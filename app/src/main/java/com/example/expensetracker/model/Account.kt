@@ -1,9 +1,14 @@
 package com.example.expensetracker.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "ACCOUNTLIST_V1")
+@Entity(tableName = "ACCOUNTLIST_V1",
+    indices = [
+        Index(value = ["accountType"])
+    ]
+)
 data class Account(
     @PrimaryKey(autoGenerate = true)
     val accountId: Int = 0,

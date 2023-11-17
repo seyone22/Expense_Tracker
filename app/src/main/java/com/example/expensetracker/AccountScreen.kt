@@ -50,6 +50,7 @@ import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.account.AccountEntryScreen
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
+import com.example.expensetracker.ui.transaction.TransactionEntryDestination
 
 enum class AccountTypes(val displayName: String) {
     CASH("Cash"),
@@ -120,7 +121,7 @@ fun AccountScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                navigateToScreen(AccountEntryDestination.route)
+                navigateToScreen(TransactionEntryDestination.route)
             }) {
                 Icon(Icons.Outlined.Edit, "Add")
             }

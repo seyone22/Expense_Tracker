@@ -1,4 +1,4 @@
-package com.example.expensetracker.data
+package com.example.expensetracker.data.account
 
 import androidx.room.Dao
 import androidx.room.Delete

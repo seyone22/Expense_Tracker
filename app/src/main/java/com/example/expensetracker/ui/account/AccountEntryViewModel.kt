@@ -5,7 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.expensetracker.data.AccountsRepository
+import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.model.Account
 
 class AccountEntryViewModel(private val accountsRepository: AccountsRepository) : ViewModel() {

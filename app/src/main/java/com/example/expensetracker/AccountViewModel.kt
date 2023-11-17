@@ -3,10 +3,9 @@ package com.example.expensetracker
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.data.AccountsRepository
+import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.ui.account.AccountUiState
-import com.example.expensetracker.ui.account.toAccount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

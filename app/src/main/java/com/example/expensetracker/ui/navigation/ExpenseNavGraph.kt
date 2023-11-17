@@ -12,6 +12,8 @@ import com.example.expensetracker.EntityDestination
 import com.example.expensetracker.EntityScreen
 import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.account.AccountEntryScreen
+import com.example.expensetracker.ui.transaction.TransactionEntryScreen
+import com.example.expensetracker.ui.transaction.TransactionEntryDestination
 
 /**
  * Provides Navigation graph for the application.
@@ -47,6 +49,11 @@ fun ExpenseNavHost(
             AccountEntryScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
+            )
+        }
+        composable(route = TransactionEntryDestination.route) {
+            TransactionEntryScreen(
+
             )
         }
     }
