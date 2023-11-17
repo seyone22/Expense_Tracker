@@ -8,7 +8,7 @@ interface AccountsRepository {
 
     fun getAccountStream(accountId: Int): Flow<Account?>
 
-    fun getAccountsFromType(accountType: String): Flow<List<Account>>
+    fun getAccountsFromTypeStream(accountType: String): Flow<List<Account>>
 
     suspend fun insertAccount(account: Account)
 

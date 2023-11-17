@@ -8,7 +8,7 @@ class OfflineAccountsRepository(private val accountDao: AccountDao) : AccountsRe
 
     override fun getAccountStream(accountId: Int): Flow<Account?> = accountDao.getAccount(accountId)
 
-    override fun getAccountsFromType(accountType: String): Flow<List<Account>> = accountDao.getAllAccountsByType(accountType)
+    override fun getAccountsFromTypeStream(accountType: String): Flow<List<Account>> = accountDao.getAllAccountsByType(accountType)
 
     override suspend fun insertAccount(account: Account) = accountDao.insert(account)
 
