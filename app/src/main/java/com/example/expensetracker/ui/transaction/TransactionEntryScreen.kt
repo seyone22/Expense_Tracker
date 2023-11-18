@@ -54,8 +54,11 @@ fun TransactionEntryScreen(
     viewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
-    
-    Dialog(onDismissRequest = { onDismissRequest() }) {
+
+    Dialog(onDismissRequest = {
+        viewModel.reset()
+        onDismissRequest()
+    }) {
         // Draw a rectangle shape with rounded corners inside the dialog
         Card(
             modifier = Modifier
@@ -96,7 +99,7 @@ fun TransactionEntryScreen(
                         },
                         modifier = Modifier.padding(8.dp),
                         enabled = viewModel.transactionUiState.isEntryValid,
-                        ) {
+                    ) {
                         Text("Create")
                     }
                 }
@@ -113,7 +116,7 @@ fun TransactionEntryForm(
     modifier: Modifier = Modifier,
     viewModel: TransactionEntryViewModel,
 
-){
+    ) {
     var statusExpanded by remember { mutableStateOf(false) }
     var typeExpanded by remember { mutableStateOf(false) }
     var accountExpanded by remember { mutableStateOf(false) }
@@ -141,7 +144,7 @@ fun TransactionEntryForm(
             }
         }
 
-        DropdownMenu(expanded = statusExpanded , onDismissRequest = { statusExpanded = false }) {
+        DropdownMenu(expanded = statusExpanded, onDismissRequest = { statusExpanded = false }) {
             enumValues<TransactionStatus>().forEach { transactionStatus ->
                 DropdownMenuItem(
                     text = { Text(transactionStatus.displayName) },
@@ -172,7 +175,7 @@ fun TransactionEntryForm(
             }
         }
 
-        DropdownMenu(expanded = typeExpanded , onDismissRequest = { typeExpanded = false }) {
+        DropdownMenu(expanded = typeExpanded, onDismissRequest = { typeExpanded = false }) {
             enumValues<TransactionCode>().forEach { transCode ->
                 DropdownMenuItem(
                     text = { Text(transCode.displayName) },
@@ -184,25 +187,36 @@ fun TransactionEntryForm(
             }
         }
 
-        OutlinedButton(
-            onClick = {
-                accountExpanded = true
-                coroutineScope.launch {
-                    viewModel.getAllAccounts()
+        Row {
+            when (transactionDetails.transCode) {
+                TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
+                    Text(text = "Account")
                 }
 
+                TransactionCode.TRANSFER.displayName -> {
+                    Text(text = "To Account")
+                }
             }
-        ) {
-            Row {
-                Text(text = transactionDetails.accountId)
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = "Description"
-                )
+            OutlinedButton(
+                onClick = {
+                    accountExpanded = true
+                    coroutineScope.launch {
+                        viewModel.getAllAccounts()
+                    }
+
+                }
+            ) {
+                Row {
+                    Text(text = transactionDetails.accountId) //TODO : Find name for AccountId
+                    Icon(
+                        imageVector = Icons.Filled.ArrowDropDown,
+                        contentDescription = "Description"
+                    )
+                }
             }
         }
 
-        DropdownMenu(expanded = accountExpanded , onDismissRequest = { accountExpanded = false }) {
+        DropdownMenu(expanded = accountExpanded, onDismissRequest = { accountExpanded = false }) {
             viewModel.transactionUiState.accountsList.forEach { account ->
                 DropdownMenuItem(
                     text = { Text(account.accountName) },
@@ -215,35 +229,78 @@ fun TransactionEntryForm(
 
         }
 
-        OutlinedButton(
-            onClick = {
-                payeeExpanded = true
-                coroutineScope.launch {
-                    viewModel.getAllAccounts()
+        Row {
+            when (transactionDetails.transCode) {
+                TransactionCode.WITHDRAWAL.displayName -> {
+                    Text(text = "Payee")
                 }
 
+                TransactionCode.DEPOSIT.displayName -> {
+                    Text(text = "From")
+                }
+
+                TransactionCode.TRANSFER.displayName -> {
+                    Text(text = "To Account")
+                }
             }
-        ) {
-            Row {
-                Text(text = transactionDetails.payeeId) //TODO : Find name for PayeeID
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = "Description"
-                )
+            OutlinedButton(
+                onClick = {
+                    payeeExpanded = true
+                    when (transactionDetails.transCode) {
+                        TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
+                            coroutineScope.launch {
+                                viewModel.getAllAccounts()
+                            }
+                        }
+
+                        TransactionCode.TRANSFER.displayName -> {
+                            coroutineScope.launch {
+
+                            }
+                        }
+                    }
+                }
+            ) {
+                Row {
+                    Text(text = transactionDetails.payeeId) //TODO : Find name for PayeeID
+                    Icon(
+                        imageVector = Icons.Filled.ArrowDropDown,
+                        contentDescription = "Description"
+                    )
+                }
             }
         }
 
         //TODO: This should populate from payee table, only account table when transfer
-        DropdownMenu(expanded = payeeExpanded , onDismissRequest = { payeeExpanded = false }) {
-            viewModel.transactionUiState.accountsList.forEach { account ->
-                val displayName: String = account.accountName
-                DropdownMenuItem(
-                    text = { Text(displayName) },
-                    onClick = {
-                        onValueChange(transactionDetails.copy(payeeId = account.accountId.toString()))
-                        payeeExpanded = false
+        DropdownMenu(expanded = payeeExpanded, onDismissRequest = { payeeExpanded = false }) {
+            when (transactionDetails.transCode) {
+                TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
+                    viewModel.transactionUiState.accountsList.forEach { account ->
+                        val displayName: String = account.accountName
+                        DropdownMenuItem(
+                            text = { Text(displayName) },
+                            onClick = {
+                                onValueChange(transactionDetails.copy(payeeId = account.accountId.toString()))
+                                onValueChange(transactionDetails.copy(toAccountId = "-1"))
+                                payeeExpanded = false
+                            }
+                        )
                     }
-                )
+                }
+
+                TransactionCode.TRANSFER.displayName -> {
+/*                    viewModel.transactionUiState.accountsList.forEach { account ->
+                        val displayName: String = account.accountName
+                        DropdownMenuItem(
+                            text = { Text(displayName) },
+                            onClick = {
+                                onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
+                                onValueChange(transactionDetails.copy(payeeId = "-1"))
+                                payeeExpanded = false
+                            }
+                        )
+                    }*/
+                }
             }
         }
 
@@ -257,7 +314,7 @@ fun TransactionEntryForm(
             }
         ) {
             Row {
-                Text(text = transactionDetails.categoryId) //TODO : Find name for CategoryId
+                Text(text = transactionDetails.categoryId)
                 Icon(
                     imageVector = Icons.Filled.ArrowDropDown,
                     contentDescription = "Description"
@@ -266,7 +323,7 @@ fun TransactionEntryForm(
         }
 
         //TODO: This should populate from categories table
-        DropdownMenu(expanded = categoryExpanded , onDismissRequest = { categoryExpanded = false }) {
+        DropdownMenu(expanded = categoryExpanded, onDismissRequest = { categoryExpanded = false }) {
             viewModel.transactionUiState.accountsList.forEach { account ->
                 val displayName: String = account.accountName
                 DropdownMenuItem(

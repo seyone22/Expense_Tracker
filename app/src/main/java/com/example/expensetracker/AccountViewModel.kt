@@ -6,16 +6,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
+import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.account.AccountUiState
-import com.example.expensetracker.ui.transaction.TransactionUiState
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.toList
 
 /**
  * ViewModel to retrieve all items in the Room database.
@@ -29,16 +26,17 @@ class AccountViewModel(
      * Holds home ui state. The list of items are retrieved from [AccountsRepository] and mapped to
      * [AccountUiState]
      */
-    //TODO: ERROR HERE
+
     val accountsUiState: StateFlow<AccountsUiState> =
         accountsRepository.getAllAccountsStream()
-            .onEach { Log.d("DEBUG", ": flow emitted $it") }
+            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
             .map { accounts ->
-            val transformedList = accounts.map { account ->
-                Pair(account, calculateBalance(account.accountId))
+                val transformedList = accounts.map { account ->
+                    Log.d("DEBUG", ": map value $account")
+                    Pair(account, calculateBalance(account))
+                }
+                AccountsUiState(transformedList, calculateGrandBalance(accounts))
             }
-            AccountsUiState(transformedList)
-        }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
@@ -49,28 +47,95 @@ class AccountViewModel(
         private const val TIMEOUT_MILLIS = 5_000L
     }
 
-    suspend fun calculateBalance(accountId: Int): Double {
-        var balance = 0.0
+    private suspend fun calculateBalance(account: Account): Double {
+        var balance = account.initialBalance ?: 0.0
         var reconciledBalance = 0.0
 
-        transactionsRepository.getTransactionsFromAccountStream(accountId)
-            .collect { transaction ->
-                // Iterate over the list of transactions
-                transaction.forEach {
-                    // Add to total
-                    balance += it.transAmount
-                    if (it.status == TransactionStatus.R.displayName) {
-                        reconciledBalance += it.transAmount
+
+        val getBalancesThread = Thread {
+            var hi = transactionsRepository.getTransactionsFromAccount(account.accountId)
+                .forEach() {
+                    Log.d("DEBUG", "calculateBalance.withinThread: $it")
+                    when (it.status) {
+                        TransactionStatus.R.displayName -> {
+                            when (it.transCode) {
+                                TransactionCode.DEPOSIT.displayName -> {
+                                    balance += it.transAmount
+                                    reconciledBalance += it.transAmount
+                                }
+
+                                TransactionCode.WITHDRAWAL.displayName -> {
+                                    balance -= it.transAmount
+                                    reconciledBalance -= it.transAmount
+                                }
+
+                                TransactionCode.TRANSFER.displayName -> {
+                                    balance -= it.transAmount
+                                    reconciledBalance -= it.transAmount
+                                }
+                            }
+                        }
+
+                        TransactionStatus.D.displayName, TransactionStatus.F.displayName, TransactionStatus.U.displayName, TransactionStatus.V.displayName -> {
+                            when (it.transCode) {
+                                TransactionCode.DEPOSIT.displayName -> {
+                                    balance += it.transAmount
+                                }
+
+                                TransactionCode.WITHDRAWAL.displayName -> {
+                                    balance -= it.transAmount
+                                }
+
+                                TransactionCode.TRANSFER.displayName -> {
+                                    balance -= it.transAmount
+                                }
+                            }
+                        }
                     }
                 }
-            }
+        }
+
+        val addInboundTransfersThread = Thread {
+            var hi = transactionsRepository.getAllTransactionsByToAccount(account.accountId)
+                .forEach() {
+                    Log.d("DEBUG", "calculateBalance.withinThread: $it")
+                    when (it.status) {
+                        TransactionStatus.R.displayName -> {
+                            when (it.transCode) {
+                                TransactionCode.TRANSFER.displayName -> {
+                                    balance += it.toTransAmount ?: 0.0
+                                }
+                            }
+                        }
+
+                        TransactionStatus.D.displayName, TransactionStatus.F.displayName, TransactionStatus.U.displayName, TransactionStatus.V.displayName -> {
+                            when (it.transCode) {
+                                TransactionCode.TRANSFER.displayName -> {
+                                    balance += it.toTransAmount ?: 0.0
+                                    reconciledBalance += it.toTransAmount ?: 0.0
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+
+        getBalancesThread.start()
+        getBalancesThread.join()
+        addInboundTransfersThread.start()
+        addInboundTransfersThread.join()
 
         return balance
     }
 
-    suspend fun calculateGrandBalance() {
+    private suspend fun calculateGrandBalance(accounts : List<Account>): Double {
         //Should account for different currincies
         //TODO : Convert to base currency, then calculate
+        var grandBalance = 0.0
+        accounts.forEach {
+            grandBalance += calculateBalance(it)
+        }
+        return grandBalance
     }
 }
 
@@ -78,5 +143,6 @@ class AccountViewModel(
  * Ui State for HomeScreen
  */
 data class AccountsUiState(
-    val accountList: List<Pair<Account, Double>> = emptyList()
+    val accountList: List<Pair<Account, Double>> = emptyList(),
+    val grandTotal: Double = 0.0
 )

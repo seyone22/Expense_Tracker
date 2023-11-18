@@ -27,5 +27,8 @@ interface TransactionDao {
     fun getAllTransactions(): Flow<List<Transaction>>
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE accountId = :accountId")
-    fun getAllTransactionsByAccount(accountId: Int): Flow<List<Transaction>>
+    fun getAllTransactionsByAccount(accountId: Int): List<Transaction>
+
+    @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE toAccountId = :toAccountId")
+    fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction>
 }

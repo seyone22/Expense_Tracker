@@ -11,6 +11,8 @@ import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.Transaction
+import com.example.expensetracker.model.TransactionCode
+import com.example.expensetracker.model.TransactionStatus
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -50,6 +52,10 @@ class TransactionEntryViewModel(
                 transactionDetails = transactionDetails,
                 isEntryValid = validateInput(transactionDetails),
             )
+    }
+
+    fun reset() {
+        transactionUiState.transactionDetails.copy(transAmount = "0.0" )
     }
 
     suspend fun getAllAccounts()  {
@@ -100,9 +106,9 @@ data class TransactionDetails(
     val accountId: String = "0",
     val toAccountId: String = "0",
     val payeeId: String = "0",
-    val transCode: String = "0",
+    val transCode: String = TransactionCode.WITHDRAWAL.displayName,
     val transAmount: String = "",
-    val status: String = "0",
+    val status: String = TransactionStatus.U.displayName,
     val transactionNumber: String = "0",
     val notes: String = "",
     val categoryId: String = "0",

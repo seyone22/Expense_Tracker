@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -61,6 +62,7 @@ import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.example.expensetracker.ui.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.transaction.TransactionEntryScreen
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 object AccountsDestination : NavigationDestination {
@@ -133,6 +135,7 @@ fun AccountScreen(
         ) {
             item {
                 Text("Current Month Summary")
+                Text(text = accountUiState.grandTotal.toString())
                 Text("Your Accounts")
                 enumValues<AccountTypes>().forEach { accountType ->
                     val displayName: String = accountType.displayName
@@ -174,7 +177,7 @@ fun AccountList(
                 Log.d("DEBUG", "AccountList: Ping")
                 if(accountPair.first.accountType == category) {
                     AccountCard(
-                        account = accountPair.first,
+                        accountWithBalance = accountPair,
                         modifier = Modifier,
                         viewModel = viewModel
                     )
@@ -186,20 +189,10 @@ fun AccountList(
 
 @Composable
 fun AccountCard(
-    account: Account,
+    accountWithBalance: Pair<Account, Double>,
     modifier: Modifier = Modifier,
     viewModel : AccountViewModel
 ) {
-    var calculatedBalance by remember { mutableStateOf("") }
-
-    // Launch the coroutine to calculate the balance
-    LaunchedEffect(account.accountId) {
-        val result = viewModel.calculateBalance(account.accountId)
-        // Update the calculatedBalance state
-        calculatedBalance = result.toString()
-    }
-
-    var balance = 0
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -233,11 +226,11 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = account.accountName,
+                    text = accountWithBalance.first.accountName,
                     style = MaterialTheme.typography.titleSmall
                 )
                 Text(
-                    text = account.status,
+                    text = accountWithBalance.first.status,
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -250,10 +243,10 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = calculatedBalance
+                    text = "Rs. "+accountWithBalance.second.toString()
                 )
                 Text(
-                    text = "Rs. $balance"
+                    text = "Rs. "+accountWithBalance.second.toString()
                 )
             }
         }
