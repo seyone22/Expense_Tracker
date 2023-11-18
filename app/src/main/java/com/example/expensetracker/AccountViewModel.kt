@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
+import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.account.AccountUiState
@@ -136,6 +137,16 @@ class AccountViewModel(
             grandBalance += calculateBalance(it)
         }
         return grandBalance
+    }
+
+    fun countInType(accountType: AccountTypes, accountList: List<Pair<Account, Double>>) : Int {
+        var counter = 0
+        accountList.forEach {
+            if (it.first.accountType == accountType.displayName) {
+                counter++
+            }
+        }
+        return counter
     }
 }
 

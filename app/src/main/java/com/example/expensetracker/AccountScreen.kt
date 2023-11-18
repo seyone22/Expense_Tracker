@@ -138,12 +138,14 @@ fun AccountScreen(
                 Text(text = accountUiState.grandTotal.toString())
                 Text("Your Accounts")
                 enumValues<AccountTypes>().forEach { accountType ->
-                    val displayName: String = accountType.displayName
-                    AccountList(
-                        category = displayName,
-                        accountList = accountUiState.accountList,
-                        viewModel = viewModel
-                    )
+                    if(viewModel.countInType(accountType, accountUiState.accountList) != 0) {
+                        val displayName: String = accountType.displayName
+                        AccountList(
+                            category = displayName,
+                            accountList = accountUiState.accountList,
+                            viewModel = viewModel
+                        )
+                    }
                 }
                 Button(onClick = { navigateToScreen(AccountEntryDestination.route) }) {
                     Text(text = "New Account")
