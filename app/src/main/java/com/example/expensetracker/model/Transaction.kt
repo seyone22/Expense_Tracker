@@ -29,3 +29,17 @@ data class Transaction(
     val toTransAmount: Double?,
     val color: Int = -1
 )
+
+enum class TransactionStatus(val displayName: String) {
+    R("Reconciled"),
+    V("Void"),
+    F("Follow Up"),
+    D("Duplicate"),
+    U("Unreconciled")
+}
+
+enum class TransactionCode(val displayName: String) {
+    WITHDRAWAL("Withdrawal"),
+    DEPOSIT("Deposit"),
+    TRANSFER("Transfer")
+}

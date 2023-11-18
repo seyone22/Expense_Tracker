@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
@@ -28,40 +29,39 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.expensetracker.model.Account
+import com.example.expensetracker.model.AccountTypes
+import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.account.AccountEntryScreen
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.example.expensetracker.ui.transaction.TransactionEntryDestination
-
-enum class AccountTypes(val displayName: String) {
-    CASH("Cash"),
-    CHECKING("Checking"),
-    CREDIT_CARD("Credit Card"),
-    LOAN("Loan"),
-    TERM("Term"),
-    INVESTMENT("Investment"),
-    ASSET("Asset"),
-    SHARES("Shares")
-}
+import com.example.expensetracker.ui.transaction.TransactionEntryScreen
+import kotlinx.coroutines.launch
 
 object AccountsDestination : NavigationDestination {
     override val route = "Accounts"
@@ -78,6 +78,7 @@ fun AccountScreen(
 ) {
     var selectedActivity by remember { mutableIntStateOf(0) }
     val accountUiState by viewModel.accountsUiState.collectAsState()
+    var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -121,7 +122,7 @@ fun AccountScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                navigateToScreen(TransactionEntryDestination.route)
+                showDialog = showDialog.not()
             }) {
                 Icon(Icons.Outlined.Edit, "Add")
             }
@@ -138,6 +139,7 @@ fun AccountScreen(
                     AccountList(
                         category = displayName,
                         accountList = accountUiState.accountList,
+                        viewModel = viewModel
                     )
                 }
                 Button(onClick = { navigateToScreen(AccountEntryDestination.route) }) {
@@ -145,15 +147,22 @@ fun AccountScreen(
                 }
             }
         }
+
+        if(showDialog) {
+            TransactionEntryScreen(
+                onDismissRequest = { showDialog = !showDialog },
+                onConfirmation = { showDialog = !showDialog }
+            )
+        }
     }
 }
 
 @Composable
 fun AccountList(
     category: String,
-    accountList: List<Account>,
-    modifier: Modifier = Modifier
-
+    accountList: List<Pair<Account,Double>>,
+    modifier: Modifier = Modifier,
+    viewModel: AccountViewModel
 ) {
     Column(
         Modifier.padding(16.dp, 12.dp),
@@ -161,18 +170,36 @@ fun AccountList(
     ) {
         Text(text = category, style = MaterialTheme.typography.titleLarge)
         Column(modifier = modifier) {
-            accountList.forEach { account ->
-                AccountCard(
-                    account = account,
-                    modifier = Modifier
-                )
+            accountList.forEach { accountPair ->
+                Log.d("DEBUG", "AccountList: Ping")
+                if(accountPair.first.accountType == category) {
+                    AccountCard(
+                        account = accountPair.first,
+                        modifier = Modifier,
+                        viewModel = viewModel
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun AccountCard(account: Account, modifier: Modifier = Modifier) {
+fun AccountCard(
+    account: Account,
+    modifier: Modifier = Modifier,
+    viewModel : AccountViewModel
+) {
+    var calculatedBalance by remember { mutableStateOf("") }
+
+    // Launch the coroutine to calculate the balance
+    LaunchedEffect(account.accountId) {
+        val result = viewModel.calculateBalance(account.accountId)
+        // Update the calculatedBalance state
+        calculatedBalance = result.toString()
+    }
+
+    var balance = 0
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -195,12 +222,13 @@ fun AccountCard(account: Account, modifier: Modifier = Modifier) {
                 ) {
                 Icon(
                     imageVector = Icons.Outlined.AccountBalanceWallet,
-                    contentDescription = "Description",
+                    contentDescription = null,
                     Modifier.size(36.dp, 36.dp)
                 )
             }
             Column(
-                Modifier.weight(3f)
+                Modifier
+                    .weight(3f)
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -214,29 +242,31 @@ fun AccountCard(account: Account, modifier: Modifier = Modifier) {
                 )
             }
             Column(
-                Modifier.weight(2f)
+                Modifier
+                    .weight(2f)
                     .fillMaxHeight()
                     .padding(0.dp, 0.dp, 12.dp, 0.dp),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = account.initialBalance.toString()
+                    text = calculatedBalance
                 )
                 Text(
-                    text = "Rs. 80.22"
+                    text = "Rs. $balance"
                 )
             }
         }
     }
 }
 
+/*
 @Preview(showBackground = true)
 @Composable
 fun AccountListPreview() {
     ExpenseTrackerTheme {
         AccountList(
-            category = "Checking", accountList = listOf(
+             category = "Checking", accountList = listOf(
                 Account(
                     0,
                     "8130107852 (BOC)",
@@ -309,4 +339,4 @@ fun AccountListPreview() {
             )
         )
     }
-}
+}*/

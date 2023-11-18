@@ -33,3 +33,14 @@ data class Account(
     val paymentDueDate: String?,
     val minimumPayment: Double?
 )
+
+enum class AccountTypes(val displayName: String) {
+    CASH("Cash"),
+    CHECKING("Checking"),
+    CREDIT_CARD("Credit Card"),
+    LOAN("Loan"),
+    TERM("Term"),
+    INVESTMENT("Investment"),
+    ASSET("Asset"),
+    SHARES("Shares")
+}

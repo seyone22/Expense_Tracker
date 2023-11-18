@@ -13,19 +13,17 @@ import kotlinx.coroutines.flow.Flow
 interface AccountDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(account: Account)
-
     @Update
     suspend fun update(account: Account)
-
     @Delete
     suspend fun delete(account: Account)
 
     @Query("SELECT * FROM ACCOUNTLIST_V1 WHERE accountId = :accountId")
     fun getAccount(accountId: Int): Flow<Account>
-
     @Query("SELECT * FROM ACCOUNTLIST_V1 ORDER BY accountName ASC")
     fun getAllAccounts(): Flow<List<Account>>
-
+    @Query("SELECT * FROM ACCOUNTLIST_V1 WHERE status = 'Open' ORDER BY accountName ASC")
+    fun getAllActiveAccounts(): Flow<List<Account>>
     @Query("SELECT * FROM ACCOUNTLIST_V1 WHERE accountType = :accountType")
     fun getAllAccountsByType(accountType: String): Flow<List<Account>>
 }

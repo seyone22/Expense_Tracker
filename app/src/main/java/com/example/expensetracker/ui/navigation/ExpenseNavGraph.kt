@@ -51,10 +51,5 @@ fun ExpenseNavHost(
                 onNavigateUp = { navController.navigateUp() }
             )
         }
-        composable(route = TransactionEntryDestination.route) {
-            TransactionEntryScreen(
-
-            )
-        }
     }
 }

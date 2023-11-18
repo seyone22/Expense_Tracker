@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.model.Account
+import com.example.expensetracker.model.AccountTypes
 
 class AccountEntryViewModel(private val accountsRepository: AccountsRepository) : ViewModel() {
     var accountUiState by mutableStateOf(AccountUiState())
@@ -43,25 +44,25 @@ data class AccountUiState(
 data class AccountDetails(
     val accountId: Int = 0,
     val accountName: String = "",
-    val accountType: String = "",
-    val accountNum: String? = null,
+    val accountType: String = AccountTypes.CHECKING.displayName, //Default value to populate dropdowns
+    val accountNum: String? = "",
     val status: String = "",
-    val notes: String? = null,
-    val heldAt: String? = null,
-    val website: String? = null,
-    val contactInfo: String? = null,
-    val accessInfo: String? = null,
-    val initialBalance: String? = null, // Changed the type to String
-    val initialDate: String? = null,
+    val notes: String? = "",
+    val heldAt: String? = "",
+    val website: String? = "",
+    val contactInfo: String? = "",
+    val accessInfo: String? = "",
+    val initialBalance: String? = "0.0", // Changed the type to String
+    val initialDate: String? = "",
     val favoriteAccount: String = "",
     val currencyId: String = "0", // Changed the type to String
-    val statementLocked: String? = null, // Changed the type to String
-    val statementDate: String? = null,
-    val minimumBalance: String? = null, // Changed the type to String
-    val creditLimit: String? = null, // Changed the type to String
-    val interestRate: String? = null, // Changed the type to String
-    val paymentDueDate: String? = null,
-    val minimumPayment: String? = null // Changed the type to String
+    val statementLocked: String? = "", // Changed the type to String
+    val statementDate: String? = "",
+    val minimumBalance: String? = "", // Changed the type to String
+    val creditLimit: String? = "", // Changed the type to String
+    val interestRate: String? = "", // Changed the type to String
+    val paymentDueDate: String? = "",
+    val minimumPayment: String? = "" // Changed the type to String
 )
 
 

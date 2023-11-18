@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface AccountsRepository {
     fun getAllAccountsStream(): Flow<List<Account>>
+    fun getAllActiveAccountsStream() : Flow<List<Account>>
     fun getAccountStream(accountId: Int): Flow<Account?>
     fun getAccountsFromTypeStream(accountType: String): Flow<List<Account>>
 
