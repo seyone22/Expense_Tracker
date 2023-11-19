@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "PAYEE_V1",
     indices = [
-        Index(value = ["payeeName"])
+        Index(value = ["payeeName"]),
     ]
 )
 data class Payee (

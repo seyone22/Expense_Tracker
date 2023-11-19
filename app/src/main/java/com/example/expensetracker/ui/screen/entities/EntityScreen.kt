@@ -7,6 +7,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -58,22 +59,6 @@ fun EntityScreen(
             Modifier.padding(innerPadding)
         ) {
             item {
-                /*Text("Current Month Summary")
-                Text(text = entityUiState.grandTotal.toString())
-                Text("Your Entitys")
-                enumValues<EntityTypes>().forEach { entityType ->
-                    if(viewModel.countInType(entityType, entityUiState.entityList) != 0) {
-                        val displayName: String = entityType.displayName
-                        EntityList(
-                            category = displayName,
-                            entityList = entityUiState.entityList,
-                            viewModel = viewModel
-                        )
-                    }
-                }
-                Button(onClick = { navigateToScreen(EntityEntryDestination.route) }) {
-                    Text(text = "New Entity")
-                }*/
             }
         }
     }
