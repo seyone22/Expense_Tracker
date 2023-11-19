@@ -47,6 +47,7 @@ import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.common.ExpenseFAB
+import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.transaction.TransactionEntryScreen
@@ -72,16 +73,7 @@ fun AccountScreen(
             ExpenseTopBar(selectedActivity = selectedActivity)
         },
         bottomBar = {
-            NavigationBar {
-                activitiesAndIcons.forEachIndexed { index, pair ->
-                    NavigationBarItem(
-                        icon = { Icon(pair.icon, contentDescription = pair.activity) },
-                        label = { Text(pair.activity) },
-                        selected = selectedActivity == index,
-                        onClick = { selectedActivity = index; navigateToScreen(pair.activity) }
-                    )
-                }
-            }
+            ExpenseNavBar(selectedActivity = selectedActivity, navigateToScreen = navigateToScreen)
         },
         floatingActionButton = {
             ExpenseFAB(navigateToScreen = navigateToScreen)
