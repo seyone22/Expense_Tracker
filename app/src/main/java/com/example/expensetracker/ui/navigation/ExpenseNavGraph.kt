@@ -1,5 +1,7 @@
 package com.example.expensetracker.ui.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -21,9 +23,11 @@ fun ExpenseNavHost(
     modifier: Modifier = Modifier,
 ) {
     NavHost(
+        modifier = modifier,
         navController = navController,
         startDestination = AccountsDestination.route,
-        modifier = modifier
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None }
     ) {
         composable(route = AccountsDestination.route) {
             AccountScreen(

@@ -46,6 +46,8 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.account.AccountEntryDestination
+import com.example.expensetracker.ui.common.ExpenseFAB
+import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.transaction.TransactionEntryScreen
 
@@ -64,35 +66,10 @@ fun AccountScreen(
 ) {
     var selectedActivity by remember { mutableIntStateOf(0) }
     val accountUiState by viewModel.accountsUiState.collectAsState()
-    var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    Text(activitiesAndIcons[selectedActivity].activity)
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Description"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            imageVector = Icons.Outlined.AccountCircle,
-                            contentDescription = "User"
-                        )
-                    }
-                }
-            )
+            ExpenseTopBar(selectedActivity = selectedActivity)
         },
         bottomBar = {
             NavigationBar {
@@ -107,11 +84,7 @@ fun AccountScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                showDialog = showDialog.not()
-            }) {
-                Icon(Icons.Outlined.Edit, "Add")
-            }
+            ExpenseFAB(navigateToScreen = navigateToScreen)
         }
     ) { innerPadding ->
         LazyColumn(
@@ -135,16 +108,6 @@ fun AccountScreen(
                     Text(text = "New Account")
                 }
             }
-        }
-
-        if(showDialog) {
-            TransactionEntryScreen(
-                onDismissRequest = { showDialog = !showDialog },
-                onConfirmation = {
-                    showDialog = !showDialog
-                    navigateToScreen(activitiesAndIcons[0].activity)
-                }
-            )
         }
     }
 }
