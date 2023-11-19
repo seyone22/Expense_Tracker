@@ -1,13 +1,13 @@
 package com.example.expensetracker.ui.screen.entities
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.expensetracker.data.category.CategoriesRepository
+import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.payee.PayeesRepository
-import com.example.expensetracker.data.transaction.TransactionsRepository
+import com.example.expensetracker.model.Category
+import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
-import com.example.expensetracker.model.TransactionCode
-import com.example.expensetracker.model.TransactionStatus
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -17,19 +17,21 @@ import kotlinx.coroutines.flow.stateIn
  * ViewModel to retrieve all items in the Room database.
  */
 class EntityViewModel(
-    private val entitiesRepository: PayeesRepository,
+    private val categoriesRepository: CategoriesRepository,
+    private val payeesRepository: PayeesRepository,
+    private val currencyFormatsRepository: CurrencyFormatsRepository,
 ) : ViewModel() {
 
     /**
-     * Holds home ui state. The list of items are retrieved from [EntitysRepository] and mapped to
+     * Holds home ui state. The list of items are retrieved from [EntitiesRepository] and mapped to
      * [EntityUiState]
      */
 
     val entitiesUiState: StateFlow<EntitiesUiState> =
-        entitiesRepository.getAllPayeesStream()
+        categoriesRepository.getAllCategoriesStream()
             //.onEach { Log.d("DEBUG", ": flow emitted $it") }
-            .map { entities ->
-                EntitiesUiState(listOf())
+            .map { categories ->
+                EntitiesUiState(categories)
             }
             .stateIn(
                 scope = viewModelScope,
@@ -46,6 +48,8 @@ class EntityViewModel(
  * Ui State for HomeScreen
  */
 data class EntitiesUiState(
-    val entityList: List<Pair<Payee, Double>> = emptyList(),
+    val categoriesList: List<Category> = listOf(),
+    val payeesList: List<Payee> = listOf(),
+    val currenciesList: List<CurrencyFormat> = listOf(),
     val grandTotal: Double = 0.0
 )

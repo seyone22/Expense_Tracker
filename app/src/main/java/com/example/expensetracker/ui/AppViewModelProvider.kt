@@ -16,7 +16,7 @@ object AppViewModelProvider {
             AccountViewModel(expenseApplication().container.accountsRepository, expenseApplication().container.transactionsRepository)
         }
         initializer {
-            EntityViewModel(expenseApplication().container.payeesRepository)
+            EntityViewModel(expenseApplication().container.categoriesRepository, expenseApplication().container.payeesRepository, expenseApplication().container.currenciesRepository)
         }
         //Initializer for AccountEntryViewModel
         initializer {

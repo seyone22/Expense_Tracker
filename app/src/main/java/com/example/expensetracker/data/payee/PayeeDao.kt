@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PayeeDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insert(account: Payee)
+    suspend fun insert(payee: Payee)
     @Update
-    suspend fun update(account: Payee)
+    suspend fun update(payee: Payee)
     @Delete
-    suspend fun delete(account: Payee)
+    suspend fun delete(payee: Payee)
 
     @Query("SELECT * FROM PAYEE_V1 WHERE payeeId = :payeeId")
     fun getPayee(payeeId: Int): Flow<Payee>
