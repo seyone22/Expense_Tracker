@@ -1,19 +1,16 @@
 package com.example.expensetracker.ui.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.expensetracker.AccountScreen
-import com.example.expensetracker.AccountsDestination
-import com.example.expensetracker.EntityDestination
-import com.example.expensetracker.EntityScreen
+import com.example.expensetracker.ui.screen.accounts.AccountScreen
+import com.example.expensetracker.ui.screen.accounts.AccountsDestination
+import com.example.expensetracker.ui.screen.entities.EntitiesDestination
+import com.example.expensetracker.ui.screen.entities.EntityScreen
 import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.account.AccountEntryScreen
-import com.example.expensetracker.ui.transaction.TransactionEntryScreen
-import com.example.expensetracker.ui.transaction.TransactionEntryDestination
 
 /**
  * Provides Navigation graph for the application.
@@ -40,9 +37,10 @@ fun ExpenseNavHost(
                 onNavigateUp = { navController.navigateUp() }
             )
         }
-        composable(route = EntityDestination.route) {
+        composable(route = EntitiesDestination.route) {
             EntityScreen(
-
+                navigateToEntityEntry = { navController.navigate(AccountEntryDestination.route) },
+                navigateToScreen = { screen -> navController.navigate(screen) }
             )
         }
         composable(route = AccountEntryDestination.route) {

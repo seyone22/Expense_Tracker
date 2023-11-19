@@ -1,4 +1,4 @@
-package com.example.expensetracker
+package com.example.expensetracker.ui.screen.entities
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
@@ -40,28 +39,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.expensetracker.model.Account
-import com.example.expensetracker.model.AccountTypes
+import com.example.expensetracker.R
+import com.example.expensetracker.activitiesAndIcons
+import com.example.expensetracker.model.Payee
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.transaction.TransactionEntryScreen
 
-object AccountsDestination : NavigationDestination {
-    override val route = "Accounts"
+object EntitiesDestination : NavigationDestination {
+    override val route = "Entities"
     override val titleRes = R.string.app_name
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AccountScreen(
-    navigateToAccountEntry: () -> Unit,
+fun EntityScreen(
+    navigateToEntityEntry: () -> Unit,
     navigateToScreen: (screen: String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     var selectedActivity by remember { mutableIntStateOf(0) }
-    val accountUiState by viewModel.accountsUiState.collectAsState()
+    val entityUiState by viewModel.entitiesUiState.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -116,22 +115,22 @@ fun AccountScreen(
             Modifier.padding(innerPadding)
         ) {
             item {
-                Text("Current Month Summary")
-                Text(text = accountUiState.grandTotal.toString())
-                Text("Your Accounts")
-                enumValues<AccountTypes>().forEach { accountType ->
-                    if(viewModel.countInType(accountType, accountUiState.accountList) != 0) {
-                        val displayName: String = accountType.displayName
-                        AccountList(
+                /*Text("Current Month Summary")
+                Text(text = entityUiState.grandTotal.toString())
+                Text("Your Entitys")
+                enumValues<EntityTypes>().forEach { entityType ->
+                    if(viewModel.countInType(entityType, entityUiState.entityList) != 0) {
+                        val displayName: String = entityType.displayName
+                        EntityList(
                             category = displayName,
-                            accountList = accountUiState.accountList,
+                            entityList = entityUiState.entityList,
                             viewModel = viewModel
                         )
                     }
                 }
-                Button(onClick = { navigateToScreen(AccountEntryDestination.route) }) {
-                    Text(text = "New Account")
-                }
+                Button(onClick = { navigateToScreen(EntityEntryDestination.route) }) {
+                    Text(text = "New Entity")
+                }*/
             }
         }
 
@@ -146,13 +145,14 @@ fun AccountScreen(
         }
     }
 }
+/*
 
 @Composable
-fun AccountList(
+fun EntityList(
     category: String,
-    accountList: List<Pair<Account,Double>>,
+    entityList: List<Pair<Payee,Double>>,
     modifier: Modifier = Modifier,
-    viewModel: AccountViewModel
+    viewModel: EntityViewModel
 ) {
     Column(
         Modifier.padding(16.dp, 12.dp),
@@ -160,11 +160,11 @@ fun AccountList(
     ) {
         Text(text = category, style = MaterialTheme.typography.titleLarge)
         Column(modifier = modifier) {
-            accountList.forEach { accountPair ->
-                Log.d("DEBUG", "AccountList: Ping")
-                if(accountPair.first.accountType == category) {
-                    AccountCard(
-                        accountWithBalance = accountPair,
+            entityList.forEach { entityPair ->
+                Log.d("DEBUG", "EntityList: Ping")
+                if(entityPair.first.entityType == category) {
+                    EntityCard(
+                        entityWithBalance = entityPair,
                         modifier = Modifier,
                         viewModel = viewModel
                     )
@@ -175,10 +175,10 @@ fun AccountList(
 }
 
 @Composable
-fun AccountCard(
-    accountWithBalance: Pair<Account, Double>,
+fun EntityCard(
+    entityWithBalance: Pair<Payee, Double>,
     modifier: Modifier = Modifier,
-    viewModel : AccountViewModel
+    viewModel : EntityViewModel
 ) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
@@ -201,7 +201,7 @@ fun AccountCard(
 
                 ) {
                 Icon(
-                    imageVector = Icons.Outlined.AccountBalanceWallet,
+                    imageVector = Icons.Outlined.EntityBalanceWallet,
                     contentDescription = null,
                     Modifier.size(36.dp, 36.dp)
                 )
@@ -213,11 +213,11 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = accountWithBalance.first.accountName,
+                    text = entityWithBalance.first.entityName,
                     style = MaterialTheme.typography.titleSmall
                 )
                 Text(
-                    text = accountWithBalance.first.status,
+                    text = entityWithBalance.first.status,
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -230,93 +230,12 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Rs. "+accountWithBalance.second.toString()
+                    text = "Rs. "+entityWithBalance.second.toString()
                 )
                 Text(
-                    text = "Rs. "+accountWithBalance.second.toString()
+                    text = "Rs. "+entityWithBalance.second.toString()
                 )
             }
         }
-    }
-}
-
-/*
-@Preview(showBackground = true)
-@Composable
-fun AccountListPreview() {
-    ExpenseTrackerTheme {
-        AccountList(
-             category = "Checking", accountList = listOf(
-                Account(
-                    0,
-                    "8130107852 (BOC)",
-                    "Checking",
-                    "",
-                    "Open",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    0.0,
-                    "",
-                    "",
-                    0,
-                    0,
-                    "",
-                    0.0,
-                    0.0,
-                    0.0,
-                    "",
-                    0.0
-                ),
-                Account(
-                    0,
-                    "8130107852 (BOC)",
-                    "Checking",
-                    "",
-                    "Open",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    0.0,
-                    "",
-                    "",
-                    0,
-                    0,
-                    "",
-                    0.0,
-                    0.0,
-                    0.0,
-                    "",
-                    0.0
-                ),
-                Account(
-                    0,
-                    "8130107852 (BOC)",
-                    "Checking",
-                    "",
-                    "Closed",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    0.0,
-                    "",
-                    "",
-                    0,
-                    0,
-                    "",
-                    0.0,
-                    0.0,
-                    0.0,
-                    "",
-                    0.0
-                )
-            )
-        )
     }
 }*/

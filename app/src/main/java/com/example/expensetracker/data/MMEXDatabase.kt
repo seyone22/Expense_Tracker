@@ -5,14 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.expensetracker.data.account.AccountDao
+import com.example.expensetracker.data.payee.PayeeDao
 import com.example.expensetracker.data.transaction.TransactionDao
 import com.example.expensetracker.model.Account
+import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.Transaction
 
-@Database(entities = [Account::class, Transaction::class], version = 1, exportSchema = false)
+@Database(entities = [Account::class, Transaction::class, Payee::class], version = 1, exportSchema = false)
 abstract class MMEXDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     abstract fun transactionDao(): TransactionDao
+    abstract fun payeeDao(): PayeeDao
 
     companion object {
         @Volatile

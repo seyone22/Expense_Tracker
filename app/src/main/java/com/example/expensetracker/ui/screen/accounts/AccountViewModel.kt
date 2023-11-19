@@ -1,4 +1,4 @@
-package com.example.expensetracker
+package com.example.expensetracker.ui.screen.accounts
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
