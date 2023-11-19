@@ -16,7 +16,6 @@ import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
@@ -29,41 +28,24 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
-import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.account.AccountEntryDestination
-import com.example.expensetracker.ui.account.AccountEntryScreen
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
-import com.example.expensetracker.ui.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.transaction.TransactionEntryScreen
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 object AccountsDestination : NavigationDestination {
     override val route = "Accounts"
@@ -156,7 +138,10 @@ fun AccountScreen(
         if(showDialog) {
             TransactionEntryScreen(
                 onDismissRequest = { showDialog = !showDialog },
-                onConfirmation = { showDialog = !showDialog }
+                onConfirmation = {
+                    showDialog = !showDialog
+                    navigateToScreen(activitiesAndIcons[0].activity)
+                }
             )
         }
     }

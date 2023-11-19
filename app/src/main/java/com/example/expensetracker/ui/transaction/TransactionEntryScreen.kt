@@ -1,7 +1,7 @@
 package com.example.expensetracker.ui.transaction
 
-import android.media.effect.Effect
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,8 +21,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.AppViewModelProvider
@@ -94,7 +91,7 @@ fun TransactionEntryScreen(
                         onClick = {
                             coroutineScope.launch {
                                 viewModel.saveTransaction()
-                                onDismissRequest()
+                                onConfirmation()
                             }
                         },
                         modifier = Modifier.padding(8.dp),
@@ -111,9 +108,9 @@ fun TransactionEntryScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionEntryForm(
+    modifier: Modifier = Modifier,
     transactionDetails: TransactionDetails,
     onValueChange: (TransactionDetails) -> Unit = {},
-    modifier: Modifier = Modifier,
     viewModel: TransactionEntryViewModel,
 
     ) {
@@ -132,27 +129,29 @@ fun TransactionEntryForm(
             label = { Text("Transaction Date") }
         )
 
-        OutlinedButton(
-            onClick = { statusExpanded = true }
-        ) {
-            Row {
-                Text(text = transactionDetails.status)
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = "Description"
-                )
+        Box(modifier = Modifier) {
+            OutlinedButton(
+                onClick = { statusExpanded = true }
+            ) {
+                Row {
+                    Text(text = transactionDetails.status)
+                    Icon(
+                        imageVector = Icons.Filled.ArrowDropDown,
+                        contentDescription = "Description"
+                    )
+                }
             }
-        }
 
-        DropdownMenu(expanded = statusExpanded, onDismissRequest = { statusExpanded = false }) {
-            enumValues<TransactionStatus>().forEach { transactionStatus ->
-                DropdownMenuItem(
-                    text = { Text(transactionStatus.displayName) },
-                    onClick = {
-                        onValueChange(transactionDetails.copy(status = transactionStatus.displayName))
-                        statusExpanded = false
-                    }
-                )
+            DropdownMenu(expanded = statusExpanded, onDismissRequest = { statusExpanded = false }) {
+                enumValues<TransactionStatus>().forEach { transactionStatus ->
+                    DropdownMenuItem(
+                        text = { Text(transactionStatus.displayName) },
+                        onClick = {
+                            onValueChange(transactionDetails.copy(status = transactionStatus.displayName))
+                            statusExpanded = false
+                        }
+                    )
+                }
             }
         }
 
@@ -163,43 +162,156 @@ fun TransactionEntryForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
         )
 
-        OutlinedButton(
-            onClick = { typeExpanded = true }
-        ) {
+        Box(modifier = Modifier) {
+            OutlinedButton(
+                onClick = { typeExpanded = true }
+            ) {
+                Row {
+                    Text(text = transactionDetails.transCode)
+                    Icon(
+                        imageVector = Icons.Filled.ArrowDropDown,
+                        contentDescription = "Description"
+                    )
+                }
+            }
+
+            DropdownMenu(expanded = typeExpanded, onDismissRequest = { typeExpanded = false }) {
+                enumValues<TransactionCode>().forEach { transCode ->
+                    DropdownMenuItem(
+                        text = { Text(transCode.displayName) },
+                        onClick = {
+                            onValueChange(transactionDetails.copy(transCode = transCode.displayName))
+                            typeExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Box(modifier = modifier) {
             Row {
-                Text(text = transactionDetails.transCode)
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = "Description"
-                )
-            }
-        }
-
-        DropdownMenu(expanded = typeExpanded, onDismissRequest = { typeExpanded = false }) {
-            enumValues<TransactionCode>().forEach { transCode ->
-                DropdownMenuItem(
-                    text = { Text(transCode.displayName) },
-                    onClick = {
-                        onValueChange(transactionDetails.copy(transCode = transCode.displayName))
-                        typeExpanded = false
+                when (transactionDetails.transCode) {
+                    TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
+                        Text(text = "Account")
                     }
-                )
+
+                    TransactionCode.TRANSFER.displayName -> {
+                        Text(text = "To Account")
+                    }
+                }
+                OutlinedButton(
+                    onClick = {
+                        accountExpanded = true
+                        coroutineScope.launch {
+                            viewModel.getAllAccounts()
+                        }
+
+                    }
+                ) {
+                    Row {
+                        Text(text = transactionDetails.accountId) //TODO : Find name for AccountId
+                        Icon(
+                            imageVector = Icons.Filled.ArrowDropDown,
+                            contentDescription = "Description"
+                        )
+                    }
+                }
+            }
+
+            DropdownMenu(expanded = accountExpanded, onDismissRequest = { accountExpanded = false }) {
+                viewModel.transactionUiState.accountsList.forEach { account ->
+                    DropdownMenuItem(
+                        text = { Text(account.accountName) },
+                        onClick = {
+                            onValueChange(transactionDetails.copy(accountId = account.accountId.toString()))
+                            accountExpanded = false
+                        }
+                    )
+                }
+
             }
         }
 
-        Row {
-            when (transactionDetails.transCode) {
-                TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
-                    Text(text = "Account")
-                }
+        Box(modifier = modifier) {
+            Row {
+                when (transactionDetails.transCode) {
+                    TransactionCode.WITHDRAWAL.displayName -> {
+                        Text(text = "Payee")
+                    }
 
-                TransactionCode.TRANSFER.displayName -> {
-                    Text(text = "To Account")
+                    TransactionCode.DEPOSIT.displayName -> {
+                        Text(text = "From")
+                    }
+
+                    TransactionCode.TRANSFER.displayName -> {
+                        Text(text = "To Account")
+                    }
+                }
+                OutlinedButton(
+                    onClick = {
+                        payeeExpanded = true
+                        when (transactionDetails.transCode) {
+                            TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
+                                coroutineScope.launch {
+                                    viewModel.getAllAccounts()
+                                }
+                            }
+
+                            TransactionCode.TRANSFER.displayName -> {
+                                coroutineScope.launch {
+
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    Row {
+                        Text(text = transactionDetails.payeeId) //TODO : Find name for PayeeID
+                        Icon(
+                            imageVector = Icons.Filled.ArrowDropDown,
+                            contentDescription = "Description"
+                        )
+                    }
                 }
             }
+
+            //TODO: This should populate from payee table, only account table when transfer
+            DropdownMenu(expanded = payeeExpanded, onDismissRequest = { payeeExpanded = false }) {
+                when (transactionDetails.transCode) {
+                    TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
+                        viewModel.transactionUiState.accountsList.forEach { account ->
+                            DropdownMenuItem(
+                                text = { Text(account.accountName) },
+                                onClick = {
+                                    onValueChange(transactionDetails.copy(payeeId = account.accountId.toString()))
+                                    onValueChange(transactionDetails.copy(toAccountId = "-1"))
+                                    payeeExpanded = false
+                                }
+                            )
+                        }
+                    }
+
+                    TransactionCode.TRANSFER.displayName -> {
+                        /*                    viewModel.transactionUiState.accountsList.forEach { account ->
+                                                val displayName: String = account.accountName
+                                                DropdownMenuItem(
+                                                    text = { Text(displayName) },
+                                                    onClick = {
+                                                        onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
+                                                        onValueChange(transactionDetails.copy(payeeId = "-1"))
+                                                        payeeExpanded = false
+                                                    }
+                                                )
+                                            }*/
+                    }
+                }
+            }
+        }
+
+        Box(modifier = modifier) {
             OutlinedButton(
                 onClick = {
-                    accountExpanded = true
+                    categoryExpanded = true
                     coroutineScope.launch {
                         viewModel.getAllAccounts()
                     }
@@ -207,132 +319,26 @@ fun TransactionEntryForm(
                 }
             ) {
                 Row {
-                    Text(text = transactionDetails.accountId) //TODO : Find name for AccountId
+                    Text(text = transactionDetails.categoryId)
                     Icon(
                         imageVector = Icons.Filled.ArrowDropDown,
                         contentDescription = "Description"
                     )
                 }
             }
-        }
 
-        DropdownMenu(expanded = accountExpanded, onDismissRequest = { accountExpanded = false }) {
-            viewModel.transactionUiState.accountsList.forEach { account ->
-                DropdownMenuItem(
-                    text = { Text(account.accountName) },
-                    onClick = {
-                        onValueChange(transactionDetails.copy(accountId = account.accountId.toString()))
-                        accountExpanded = false
-                    }
-                )
-            }
-
-        }
-
-        Row {
-            when (transactionDetails.transCode) {
-                TransactionCode.WITHDRAWAL.displayName -> {
-                    Text(text = "Payee")
-                }
-
-                TransactionCode.DEPOSIT.displayName -> {
-                    Text(text = "From")
-                }
-
-                TransactionCode.TRANSFER.displayName -> {
-                    Text(text = "To Account")
-                }
-            }
-            OutlinedButton(
-                onClick = {
-                    payeeExpanded = true
-                    when (transactionDetails.transCode) {
-                        TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
-                            coroutineScope.launch {
-                                viewModel.getAllAccounts()
-                            }
+            //TODO: This should populate from categories table
+            DropdownMenu(expanded = categoryExpanded, onDismissRequest = { categoryExpanded = false }) {
+                viewModel.transactionUiState.accountsList.forEach { account ->
+                    val displayName: String = account.accountName
+                    DropdownMenuItem(
+                        text = { Text(displayName) },
+                        onClick = {
+                            onValueChange(transactionDetails.copy(categoryId = account.accountId.toString()))
+                            categoryExpanded = false
                         }
-
-                        TransactionCode.TRANSFER.displayName -> {
-                            coroutineScope.launch {
-
-                            }
-                        }
-                    }
-                }
-            ) {
-                Row {
-                    Text(text = transactionDetails.payeeId) //TODO : Find name for PayeeID
-                    Icon(
-                        imageVector = Icons.Filled.ArrowDropDown,
-                        contentDescription = "Description"
                     )
                 }
-            }
-        }
-
-        //TODO: This should populate from payee table, only account table when transfer
-        DropdownMenu(expanded = payeeExpanded, onDismissRequest = { payeeExpanded = false }) {
-            when (transactionDetails.transCode) {
-                TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
-                    viewModel.transactionUiState.accountsList.forEach { account ->
-                        val displayName: String = account.accountName
-                        DropdownMenuItem(
-                            text = { Text(displayName) },
-                            onClick = {
-                                onValueChange(transactionDetails.copy(payeeId = account.accountId.toString()))
-                                onValueChange(transactionDetails.copy(toAccountId = "-1"))
-                                payeeExpanded = false
-                            }
-                        )
-                    }
-                }
-
-                TransactionCode.TRANSFER.displayName -> {
-/*                    viewModel.transactionUiState.accountsList.forEach { account ->
-                        val displayName: String = account.accountName
-                        DropdownMenuItem(
-                            text = { Text(displayName) },
-                            onClick = {
-                                onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
-                                onValueChange(transactionDetails.copy(payeeId = "-1"))
-                                payeeExpanded = false
-                            }
-                        )
-                    }*/
-                }
-            }
-        }
-
-        OutlinedButton(
-            onClick = {
-                categoryExpanded = true
-                coroutineScope.launch {
-                    viewModel.getAllAccounts()
-                }
-
-            }
-        ) {
-            Row {
-                Text(text = transactionDetails.categoryId)
-                Icon(
-                    imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = "Description"
-                )
-            }
-        }
-
-        //TODO: This should populate from categories table
-        DropdownMenu(expanded = categoryExpanded, onDismissRequest = { categoryExpanded = false }) {
-            viewModel.transactionUiState.accountsList.forEach { account ->
-                val displayName: String = account.accountName
-                DropdownMenuItem(
-                    text = { Text(displayName) },
-                    onClick = {
-                        onValueChange(transactionDetails.copy(categoryId = account.accountId.toString()))
-                        payeeExpanded = false
-                    }
-                )
             }
         }
 
