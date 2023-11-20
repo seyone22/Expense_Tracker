@@ -3,6 +3,7 @@ package com.example.expensetracker.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.io.Serializable
 
 @Entity(tableName = "ACCOUNTLIST_V1",
     indices = [

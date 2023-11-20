@@ -150,8 +150,8 @@ fun AccountCard(
             .height(104.dp)
             .padding(0.dp, 12.dp)
             .clickable {
-                var variableName = 2
-                navigateToScreen("AccountDetails/$variableName")
+                var accountId = accountWithBalance.first.accountId
+                navigateToScreen("AccountDetails/$accountId")
             }
     ) {
         Row(

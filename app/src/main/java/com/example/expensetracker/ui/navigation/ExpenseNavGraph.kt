@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.expensetracker.model.Account
 import com.example.expensetracker.ui.account.AccountDetailDestination
 import com.example.expensetracker.ui.account.AccountDetailScreen
 import com.example.expensetracker.ui.screen.accounts.AccountScreen
@@ -51,7 +52,7 @@ fun ExpenseNavHost(
                 navigateToScreen = { screen -> navController.navigate(screen) },
             )
         }
-        composable(route = AccountDetailDestination.route+"/{variableName}", arguments = listOf(navArgument("variableName") { type = NavType.IntType })) {
+        composable(route = AccountDetailDestination.route+"/{accountId}", arguments = listOf(navArgument("accountId") { type = NavType.IntType })) {
             AccountDetailScreen(
                 navigateToEntityEntry = { navController.navigate(AccountEntryDestination.route) },
                 navigateToScreen = { screen -> navController.navigate(screen) },

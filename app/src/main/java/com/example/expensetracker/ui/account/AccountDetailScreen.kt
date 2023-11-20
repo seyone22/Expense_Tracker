@@ -24,7 +24,7 @@ fun AccountDetailScreen(
     navController: NavController
 ) {
     val navBackStackEntry = navController.currentBackStackEntryAsState()
-    val variableReceived = navBackStackEntry.value?.arguments?.getInt("variableName") ?: -1
+    val variableReceived = navBackStackEntry.value?.arguments?.getInt("accountId") ?: -1
 
     Text(text = variableReceived.toString())
 }
