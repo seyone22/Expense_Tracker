@@ -8,26 +8,63 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.ui.screen.accounts.AccountsUiState
 import com.example.expensetracker.data.account.AccountsRepository
+import com.example.expensetracker.data.category.CategoriesRepository
+import com.example.expensetracker.data.payee.PayeesRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
+import com.example.expensetracker.model.Category
+import com.example.expensetracker.model.CurrencyFormat
+import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
+import com.example.expensetracker.ui.screen.entities.EntitiesUiState
+import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class TransactionEntryViewModel(
     private val transactionsRepository: TransactionsRepository,
-    private val accountsRepository: AccountsRepository
+    private val accountsRepository: AccountsRepository,
+    private val payeesRepository: PayeesRepository,
+    private val categoriesRepository: CategoriesRepository
 ) :
     ViewModel() {
     var transactionUiState by mutableStateOf(TransactionUiState())
         private set
 
+    val transactionUiState1: StateFlow<TransactionUiState> =
+        categoriesRepository.getAllCategoriesStream()
+            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
+            .map { categories ->
+                TransactionUiState(
+                    categoriesList = categories
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TransactionEntryViewModel.TIMEOUT_MILLIS),
+                initialValue = TransactionUiState()
+            )
+
+    val transactionUiState2: StateFlow<TransactionUiState> =
+        payeesRepository.getAllActivePayeesStream()
+            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
+            .map { payees ->
+                TransactionUiState(
+                    payeesList = payees
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TransactionEntryViewModel.TIMEOUT_MILLIS),
+                initialValue = TransactionUiState()
+            )
+
     init {
-        Log.d("DEBUG", ": Initialization")
         viewModelScope.launch {
             accountsRepository.getAllActiveAccountsStream().map {
                 Log.d("DEBUG", ": Value is:  $it")
@@ -39,6 +76,7 @@ class TransactionEntryViewModel(
                     initialValue = AccountsUiState()
                 )
         }
+
     }
 
     companion object {
@@ -96,21 +134,23 @@ class TransactionEntryViewModel(
 data class TransactionUiState(
     val transactionDetails: TransactionDetails = TransactionDetails(),
     val isEntryValid: Boolean = false,
-    val accountsList : List<Account> = listOf()
+    val accountsList : List<Account> = listOf(),
+    val categoriesList: List<Category> = listOf(),
+    val payeesList: List<Payee> = listOf(),
 )
 
 //Data class for AccountDetails
 data class TransactionDetails(
     val transId: Int = 0,
-    val accountId: String = "0",
+    val accountId: String = "",
     val toAccountId: String = "0",
-    val payeeId: String = "0",
+    val payeeId: String = "",
     val transCode: String = TransactionCode.WITHDRAWAL.displayName,
     val transAmount: String = "",
     val status: String = TransactionStatus.U.displayName,
     val transactionNumber: String = "0",
     val notes: String = "",
-    val categoryId: String = "0",
+    val categoryId: String = "",
     val transDate: String = "",
     val lastUpdatedTime: String = "",
     val deletedTime: String = "",

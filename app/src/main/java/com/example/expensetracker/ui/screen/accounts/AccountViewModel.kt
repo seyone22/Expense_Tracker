@@ -27,7 +27,6 @@ class AccountViewModel(
      * Holds home ui state. The list of items are retrieved from [AccountsRepository] and mapped to
      * [AccountUiState]
      */
-
     val accountsUiState: StateFlow<AccountsUiState> =
         accountsRepository.getAllAccountsStream()
             //.onEach { Log.d("DEBUG", ": flow emitted $it") }

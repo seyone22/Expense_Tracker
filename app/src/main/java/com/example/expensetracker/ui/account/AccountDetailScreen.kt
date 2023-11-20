@@ -2,6 +2,9 @@ package com.example.expensetracker.ui.account
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -20,11 +23,10 @@ fun AccountDetailScreen(
     navigateToEntityEntry: () -> Unit,
     navigateToScreen: (screen: String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: AccountDetailViewModel = viewModel(factory = AppViewModelProvider.Factory),
     navController: NavController
 ) {
-    val navBackStackEntry = navController.currentBackStackEntryAsState()
-    val variableReceived = navBackStackEntry.value?.arguments?.getInt("accountId") ?: -1
+    val accountDetailAccountUiState by viewModel.accountDetailAccountUiState.collectAsState()
 
-    Text(text = variableReceived.toString())
+    Text(text = accountDetailAccountUiState.balance.toString())
 }

@@ -4,6 +4,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -12,6 +13,7 @@ import androidx.navigation.navArgument
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.ui.account.AccountDetailDestination
 import com.example.expensetracker.ui.account.AccountDetailScreen
+import com.example.expensetracker.ui.account.AccountDetailViewModel
 import com.example.expensetracker.ui.screen.accounts.AccountScreen
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
