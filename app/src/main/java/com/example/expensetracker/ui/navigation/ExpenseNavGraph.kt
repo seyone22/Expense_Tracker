@@ -5,8 +5,12 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.expensetracker.ui.account.AccountDetailDestination
+import com.example.expensetracker.ui.account.AccountDetailScreen
 import com.example.expensetracker.ui.screen.accounts.AccountScreen
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
@@ -43,8 +47,15 @@ fun ExpenseNavHost(
         }
         composable(route = EntitiesDestination.route) {
             EntityScreen(
+                navigateToEntityEntry = { navController.navigate(EntitiesDestination.route) },
+                navigateToScreen = { screen -> navController.navigate(screen) },
+            )
+        }
+        composable(route = AccountDetailDestination.route+"/{variableName}", arguments = listOf(navArgument("variableName") { type = NavType.IntType })) {
+            AccountDetailScreen(
                 navigateToEntityEntry = { navController.navigate(AccountEntryDestination.route) },
-                navigateToScreen = { screen -> navController.navigate(screen) }
+                navigateToScreen = { screen -> navController.navigate(screen) },
+                navController = navController
             )
         }
         composable(route = AccountEntryDestination.route) {

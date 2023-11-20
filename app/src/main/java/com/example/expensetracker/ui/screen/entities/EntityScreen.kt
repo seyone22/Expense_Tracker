@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.expensetracker.R
 import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.CurrencyFormat
@@ -51,12 +53,14 @@ fun EntityScreen(
     navigateToEntityEntry: () -> Unit,
     navigateToScreen: (screen: String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     var state by remember { mutableIntStateOf(0) }
     val titles = listOf("Categories", "Payees", "Currencies")
+    //TODO: Refactor this to be more elegant
     val entityUiState : EntitiesUiState by viewModel.entitiesUiState.collectAsState()
-
+    val entityUiState2 : EntitiesUiState by viewModel.entitiesUiState2.collectAsState()
+    val entityUiState3 : EntitiesUiState by viewModel.entitiesUiState2.collectAsState()
     Scaffold(
         topBar = {
             ExpenseTopBar(selectedActivity = 1)
@@ -86,10 +90,10 @@ fun EntityScreen(
                         CategoryList(list = entityUiState.categoriesList)
                     }
                     1 -> {
-                        PayeeList(list = entityUiState.payeesList)
+                        PayeeList(list = entityUiState3.payeesList)
                     }
                     2 -> {
-                        CurrenciesList(list = entityUiState.currenciesList)
+                        CurrenciesList(list = entityUiState2.currenciesList)
                     }
                 }
             }
@@ -180,14 +184,9 @@ fun CurrenciesList(
     LazyColumn() {
         items(list) {
             ListItem(
-                headlineContent = { Text("Three line list item") },
-                overlineContent = { Text("OVERLINE") },
-                leadingContent = {
-                    Icon(
-                        Icons.Filled.Favorite,
-                        contentDescription = "Localized description",
-                    )
-                },
+                headlineContent = { Text(it.baseConvRate.toString()) },
+                overlineContent = { Text(it.currencyName) },
+                leadingContent = { Text(it.currency_symbol) },
                 trailingContent = {
                     Column(
                         verticalArrangement = Arrangement.Center,
@@ -208,77 +207,3 @@ fun CurrenciesList(
         }
     }
 }
-
-
-
-
-
-
-
-
-/*
-@Composable
-fun CategoryCard(
-    entityWithBalance: Pair<Payee, Double>,
-    modifier: Modifier = Modifier,
-    viewModel : EntityViewModel
-) {
-    ElevatedCard(
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(104.dp)
-            .padding(0.dp, 12.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-
-                ) {
-                Icon(
-                    imageVector = Icons.Outlined.EntityBalanceWallet,
-                    contentDescription = null,
-                    Modifier.size(36.dp, 36.dp)
-                )
-            }
-            Column(
-                Modifier
-                    .weight(3f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = entityWithBalance.first.entityName,
-                    style = MaterialTheme.typography.titleSmall
-                )
-                Text(
-                    text = entityWithBalance.first.status,
-                    style = MaterialTheme.typography.labelLarge
-                )
-            }
-            Column(
-                Modifier
-                    .weight(2f)
-                    .fillMaxHeight()
-                    .padding(0.dp, 0.dp, 12.dp, 0.dp),
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Rs. "+entityWithBalance.second.toString()
-                )
-                Text(
-                    text = "Rs. "+entityWithBalance.second.toString()
-                )
-            }
-        }
-    }
-}*/

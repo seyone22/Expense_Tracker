@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.screen.accounts
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -92,7 +93,8 @@ fun AccountScreen(
                         AccountList(
                             category = displayName,
                             accountList = accountUiState.accountList,
-                            viewModel = viewModel
+                            viewModel = viewModel,
+                            navigateToScreen = navigateToScreen
                         )
                     }
                 }
@@ -109,8 +111,9 @@ fun AccountList(
     category: String,
     accountList: List<Pair<Account,Double>>,
     modifier: Modifier = Modifier,
-    viewModel: AccountViewModel
-) {
+    viewModel: AccountViewModel,
+    navigateToScreen: (screen: String) -> Unit,
+    ) {
     Column(
         Modifier.padding(16.dp, 12.dp),
 
@@ -122,8 +125,8 @@ fun AccountList(
                 if(accountPair.first.accountType == category) {
                     AccountCard(
                         accountWithBalance = accountPair,
-                        modifier = Modifier,
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        navigateToScreen = navigateToScreen
                     )
                 }
             }
@@ -135,8 +138,9 @@ fun AccountList(
 fun AccountCard(
     accountWithBalance: Pair<Account, Double>,
     modifier: Modifier = Modifier,
-    viewModel : AccountViewModel
-) {
+    viewModel : AccountViewModel,
+    navigateToScreen: (screen: String) -> Unit,
+    ) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -145,6 +149,10 @@ fun AccountCard(
             .fillMaxWidth()
             .height(104.dp)
             .padding(0.dp, 12.dp)
+            .clickable {
+                var variableName = 2
+                navigateToScreen("AccountDetails/$variableName")
+            }
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween

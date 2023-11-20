@@ -31,7 +31,37 @@ class EntityViewModel(
         categoriesRepository.getAllCategoriesStream()
             //.onEach { Log.d("DEBUG", ": flow emitted $it") }
             .map { categories ->
-                EntitiesUiState(categories)
+                EntitiesUiState(
+                    categoriesList = categories
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = EntitiesUiState()
+            )
+
+    val entitiesUiState2: StateFlow<EntitiesUiState> =
+        currencyFormatsRepository.getAllCurrencyFormatsStream()
+            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
+            .map { currencies ->
+                EntitiesUiState(
+                    currenciesList = currencies
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = EntitiesUiState()
+            )
+
+    val entitiesUiState3: StateFlow<EntitiesUiState> =
+        payeesRepository.getAllActivePayeesStream()
+            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
+            .map { payees ->
+                EntitiesUiState(
+                    payeesList = payees
+                )
             }
             .stateIn(
                 scope = viewModelScope,
@@ -51,5 +81,4 @@ data class EntitiesUiState(
     val categoriesList: List<Category> = listOf(),
     val payeesList: List<Payee> = listOf(),
     val currenciesList: List<CurrencyFormat> = listOf(),
-    val grandTotal: Double = 0.0
 )
