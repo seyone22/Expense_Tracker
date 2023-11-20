@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.account
 
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -8,34 +9,49 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.ImeOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
+import com.example.expensetracker.activitiesAndIcons
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
@@ -57,16 +73,54 @@ fun AccountEntryScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    AccountEntryBody(
-        onEnterClick = {
-            coroutineScope.launch {
-                viewModel.saveAccount()
-                navigateBack()
-            }
-        },
-        accountUiState = viewModel.accountUiState,
-        onAccountValueChange = viewModel::updateUiState
-    )
+    Scaffold(
+        topBar = {
+
+            TopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                title = {
+                    Text(
+                        text = "Create Account",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navigateBack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Close"
+                        )
+                    }
+                },
+                actions = {
+
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "Create")
+                    }
+                }
+            )
+
+        }
+
+    ) {
+            toppadding -> toppadding
+        AccountEntryBody(
+            onEnterClick = {
+                coroutineScope.launch {
+                    viewModel.saveAccount()
+                    navigateBack()
+                }
+            },
+            accountUiState = viewModel.accountUiState,
+            onAccountValueChange = viewModel::updateUiState
+        )
+    }
+
 }
 
 @Composable
@@ -102,9 +156,12 @@ fun AccountEntryForm(
     modifier: Modifier = Modifier,
 ) {
     var accountTypeExpanded by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     Column(
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
+            .padding(16.dp)
+            .focusGroup()
     ) {
 
         OutlinedButton(
@@ -119,7 +176,9 @@ fun AccountEntryForm(
             }
         }
 
-        DropdownMenu(expanded = accountTypeExpanded , onDismissRequest = { accountTypeExpanded = false }) {
+        DropdownMenu(
+            expanded = accountTypeExpanded,
+            onDismissRequest = { accountTypeExpanded = false }) {
             enumValues<AccountTypes>().forEach { accountType ->
                 val displayName: String = accountType.displayName
                 DropdownMenuItem(
@@ -135,26 +194,33 @@ fun AccountEntryForm(
         OutlinedTextField(
             value = accountDetails.accountName,
             onValueChange = { onValueChange(accountDetails.copy(accountName = it)) },
-            label = { Text("Account Name *") }
+            label = { Text("Account Name *") },
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
 
         OutlinedTextField(
             value = accountDetails.initialBalance.toString(),
             onValueChange = { onValueChange(accountDetails.copy(initialBalance = it)) },
             label = { Text("Initial Balance *") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
 
         OutlinedTextField(
             value = accountDetails.initialDate.toString(),
             onValueChange = { onValueChange(accountDetails.copy(initialDate = it)) },
-            label = { Text("Opening Date  *") }
+            label = { Text("Opening Date  *") },
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
 
         OutlinedTextField(
             value = accountDetails.notes.toString(),
             onValueChange = { onValueChange(accountDetails.copy(notes = it)) },
-            label = { Text("Notes") }
+            label = { Text("Notes") },
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
 
         Text(
@@ -166,28 +232,38 @@ fun AccountEntryForm(
             value = accountDetails.accountNum.toString(),
             onValueChange = { onValueChange(accountDetails.copy(accountNum = it)) },
             label = { Text("Account Number") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
         OutlinedTextField(
             value = accountDetails.heldAt.toString(),
             onValueChange = { onValueChange(accountDetails.copy(heldAt = it)) },
-            label = { Text("Held At") }
+            label = { Text("Held At") },
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
         OutlinedTextField(
             value = accountDetails.website.toString(),
             onValueChange = { onValueChange(accountDetails.copy(website = it)) },
-            label = { Text("Website") }
+            label = { Text("Website") },
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
         OutlinedTextField(
             value = accountDetails.contactInfo.toString(),
             onValueChange = { onValueChange(accountDetails.copy(contactInfo = it)) },
-            label = { Text("Contact Information") }
+            label = { Text("Contact Information") },
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
 
         OutlinedTextField(
             value = accountDetails.accessInfo.toString(),
             onValueChange = { onValueChange(accountDetails.copy(accessInfo = it)) },
-            label = { Text("Access Information") }
+            label = { Text("Access Information") },
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
 
         Text("Statement")
@@ -208,14 +284,18 @@ fun AccountEntryForm(
         OutlinedTextField(
             value = accountDetails.statementDate.toString(),
             onValueChange = { onValueChange(accountDetails.copy(statementDate = it)) },
-            label = { Text("Statement Date") }
+            label = { Text("Statement Date") },
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
 
         OutlinedTextField(
             value = accountDetails.minimumBalance.toString(),
             onValueChange = { onValueChange(accountDetails.copy(minimumBalance = it)) },
             label = { Text("Minimum Balance") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
 
         Text("Credit")
@@ -224,25 +304,33 @@ fun AccountEntryForm(
             value = accountDetails.creditLimit.toString(),
             onValueChange = { onValueChange(accountDetails.copy(creditLimit = it)) },
             label = { Text("Credit Limit") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
 
         )
         OutlinedTextField(
             value = accountDetails.interestRate.toString(),
             onValueChange = { onValueChange(accountDetails.copy(interestRate = it)) },
             label = { Text("Interest Rate") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
         OutlinedTextField(
             value = accountDetails.paymentDueDate.toString(),
             onValueChange = { onValueChange(accountDetails.copy(paymentDueDate = it)) },
-            label = { Text("Payment Due Date") }
+            label = { Text("Payment Due Date") },
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
         OutlinedTextField(
             value = accountDetails.minimumPayment.toString(),
             onValueChange = { onValueChange(accountDetails.copy(minimumPayment = it)) },
             label = { Text("Minimum Payment") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            singleLine = true,
+            keyboardActions = KeyboardActions(onDone = { })
         )
     }
 }
