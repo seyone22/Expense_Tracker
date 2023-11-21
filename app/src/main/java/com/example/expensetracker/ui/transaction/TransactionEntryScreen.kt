@@ -101,6 +101,7 @@ fun TransactionEntryScreen(
                                 navigateBack()
                             }
                         },
+                        enabled = viewModel.transactionUiState.isEntryValid,
                         modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp)
                     ) {
                         Text(text = "Create")
@@ -122,7 +123,7 @@ fun TransactionEntryScreen(
     }
 }
 
-@SuppressLint("UnrememberedMutableState")
+@SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionEntryForm(
@@ -152,7 +153,7 @@ fun TransactionEntryForm(
             .focusGroup()
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+    ) {
         item {
             OutlinedTextField(
                 modifier = Modifier
@@ -285,7 +286,7 @@ fun TransactionEntryForm(
                             }
 
                             TransactionCode.TRANSFER.displayName -> {
-                                Text(text = "To Account")
+                                Text(text = "From Account")
                             }
                         }
                     },
@@ -336,12 +337,23 @@ fun TransactionEntryForm(
                         }
                     }
                 }) {
+                var payeeBoxValue : String = ""
+                when(transactionDetails.transCode) {
+                    TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
+                        payeeBoxValue = transactionDetails.payeeId
+                    }
+                    TransactionCode.TRANSFER.displayName -> {
+                        payeeBoxValue = transactionDetails.toAccountId
+                    }
+                    else -> {}
+                }
+
                 OutlinedTextField(
                     modifier = Modifier
                         .padding(0.dp, 8.dp)
                         .clickable(enabled = true) { payeeExpanded = true }
                         .menuAnchor(),
-                    value = transactionDetails.payeeId,
+                    value = payeeBoxValue,
                     readOnly = true,
                     onValueChange = { onValueChange(transactionDetails.copy(payeeId = it)) },
                     label = {
@@ -387,17 +399,16 @@ fun TransactionEntryForm(
                         }
 
                         TransactionCode.TRANSFER.displayName -> {
-                            /*                    viewModel.transactionUiState.accountsList.forEach { account ->
-                                                    val displayName: String = account.accountName
-                                                    DropdownMenuItem(
-                                                        text = { Text(displayName) },
-                                                        onClick = {
-                                                            onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
-                                                            onValueChange(transactionDetails.copy(payeeId = "-1"))
-                                                            payeeExpanded = false
-                                                        }
-                                                    )
-                                                }*/
+                            viewModel.transactionUiState.accountsList.forEach { account ->
+                                DropdownMenuItem(
+                                    text = { Text(account.accountName) },
+                                    onClick = {
+                                        onValueChange(transactionDetails.copy(payeeId = "-1"))
+                                        onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
+                                        payeeExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -413,6 +424,10 @@ fun TransactionEntryForm(
                     }
                 })
             {
+                var categoryName : String = "0"
+/*                coroutineScope.launch {
+                    viewModel.getCategoryName(transactionDetails.categoryId.toInt())
+                }*/
                 OutlinedTextField(
                     modifier = Modifier
                         .padding(0.dp, 8.dp)
@@ -423,7 +438,7 @@ fun TransactionEntryForm(
                             }
                         }
                         .menuAnchor(),
-                    value = transactionDetails.categoryId,
+                    value = categoryName,
                     readOnly = true,
                     onValueChange = { onValueChange(transactionDetails.copy(categoryId = it)) },
                     label = { Text("Transaction Category *") },
@@ -453,20 +468,20 @@ fun TransactionEntryForm(
             }
 
             OutlinedTextField(
-                value = transactionDetails.transDate,
+                value = transactionDetails.transactionNumber,
                 onValueChange = { onValueChange(transactionDetails.copy(transactionNumber = it)) },
                 label = { Text("Number") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
             OutlinedTextField(
-                value = transactionDetails.transDate,
+                value = transactionDetails.notes,
                 onValueChange = { onValueChange(transactionDetails.copy(notes = it)) },
                 label = { Text("Notes") }
             )
 
             OutlinedTextField(
-                value = transactionDetails.transDate,
+                value = transactionDetails.color,
                 onValueChange = { onValueChange(transactionDetails.copy(color = it)) },
                 label = { Text("Color") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)

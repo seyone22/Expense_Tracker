@@ -37,6 +37,7 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.account.AccountEntryDestination
+import com.example.expensetracker.ui.common.AnimatedCircle
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
@@ -74,6 +75,20 @@ fun AccountScreen(
             Modifier.padding(innerPadding)
         ) {
             item {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .fillMaxHeight()
+                ) {
+                    AnimatedCircle(
+                        proportions = listOf(0.25f, 0.5f),
+                        colors = listOf(Color.Green, Color.Red),
+                        modifier = modifier
+                            .height(300.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .fillMaxWidth()
+                    )
+                }
+
                 Text("Current Month Summary")
                 Text(text = accountUiState.grandTotal.toString())
                 Text("Your Accounts")
