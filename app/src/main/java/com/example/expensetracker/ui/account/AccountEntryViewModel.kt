@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
+import java.time.LocalDateTime
 
 class AccountEntryViewModel(private val accountsRepository: AccountsRepository) : ViewModel() {
     var accountUiState by mutableStateOf(AccountUiState())
@@ -30,7 +31,7 @@ class AccountEntryViewModel(private val accountsRepository: AccountsRepository) 
         Log.d("DEBUG", "validateInput: Validation Begins!")
         Log.d("DEBUG", uiState.accountName)
         return with(uiState) {
-            accountName.isNotBlank()
+            accountName.isNotBlank() && (initialDate?.isNotBlank() ?: false)
         }
     }
 }

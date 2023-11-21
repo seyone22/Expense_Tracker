@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.account
 
-import android.app.Activity
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -21,14 +24,16 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,13 +43,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.AccountTypes
@@ -52,6 +54,9 @@ import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 object AccountEntryDestination : NavigationDestination {
     override val route = "EnterAccount"
@@ -101,7 +106,8 @@ fun AccountEntryScreen(
                             navigateBack()
                         }
                         },
-                        modifier = modifier.padding(0.dp,0.dp,8.dp,0.dp)
+                        modifier = modifier.padding(0.dp,0.dp,8.dp,0.dp),
+                        enabled = viewModel.accountUiState.isEntryValid
                     ) {
                         Text(text = "Create")
                     }
@@ -141,6 +147,7 @@ fun AccountEntryBody(
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountEntryForm(
@@ -149,6 +156,10 @@ fun AccountEntryForm(
     modifier: Modifier = Modifier,
 ) {
     var accountTypeExpanded by remember { mutableStateOf(false) }
+    var openInitialDateDialog by remember { mutableStateOf(false) }
+    var openPaymentDueDateDialog by remember { mutableStateOf(false) }
+    var openStatementDateDialog by remember { mutableStateOf(false) }
+
     val focusManager = LocalFocusManager.current
 
     Column(
@@ -212,10 +223,26 @@ fun AccountEntryForm(
         )
 
         OutlinedTextField(
-            modifier = Modifier.padding(0.dp, 8.dp),
-            value = accountDetails.initialDate.toString(),
+            modifier = Modifier
+                .padding(0.dp, 8.dp)
+                .clickable(enabled = true) {
+                    openInitialDateDialog = true
+                    Log.d("DEBUG", "AccountEntryForm: $openInitialDateDialog")
+                },
+            enabled = false,
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledBorderColor = MaterialTheme.colorScheme.outline,
+                disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                //For Icons
+                disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+            value = accountDetails.initialDate!!,
             onValueChange = { onValueChange(accountDetails.copy(initialDate = it)) },
             label = { Text("Opening Date  *") },
+            readOnly = true,
             singleLine = true,
             keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
@@ -292,11 +319,27 @@ fun AccountEntryForm(
                 modifier = Modifier.align(CenterVertically)
             )
         }
+
         OutlinedTextField(
-            modifier = Modifier.padding(0.dp, 8.dp),
-            value = accountDetails.statementDate.toString(),
+            modifier = Modifier
+                .padding(0.dp, 8.dp)
+                .clickable(enabled = true) {
+                    openStatementDateDialog = true
+                },
+            enabled = false,
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledBorderColor = MaterialTheme.colorScheme.outline,
+                disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                //For Icons
+                disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+            value = accountDetails.statementDate!!,
             onValueChange = { onValueChange(accountDetails.copy(statementDate = it)) },
             label = { Text("Statement Date") },
+            readOnly = true,
             singleLine = true,
             keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
@@ -332,14 +375,31 @@ fun AccountEntryForm(
             singleLine = true,
             keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
+
         OutlinedTextField(
-            modifier = Modifier.padding(0.dp, 8.dp),
-            value = accountDetails.paymentDueDate.toString(),
+            modifier = Modifier
+                .padding(0.dp, 8.dp)
+                .clickable(enabled = true) {
+                    openPaymentDueDateDialog = true
+                },
+            enabled = false,
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledBorderColor = MaterialTheme.colorScheme.outline,
+                disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                //For Icons
+                disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+            value = accountDetails.paymentDueDate!!,
             onValueChange = { onValueChange(accountDetails.copy(paymentDueDate = it)) },
             label = { Text("Payment Due Date") },
+            readOnly = true,
             singleLine = true,
             keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
+
         OutlinedTextField(
             modifier = Modifier.padding(0.dp, 8.dp),
             value = accountDetails.minimumPayment.toString(),
@@ -350,7 +410,124 @@ fun AccountEntryForm(
             keyboardActions = KeyboardActions(onDone = { })
         )
     }
+    
+    if (openInitialDateDialog) {
+        val datePickerState = rememberDatePickerState()
+        val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
+        DatePickerDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                // button. If you want to disable that functionality, simply use an empty
+                // onDismissRequest.
+                openInitialDateDialog = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openInitialDateDialog = false
+                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val date = Date(datePickerState.selectedDateMillis!!)
+
+                        onValueChange(accountDetails.copy(initialDate = dateFormat.format(date)))
+                    },
+                    enabled = confirmEnabled.value
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openInitialDateDialog = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+    if (openStatementDateDialog) {
+        val datePickerState = rememberDatePickerState()
+        val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
+        DatePickerDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                // button. If you want to disable that functionality, simply use an empty
+                // onDismissRequest.
+                openStatementDateDialog = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openStatementDateDialog = false
+                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val date = Date(datePickerState.selectedDateMillis!!)
+
+                        onValueChange(accountDetails.copy(statementDate = dateFormat.format(date)))
+                    },
+                    enabled = confirmEnabled.value
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openStatementDateDialog = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+    if (openPaymentDueDateDialog) {
+        val datePickerState = rememberDatePickerState()
+        val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
+        DatePickerDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                // button. If you want to disable that functionality, simply use an empty
+                // onDismissRequest.
+                openPaymentDueDateDialog = false
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openPaymentDueDateDialog = false
+                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val date = Date(datePickerState.selectedDateMillis!!)
+
+                        onValueChange(accountDetails.copy(paymentDueDate = dateFormat.format(date)))
+                    },
+                    enabled = confirmEnabled.value
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openPaymentDueDateDialog = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+
 }
+
+
+
+
 
 @Preview(showBackground = true)
 @Composable
