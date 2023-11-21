@@ -1,9 +1,13 @@
 package com.example.expensetracker.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "INFOTABLE_V1")
+@Entity(tableName = "INFOTABLE_V1",
+    indices = [
+        Index(value = ["infoName"]),
+    ])
 data class Metadata (
     @PrimaryKey(autoGenerate = true)
     val infoId : Int = 1,
