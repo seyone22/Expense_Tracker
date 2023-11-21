@@ -18,13 +18,12 @@ object AccountDetailDestination : NavigationDestination {
     override val route = "AccountDetails"
     override val titleRes = R.string.app_name
 }
+
 @Composable
 fun AccountDetailScreen(
-    navigateToEntityEntry: () -> Unit,
-    navigateToScreen: (screen: String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AccountDetailViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    navController: NavController
+    navController: NavController,
+    viewModel: AccountDetailViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val accountDetailAccountUiState by viewModel.accountDetailAccountUiState.collectAsState()
 

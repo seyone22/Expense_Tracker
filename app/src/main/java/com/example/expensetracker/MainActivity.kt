@@ -23,25 +23,17 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 
-data class ActivityIconPair(val activity: String, val icon: ImageVector)
-val activitiesAndIcons = listOf(
-    ActivityIconPair("Accounts", Icons.Outlined.AccountBalanceWallet),
-    ActivityIconPair("Entities", Icons.Outlined.AccountBalance),
-    ActivityIconPair("Budgets", Icons.Outlined.Balance),
-    ActivityIconPair("Assets", Icons.Outlined.House),
-    ActivityIconPair("Reports", Icons.Outlined.TextSnippet),
-)
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
             ExpenseTrackerTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
                 ) {
+
                     ExpenseApp()
                 }
             }

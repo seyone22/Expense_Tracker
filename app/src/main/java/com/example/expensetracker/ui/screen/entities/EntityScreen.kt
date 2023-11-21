@@ -14,6 +14,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -50,9 +51,8 @@ object EntitiesDestination : NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EntityScreen(
-    navigateToEntityEntry: () -> Unit,
-    navigateToScreen: (screen: String) -> Unit,
     modifier: Modifier = Modifier,
+    navigateToScreen: (screen: String) -> Unit,
     viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     var state by remember { mutableIntStateOf(0) }
@@ -62,6 +62,7 @@ fun EntityScreen(
     val entityUiState2 : EntitiesUiState by viewModel.entitiesUiState2.collectAsState()
     val entityUiState3 : EntitiesUiState by viewModel.entitiesUiState2.collectAsState()
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
             ExpenseTopBar(selectedActivity = 1)
         },
@@ -75,7 +76,10 @@ fun EntityScreen(
         Column(
             Modifier.padding(innerPadding)
         ) {
-                PrimaryTabRow(selectedTabIndex = state) {
+                PrimaryTabRow(
+                    selectedTabIndex = state,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                ) {
                     titles.forEachIndexed { index, title ->
                         Tab(
                             selected = state == index,

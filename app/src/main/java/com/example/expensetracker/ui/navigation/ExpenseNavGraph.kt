@@ -4,6 +4,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -20,6 +21,8 @@ import com.example.expensetracker.ui.screen.entities.EntitiesDestination
 import com.example.expensetracker.ui.screen.entities.EntityScreen
 import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.account.AccountEntryScreen
+import com.example.expensetracker.ui.transaction.TransactionEntryDestination
+import com.example.expensetracker.ui.transaction.TransactionEntryScreen
 
 /**
  * Provides Navigation graph for the application.
@@ -36,33 +39,31 @@ fun ExpenseNavHost(
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
+        // Routes to main Navbar destinations
         composable(route = AccountsDestination.route) {
             AccountScreen(
-                navigateToAccountEntry = { navController.navigate(AccountEntryDestination.route) },
                 navigateToScreen = { screen -> navController.navigate(screen) }
             )
         }
+        composable(route = EntitiesDestination.route) {
+            EntityScreen(
+                navigateToScreen = { screen -> navController.navigate(screen) },
+            )
+        }
+        // Routes to pages for CRUD operations
         composable(route = AccountEntryDestination.route) {
             AccountEntryScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
             )
         }
-        composable(route = EntitiesDestination.route) {
-            EntityScreen(
-                navigateToEntityEntry = { navController.navigate(EntitiesDestination.route) },
-                navigateToScreen = { screen -> navController.navigate(screen) },
-            )
-        }
         composable(route = AccountDetailDestination.route+"/{accountId}", arguments = listOf(navArgument("accountId") { type = NavType.IntType })) {
             AccountDetailScreen(
-                navigateToEntityEntry = { navController.navigate(AccountEntryDestination.route) },
-                navigateToScreen = { screen -> navController.navigate(screen) },
                 navController = navController
             )
         }
-        composable(route = AccountEntryDestination.route) {
-            AccountEntryScreen(
+        composable(route = TransactionEntryDestination.route) {
+            TransactionEntryScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
             )

@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -23,10 +24,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,73 +53,76 @@ import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.AppViewModelProvider
+import com.example.expensetracker.ui.account.AccountEntryBody
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesUiState
 import kotlinx.coroutines.launch
 
 object TransactionEntryDestination : NavigationDestination {
-    override val route = "EnterTransaction"
+    override val route = "TransactionEntry"
     override val titleRes = R.string.app_name
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionEntryScreen(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
+    modifier: Modifier = Modifier,
+    navigateBack: () -> Unit = {},
+    onNavigateUp: () -> Unit = {},
+    canNavigateBack: Boolean = true,
     viewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    Dialog(onDismissRequest = {
-        viewModel.reset()
-        onDismissRequest()
-    }) {
-        // Draw a rectangle shape with rounded corners inside the dialog
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxSize()
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                TransactionEntryForm(
-                    transactionDetails = viewModel.transactionUiState.transactionDetails,
-                    onValueChange = viewModel::updateUiState,
-                    modifier = Modifier.fillMaxWidth(),
-                    viewModel = viewModel
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    TextButton(
-                        onClick = { onDismissRequest() },
-                        modifier = Modifier.padding(8.dp),
-                    ) {
-                        Text("Cancel")
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                title = {
+                    Text(
+                        text = "Create Transaction",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navigateBack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Close"
+                        )
                     }
-                    TextButton(
+                },
+                actions = {
+                    Button(
                         onClick = {
                             coroutineScope.launch {
                                 viewModel.saveTransaction()
-                                onConfirmation()
+                                navigateBack()
                             }
                         },
-                        modifier = Modifier.padding(8.dp),
-                        enabled = viewModel.transactionUiState.isEntryValid,
+                        modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp)
                     ) {
-                        Text("Create")
+                        Text(text = "Create")
                     }
                 }
-            }
+            )
+
         }
+
+    ) { padding ->
+        TransactionEntryForm(
+            transactionDetails = viewModel.transactionUiState.transactionDetails,
+            onValueChange = viewModel::updateUiState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(padding),
+            viewModel = viewModel
+        )
     }
 }
 
@@ -133,8 +142,8 @@ fun TransactionEntryForm(
     var categoryExpanded by remember { mutableStateOf(false) }
 
     //TODO: Refactor this to be more elegant
-    val transactionUiState1 : TransactionUiState by viewModel.transactionUiState1.collectAsState()
-    val transactionUiState2 : TransactionUiState by viewModel.transactionUiState2.collectAsState()
+    val transactionUiState1: TransactionUiState by viewModel.transactionUiState1.collectAsState()
+    val transactionUiState2: TransactionUiState by viewModel.transactionUiState2.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
@@ -142,16 +151,10 @@ fun TransactionEntryForm(
     LazyColumn(
         modifier = modifier
             .focusGroup()
-    ) {
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
         item {
-            Button(onClick = {
-                coroutineScope.launch {
-                    viewModel.saveTransaction()
-                }
-            }) {
-
-            }
-            
             OutlinedTextField(
                 value = transactionDetails.transDate,
                 onValueChange = { onValueChange(transactionDetails.copy(transDate = it)) },
@@ -172,7 +175,11 @@ fun TransactionEntryForm(
                     onValueChange = { onValueChange(transactionDetails.copy(status = it)) },
                     label = { Text("Transaction Status *") },
                     singleLine = true,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) }),
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    }),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusExpanded) },
                 )
 
@@ -213,7 +220,11 @@ fun TransactionEntryForm(
                     onValueChange = { onValueChange(transactionDetails.copy(transCode = it)) },
                     label = { Text("Transaction Type *") },
                     singleLine = true,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) }),
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    }),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeExpanded) },
                 )
 
@@ -262,7 +273,11 @@ fun TransactionEntryForm(
                         }
                     },
                     singleLine = true,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) }),
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    }),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = accountExpanded) },
                 )
 
@@ -328,7 +343,11 @@ fun TransactionEntryForm(
                         }
                     },
                     singleLine = true,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) }),
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    }),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = payeeExpanded) },
                 )
 
@@ -392,7 +411,11 @@ fun TransactionEntryForm(
                     onValueChange = { onValueChange(transactionDetails.copy(categoryId = it)) },
                     label = { Text("Transaction Category *") },
                     singleLine = true,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) }),
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    }),
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                 )
 

@@ -11,18 +11,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import com.example.expensetracker.activitiesAndIcons
+import androidx.compose.ui.res.stringArrayResource
+import com.example.expensetracker.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseTopBar(selectedActivity: Int) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
         ),
         title = {
-            Text(activitiesAndIcons[selectedActivity].activity)
+            Text(stringArrayResource(id = R.array.activities)[selectedActivity])
         },
         navigationIcon = {
             IconButton(onClick = { /*TODO*/ }) {
