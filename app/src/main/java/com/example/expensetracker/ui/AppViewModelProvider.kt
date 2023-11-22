@@ -13,6 +13,7 @@ import com.example.expensetracker.ui.entity.category.CategoryEntryViewModel
 import com.example.expensetracker.ui.entity.currency.CurrencyEntryViewModel
 import com.example.expensetracker.ui.entity.payee.PayeeEntryViewModel
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
+import com.example.expensetracker.ui.screen.settings.SettingsViewModel
 import com.example.expensetracker.ui.transaction.TransactionEntryViewModel
 
 object AppViewModelProvider {
@@ -42,6 +43,10 @@ object AppViewModelProvider {
         }
         initializer {
             PayeeEntryViewModel(expenseApplication().container.payeesRepository)
+        }
+        // Initializer for Settings ViewModel
+        initializer {
+            SettingsViewModel(expenseApplication().container.payeesRepository)
         }
     }
 }
