@@ -21,6 +21,12 @@ import com.example.expensetracker.ui.screen.entities.EntitiesDestination
 import com.example.expensetracker.ui.screen.entities.EntityScreen
 import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.account.AccountEntryScreen
+import com.example.expensetracker.ui.entity.category.CategoryEntryDestination
+import com.example.expensetracker.ui.entity.category.CategoryEntryScreen
+import com.example.expensetracker.ui.entity.currency.CurrencyEntryDestination
+import com.example.expensetracker.ui.entity.currency.CurrencyEntryScreen
+import com.example.expensetracker.ui.entity.payee.PayeeEntryDestination
+import com.example.expensetracker.ui.entity.payee.PayeeEntryScreen
 import com.example.expensetracker.ui.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.transaction.TransactionEntryScreen
 
@@ -64,6 +70,25 @@ fun ExpenseNavHost(
         }
         composable(route = TransactionEntryDestination.route) {
             TransactionEntryScreen(
+                navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+        //Routes to pages for Create operations for Entities
+        composable(route = CategoryEntryDestination.route) {
+            CategoryEntryScreen(
+                navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+        composable(route = PayeeEntryDestination.route) {
+            PayeeEntryScreen(
+                navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+        composable(route = CurrencyEntryDestination.route) {
+            CurrencyEntryScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
             )

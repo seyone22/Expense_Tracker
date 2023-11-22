@@ -9,6 +9,9 @@ import com.example.expensetracker.ui.screen.accounts.AccountViewModel
 import com.example.expensetracker.ExpenseApplication
 import com.example.expensetracker.ui.account.AccountDetailViewModel
 import com.example.expensetracker.ui.account.AccountEntryViewModel
+import com.example.expensetracker.ui.entity.category.CategoryEntryViewModel
+import com.example.expensetracker.ui.entity.currency.CurrencyEntryViewModel
+import com.example.expensetracker.ui.entity.payee.PayeeEntryViewModel
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.transaction.TransactionEntryViewModel
 
@@ -29,6 +32,15 @@ object AppViewModelProvider {
         }
         initializer {
             AccountDetailViewModel(expenseApplication().container.accountsRepository, expenseApplication().container.transactionsRepository, SavedStateHandle())
+        }
+        initializer {
+            CategoryEntryViewModel(expenseApplication().container.categoriesRepository)
+        }
+        initializer {
+            CurrencyEntryViewModel(expenseApplication().container.currenciesRepository)
+        }
+        initializer {
+            PayeeEntryViewModel(expenseApplication().container.payeesRepository)
         }
     }
 }

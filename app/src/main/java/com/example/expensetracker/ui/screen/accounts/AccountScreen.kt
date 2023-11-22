@@ -62,7 +62,10 @@ fun AccountScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
-            ExpenseTopBar(selectedActivity = selectedActivity)
+            ExpenseTopBar(
+                selectedActivity = selectedActivity,
+                navBarAction = { navigateToScreen(AccountEntryDestination.route) }
+            )
         },
         bottomBar = {
             ExpenseNavBar(selectedActivity = selectedActivity, navigateToScreen = navigateToScreen)
@@ -102,9 +105,6 @@ fun AccountScreen(
                             navigateToScreen = navigateToScreen
                         )
                     }
-                }
-                Button(onClick = { navigateToScreen(AccountEntryDestination.route) }) {
-                    Text(text = "New Account")
                 }
             }
         }

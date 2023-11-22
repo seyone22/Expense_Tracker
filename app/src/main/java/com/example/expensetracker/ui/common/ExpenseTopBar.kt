@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.common
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -16,7 +17,10 @@ import com.example.expensetracker.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpenseTopBar(selectedActivity: Int) {
+fun ExpenseTopBar(
+    selectedActivity: Int,
+    navBarAction: () -> Unit,
+    ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -34,10 +38,10 @@ fun ExpenseTopBar(selectedActivity: Int) {
             }
         },
         actions = {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { navBarAction() }) {
                 Icon(
-                    imageVector = Icons.Outlined.AccountCircle,
-                    contentDescription = "User"
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Add Item"
                 )
             }
         }

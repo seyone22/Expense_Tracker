@@ -38,10 +38,15 @@ import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
 import com.example.expensetracker.ui.AppViewModelProvider
+import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
+import com.example.expensetracker.ui.entity.category.CategoryEntryDestination
+import com.example.expensetracker.ui.entity.currency.CurrencyEntryDestination
+import com.example.expensetracker.ui.entity.payee.PayeeEntryDestination
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 
 object EntitiesDestination : NavigationDestination {
     override val route = "Entities"
@@ -64,7 +69,22 @@ fun EntityScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
-            ExpenseTopBar(selectedActivity = 1)
+            ExpenseTopBar(
+                selectedActivity = 1,
+                navBarAction = {
+                    when(state) {
+                        0 -> {
+                            navigateToScreen(CategoryEntryDestination.route)
+                        }
+                        1 -> {
+                            navigateToScreen(PayeeEntryDestination.route)
+                        }
+                        2 -> {
+                            navigateToScreen(CurrencyEntryDestination.route)
+                        }
+                    }
+                }
+            )
         },
         bottomBar = {
             ExpenseNavBar(selectedActivity = 1, navigateToScreen = navigateToScreen)
