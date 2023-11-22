@@ -2,8 +2,7 @@ package com.example.expensetracker.ui.common
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,6 +19,8 @@ import com.example.expensetracker.R
 fun ExpenseTopBar(
     selectedActivity: Int,
     navBarAction: () -> Unit,
+    hasNavBarAction : Boolean = true,
+    navigateToSettings: () -> Unit
     ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -30,19 +31,23 @@ fun ExpenseTopBar(
             Text(stringArrayResource(id = R.array.activities)[selectedActivity])
         },
         navigationIcon = {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {
+                navigateToSettings()
+            }) {
                 Icon(
-                    imageVector = Icons.Filled.Menu,
-                    contentDescription = "Description"
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = "Settings"
                 )
             }
         },
         actions = {
-            IconButton(onClick = { navBarAction() }) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Add Item"
-                )
+            if (hasNavBarAction) {
+                IconButton(onClick = { navBarAction() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Add Item"
+                    )
+                }
             }
         }
     )

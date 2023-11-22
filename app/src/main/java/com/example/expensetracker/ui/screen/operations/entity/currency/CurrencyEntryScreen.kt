@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.entity.category
+package com.example.expensetracker.ui.screen.operations.entity.currency
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.focusGroup
@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
@@ -14,16 +13,18 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,18 +35,19 @@ import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import kotlinx.coroutines.launch
 
-object CategoryEntryDestination : NavigationDestination {
-    override val route = "EnterCategory"
+object CurrencyEntryDestination : NavigationDestination {
+    override val route = "EnterCurrency"
     override val titleRes = R.string.app_name
+    override val routeId = 16
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryEntryScreen(
+fun CurrencyEntryScreen(
     navigateBack: () -> Unit = {},
     onNavigateUp: () -> Unit = {},
     canNavigateBack: Boolean = true,
-    viewModel: CategoryEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: CurrencyEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -60,7 +62,7 @@ fun CategoryEntryScreen(
                 ),
                 title = {
                     Text(
-                        text = "Create Category",
+                        text = "Create Currency",
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -78,12 +80,12 @@ fun CategoryEntryScreen(
                     Button(
                         onClick = {
                         coroutineScope.launch {
-                            viewModel.saveCategory()
+                            viewModel.saveCurrency()
                             navigateBack()
                         }
                         },
                         modifier = modifier.padding(0.dp,0.dp,8.dp,0.dp),
-                        enabled = viewModel.categoryUiState.isEntryValid
+                        enabled = viewModel.currencyUiState.isEntryValid
                     ) {
                         Text(text = "Create")
                     }
@@ -93,9 +95,9 @@ fun CategoryEntryScreen(
         }
 
     ) { padding ->
-        CategoryEntryBody(
-            categoryUiState = viewModel.categoryUiState,
-            onCategoryValueChange = viewModel::updateUiState,
+        CurrencyEntryBody(
+            currencyUiState = viewModel.currencyUiState,
+            onCurrencyValueChange = viewModel::updateUiState,
             modifier = modifier.padding(padding)
         )
     }
@@ -103,9 +105,9 @@ fun CategoryEntryScreen(
 }
 
 @Composable
-fun CategoryEntryBody(
-    categoryUiState: CategoryUiState = CategoryUiState(),
-    onCategoryValueChange: (CategoryDetails) -> Unit = {},
+fun CurrencyEntryBody(
+    currencyUiState: CurrencyUiState = CurrencyUiState(),
+    onCurrencyValueChange: (CurrencyDetails) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -114,9 +116,9 @@ fun CategoryEntryBody(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item {
-            CategoryEntryForm(
-                categoryDetails = categoryUiState.categoryDetails,
-                onValueChange = onCategoryValueChange,
+            CurrencyEntryForm(
+                currencyDetails = currencyUiState.currencyDetails,
+                onValueChange = onCurrencyValueChange,
                 modifier = Modifier
             )
         }
@@ -126,11 +128,13 @@ fun CategoryEntryBody(
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryEntryForm(
-    categoryDetails: CategoryDetails,
-    onValueChange: (CategoryDetails) -> Unit = {},
+fun CurrencyEntryForm(
+    currencyDetails: CurrencyDetails,
+    onValueChange: (CurrencyDetails) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    var currencyTypeExpanded by remember { mutableStateOf(false) }
+
     val focusManager = LocalFocusManager.current
 
     Column(
@@ -139,15 +143,9 @@ fun CategoryEntryForm(
             .padding(0.dp, 8.dp)
     )
     {
-        OutlinedTextField(
-            modifier = Modifier.padding(0.dp, 8.dp),
-            value = categoryDetails.categName,
-            onValueChange = { onValueChange(categoryDetails.copy(categName = it)) },
-            label = { Text("Category Name *") },
-            singleLine = true,
-            keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
-        )
+
     }
+
 }
 
 
@@ -156,8 +154,8 @@ fun CategoryEntryForm(
 
 @Preview(showBackground = true)
 @Composable
-fun CategoryEntryFormPreview() {
+fun CurrencyEntryFormPreview() {
     ExpenseTrackerTheme {
-        CategoryEntryScreen()
+        CurrencyEntryScreen()
     }
 }

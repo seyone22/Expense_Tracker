@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.transaction
+package com.example.expensetracker.ui.screen.operations.transaction
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
@@ -56,6 +56,7 @@ import java.util.Locale
 object TransactionEntryDestination : NavigationDestination {
     override val route = "TransactionEntry"
     override val titleRes = R.string.app_name
+    override val routeId = 11
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

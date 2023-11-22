@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.screen.settings
+package com.example.expensetracker.ui.screen.report
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -18,19 +18,20 @@ import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.settings.SettingsDestination
 
-object SettingsDestination : NavigationDestination {
-    override val route = "Settings"
+object ReportsDestination : NavigationDestination {
+    override val route = "Reports"
     override val titleRes = R.string.app_name
-    override val routeId = 14
+    override val routeId = 4
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(
+fun ReportScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
-    viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     var state by remember { mutableIntStateOf(0) }
     val titles = listOf("Categories", "Payees", "Currencies")
@@ -38,14 +39,13 @@ fun SettingsScreen(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
             ExpenseTopBar(
-                selectedActivity = 1,
-                navBarAction = { },
-                hasNavBarAction = false,
-                navigateToSettings = { }
+                selectedActivity = ReportsDestination.routeId,
+                navBarAction = {  },
+                navigateToSettings = { navigateToScreen(SettingsDestination.route) }
             )
         },
         bottomBar = {
-            ExpenseNavBar(selectedActivity = 1, navigateToScreen = navigateToScreen)
+            ExpenseNavBar(selectedActivity = ReportsDestination.routeId, navigateToScreen = navigateToScreen)
         },
         floatingActionButton = {
             ExpenseFAB(navigateToScreen = navigateToScreen)

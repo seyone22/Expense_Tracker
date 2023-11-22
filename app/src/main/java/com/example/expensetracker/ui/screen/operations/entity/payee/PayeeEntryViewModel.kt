@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.entity.payee
+package com.example.expensetracker.ui.screen.operations.entity.payee
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -18,7 +18,7 @@ class PayeeEntryViewModel(private val payeesRepository: PayeesRepository) : View
     }
 
     suspend fun savePayee() {
-        Log.d("DEBUG", "savePayee: Called!")
+        Log.d("DEBUG", "savePayee: $payeeUiState!")
         if (validateInput()) {
             Log.d("DEBUG", "savePayee: Input Valid!")
             payeesRepository.insertPayee(payeeUiState.payeeDetails.toPayee())
@@ -44,11 +44,11 @@ data class PayeeUiState(
 data class PayeeDetails(
     val payeeId: Int = 0,
     val payeeName: String = "",
-    val categId: String = "",
+    val categId: String = "0",
     val number: String = "",
     val website: String = "",
     val notes: String = "",
-    val active: String = ""
+    val active: String = "false"
 )
 
 
@@ -56,11 +56,11 @@ data class PayeeDetails(
 fun PayeeDetails.toPayee(): Payee = Payee(
     payeeId = payeeId,
     payeeName = payeeName,
-    categId = categId.toInt(),
-    number = number.toInt(),
+    categId =  categId.toInt(),
+    number = number,
     website = website,
     notes = notes,
-    active = active.toInt()
+    active = if (active == "true") 0 else 1
 )
 
 fun Payee.toPayeeUiState(isEntryValid: Boolean = false): PayeeUiState = PayeeUiState(
@@ -72,7 +72,7 @@ fun Payee.toPayeeDetails(): PayeeDetails = PayeeDetails(
     payeeId = payeeId,
     payeeName = payeeName,
     categId = categId.toString(),
-    number = number.toString(),
+    number = number,
     website = website,
     notes = notes,
     active = active.toString()

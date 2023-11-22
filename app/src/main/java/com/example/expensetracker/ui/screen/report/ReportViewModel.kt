@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.screen.settings
+package com.example.expensetracker.ui.screen.report
 
 import androidx.lifecycle.ViewModel
 import com.example.expensetracker.data.payee.PayeesRepository
@@ -6,7 +6,7 @@ import com.example.expensetracker.data.payee.PayeesRepository
 /**
  * ViewModel to retrieve all items in the Room database.
  */
-class SettingsViewModel(
+class ReportViewModel(
 
     private val payeesRepository: PayeesRepository,
 

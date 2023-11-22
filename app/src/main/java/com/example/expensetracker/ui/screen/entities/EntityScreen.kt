@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.entities
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -23,34 +24,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.expensetracker.R
 import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
-import com.example.expensetracker.ui.entity.category.CategoryEntryDestination
-import com.example.expensetracker.ui.entity.currency.CurrencyEntryDestination
-import com.example.expensetracker.ui.entity.payee.PayeeEntryDestination
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.accounts.AccountsDestination
+import com.example.expensetracker.ui.screen.operations.entity.category.CategoryEntryDestination
+import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyEntryDestination
+import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryDestination
+import com.example.expensetracker.ui.screen.settings.SettingsDestination
 
 object EntitiesDestination : NavigationDestination {
     override val route = "Entities"
     override val titleRes = R.string.app_name
+    override val routeId = 1
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,12 +62,12 @@ fun EntityScreen(
     //TODO: Refactor this to be more elegant
     val entityUiState : EntitiesUiState by viewModel.entitiesUiState.collectAsState()
     val entityUiState2 : EntitiesUiState by viewModel.entitiesUiState2.collectAsState()
-    val entityUiState3 : EntitiesUiState by viewModel.entitiesUiState2.collectAsState()
+    val entityUiState3 : EntitiesUiState by viewModel.entitiesUiState3.collectAsState()
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
             ExpenseTopBar(
-                selectedActivity = 1,
+                selectedActivity = EntitiesDestination.routeId,
                 navBarAction = {
                     when(state) {
                         0 -> {
@@ -83,11 +80,12 @@ fun EntityScreen(
                             navigateToScreen(CurrencyEntryDestination.route)
                         }
                     }
-                }
+                },
+                navigateToSettings = { navigateToScreen(SettingsDestination.route) }
             )
         },
         bottomBar = {
-            ExpenseNavBar(selectedActivity = 1, navigateToScreen = navigateToScreen)
+            ExpenseNavBar(selectedActivity = EntitiesDestination.routeId, navigateToScreen = navigateToScreen)
         },
         floatingActionButton = {
             ExpenseFAB(navigateToScreen = navigateToScreen)
@@ -115,6 +113,7 @@ fun EntityScreen(
                     }
                     1 -> {
                         PayeeList(list = entityUiState3.payeesList)
+                        Log.d("DEBUG", "EntityScreen: $entityUiState3")
                     }
                     2 -> {
                         CurrenciesList(list = entityUiState2.currenciesList)
@@ -171,8 +170,8 @@ fun PayeeList(
     LazyColumn() {
         items(list) {
             ListItem(
-                headlineContent = { Text("Three line list item") },
-                overlineContent = { Text("OVERLINE") },
+                headlineContent = { Text(it.payeeName.toString()) },
+                overlineContent = { Text(it.payeeId.toString()) },
                 leadingContent = {
                     Icon(
                         Icons.Filled.Favorite,

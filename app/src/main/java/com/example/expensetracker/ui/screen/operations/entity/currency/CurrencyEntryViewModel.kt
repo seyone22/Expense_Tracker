@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.entity.currency
+package com.example.expensetracker.ui.screen.operations.entity.currency
 
 import android.util.Log
 import androidx.compose.runtime.getValue

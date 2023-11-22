@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,9 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,39 +32,45 @@ import com.example.expensetracker.R
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.account.AccountEntryDestination
 import com.example.expensetracker.ui.common.AnimatedCircle
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
+import com.example.expensetracker.ui.screen.settings.SettingsDestination
 
 object AccountsDestination : NavigationDestination {
     override val route = "Accounts"
     override val titleRes = R.string.app_name
+    override val routeId = 0
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
+        .padding(16.dp, 12.dp),
     navigateToScreen: (screen: String) -> Unit,
     viewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
-) {
-    var selectedActivity by remember { mutableIntStateOf(0) }
+    ) {
     val accountUiState by viewModel.accountsUiState.collectAsState()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
             ExpenseTopBar(
-                selectedActivity = selectedActivity,
-                navBarAction = { navigateToScreen(AccountEntryDestination.route) }
+                selectedActivity = AccountsDestination.routeId,
+                navBarAction = { navigateToScreen(AccountEntryDestination.route) },
+                navigateToSettings = { navigateToScreen(SettingsDestination.route) }
             )
         },
         bottomBar = {
-            ExpenseNavBar(selectedActivity = selectedActivity, navigateToScreen = navigateToScreen)
+            ExpenseNavBar(
+                selectedActivity = AccountsDestination.routeId,
+                navigateToScreen = navigateToScreen
+            )
         },
         floatingActionButton = {
             ExpenseFAB(navigateToScreen = navigateToScreen)
@@ -79,7 +81,8 @@ fun AccountScreen(
         ) {
             item {
                 Column(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .fillMaxHeight()
                 ) {
                     AnimatedCircle(
@@ -92,13 +95,23 @@ fun AccountScreen(
                     )
                 }
 
-                Text("Current Month Summary")
-                Text(text = accountUiState.grandTotal.toString())
-                Text("Your Accounts")
+                Column(
+                    modifier = modifier,
+                ) {
+                    Text("Current Month Summary")
+                    Text(text = accountUiState.grandTotal.toString())
+
+                    Text(
+                        text = "Summary of Accounts",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+
                 enumValues<AccountTypes>().forEach { accountType ->
-                    if(viewModel.countInType(accountType, accountUiState.accountList) != 0) {
+                    if (viewModel.countInType(accountType, accountUiState.accountList) != 0) {
                         val displayName: String = accountType.displayName
                         AccountList(
+                            modifier = modifier,
                             category = displayName,
                             accountList = accountUiState.accountList,
                             viewModel = viewModel,
@@ -113,39 +126,41 @@ fun AccountScreen(
 
 @Composable
 fun AccountList(
-    category: String,
-    accountList: List<Pair<Account,Double>>,
     modifier: Modifier = Modifier,
+    category: String,
+    accountList: List<Pair<Account, Double>>,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
-    ) {
+) {
     Column(
-        Modifier.padding(16.dp, 12.dp),
-
+        modifier = modifier,
     ) {
-        Text(text = category, style = MaterialTheme.typography.titleLarge)
-        Column(modifier = modifier) {
-            accountList.forEach { accountPair ->
-                Log.d("DEBUG", "AccountList: Ping")
-                if(accountPair.first.accountType == category) {
-                    AccountCard(
-                        accountWithBalance = accountPair,
-                        viewModel = viewModel,
-                        navigateToScreen = navigateToScreen
-                    )
-                }
+        Text(
+            text = category,
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        accountList.forEach { accountPair ->
+            Log.d("DEBUG", "AccountList: Ping")
+            if (accountPair.first.accountType == category) {
+                AccountCard(
+                    accountWithBalance = accountPair,
+                    viewModel = viewModel,
+                    navigateToScreen = navigateToScreen
+                )
             }
         }
     }
+
 }
 
 @Composable
 fun AccountCard(
     accountWithBalance: Pair<Account, Double>,
     modifier: Modifier = Modifier,
-    viewModel : AccountViewModel,
+    viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
-    ) {
+) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -200,10 +215,10 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Rs. "+accountWithBalance.second.toString()
+                    text = "Rs. " + accountWithBalance.second.toString()
                 )
                 Text(
-                    text = "Rs. "+accountWithBalance.second.toString()
+                    text = "Rs. " + accountWithBalance.second.toString()
                 )
             }
         }

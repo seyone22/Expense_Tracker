@@ -9,7 +9,7 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
-import com.example.expensetracker.ui.account.AccountUiState
+import com.example.expensetracker.ui.screen.operations.account.AccountUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -47,7 +47,7 @@ class AccountViewModel(
         private const val TIMEOUT_MILLIS = 5_000L
     }
 
-    private suspend fun calculateBalance(account: Account): Double {
+    private fun calculateBalance(account: Account): Double {
         var balance = account.initialBalance ?: 0.0
         var reconciledBalance = 0.0
 

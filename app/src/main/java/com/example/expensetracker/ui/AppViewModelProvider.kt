@@ -1,20 +1,20 @@
 package com.example.expensetracker.ui
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.expensetracker.ui.screen.accounts.AccountViewModel
 import com.example.expensetracker.ExpenseApplication
-import com.example.expensetracker.ui.account.AccountDetailViewModel
-import com.example.expensetracker.ui.account.AccountEntryViewModel
-import com.example.expensetracker.ui.entity.category.CategoryEntryViewModel
-import com.example.expensetracker.ui.entity.currency.CurrencyEntryViewModel
-import com.example.expensetracker.ui.entity.payee.PayeeEntryViewModel
+import com.example.expensetracker.ui.screen.accounts.AccountViewModel
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
+import com.example.expensetracker.ui.screen.operations.account.AccountDetailViewModel
+import com.example.expensetracker.ui.screen.operations.account.AccountEntryViewModel
+import com.example.expensetracker.ui.screen.operations.entity.category.CategoryEntryViewModel
+import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyEntryViewModel
+import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryViewModel
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
+import com.example.expensetracker.ui.screen.report.ReportViewModel
 import com.example.expensetracker.ui.screen.settings.SettingsViewModel
-import com.example.expensetracker.ui.transaction.TransactionEntryViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -24,6 +24,9 @@ object AppViewModelProvider {
         initializer {
             EntityViewModel(expenseApplication().container.categoriesRepository, expenseApplication().container.payeesRepository, expenseApplication().container.currenciesRepository)
         }
+        initializer {
+            ReportViewModel(expenseApplication().container.payeesRepository)
+        }
         //Initializer for AccountEntryViewModel
         initializer {
             AccountEntryViewModel(expenseApplication().container.accountsRepository)
@@ -32,7 +35,7 @@ object AppViewModelProvider {
             TransactionEntryViewModel(expenseApplication().container.transactionsRepository, expenseApplication().container.accountsRepository, expenseApplication().container.payeesRepository, expenseApplication().container.categoriesRepository)
         }
         initializer {
-            AccountDetailViewModel(expenseApplication().container.accountsRepository, expenseApplication().container.transactionsRepository, SavedStateHandle())
+            AccountDetailViewModel(expenseApplication().container.accountsRepository, expenseApplication().container.transactionsRepository)
         }
         // Initializers for Entity type Viewmodels
         initializer {

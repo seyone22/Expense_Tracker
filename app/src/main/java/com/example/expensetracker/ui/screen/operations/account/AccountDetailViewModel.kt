@@ -1,7 +1,6 @@
-package com.example.expensetracker.ui.account
+package com.example.expensetracker.ui.screen.operations.account
 
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
@@ -9,54 +8,42 @@ import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
-import com.example.expensetracker.ui.screen.accounts.AccountViewModel
-import com.example.expensetracker.ui.screen.accounts.AccountsUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 class AccountDetailViewModel(
     private val accountsRepository: AccountsRepository,
     private val transactionsRepository: TransactionsRepository,
-    savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
-    private val argument: Int = savedStateHandle.get("accountId") ?: 0
-    /**
-     * Holds home ui state. The list of items are retrieved from [AccountsRepository] and mapped to
-     * [AccountUiState]
-     */
-    val accountDetailAccountUiState: StateFlow<AccountDetailAccountUiState> =
-        accountsRepository.getAccountStream(argument)
-            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
-            .map { account  ->
-                AccountDetailAccountUiState(account ?: Account(), calculateBalance(account ?: Account()))
+    var accountDetailAccountUiState: StateFlow<AccountDetailAccountUiState> =
+        accountsRepository.getAccountStream(0)
+            .onEach { Log.d("DEBUG", ": flow emitted $it") }
+            .map { account ->
+                AccountDetailAccountUiState(account ?: Account())
             }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(AccountDetailViewModel.TIMEOUT_MILLIS),
                 initialValue = AccountDetailAccountUiState()
             )
-    /**
-     * Holds home ui state. The list of items are retrieved from [AccountsRepository] and mapped to
-     * [AccountUiState]
-     */
-/*    val accountDetailTransactionUiState: StateFlow<AccountDetailTransactionUiState> =
-        accountsRepository.getAllAccountsStream()
-            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
-            .map { accounts ->
-                val transformedList = accounts.map { account ->
-                    Log.d("DEBUG", ": map value $account")
-                    Pair(account, calculateBalance(account))
-                }
-                AccountsUiState(transformedList, calculateGrandBalance(accounts))
+
+    suspend fun getAccount(accountId : Int) {
+        accountDetailAccountUiState = accountsRepository.getAccountStream(accountId)
+            .onEach { Log.d("DEBUG", ": flow emitted $it") }
+            .map { account ->
+                AccountDetailAccountUiState(account ?: Account())
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(AccountViewModel.TIMEOUT_MILLIS),
-                initialValue = AccountsUiState()
-            )*/
+                started = SharingStarted.WhileSubscribed(AccountDetailViewModel.TIMEOUT_MILLIS),
+                initialValue = AccountDetailAccountUiState()
+            )
+
+    }
 
 
     companion object {

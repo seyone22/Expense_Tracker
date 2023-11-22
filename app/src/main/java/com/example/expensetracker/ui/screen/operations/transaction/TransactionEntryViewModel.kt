@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.transaction
+package com.example.expensetracker.ui.screen.operations.transaction
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -19,7 +19,6 @@ import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.screen.accounts.AccountsUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -44,7 +43,7 @@ class TransactionEntryViewModel(
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TransactionEntryViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = TransactionUiState()
             )
 
@@ -58,7 +57,7 @@ class TransactionEntryViewModel(
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TransactionEntryViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = TransactionUiState()
             )
 
@@ -70,7 +69,7 @@ class TransactionEntryViewModel(
             }
                 .stateIn(
                     scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(TransactionEntryViewModel.TIMEOUT_MILLIS),
+                    started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                     initialValue = AccountsUiState()
                 )
         }

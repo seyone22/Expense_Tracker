@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.account
+package com.example.expensetracker.ui.screen.operations.account
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
-import java.time.LocalDateTime
 
 class AccountEntryViewModel(private val accountsRepository: AccountsRepository) : ViewModel() {
     var accountUiState by mutableStateOf(AccountUiState())

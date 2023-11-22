@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.account
+package com.example.expensetracker.ui.screen.operations.account
 
 import android.annotation.SuppressLint
 import android.util.Log
@@ -61,16 +61,17 @@ import java.util.Locale
 object AccountEntryDestination : NavigationDestination {
     override val route = "EnterAccount"
     override val titleRes = R.string.app_name
+    override val routeId = 12
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountEntryScreen(
+    modifier: Modifier = Modifier,
     navigateBack: () -> Unit = {},
     onNavigateUp: () -> Unit = {},
     canNavigateBack: Boolean = true,
     viewModel: AccountEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -128,9 +129,9 @@ fun AccountEntryScreen(
 
 @Composable
 fun AccountEntryBody(
+    modifier: Modifier = Modifier,
     accountUiState: AccountUiState = AccountUiState(),
     onAccountValueChange: (AccountDetails) -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier
@@ -151,9 +152,9 @@ fun AccountEntryBody(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountEntryForm(
+    modifier: Modifier = Modifier,
     accountDetails: AccountDetails,
     onValueChange: (AccountDetails) -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     var accountTypeExpanded by remember { mutableStateOf(false) }
     var openInitialDateDialog by remember { mutableStateOf(false) }
