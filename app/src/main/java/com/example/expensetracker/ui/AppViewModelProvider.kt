@@ -33,6 +33,7 @@ object AppViewModelProvider {
         initializer {
             AccountDetailViewModel(expenseApplication().container.accountsRepository, expenseApplication().container.transactionsRepository, SavedStateHandle())
         }
+        // Initializers for Entity type Viewmodels
         initializer {
             CategoryEntryViewModel(expenseApplication().container.categoriesRepository)
         }
