@@ -6,8 +6,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
+import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
@@ -24,14 +30,15 @@ object SettingsDestination : NavigationDestination {
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
-    //viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
+    var state by remember { mutableIntStateOf(0) }
+    val titles = listOf("Categories", "Payees", "Currencies")
     Scaffold(
-        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
             ExpenseTopBar(
-                selectedActivity = 14,
+                selectedActivity = 1,
                 navBarAction = { },
                 hasNavBarAction = false,
                 navigateToSettings = { }

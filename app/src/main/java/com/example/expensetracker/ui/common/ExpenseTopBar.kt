@@ -22,21 +22,13 @@ fun ExpenseTopBar(
     hasNavBarAction : Boolean = true,
     navigateToSettings: () -> Unit
     ) {
-    //Title string for header elements
-    val titleString : String
-    if (selectedActivity in 0..4) {
-        titleString = stringArrayResource(id = R.array.activities)[selectedActivity]
-    } else {
-        titleString = "Settings"
-    }
-
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
         ),
         title = {
-            Text(titleString)
+            Text(stringArrayResource(id = R.array.activities)[selectedActivity])
         },
         navigationIcon = {
             IconButton(onClick = {
