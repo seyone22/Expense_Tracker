@@ -22,7 +22,7 @@ fun ExpenseTopBar(
     hasNavBarAction : Boolean = true,
     navigateToSettings: () -> Unit
     ) {
-    //Title string for header elements, check NavigationDestinations for values
+    //Title string for header elements
     val titleString : String
     if (selectedActivity in 0..4) {
         titleString = stringArrayResource(id = R.array.activities)[selectedActivity]
