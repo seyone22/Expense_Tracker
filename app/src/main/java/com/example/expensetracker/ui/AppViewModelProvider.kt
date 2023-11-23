@@ -19,10 +19,19 @@ import com.example.expensetracker.ui.screen.settings.SettingsViewModel
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            AccountViewModel(expenseApplication().container.accountsRepository, expenseApplication().container.transactionsRepository)
+            AccountViewModel(
+                expenseApplication().container.accountsRepository,
+                expenseApplication().container.transactionsRepository,
+                expenseApplication().container.metadataRepository,
+                expenseApplication().container.currenciesRepository
+            )
         }
         initializer {
-            EntityViewModel(expenseApplication().container.categoriesRepository, expenseApplication().container.payeesRepository, expenseApplication().container.currenciesRepository)
+            EntityViewModel(
+                expenseApplication().container.categoriesRepository,
+                expenseApplication().container.payeesRepository,
+                expenseApplication().container.currenciesRepository
+            )
         }
         initializer {
             ReportViewModel(expenseApplication().container.payeesRepository)
@@ -32,10 +41,18 @@ object AppViewModelProvider {
             AccountEntryViewModel(expenseApplication().container.accountsRepository)
         }
         initializer {
-            TransactionEntryViewModel(expenseApplication().container.transactionsRepository, expenseApplication().container.accountsRepository, expenseApplication().container.payeesRepository, expenseApplication().container.categoriesRepository)
+            TransactionEntryViewModel(
+                expenseApplication().container.transactionsRepository,
+                expenseApplication().container.accountsRepository,
+                expenseApplication().container.payeesRepository,
+                expenseApplication().container.categoriesRepository
+            )
         }
         initializer {
-            AccountDetailViewModel(expenseApplication().container.accountsRepository, expenseApplication().container.transactionsRepository)
+            AccountDetailViewModel(
+                expenseApplication().container.accountsRepository,
+                expenseApplication().container.transactionsRepository
+            )
         }
         // Initializers for Entity type Viewmodels
         initializer {

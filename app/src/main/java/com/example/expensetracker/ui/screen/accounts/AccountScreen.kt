@@ -21,16 +21,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
+import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.AnimatedCircle
 import com.example.expensetracker.ui.common.ExpenseFAB
@@ -39,6 +42,7 @@ import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
+import kotlinx.coroutines.CoroutineScope
 
 object AccountsDestination : NavigationDestination {
     override val route = "Accounts"
@@ -56,6 +60,13 @@ fun AccountScreen(
 
     ) {
     val accountUiState by viewModel.accountsUiState.collectAsState()
+    val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
+    var baseCurrencyInfo = CurrencyFormat(0, "", "", "", "", "", "", "", 0, 0.0, "", "")
+    LaunchedEffect(baseCurrencyId) {
+        baseCurrencyInfo = viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId)
+    }
+    Log.d("DEBUG", "AccountScreen: BaseCurrencyID is $baseCurrencyId")
+    Log.d("DEBUG", "AccountScreen: BaseCurrencyInfo is $baseCurrencyInfo")
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,

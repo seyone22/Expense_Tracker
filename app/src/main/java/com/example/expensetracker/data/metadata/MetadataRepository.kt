@@ -9,5 +9,7 @@ interface MetadataRepository {
     suspend fun updateMetadata(info: Metadata)
     
     fun getAllMetadataStream(): Flow<List<Metadata>>
-    fun getMetadataStream(infoId: Int): Flow<Metadata?>
+    fun getMetadataByIdStream(infoId: Int): Flow<Metadata?>
+    fun getMetadataByNameStream(infoName: String): Flow<Metadata?>
+
 }

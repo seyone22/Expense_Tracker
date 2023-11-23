@@ -4,14 +4,17 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
+import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.metadata.MetadataRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
+import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
-import com.example.expensetracker.ui.screen.operations.account.AccountUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -20,13 +23,20 @@ import kotlinx.coroutines.flow.stateIn
  */
 class AccountViewModel(
     private val accountsRepository: AccountsRepository,
-    private val transactionsRepository: TransactionsRepository
+    private val transactionsRepository: TransactionsRepository,
+    private val metadataRepository: MetadataRepository,
+    private val currencyFormatsRepository: CurrencyFormatsRepository
 ) : ViewModel() {
-
-    /**
-     * Holds home ui state. The list of items are retrieved from [AccountsRepository] and mapped to
-     * [AccountUiState]
-     */
+    val baseCurrencyId =
+        metadataRepository.getMetadataByNameStream("BASECURRENCYID")
+            .map { info ->
+                info?.infoValue?.toInt() ?: 0
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = 0
+            )
     val accountsUiState: StateFlow<AccountsUiState> =
         accountsRepository.getAllAccountsStream()
             //.onEach { Log.d("DEBUG", ": flow emitted $it") }
@@ -43,11 +53,21 @@ class AccountViewModel(
                 initialValue = AccountsUiState()
             )
 
+    suspend fun getBaseCurrencyInfo(baseCurrencyId: Int): CurrencyFormat {
+        Log.d("DEBUG", "getBaseCurrencyInfo: I EXIST!!")
+
+        return currencyFormatsRepository.getCurrencyFormatsStream(baseCurrencyId)
+            .firstOrNull() ?: CurrencyFormat(0, "", "", "", "", "", "", "", 0, 0.0, "", "")
+    }
+
+
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
 
     private fun calculateBalance(account: Account): Double {
+
+
         var balance = account.initialBalance ?: 0.0
         var reconciledBalance = 0.0
 
@@ -128,7 +148,7 @@ class AccountViewModel(
         return balance
     }
 
-    private suspend fun calculateGrandBalance(accounts : List<Account>): Double {
+    private suspend fun calculateGrandBalance(accounts: List<Account>): Double {
         //Should account for different currincies
         //TODO : Convert to base currency, then calculate
         var grandBalance = 0.0
@@ -138,7 +158,7 @@ class AccountViewModel(
         return grandBalance
     }
 
-    fun countInType(accountType: AccountTypes, accountList: List<Pair<Account, Double>>) : Int {
+    fun countInType(accountType: AccountTypes, accountList: List<Pair<Account, Double>>): Int {
         var counter = 0
         accountList.forEach {
             if (it.first.accountType == accountType.displayName) {
