@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "CURRENCYFORMATS_V1")
-data class CurrencyFormats (
+data class CurrencyFormat (
     @PrimaryKey(autoGenerate = true)
     val currencyId : Int = 0,
     val currencyName : String,

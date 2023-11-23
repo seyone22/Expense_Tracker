@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.account
+package com.example.expensetracker.ui.screen.operations.account
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -30,7 +30,7 @@ class AccountEntryViewModel(private val accountsRepository: AccountsRepository) 
         Log.d("DEBUG", "validateInput: Validation Begins!")
         Log.d("DEBUG", uiState.accountName)
         return with(uiState) {
-            accountName.isNotBlank()
+            accountName.isNotBlank() && (initialDate?.isNotBlank() ?: false)
         }
     }
 }

@@ -1,8 +1,14 @@
 <resources>
     <string name="app_name">Expense Tracker</string>
 
-    <string name="account1">Cash Account 1</string>
-    <string name="account2">Cash Account 2</string>
-    <string name="account3">Cash Account 3</string>
-    <string name="account4">Cash Account 4</string>
+    <string-array name="activities">
+        <item>Accounts</item>
+        <item>Entities</item>
+        <item>Budgets</item>
+        <item>Assets</item>
+        <item>Reports</item>
+    </string-array>
 </resources>
+
+
+

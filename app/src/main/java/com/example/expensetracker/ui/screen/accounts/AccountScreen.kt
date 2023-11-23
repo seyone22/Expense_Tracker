@@ -1,6 +1,7 @@
-package com.example.expensetracker
+package com.example.expensetracker.ui.screen.accounts
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,174 +12,154 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.expensetracker.R
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.account.AccountEntryDestination
+import com.example.expensetracker.ui.common.AnimatedCircle
+import com.example.expensetracker.ui.common.ExpenseFAB
+import com.example.expensetracker.ui.common.ExpenseNavBar
+import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.transaction.TransactionEntryScreen
+import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
+import com.example.expensetracker.ui.screen.settings.SettingsDestination
 
 object AccountsDestination : NavigationDestination {
     override val route = "Accounts"
     override val titleRes = R.string.app_name
+    override val routeId = 0
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
-    navigateToAccountEntry: () -> Unit,
+    modifier: Modifier = Modifier
+        .padding(16.dp, 12.dp),
     navigateToScreen: (screen: String) -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory)
-) {
-    var selectedActivity by remember { mutableIntStateOf(0) }
+    viewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory),
+
+    ) {
     val accountUiState by viewModel.accountsUiState.collectAsState()
-    var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                title = {
-                    Text(activitiesAndIcons[selectedActivity].activity)
-                },
-                navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "Description"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
-                        Icon(
-                            imageVector = Icons.Outlined.AccountCircle,
-                            contentDescription = "User"
-                        )
-                    }
-                }
+            ExpenseTopBar(
+                selectedActivity = AccountsDestination.routeId,
+                navBarAction = { navigateToScreen(AccountEntryDestination.route) },
+                navigateToSettings = { navigateToScreen(SettingsDestination.route) }
             )
         },
         bottomBar = {
-            NavigationBar {
-                activitiesAndIcons.forEachIndexed { index, pair ->
-                    NavigationBarItem(
-                        icon = { Icon(pair.icon, contentDescription = pair.activity) },
-                        label = { Text(pair.activity) },
-                        selected = selectedActivity == index,
-                        onClick = { selectedActivity = index; navigateToScreen(pair.activity) }
-                    )
-                }
-            }
+            ExpenseNavBar(
+                selectedActivity = AccountsDestination.routeId,
+                navigateToScreen = navigateToScreen
+            )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                showDialog = showDialog.not()
-            }) {
-                Icon(Icons.Outlined.Edit, "Add")
-            }
+            ExpenseFAB(navigateToScreen = navigateToScreen)
         }
     ) { innerPadding ->
         LazyColumn(
             Modifier.padding(innerPadding)
         ) {
             item {
-                Text("Current Month Summary")
-                Text(text = accountUiState.grandTotal.toString())
-                Text("Your Accounts")
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                ) {
+                    AnimatedCircle(
+                        proportions = listOf(0.25f, 0.5f),
+                        colors = listOf(Color.Green, Color.Red),
+                        modifier = modifier
+                            .height(300.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .fillMaxWidth()
+                    )
+                }
+
+                Column(
+                    modifier = modifier,
+                ) {
+                    Text("Current Month Summary")
+                    Text(text = accountUiState.grandTotal.toString())
+
+                    Text(
+                        text = "Summary of Accounts",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+
                 enumValues<AccountTypes>().forEach { accountType ->
-                    if(viewModel.countInType(accountType, accountUiState.accountList) != 0) {
+                    if (viewModel.countInType(accountType, accountUiState.accountList) != 0) {
                         val displayName: String = accountType.displayName
                         AccountList(
+                            modifier = modifier,
                             category = displayName,
                             accountList = accountUiState.accountList,
-                            viewModel = viewModel
+                            viewModel = viewModel,
+                            navigateToScreen = navigateToScreen
                         )
                     }
                 }
-                Button(onClick = { navigateToScreen(AccountEntryDestination.route) }) {
-                    Text(text = "New Account")
-                }
             }
-        }
-
-        if(showDialog) {
-            TransactionEntryScreen(
-                onDismissRequest = { showDialog = !showDialog },
-                onConfirmation = {
-                    showDialog = !showDialog
-                    navigateToScreen(activitiesAndIcons[0].activity)
-                }
-            )
         }
     }
 }
 
 @Composable
 fun AccountList(
-    category: String,
-    accountList: List<Pair<Account,Double>>,
     modifier: Modifier = Modifier,
-    viewModel: AccountViewModel
+    category: String,
+    accountList: List<Pair<Account, Double>>,
+    viewModel: AccountViewModel,
+    navigateToScreen: (screen: String) -> Unit,
 ) {
     Column(
-        Modifier.padding(16.dp, 12.dp),
-
+        modifier = modifier,
     ) {
-        Text(text = category, style = MaterialTheme.typography.titleLarge)
-        Column(modifier = modifier) {
-            accountList.forEach { accountPair ->
-                Log.d("DEBUG", "AccountList: Ping")
-                if(accountPair.first.accountType == category) {
-                    AccountCard(
-                        accountWithBalance = accountPair,
-                        modifier = Modifier,
-                        viewModel = viewModel
-                    )
-                }
+        Text(
+            text = category,
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        accountList.forEach { accountPair ->
+            Log.d("DEBUG", "AccountList: Ping")
+            if (accountPair.first.accountType == category) {
+                AccountCard(
+                    accountWithBalance = accountPair,
+                    viewModel = viewModel,
+                    navigateToScreen = navigateToScreen
+                )
             }
         }
     }
+
 }
 
 @Composable
 fun AccountCard(
     accountWithBalance: Pair<Account, Double>,
     modifier: Modifier = Modifier,
-    viewModel : AccountViewModel
+    viewModel: AccountViewModel,
+    navigateToScreen: (screen: String) -> Unit,
 ) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
@@ -188,6 +169,10 @@ fun AccountCard(
             .fillMaxWidth()
             .height(104.dp)
             .padding(0.dp, 12.dp)
+            .clickable {
+                var accountId = accountWithBalance.first.accountId
+                navigateToScreen("AccountDetails/$accountId")
+            }
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween
@@ -230,10 +215,10 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Rs. "+accountWithBalance.second.toString()
+                    text = "Rs. " + accountWithBalance.second.toString()
                 )
                 Text(
-                    text = "Rs. "+accountWithBalance.second.toString()
+                    text = "Rs. " + accountWithBalance.second.toString()
                 )
             }
         }

@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "CATEGORY_V1",
     indices = [
-        Index(value = ["categName", "parentId"]),
+        Index(value = ["categId", "parentId"], unique = true),
         Index(value = ["categName"])
     ]
 )

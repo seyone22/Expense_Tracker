@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "PAYEE_V1",
     indices = [
-        Index(value = ["payeeName"])
+        Index(value = ["payeeName"]),
     ]
 )
 data class Payee (
@@ -14,7 +14,7 @@ data class Payee (
     val payeeId : Int = 0,
     val payeeName : String,
     val categId : Int,
-    val number : Int,
+    val number : String, // Refers to a reference number or something. smh.
     val website : String,
     val notes : String,
     val active : Int

@@ -3,12 +3,24 @@ package com.example.expensetracker.data
 import android.content.Context
 import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.account.OfflineAccountsRepository
+import com.example.expensetracker.data.category.CategoriesRepository
+import com.example.expensetracker.data.category.OfflineCategoriesRepository
+import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.currencyFormat.OfflineCurrencyFormatsRepository
+import com.example.expensetracker.data.metadata.MetadataRepository
+import com.example.expensetracker.data.metadata.OfflineMetadataRepository
+import com.example.expensetracker.data.payee.OfflinePayeesRepository
+import com.example.expensetracker.data.payee.PayeesRepository
 import com.example.expensetracker.data.transaction.OfflineTransactionsRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 
 interface AppContainer {
     val accountsRepository: AccountsRepository
     val transactionsRepository: TransactionsRepository
+    val payeesRepository: PayeesRepository
+    val categoriesRepository : CategoriesRepository
+    val currenciesRepository : CurrencyFormatsRepository
+    val metadataRepository : MetadataRepository
 }
 
 /**
@@ -23,5 +35,17 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
     override val transactionsRepository: TransactionsRepository by lazy {
         OfflineTransactionsRepository(MMEXDatabase.getDatabase(context).transactionDao())
+    }
+    override val payeesRepository: PayeesRepository by lazy {
+        OfflinePayeesRepository(MMEXDatabase.getDatabase(context).payeeDao())
+    }
+    override val categoriesRepository: CategoriesRepository by lazy {
+        OfflineCategoriesRepository(MMEXDatabase.getDatabase(context).categoryDao())
+    }
+    override val currenciesRepository: CurrencyFormatsRepository by lazy {
+        OfflineCurrencyFormatsRepository(MMEXDatabase.getDatabase(context).currencyFormatDao())
+    }
+    override val metadataRepository: MetadataRepository by lazy {
+        OfflineMetadataRepository(MMEXDatabase.getDatabase(context).metadataDao())
     }
 }

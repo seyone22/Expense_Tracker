@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.transaction
+package com.example.expensetracker.ui.screen.operations.transaction
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -6,29 +6,62 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.AccountsUiState
 import com.example.expensetracker.data.account.AccountsRepository
+import com.example.expensetracker.data.category.CategoriesRepository
+import com.example.expensetracker.data.payee.PayeesRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
+import com.example.expensetracker.model.Category
+import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
+import com.example.expensetracker.ui.screen.accounts.AccountsUiState
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class TransactionEntryViewModel(
     private val transactionsRepository: TransactionsRepository,
-    private val accountsRepository: AccountsRepository
+    private val accountsRepository: AccountsRepository,
+    private val payeesRepository: PayeesRepository,
+    private val categoriesRepository: CategoriesRepository
 ) :
     ViewModel() {
     var transactionUiState by mutableStateOf(TransactionUiState())
         private set
 
+    val transactionUiState1: StateFlow<TransactionUiState> =
+        categoriesRepository.getAllCategoriesStream()
+            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
+            .map { categories ->
+                TransactionUiState(
+                    categoriesList = categories
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = TransactionUiState()
+            )
+
+    val transactionUiState2: StateFlow<TransactionUiState> =
+        payeesRepository.getAllActivePayeesStream()
+            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
+            .map { payees ->
+                TransactionUiState(
+                    payeesList = payees
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = TransactionUiState()
+            )
+
     init {
-        Log.d("DEBUG", ": Initialization")
         viewModelScope.launch {
             accountsRepository.getAllActiveAccountsStream().map {
                 Log.d("DEBUG", ": Value is:  $it")
@@ -36,10 +69,11 @@ class TransactionEntryViewModel(
             }
                 .stateIn(
                     scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(TransactionEntryViewModel.TIMEOUT_MILLIS),
+                    started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                     initialValue = AccountsUiState()
                 )
         }
+
     }
 
     companion object {
@@ -80,13 +114,25 @@ class TransactionEntryViewModel(
         }
     }
 
+    suspend fun getCategoryName(categoryId: Int): String {
+        var categoryName: String? = null
+
+        categoriesRepository.getCategoriesStream(categoryId).collect {
+            if (it != null) {
+                categoryName = it.categName // Assuming there is a property 'name' in your category
+                // Optionally, you can exit the collect block here if needed
+            }
+        }
+
+        return categoryName ?: "DefaultCategoryName" // Provide a default name if no category was found
+    }
 
 
     private fun validateInput(uiState: TransactionDetails = transactionUiState.transactionDetails): Boolean {
         Log.d("DEBUG", "validateInput: Validation Begins!")
         Log.d("DEBUG", uiState.transactionNumber)
         return with(uiState) {
-            transAmount.isNotBlank() && transDate.isNotBlank()
+            transAmount.isNotBlank() && transDate.isNotBlank()&& accountId.isNotBlank() && categoryId.isNotBlank()
         }
     }
 
@@ -97,21 +143,23 @@ class TransactionEntryViewModel(
 data class TransactionUiState(
     val transactionDetails: TransactionDetails = TransactionDetails(),
     val isEntryValid: Boolean = false,
-    val accountsList : List<Account> = listOf()
+    val accountsList : List<Account> = listOf(),
+    val categoriesList: List<Category> = listOf(),
+    val payeesList: List<Payee> = listOf(),
 )
 
 //Data class for AccountDetails
 data class TransactionDetails(
     val transId: Int = 0,
-    val accountId: String = "0",
+    val accountId: String = "",
     val toAccountId: String = "0",
-    val payeeId: String = "0",
+    val payeeId: String = "",
     val transCode: String = TransactionCode.WITHDRAWAL.displayName,
     val transAmount: String = "",
     val status: String = TransactionStatus.U.displayName,
     val transactionNumber: String = "0",
     val notes: String = "",
-    val categoryId: String = "0",
+    val categoryId: String = "",
     val transDate: String = "",
     val lastUpdatedTime: String = "",
     val deletedTime: String = "",
