@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.Account
@@ -40,6 +41,7 @@ import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.accounts.AccountViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import kotlinx.coroutines.CoroutineScope
@@ -59,15 +61,40 @@ fun AccountScreen(
     viewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     ) {
-    val accountUiState by viewModel.accountsUiState.collectAsState()
+    val accountsUiState by viewModel.accountsUiState.collectAsState()
     val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
+    val isUsed by viewModel.isUsed.collectAsState()
+
+
     var baseCurrencyInfo = CurrencyFormat(0, "", "", "", "", "", "", "", 0, 0.0, "", "")
     LaunchedEffect(baseCurrencyId) {
-        baseCurrencyInfo = viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId)
+        baseCurrencyInfo = viewModel.getBaseCurrencyInfo(baseCurrencyId = 0)
     }
-    Log.d("DEBUG", "AccountScreen: BaseCurrencyID is $baseCurrencyId")
-    Log.d("DEBUG", "AccountScreen: BaseCurrencyInfo is $baseCurrencyInfo")
+    Log.d("DEBUG", "AccountScreen: IsUsed is $isUsed")
 
+    when(isUsed) {
+        "FALSE" -> {
+            navigateToScreen("Onboarding")
+        }
+        "TRUE" -> {
+            HomePage(
+                modifier = modifier,
+                navigateToScreen = { navigateToScreen },
+                accountsUiState = accountsUiState,
+                viewModel = viewModel
+            )
+        }
+    }
+}
+
+@Composable
+fun HomePage(
+    modifier: Modifier,
+    navigateToScreen: (screen: String) -> Unit,
+    accountsUiState: AccountsUiState,
+    viewModel: AccountViewModel
+)
+{
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
         topBar = {
@@ -110,7 +137,7 @@ fun AccountScreen(
                     modifier = modifier,
                 ) {
                     Text("Current Month Summary")
-                    Text(text = accountUiState.grandTotal.toString())
+                    Text(text = accountsUiState.grandTotal.toString())
 
                     Text(
                         text = "Summary of Accounts",
@@ -119,12 +146,12 @@ fun AccountScreen(
                 }
 
                 enumValues<AccountTypes>().forEach { accountType ->
-                    if (viewModel.countInType(accountType, accountUiState.accountList) != 0) {
+                    if (viewModel.countInType(accountType, accountsUiState.accountList) != 0) {
                         val displayName: String = accountType.displayName
                         AccountList(
                             modifier = modifier,
                             category = displayName,
-                            accountList = accountUiState.accountList,
+                            accountList = accountsUiState.accountList,
                             viewModel = viewModel,
                             navigateToScreen = navigateToScreen
                         )
@@ -134,6 +161,7 @@ fun AccountScreen(
         }
     }
 }
+
 
 @Composable
 fun AccountList(

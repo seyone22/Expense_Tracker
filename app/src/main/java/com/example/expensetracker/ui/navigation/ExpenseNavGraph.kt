@@ -15,6 +15,8 @@ import com.example.expensetracker.ui.screen.accounts.AccountScreen
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
 import com.example.expensetracker.ui.screen.entities.EntityScreen
+import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
+import com.example.expensetracker.ui.screen.onboarding.OnboardingScreen
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryScreen
 import com.example.expensetracker.ui.screen.operations.entity.category.CategoryEntryDestination
@@ -104,6 +106,13 @@ fun ExpenseNavHost(
         // Routes to settings screen
         composable(route = SettingsDestination.route) {
             SettingsScreen(
+                navigateToScreen = { screen -> navController.navigate(screen) }
+            )
+        }
+
+        //Route to Onboarding Screen
+        composable(route = OnboardingDestination.route) {
+            OnboardingScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) }
             )
         }

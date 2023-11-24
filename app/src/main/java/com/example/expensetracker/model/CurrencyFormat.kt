@@ -7,15 +7,15 @@ import androidx.room.PrimaryKey
 data class CurrencyFormat (
     @PrimaryKey(autoGenerate = true)
     val currencyId : Int = 0,
-    val currencyName : String,
-    val pfx_symbol : String,
-    val sfx_symbol : String,
-    val decimal_point : String,
-    val group_seperator : String,
-    val unit_name : String,
-    val cent_name : String,
-    val scale : Int,
-    val baseConvRate : Double,
-    val currency_symbol : String,
-    val currency_type : String
+    val currencyName : String = "",
+    val pfx_symbol : String = "",
+    val sfx_symbol : String = "",
+    val decimal_point : String = "",
+    val group_seperator : String = "",
+    val unit_name : String = "",
+    val cent_name : String = "",
+    val scale : Int = 0,
+    val baseConvRate : Double = 0.0,
+    val currency_symbol : String = "",
+    val currency_type : String = ""
 )

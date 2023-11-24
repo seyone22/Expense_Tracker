@@ -7,6 +7,7 @@ import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.metadata.MetadataRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
+import com.example.expensetracker.data.userPreferences.UserPreferencesRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
@@ -14,6 +15,7 @@ import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -25,24 +27,34 @@ class AccountViewModel(
     private val accountsRepository: AccountsRepository,
     private val transactionsRepository: TransactionsRepository,
     private val metadataRepository: MetadataRepository,
-    private val currencyFormatsRepository: CurrencyFormatsRepository
+    private val currencyFormatsRepository: CurrencyFormatsRepository,
 ) : ViewModel() {
     val baseCurrencyId =
         metadataRepository.getMetadataByNameStream("BASECURRENCYID")
             .map { info ->
-                info?.infoValue?.toInt() ?: 0
+                info?.infoValue?.toString() ?: "-1"
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = "-1"
+            )
+    val isUsed =
+        metadataRepository.getMetadataByNameStream("ISUSED")
+            .map { info ->
+                info?.infoValue?.toString() ?: "FALSE"
             }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = 0
             )
+
     val accountsUiState: StateFlow<AccountsUiState> =
         accountsRepository.getAllAccountsStream()
             //.onEach { Log.d("DEBUG", ": flow emitted $it") }
             .map { accounts ->
                 val transformedList = accounts.map { account ->
-                    Log.d("DEBUG", ": map value $account")
                     Pair(account, calculateBalance(account))
                 }
                 AccountsUiState(transformedList, calculateGrandBalance(accounts))
@@ -53,8 +65,10 @@ class AccountViewModel(
                 initialValue = AccountsUiState()
             )
 
+    //TODO : FIX 
     suspend fun getBaseCurrencyInfo(baseCurrencyId: Int): CurrencyFormat {
         Log.d("DEBUG", "getBaseCurrencyInfo: I EXIST!!")
+
 
         return currencyFormatsRepository.getCurrencyFormatsStream(baseCurrencyId)
             .firstOrNull() ?: CurrencyFormat(0, "", "", "", "", "", "", "", 0, 0.0, "", "")
