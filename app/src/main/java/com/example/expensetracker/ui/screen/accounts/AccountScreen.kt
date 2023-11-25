@@ -61,20 +61,14 @@ fun AccountScreen(
 
     ) {
     val accountsUiState by viewModel.accountsUiState.collectAsState()
-    val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
+
     val isUsed by viewModel.isUsed.collectAsState()
 
-    var baseCurrencyInfo = CurrencyFormat()
-    LaunchedEffect( baseCurrencyId ) {
-        baseCurrencyInfo = viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
-        Log.d("DEBUG", "AccountScreen within LaunchedEffect: $baseCurrencyInfo")
-    }
-
-
-    when(isUsed) {
+    when (isUsed) {
         "FALSE" -> {
             navigateToScreen("Onboarding")
         }
+
         "TRUE" -> {
             Scaffold(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -118,7 +112,9 @@ fun AccountScreen(
                             modifier = modifier,
                         ) {
                             Text("Current Month Summary")
-                            Text(text =  formatAsCurrency(accountsUiState.grandTotal, baseCurrencyInfo))
+                            Text(
+                                text = accountsUiState.grandTotal.toString()
+                            )
 
                             Text(
                                 text = "Summary of Accounts",
@@ -127,7 +123,11 @@ fun AccountScreen(
                         }
 
                         enumValues<AccountTypes>().forEach { accountType ->
-                            if (viewModel.countInType(accountType, accountsUiState.accountList) != 0) {
+                            if (viewModel.countInType(
+                                    accountType,
+                                    accountsUiState.accountList
+                                ) != 0
+                            ) {
                                 val displayName: String = accountType.displayName
                                 AccountList(
                                     modifier = modifier,
@@ -135,7 +135,6 @@ fun AccountScreen(
                                     accountList = accountsUiState.accountList,
                                     viewModel = viewModel,
                                     navigateToScreen = navigateToScreen,
-                                    baseCurrencyInfo = baseCurrencyInfo
                                 )
                             }
                         }
@@ -153,8 +152,8 @@ fun AccountList(
     accountList: List<Pair<Account, Double>>,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
-    baseCurrencyInfo: CurrencyFormat
 ) {
+    val data by viewModel.data.collectAsState()
     Column(
         modifier = modifier,
     ) {
@@ -164,13 +163,13 @@ fun AccountList(
         )
 
         accountList.forEach { accountPair ->
-            Log.d("DEBUG", "AccountList: Ping")
+            val balance: Double = data.balancesList.find { it.accountId == accountPair.first.accountId }?.balance ?: 0.0
             if (accountPair.first.accountType == category) {
                 AccountCard(
                     accountWithBalance = accountPair,
+                    balance = balance,
                     viewModel = viewModel,
                     navigateToScreen = navigateToScreen,
-                    baseCurrencyInfo = baseCurrencyInfo
                 )
             }
         }
@@ -182,9 +181,9 @@ fun AccountList(
 fun AccountCard(
     accountWithBalance: Pair<Account, Double>,
     modifier: Modifier = Modifier,
+    balance: Double,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
-    baseCurrencyInfo: CurrencyFormat
 ) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
@@ -240,10 +239,10 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = formatAsCurrency(accountWithBalance.second, baseCurrencyInfo)
+                    text = balance.toString()
                 )
                 Text(
-                    text = formatAsCurrency(accountWithBalance.second, baseCurrencyInfo)
+                    text = balance.toString()
                 )
             }
         }
@@ -252,7 +251,6 @@ fun AccountCard(
 
 
 fun formatAsCurrency(value: Double, format: CurrencyFormat): String {
-    Log.d("DEBUG", "formatAsCurrency: $format")
     return if (format.pfx_symbol.isNotBlank()) {
         format.pfx_symbol + " " + String.format("%.2f", value)
     } else {

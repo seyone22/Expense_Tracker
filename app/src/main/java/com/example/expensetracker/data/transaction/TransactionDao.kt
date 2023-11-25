@@ -27,8 +27,21 @@ interface TransactionDao {
     fun getAllTransactions(): Flow<List<Transaction>>
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE accountId = :accountId")
-    fun getAllTransactionsByAccount(accountId: Int): List<Transaction>
+    fun getAllTransactionsByAccount(accountId: Int): Flow<List<Transaction>>
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE toAccountId = :toAccountId")
     fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction>
+
+    @Query("SELECT accountId, " +
+            "SUM(CASE WHEN transCode = 'Deposit' OR transCode = 'Transfer' THEN transAmount " +
+            "          WHEN transCode = 'Withdrawal' THEN -transAmount " +
+            "          ELSE 0 END) AS balance " +
+            "FROM CHECKINGACCOUNT_V1 " +
+            "GROUP BY accountId")
+    fun getAllAccountBalances(): Flow<List<BalanceResult>>
+
+    data class BalanceResult(
+        val accountId: Int,
+        val balance: Double
+    )
 }

@@ -52,6 +52,7 @@ object AppViewModelProvider {
             )
         }
         initializer {
+
             AccountDetailViewModel(
                 expenseApplication().container.accountsRepository,
                 expenseApplication().container.transactionsRepository

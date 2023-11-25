@@ -6,22 +6,30 @@ import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
+import com.example.expensetracker.model.Category
+import com.example.expensetracker.model.Payee
+import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlin.math.log
 
 class AccountDetailViewModel(
     private val accountsRepository: AccountsRepository,
     private val transactionsRepository: TransactionsRepository,
 ): ViewModel() {
+    var accountId: Int = -1;
 
     var accountDetailAccountUiState: StateFlow<AccountDetailAccountUiState> =
-        accountsRepository.getAccountStream(0)
-            .onEach { Log.d("DEBUG", ": flow emitted $it") }
+        accountsRepository.getAccountStream(accountId)
             .map { account ->
                 AccountDetailAccountUiState(account ?: Account())
             }
@@ -29,11 +37,24 @@ class AccountDetailViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(AccountDetailViewModel.TIMEOUT_MILLIS),
                 initialValue = AccountDetailAccountUiState()
+            )
+
+    var accountDetailTransactionUiState: StateFlow<AccountDetailTransactionUiState> =
+        transactionsRepository.getTransactionsFromAccount(0)
+            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
+            .map { transactions ->
+                AccountDetailTransactionUiState(
+                    transactions = transactions
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TransactionEntryViewModel.TIMEOUT_MILLIS),
+                initialValue = AccountDetailTransactionUiState()
             )
 
     suspend fun getAccount(accountId : Int) {
         accountDetailAccountUiState = accountsRepository.getAccountStream(accountId)
-            .onEach { Log.d("DEBUG", ": flow emitted $it") }
             .map { account ->
                 AccountDetailAccountUiState(account ?: Account())
             }
@@ -42,7 +63,24 @@ class AccountDetailViewModel(
                 started = SharingStarted.WhileSubscribed(AccountDetailViewModel.TIMEOUT_MILLIS),
                 initialValue = AccountDetailAccountUiState()
             )
+    }
 
+    suspend fun getTransactions() {
+        accountDetailTransactionUiState =
+            transactionsRepository.getTransactionsFromAccount(accountId)
+                //.onEach { Log.d("DEBUG", ": flow emitted $it") }
+                .map { transactions ->
+                    AccountDetailTransactionUiState(
+                        transactions = transactions
+
+                    )
+                }
+                .stateIn(
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(TransactionEntryViewModel.TIMEOUT_MILLIS),
+                    initialValue = AccountDetailTransactionUiState()
+                )
+        Log.d("DEBUG", "getTransactions: AccountId is $accountId")
     }
 
 
@@ -57,8 +95,8 @@ class AccountDetailViewModel(
 
         val getBalancesThread = Thread {
             var hi = transactionsRepository.getTransactionsFromAccount(account.accountId)
-                .forEach() {
-                    Log.d("DEBUG", "calculateBalance.withinThread: $it")
+                .map {
+                    it.forEach() {
                     when (it.status) {
                         TransactionStatus.R.displayName -> {
                             when (it.transCode) {
@@ -96,12 +134,12 @@ class AccountDetailViewModel(
                         }
                     }
                 }
+                }
         }
 
         val addInboundTransfersThread = Thread {
             var hi = transactionsRepository.getAllTransactionsByToAccount(account.accountId)
                 .forEach() {
-                    Log.d("DEBUG", "calculateBalance.withinThread: $it")
                     when (it.status) {
                         TransactionStatus.R.displayName -> {
                             when (it.transCode) {
@@ -137,5 +175,5 @@ data class AccountDetailAccountUiState(
     val balance: Double = 0.0
 )
 data class AccountDetailTransactionUiState(
-    val transactions: List<Pair<Account, Double>> = emptyList(),
+    val transactions: List<Transaction> = listOf(),
 )

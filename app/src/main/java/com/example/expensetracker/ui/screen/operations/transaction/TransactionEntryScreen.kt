@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.screen.operations.transaction
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -332,13 +333,10 @@ fun TransactionEntryForm(
                 expanded = payeeExpanded,
                 onExpandedChange = {
                     payeeExpanded = !payeeExpanded
-                    coroutineScope.launch {
-                        viewModel.getAllAccounts()
-                    }
-                    when (transactionDetails.payeeId) {
+                    when (transactionDetails.transCode) {
                         TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
                             coroutineScope.launch {
-
+                                viewModel.getAllAccounts()
                             }
                         }
 
@@ -349,18 +347,6 @@ fun TransactionEntryForm(
                         }
                     }
                 }) {
-                var payeeBoxValue: String = ""
-                when (transactionDetails.transCode) {
-                    TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
-                        payeeBoxValue = transactionDetails.payeeId
-                    }
-
-                    TransactionCode.TRANSFER.displayName -> {
-                        payeeBoxValue = transactionDetails.toAccountId
-                    }
-
-                    else -> {}
-                }
 
                 OutlinedTextField(
                     modifier = Modifier
@@ -369,7 +355,7 @@ fun TransactionEntryForm(
                         .menuAnchor(),
                     value = currentPayee.payeeName,
                     readOnly = true,
-                    onValueChange = { onValueChange(transactionDetails.copy(payeeId = it)) },
+                    onValueChange = { },
                     label = {
                         when (transactionDetails.transCode) {
                             TransactionCode.WITHDRAWAL.displayName -> {
@@ -404,9 +390,10 @@ fun TransactionEntryForm(
                                 DropdownMenuItem(
                                     text = { Text(payee.payeeName) },
                                     onClick = {
-                                        onValueChange(transactionDetails.copy(payeeId = payee.payeeId.toString()))
-                                        onValueChange(transactionDetails.copy(toAccountId = "-1"))
                                         currentPayee = payee
+                                        onValueChange(transactionDetails.copy(toAccountId = "-1"))
+                                        onValueChange(transactionDetails.copy(payeeId = currentPayee.payeeId.toString()))
+                                        Log.d("DEBUG", "TransactionEntryForm: $transactionDetails")
                                         payeeExpanded = false
                                     }
                                 )

@@ -43,8 +43,8 @@ data class CategoryUiState(
 data class CategoryDetails(
     val categId : Int = 0,
     val categName : String,
-    val active : String,
-    val parentId : String
+    val active : String = "1",
+    val parentId : String = "-1"
 )
 
 
