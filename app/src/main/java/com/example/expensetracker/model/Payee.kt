@@ -12,10 +12,10 @@ import androidx.room.PrimaryKey
 data class Payee (
     @PrimaryKey(autoGenerate = true)
     val payeeId : Int = 0,
-    val payeeName : String,
-    val categId : Int,
-    val number : String, // Refers to a reference number or something. smh.
-    val website : String,
-    val notes : String,
-    val active : Int
+    val payeeName : String = "",
+    val categId : Int = 0,
+    val number : String = "", // Refers to a reference number or something. smh.
+    val website : String = "",
+    val notes : String = "",
+    val active : Int = 1
 )
