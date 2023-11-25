@@ -67,13 +67,10 @@ class AccountViewModel(
 
     //TODO : FIX 
     suspend fun getBaseCurrencyInfo(baseCurrencyId: Int): CurrencyFormat {
-        Log.d("DEBUG", "getBaseCurrencyInfo: I EXIST!!")
-
-
-        return currencyFormatsRepository.getCurrencyFormatsStream(baseCurrencyId)
-            .firstOrNull() ?: CurrencyFormat(0, "", "", "", "", "", "", "", 0, 0.0, "", "")
+        val x = currencyFormatsRepository.getCurrencyFormatsStream(baseCurrencyId)
+            .firstOrNull() ?: CurrencyFormat()
+        return x
     }
-
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L

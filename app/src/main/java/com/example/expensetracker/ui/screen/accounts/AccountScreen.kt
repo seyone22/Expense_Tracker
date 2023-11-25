@@ -52,7 +52,6 @@ object AccountsDestination : NavigationDestination {
     override val routeId = 0
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
     modifier: Modifier = Modifier
@@ -65,103 +64,87 @@ fun AccountScreen(
     val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
     val isUsed by viewModel.isUsed.collectAsState()
 
-
-    var baseCurrencyInfo = CurrencyFormat(0, "", "", "", "", "", "", "", 0, 0.0, "", "")
-    LaunchedEffect(baseCurrencyId) {
-        baseCurrencyInfo = viewModel.getBaseCurrencyInfo(baseCurrencyId = 0)
+    var baseCurrencyInfo = CurrencyFormat()
+    LaunchedEffect( baseCurrencyId ) {
+        baseCurrencyInfo = viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
+        Log.d("DEBUG", "AccountScreen within LaunchedEffect: $baseCurrencyInfo")
     }
-    Log.d("DEBUG", "AccountScreen: IsUsed is $isUsed")
+
 
     when(isUsed) {
         "FALSE" -> {
             navigateToScreen("Onboarding")
         }
         "TRUE" -> {
-            HomePage(
-                modifier = modifier,
-                navigateToScreen = { navigateToScreen },
-                accountsUiState = accountsUiState,
-                viewModel = viewModel
-            )
-        }
-    }
-}
-
-@Composable
-fun HomePage(
-    modifier: Modifier,
-    navigateToScreen: (screen: String) -> Unit,
-    accountsUiState: AccountsUiState,
-    viewModel: AccountViewModel
-)
-{
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-        topBar = {
-            ExpenseTopBar(
-                selectedActivity = AccountsDestination.routeId,
-                navBarAction = { navigateToScreen(AccountEntryDestination.route) },
-                navigateToSettings = { navigateToScreen(SettingsDestination.route) }
-            )
-        },
-        bottomBar = {
-            ExpenseNavBar(
-                selectedActivity = AccountsDestination.routeId,
-                navigateToScreen = navigateToScreen
-            )
-        },
-        floatingActionButton = {
-            ExpenseFAB(navigateToScreen = navigateToScreen)
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            Modifier.padding(innerPadding)
-        ) {
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                ) {
-                    AnimatedCircle(
-                        proportions = listOf(0.25f, 0.5f),
-                        colors = listOf(Color.Green, Color.Red),
-                        modifier = modifier
-                            .height(300.dp)
-                            .align(Alignment.CenterHorizontally)
-                            .fillMaxWidth()
+            Scaffold(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                topBar = {
+                    ExpenseTopBar(
+                        selectedActivity = AccountsDestination.routeId,
+                        navBarAction = { navigateToScreen(AccountEntryDestination.route) },
+                        navigateToSettings = { navigateToScreen(SettingsDestination.route) }
                     )
-                }
-
-                Column(
-                    modifier = modifier,
-                ) {
-                    Text("Current Month Summary")
-                    Text(text = accountsUiState.grandTotal.toString())
-
-                    Text(
-                        text = "Summary of Accounts",
-                        style = MaterialTheme.typography.titleLarge
+                },
+                bottomBar = {
+                    ExpenseNavBar(
+                        selectedActivity = AccountsDestination.routeId,
+                        navigateToScreen = navigateToScreen
                     )
+                },
+                floatingActionButton = {
+                    ExpenseFAB(navigateToScreen = navigateToScreen)
                 }
+            ) { innerPadding ->
+                LazyColumn(
+                    Modifier.padding(innerPadding)
+                ) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight()
+                        ) {
+                            AnimatedCircle(
+                                proportions = listOf(0.25f, 0.5f),
+                                colors = listOf(Color.Green, Color.Red),
+                                modifier = modifier
+                                    .height(300.dp)
+                                    .align(Alignment.CenterHorizontally)
+                                    .fillMaxWidth()
+                            )
+                        }
 
-                enumValues<AccountTypes>().forEach { accountType ->
-                    if (viewModel.countInType(accountType, accountsUiState.accountList) != 0) {
-                        val displayName: String = accountType.displayName
-                        AccountList(
+                        Column(
                             modifier = modifier,
-                            category = displayName,
-                            accountList = accountsUiState.accountList,
-                            viewModel = viewModel,
-                            navigateToScreen = navigateToScreen
-                        )
+                        ) {
+                            Text("Current Month Summary")
+                            Text(text =  formatAsCurrency(accountsUiState.grandTotal, baseCurrencyInfo))
+
+                            Text(
+                                text = "Summary of Accounts",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+
+                        enumValues<AccountTypes>().forEach { accountType ->
+                            if (viewModel.countInType(accountType, accountsUiState.accountList) != 0) {
+                                val displayName: String = accountType.displayName
+                                AccountList(
+                                    modifier = modifier,
+                                    category = displayName,
+                                    accountList = accountsUiState.accountList,
+                                    viewModel = viewModel,
+                                    navigateToScreen = navigateToScreen,
+                                    baseCurrencyInfo = baseCurrencyInfo
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun AccountList(
@@ -170,6 +153,7 @@ fun AccountList(
     accountList: List<Pair<Account, Double>>,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
+    baseCurrencyInfo: CurrencyFormat
 ) {
     Column(
         modifier = modifier,
@@ -185,7 +169,8 @@ fun AccountList(
                 AccountCard(
                     accountWithBalance = accountPair,
                     viewModel = viewModel,
-                    navigateToScreen = navigateToScreen
+                    navigateToScreen = navigateToScreen,
+                    baseCurrencyInfo = baseCurrencyInfo
                 )
             }
         }
@@ -199,6 +184,7 @@ fun AccountCard(
     modifier: Modifier = Modifier,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
+    baseCurrencyInfo: CurrencyFormat
 ) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
@@ -254,93 +240,22 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Rs. " + accountWithBalance.second.toString()
+                    text = formatAsCurrency(accountWithBalance.second, baseCurrencyInfo)
                 )
                 Text(
-                    text = "Rs. " + accountWithBalance.second.toString()
+                    text = formatAsCurrency(accountWithBalance.second, baseCurrencyInfo)
                 )
             }
         }
     }
 }
 
-/*
-@Preview(showBackground = true)
-@Composable
-fun AccountListPreview() {
-    ExpenseTrackerTheme {
-        AccountList(
-             category = "Checking", accountList = listOf(
-                Account(
-                    0,
-                    "8130107852 (BOC)",
-                    "Checking",
-                    "",
-                    "Open",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    0.0,
-                    "",
-                    "",
-                    0,
-                    0,
-                    "",
-                    0.0,
-                    0.0,
-                    0.0,
-                    "",
-                    0.0
-                ),
-                Account(
-                    0,
-                    "8130107852 (BOC)",
-                    "Checking",
-                    "",
-                    "Open",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    0.0,
-                    "",
-                    "",
-                    0,
-                    0,
-                    "",
-                    0.0,
-                    0.0,
-                    0.0,
-                    "",
-                    0.0
-                ),
-                Account(
-                    0,
-                    "8130107852 (BOC)",
-                    "Checking",
-                    "",
-                    "Closed",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    0.0,
-                    "",
-                    "",
-                    0,
-                    0,
-                    "",
-                    0.0,
-                    0.0,
-                    0.0,
-                    "",
-                    0.0
-                )
-            )
-        )
+
+fun formatAsCurrency(value: Double, format: CurrencyFormat): String {
+    Log.d("DEBUG", "formatAsCurrency: $format")
+    return if (format.pfx_symbol.isNotBlank()) {
+        format.pfx_symbol + " " + String.format("%.2f", value)
+    } else {
+        String.format("%.2f", value) + " " + format.sfx_symbol
     }
-}*/
+}
