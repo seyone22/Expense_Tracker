@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+/app/release/app-release.apk
+/.idea/deploymentTargetDropDown.xml
+/app/release/output-metadata.json
