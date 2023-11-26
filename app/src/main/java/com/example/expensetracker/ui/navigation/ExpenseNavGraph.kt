@@ -30,6 +30,8 @@ import com.example.expensetracker.ui.screen.operations.transaction.TransactionEn
 import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.report.ReportScreen
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
+import com.example.expensetracker.ui.screen.settings.SettingsDetailDestination
+import com.example.expensetracker.ui.screen.settings.SettingsDetailScreen
 import com.example.expensetracker.ui.screen.settings.SettingsScreen
 import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionsScreen
@@ -113,7 +115,16 @@ fun ExpenseNavHost(
         // Routes to settings screen
         composable(route = SettingsDestination.route) {
             SettingsScreen(
-                navigateToScreen = { screen -> navController.navigate(screen) }
+                navigateToScreen = { screen -> navController.navigate(screen) },
+                navigateBack = { navController.popBackStack() },
+                )
+        }
+        composable(route = SettingsDetailDestination.route+"/{setting}",
+            arguments = listOf(navArgument("setting") { type = NavType.StringType })) {
+            SettingsDetailScreen(
+                navigateToScreen = { screen -> navController.navigate(screen) },
+                navigateBack = { navController.popBackStack() },
+                backStackEntry = it.arguments?.getString("setting") ?: "-1"
             )
         }
 
