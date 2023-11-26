@@ -17,11 +17,11 @@ import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryVi
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.report.ReportViewModel
 import com.example.expensetracker.ui.screen.settings.SettingsViewModel
+import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            val application = (this[APPLICATION_KEY] as ExpenseApplication)
             AccountViewModel(
                 expenseApplication().container.accountsRepository,
                 expenseApplication().container.transactionsRepository,
@@ -34,6 +34,11 @@ object AppViewModelProvider {
                 expenseApplication().container.categoriesRepository,
                 expenseApplication().container.payeesRepository,
                 expenseApplication().container.currenciesRepository
+            )
+        }
+        initializer {
+            TransactionsViewModel(
+                expenseApplication().container.transactionsRepository,
             )
         }
         initializer {

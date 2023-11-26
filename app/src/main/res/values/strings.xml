@@ -5,7 +5,7 @@
         <item>Accounts</item>
         <item>Entities</item>
         <item>Budgets</item>
-        <item>Assets</item>
+        <item>Entries</item>
         <item>Reports</item>
     </string-array>
 </resources>

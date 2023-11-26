@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.outlined.TextSnippet
 import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Balance
+import androidx.compose.material.icons.outlined.CompareArrows
 import androidx.compose.material.icons.outlined.House
 import androidx.compose.material.icons.outlined.TextSnippet
 import androidx.compose.material3.Icon
@@ -33,7 +34,7 @@ fun ExpenseNavBar(
         ActivityIconPair(stringArrayResource(id = R.array.activities)[0], Icons.Outlined.AccountBalanceWallet),
         ActivityIconPair(stringArrayResource(id = R.array.activities)[1], Icons.Outlined.AccountBalance),
         ActivityIconPair(stringArrayResource(id = R.array.activities)[2], Icons.Outlined.Balance),
-        ActivityIconPair(stringArrayResource(id = R.array.activities)[3], Icons.Outlined.House),
+        ActivityIconPair(stringArrayResource(id = R.array.activities)[3], Icons.Outlined.CompareArrows),
         ActivityIconPair(stringArrayResource(id = R.array.activities)[4], Icons.AutoMirrored.Outlined.TextSnippet),
     )
 

@@ -150,7 +150,6 @@ fun TransactionEntryForm(
 
     //TODO: Refactor this to be more elegant
     val transactionUiState1: TransactionUiState by viewModel.transactionUiState1.collectAsState()
-    val transactionUiState2: TransactionUiState by viewModel.transactionUiState2.collectAsState()
 
     val focusManager = LocalFocusManager.current
 
@@ -182,7 +181,7 @@ fun TransactionEntryForm(
                     //For Icons
                     disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
-                value = transactionDetails.transDate!!,
+                value = transactionDetails.transDate,
                 onValueChange = { onValueChange(transactionDetails.copy(transDate = it)) },
                 label = { Text("Date of Transaction") },
                 readOnly = true,
@@ -335,14 +334,18 @@ fun TransactionEntryForm(
                     payeeExpanded = !payeeExpanded
                     when (transactionDetails.transCode) {
                         TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
+
                             coroutineScope.launch {
-                                viewModel.getAllAccounts()
+                                Log.d("DEBUG","BEORE GETALLPAYEES")
+
+                                viewModel.getAllPayees()
+                                Log.d("DEBUG", "Within When: ${ viewModel.transactionUiState2.payeesList }")
                             }
                         }
 
                         TransactionCode.TRANSFER.displayName -> {
                             coroutineScope.launch {
-
+                                viewModel.getAllAccounts()
                             }
                         }
                     }
@@ -386,7 +389,8 @@ fun TransactionEntryForm(
                 ) {
                     when (transactionDetails.transCode) {
                         TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
-                            transactionUiState2.payeesList.forEach { payee ->
+                            Log.d("DEBUG", "TransactionEntryForm: Executes Other! ${viewModel.transactionUiState2.payeesList}")
+                            viewModel.transactionUiState2.payeesList.forEach { payee ->
                                 DropdownMenuItem(
                                     text = { Text(payee.payeeName) },
                                     onClick = {
@@ -399,9 +403,9 @@ fun TransactionEntryForm(
                                 )
                             }
                         }
-
                         TransactionCode.TRANSFER.displayName -> {
                             viewModel.transactionUiState.accountsList.forEach { account ->
+                                Log.d("DEBUG", "TransactionEntryForm: Executes! $account")
                                 DropdownMenuItem(
                                     text = { Text(account.accountName) },
                                     onClick = {
@@ -427,10 +431,6 @@ fun TransactionEntryForm(
                     }
                 })
             {
-                var categoryName: String = "0"
-                /*                coroutineScope.launch {
-                                    viewModel.getCategoryName(transactionDetails.categoryId.toInt())
-                                }*/
                 OutlinedTextField(
                     modifier = Modifier
                         .padding(0.dp, 8.dp)

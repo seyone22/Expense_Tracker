@@ -32,13 +32,34 @@ interface TransactionDao {
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE toAccountId = :toAccountId")
     fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction>
 
-    @Query("SELECT accountId, " +
-            "SUM(CASE WHEN transCode = 'Deposit' OR transCode = 'Transfer' THEN transAmount " +
-            "          WHEN transCode = 'Withdrawal' THEN -transAmount " +
-            "          ELSE 0 END) AS balance " +
-            "FROM CHECKINGACCOUNT_V1 " +
+    @Query("SELECT " +
+            "    accountId, " +
+            "    SUM(balanceChange) AS balance " +
+            "FROM ( " +
+            "    SELECT " +
+            "        accountId, " +
+            "        SUM(CASE WHEN transCode = 'Deposit' THEN transAmount " +
+            "                 WHEN transCode = 'Withdrawal' OR transCode = 'Transfer' THEN -transAmount " +
+            "                 ELSE 0 END) AS balanceChange " +
+            "    FROM CHECKINGACCOUNT_V1 " +
+            "    GROUP BY accountId " +
+            " " +
+            "    UNION ALL " +
+            " " +
+            "    SELECT " +
+            "        toAccountId AS accountId, " +
+            "        SUM(transAmount) AS balanceChange " +
+            "    FROM CHECKINGACCOUNT_V1 " +
+            "    WHERE transCode = 'Transfer' " +
+            "    GROUP BY toAccountId " +
+            ") AS subquery " +
             "GROUP BY accountId")
     fun getAllAccountBalances(): Flow<List<BalanceResult>>
+
+    @Query("SELECT SUM(transAmount) AS totalWithdrawal FROM CHECKINGACCOUNT_V1 WHERE transCode = :transCode")
+    fun getTotalBalanceByCode(transCode : String): Flow<Double>
+    @Query("SELECT SUM(transAmount) AS totalWithdrawal FROM CHECKINGACCOUNT_V1")
+    fun getTotalBalance(): Flow<Double>
 
     data class BalanceResult(
         val accountId: Int,

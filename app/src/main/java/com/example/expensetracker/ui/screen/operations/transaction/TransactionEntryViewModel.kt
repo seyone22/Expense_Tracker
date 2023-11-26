@@ -33,26 +33,15 @@ class TransactionEntryViewModel(
     var transactionUiState by mutableStateOf(TransactionUiState())
         private set
 
+    var transactionUiState2 by mutableStateOf(TransactionUiState())
+        private set
+
     val transactionUiState1: StateFlow<TransactionUiState> =
         categoriesRepository.getAllCategoriesStream()
             //.onEach { Log.d("DEBUG", ": flow emitted $it") }
             .map { categories ->
                 TransactionUiState(
                     categoriesList = categories
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = TransactionUiState()
-            )
-
-    val transactionUiState2: StateFlow<TransactionUiState> =
-        payeesRepository.getAllActivePayeesStream()
-            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
-            .map { payees ->
-                TransactionUiState(
-                    payeesList = payees
                 )
             }
             .stateIn(
@@ -88,12 +77,7 @@ class TransactionEntryViewModel(
             )
     }
 
-    fun reset() {
-        transactionUiState.transactionDetails.copy(transAmount = "0.0" )
-    }
-
     suspend fun getAllAccounts()  {
-        var x : List<Account> = listOf()
         accountsRepository.getAllAccountsStream().collect {
             transactionUiState =
                 TransactionUiState(
@@ -101,33 +85,24 @@ class TransactionEntryViewModel(
                     isEntryValid = transactionUiState.isEntryValid,
                     accountsList = it
                 )
-            Log.d("DEBUG", "getAllAccounts: Within the collect $it")
         }
-        Log.d("DEBUG", "getAllAccounts: x is $x")
+    }
+    suspend fun getAllPayees()  {
+        payeesRepository.getAllPayeesStream().collect {
+            transactionUiState2 =
+                TransactionUiState(
+                    transactionDetails = transactionUiState2.transactionDetails,
+                    isEntryValid = transactionUiState2.isEntryValid,
+                    payeesList = it
+                )
+        }
     }
 
     suspend fun saveTransaction() {
-        Log.d("DEBUG", "saveTransaction: Called!")
         if (validateInput()) {
-            Log.d("DEBUG", "saveTransaction: Input Valid!")
-            Log.d("DEBUG", "TransactionEntryForm: $transactionUiState")
             transactionsRepository.insertTransaction(transactionUiState.transactionDetails.toTransaction())
         }
     }
-
-    suspend fun getCategoryName(categoryId: Int): String {
-        var categoryName: String? = null
-
-        categoriesRepository.getCategoriesStream(categoryId).collect {
-            if (it != null) {
-                categoryName = it.categName // Assuming there is a property 'name' in your category
-                // Optionally, you can exit the collect block here if needed
-            }
-        }
-
-        return categoryName ?: "DefaultCategoryName" // Provide a default name if no category was found
-    }
-
 
     private fun validateInput(uiState: TransactionDetails = transactionUiState.transactionDetails): Boolean {
         Log.d("DEBUG", "validateInput: Validation Begins!")
@@ -138,7 +113,6 @@ class TransactionEntryViewModel(
     }
 
 }
-
 
 //Data class for AccountUiState
 data class TransactionUiState(
@@ -153,8 +127,8 @@ data class TransactionUiState(
 data class TransactionDetails(
     val transId: Int = 0,
     val accountId: String = "",
-    val toAccountId: String = "0",
-    val payeeId: String = "",
+    val toAccountId: String = "-1",
+    val payeeId: String = "-1",
     val transCode: String = TransactionCode.WITHDRAWAL.displayName,
     val transAmount: String = "",
     val status: String = TransactionStatus.U.displayName,
@@ -168,7 +142,6 @@ data class TransactionDetails(
     val toTransAmount: String = "0",
     val color: String = "-1"
 )
-
 
 // Extension functions to convert between [Transaction], [TransactionUiState], and [TransactionDetails]
 fun TransactionDetails.toTransaction(): Transaction = Transaction(
