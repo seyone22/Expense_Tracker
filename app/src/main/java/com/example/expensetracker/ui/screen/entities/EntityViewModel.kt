@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screen.entities
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,8 +20,10 @@ import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrenc
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeUiState
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayee
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -35,45 +36,20 @@ class EntityViewModel(
     private val currencyFormatsRepository: CurrencyFormatsRepository,
 ) : ViewModel() {
 
-    /**
-     * Holds home ui state. The list of items are retrieved from [EntitiesRepository] and mapped to
-     * [EntityUiState]
-     */
+    private val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
+    private val currencyFormatsFlow: Flow<List<CurrencyFormat>> = currencyFormatsRepository.getAllCurrencyFormatsStream()
+    private val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllActivePayeesStream()
 
-    val entitiesUiState: StateFlow<EntitiesUiState> =
+    // Combine the flows and calculate the totals
+    val entitiesUiState: Flow<EntitiesUiState> = combine(categoriesFlow, currencyFormatsFlow, payeesFlow) { categories, currencies, payees ->
+        EntitiesUiState(categories, payees, currencies)
+    }
+
+    val d: StateFlow<EntitiesUiState> =
         categoriesRepository.getAllCategoriesStream()
-            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
             .map { categories ->
                 EntitiesUiState(
                     categoriesList = categories
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = EntitiesUiState()
-            )
-
-    val entitiesUiState2: StateFlow<EntitiesUiState> =
-        currencyFormatsRepository.getAllCurrencyFormatsStream()
-            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
-            .map { currencies ->
-                EntitiesUiState(
-                    currenciesList = currencies
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = EntitiesUiState()
-            )
-
-    val entitiesUiState3: StateFlow<EntitiesUiState> =
-        payeesRepository.getAllActivePayeesStream()
-            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
-            .map { payees ->
-                EntitiesUiState(
-                    payeesList = payees
                 )
             }
             .stateIn(
@@ -90,16 +66,12 @@ class EntityViewModel(
         private set
 
     suspend fun saveCategory() {
-        Log.d("DEBUG", "saveCategory: Called!")
         if(validateCategoryInput()) {
-            Log.d("DEBUG", "saveCategory: Input Valid!")
             categoriesRepository.insertCategory(categoryUiState.categoryDetails.toCategory())
         }
     }
 
     private fun validateCategoryInput(uiState: CategoryDetails = categoryUiState.categoryDetails): Boolean {
-        Log.d("DEBUG", "validateInput: Validation Begins!")
-        Log.d("DEBUG", uiState.categName)
         return with(uiState) {
             categName.isNotBlank()
         }
@@ -111,16 +83,12 @@ class EntityViewModel(
     var payeeUiState by mutableStateOf(PayeeUiState())
         private set
     suspend fun savePayee() {
-        Log.d("DEBUG", "saveCategory: Called!")
         if(validatePayeeInput()) {
-            Log.d("DEBUG", "saveCategory: Input Valid!")
             payeesRepository.insertPayee(payeeUiState.payeeDetails.toPayee())
         }
     }
 
     private fun validatePayeeInput(uiState: PayeeDetails = payeeUiState.payeeDetails): Boolean {
-        Log.d("DEBUG", "validateInput: Validation Begins!")
-        Log.d("DEBUG", uiState.payeeName)
         return with(uiState) {
             payeeName.isNotBlank()
         }
@@ -132,16 +100,12 @@ class EntityViewModel(
     var currencyUiState by mutableStateOf(CurrencyUiState())
         private set
     suspend fun saveCurrency() {
-        Log.d("DEBUG", "saveCurrency: Called!")
         if(validateCurrencyInput()) {
-            Log.d("DEBUG", "saveCurrency: Input Valid!")
             currencyFormatsRepository.insertCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
         }
     }
 
     private fun validateCurrencyInput(uiState: CurrencyDetails = currencyUiState.currencyDetails): Boolean {
-        Log.d("DEBUG", "validateInput: Validation Begins!")
-        Log.d("DEBUG", uiState.currencyName)
         return with(uiState) {
             currencyName.isNotBlank()
         }

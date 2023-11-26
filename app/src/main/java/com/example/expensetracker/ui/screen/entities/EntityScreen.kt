@@ -1,8 +1,6 @@
 package com.example.expensetracker.ui.screen.entities
 
 import android.annotation.SuppressLint
-import android.util.Log
-import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
@@ -64,12 +61,7 @@ import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.operations.entity.category.CategoryDetails
-import com.example.expensetracker.ui.screen.operations.entity.category.CategoryEntryDestination
-import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyEntryDestination
-import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 object EntitiesDestination : NavigationDestination {
@@ -90,9 +82,7 @@ fun EntityScreen(
     var state by remember { mutableIntStateOf(0) }
     val titles = listOf("Categories", "Payees", "Currencies")
     //TODO: Refactor this to be more elegant
-    val entityUiState : EntitiesUiState by viewModel.entitiesUiState.collectAsState()
-    val entityUiState2 : EntitiesUiState by viewModel.entitiesUiState2.collectAsState()
-    val entityUiState3 : EntitiesUiState by viewModel.entitiesUiState3.collectAsState()
+    val entityUiState : EntitiesUiState by viewModel.entitiesUiState.collectAsState(EntitiesUiState())
 
     var showCategoryDialog by remember { mutableStateOf(false) }
     var showPayeeDialog by remember { mutableStateOf(false) }
@@ -128,7 +118,7 @@ fun EntityScreen(
         }
     ) { innerPadding ->
         Column(
-            Modifier.padding(innerPadding)
+            modifier = modifier.padding(innerPadding)
         ) {
                 PrimaryTabRow(
                     selectedTabIndex = state,
@@ -148,11 +138,10 @@ fun EntityScreen(
                         CategoryList(list = entityUiState.categoriesList)
                     }
                     1 -> {
-                        PayeeList(list = entityUiState3.payeesList)
-                        Log.d("DEBUG", "EntityScreen: $entityUiState3")
+                        PayeeList(list = entityUiState.payeesList)
                     }
                     2 -> {
-                        CurrenciesList(list = entityUiState2.currenciesList)
+                        CurrenciesList(list = entityUiState.currenciesList)
                     }
                 }
             }
@@ -215,7 +204,7 @@ fun CategoryList(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                                 contentDescription = null,
-                                Modifier.size(36.dp, 36.dp)
+                                modifier = modifier.size(36.dp, 36.dp)
                             )
                         }
                     }
@@ -234,7 +223,7 @@ fun PayeeList(
     LazyColumn() {
         items(list) {
             ListItem(
-                headlineContent = { Text(it.payeeName.toString()) },
+                headlineContent = { Text(it.payeeName) },
                 overlineContent = { Text(it.payeeId.toString()) },
                 leadingContent = {
                     Icon(
@@ -252,7 +241,7 @@ fun PayeeList(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                                 contentDescription = null,
-                                Modifier.size(36.dp, 36.dp)
+                                modifier = modifier.size(36.dp, 36.dp)
                             )
                         }
                     }
@@ -284,7 +273,7 @@ fun CurrenciesList(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                                 contentDescription = null,
-                                Modifier.size(36.dp, 36.dp)
+                                modifier = modifier.size(36.dp, 36.dp)
                             )
                         }
                     }
@@ -338,7 +327,7 @@ fun CategoryEntryDialog(
                 )
 
                 Row(
-                    modifier = Modifier
+                    modifier = modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                 ) {
@@ -383,7 +372,7 @@ fun PayeeEntryDialog(
     {
         // Draw a rectangle shape with rounded corners inside the dialog
         Card(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .height(535.dp)
                 .padding(16.dp),
@@ -492,7 +481,7 @@ fun CurrencyEntryDialog(
     {
         // Draw a rectangle shape with rounded corners inside the dialog
         Card(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .height(225.dp)
                 .padding(16.dp),
@@ -512,7 +501,7 @@ fun CurrencyEntryDialog(
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
                     value = viewModel.categoryUiState.categoryDetails.categName,
-                    onValueChange = { viewModel.updateCategoryState(viewModel.categoryUiState.categoryDetails.copy(categName = it)) },
+                    onValueChange = { viewModel.updateCurrencyState(viewModel.currencyUiState.currencyDetails.copy(currencyName = it)) },
                     label = { Text("Currency Name *") },
                     singleLine = true,
                     keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
@@ -520,7 +509,7 @@ fun CurrencyEntryDialog(
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
                     value = viewModel.categoryUiState.categoryDetails.categName,
-                    onValueChange = { viewModel.updateCategoryState(viewModel.categoryUiState.categoryDetails.copy(categName = it)) },
+                    onValueChange = { viewModel.updateCurrencyState(viewModel.currencyUiState.currencyDetails.copy(pfx_symbol = it)) },
                     label = { Text("Currency Code *") },
                     singleLine = true,
                     keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
@@ -528,7 +517,7 @@ fun CurrencyEntryDialog(
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
                     value = viewModel.categoryUiState.categoryDetails.categName,
-                    onValueChange = { viewModel.updateCategoryState(viewModel.categoryUiState.categoryDetails.copy(categName = it)) },
+                    onValueChange = { viewModel.updateCurrencyState(viewModel.currencyUiState.currencyDetails.copy(currency_symbol = it)) },
                     label = { Text("Currency Symbol *") },
                     singleLine = true,
                     keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
