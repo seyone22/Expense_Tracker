@@ -110,6 +110,7 @@ class TransactionEntryViewModel(
         Log.d("DEBUG", "saveTransaction: Called!")
         if (validateInput()) {
             Log.d("DEBUG", "saveTransaction: Input Valid!")
+            Log.d("DEBUG", "TransactionEntryForm: $transactionUiState")
             transactionsRepository.insertTransaction(transactionUiState.transactionDetails.toTransaction())
         }
     }

@@ -6,8 +6,9 @@ import kotlinx.coroutines.flow.Flow
 interface TransactionsRepository {
     fun getAllTransactionsStream(): Flow<List<Transaction>>
     fun getTransactionStream(transId: Int): Flow<Transaction?>
-    fun getTransactionsFromAccount(accountId: Int): List<Transaction>
+    fun getTransactionsFromAccount(accountId: Int): Flow<List<Transaction>>
     fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction>
+    fun getBalanceByAccountId() : Flow<List<TransactionDao.BalanceResult>>
 
 
     suspend fun insertTransaction(transaction: Transaction)

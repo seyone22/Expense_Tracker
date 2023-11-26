@@ -1,12 +1,14 @@
 package com.example.expensetracker.ui
 
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.expensetracker.ExpenseApplication
 import com.example.expensetracker.ui.screen.accounts.AccountViewModel
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
+import com.example.expensetracker.ui.screen.onboarding.OnboardingViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountDetailViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryViewModel
 import com.example.expensetracker.ui.screen.operations.entity.category.CategoryEntryViewModel
@@ -19,11 +21,12 @@ import com.example.expensetracker.ui.screen.settings.SettingsViewModel
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
+            val application = (this[APPLICATION_KEY] as ExpenseApplication)
             AccountViewModel(
                 expenseApplication().container.accountsRepository,
                 expenseApplication().container.transactionsRepository,
                 expenseApplication().container.metadataRepository,
-                expenseApplication().container.currenciesRepository
+                expenseApplication().container.currenciesRepository,
             )
         }
         initializer {
@@ -49,6 +52,7 @@ object AppViewModelProvider {
             )
         }
         initializer {
+
             AccountDetailViewModel(
                 expenseApplication().container.accountsRepository,
                 expenseApplication().container.transactionsRepository
@@ -67,6 +71,10 @@ object AppViewModelProvider {
         // Initializer for Settings ViewModel
         initializer {
             SettingsViewModel(expenseApplication().container.payeesRepository)
+        }
+        // Initializer for Onboarding ViewModel
+        initializer {
+            OnboardingViewModel(expenseApplication().container.metadataRepository, expenseApplication().container.currenciesRepository)
         }
     }
 }

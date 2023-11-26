@@ -151,10 +151,6 @@ fun CategoryEntryForm(
     }
 }
 
-
-
-
-
 @Preview(showBackground = true)
 @Composable
 fun CategoryEntryFormPreview() {

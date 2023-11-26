@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.Account
@@ -40,6 +41,7 @@ import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.accounts.AccountViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +52,6 @@ object AccountsDestination : NavigationDestination {
     override val routeId = 0
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
     modifier: Modifier = Modifier
@@ -59,75 +60,84 @@ fun AccountScreen(
     viewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     ) {
-    val accountUiState by viewModel.accountsUiState.collectAsState()
-    val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
-    var baseCurrencyInfo = CurrencyFormat(0, "", "", "", "", "", "", "", 0, 0.0, "", "")
-    LaunchedEffect(baseCurrencyId) {
-        baseCurrencyInfo = viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId)
-    }
-    Log.d("DEBUG", "AccountScreen: BaseCurrencyID is $baseCurrencyId")
-    Log.d("DEBUG", "AccountScreen: BaseCurrencyInfo is $baseCurrencyInfo")
+    val accountsUiState by viewModel.accountsUiState.collectAsState()
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-        topBar = {
-            ExpenseTopBar(
-                selectedActivity = AccountsDestination.routeId,
-                navBarAction = { navigateToScreen(AccountEntryDestination.route) },
-                navigateToSettings = { navigateToScreen(SettingsDestination.route) }
-            )
-        },
-        bottomBar = {
-            ExpenseNavBar(
-                selectedActivity = AccountsDestination.routeId,
-                navigateToScreen = navigateToScreen
-            )
-        },
-        floatingActionButton = {
-            ExpenseFAB(navigateToScreen = navigateToScreen)
+    val isUsed by viewModel.isUsed.collectAsState()
+
+    when (isUsed) {
+        "FALSE" -> {
+            navigateToScreen("Onboarding")
         }
-    ) { innerPadding ->
-        LazyColumn(
-            Modifier.padding(innerPadding)
-        ) {
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                ) {
-                    AnimatedCircle(
-                        proportions = listOf(0.25f, 0.5f),
-                        colors = listOf(Color.Green, Color.Red),
-                        modifier = modifier
-                            .height(300.dp)
-                            .align(Alignment.CenterHorizontally)
-                            .fillMaxWidth()
+
+        "TRUE" -> {
+            Scaffold(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                topBar = {
+                    ExpenseTopBar(
+                        selectedActivity = AccountsDestination.routeId,
+                        navBarAction = { navigateToScreen(AccountEntryDestination.route) },
+                        navigateToSettings = { navigateToScreen(SettingsDestination.route) }
                     )
-                }
-
-                Column(
-                    modifier = modifier,
-                ) {
-                    Text("Current Month Summary")
-                    Text(text = accountUiState.grandTotal.toString())
-
-                    Text(
-                        text = "Summary of Accounts",
-                        style = MaterialTheme.typography.titleLarge
+                },
+                bottomBar = {
+                    ExpenseNavBar(
+                        selectedActivity = AccountsDestination.routeId,
+                        navigateToScreen = navigateToScreen
                     )
+                },
+                floatingActionButton = {
+                    ExpenseFAB(navigateToScreen = navigateToScreen)
                 }
+            ) { innerPadding ->
+                LazyColumn(
+                    Modifier.padding(innerPadding)
+                ) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight()
+                        ) {
+                            AnimatedCircle(
+                                proportions = listOf(0.25f, 0.5f),
+                                colors = listOf(Color.Green, Color.Red),
+                                modifier = modifier
+                                    .height(300.dp)
+                                    .align(Alignment.CenterHorizontally)
+                                    .fillMaxWidth()
+                            )
+                        }
 
-                enumValues<AccountTypes>().forEach { accountType ->
-                    if (viewModel.countInType(accountType, accountUiState.accountList) != 0) {
-                        val displayName: String = accountType.displayName
-                        AccountList(
+                        Column(
                             modifier = modifier,
-                            category = displayName,
-                            accountList = accountUiState.accountList,
-                            viewModel = viewModel,
-                            navigateToScreen = navigateToScreen
-                        )
+                        ) {
+                            Text("Current Month Summary")
+                            Text(
+                                text = accountsUiState.grandTotal.toString()
+                            )
+
+                            Text(
+                                text = "Summary of Accounts",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+
+                        enumValues<AccountTypes>().forEach { accountType ->
+                            if (viewModel.countInType(
+                                    accountType,
+                                    accountsUiState.accountList
+                                ) != 0
+                            ) {
+                                val displayName: String = accountType.displayName
+                                AccountList(
+                                    modifier = modifier,
+                                    category = displayName,
+                                    accountList = accountsUiState.accountList,
+                                    viewModel = viewModel,
+                                    navigateToScreen = navigateToScreen,
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -143,6 +153,7 @@ fun AccountList(
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
 ) {
+    val data by viewModel.data.collectAsState()
     Column(
         modifier = modifier,
     ) {
@@ -152,12 +163,13 @@ fun AccountList(
         )
 
         accountList.forEach { accountPair ->
-            Log.d("DEBUG", "AccountList: Ping")
+            val balance: Double = data.balancesList.find { it.accountId == accountPair.first.accountId }?.balance ?: 0.0
             if (accountPair.first.accountType == category) {
                 AccountCard(
                     accountWithBalance = accountPair,
+                    balance = balance,
                     viewModel = viewModel,
-                    navigateToScreen = navigateToScreen
+                    navigateToScreen = navigateToScreen,
                 )
             }
         }
@@ -169,6 +181,7 @@ fun AccountList(
 fun AccountCard(
     accountWithBalance: Pair<Account, Double>,
     modifier: Modifier = Modifier,
+    balance: Double,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
 ) {
@@ -226,93 +239,21 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Rs. " + accountWithBalance.second.toString()
+                    text = balance.toString()
                 )
                 Text(
-                    text = "Rs. " + accountWithBalance.second.toString()
+                    text = balance.toString()
                 )
             }
         }
     }
 }
 
-/*
-@Preview(showBackground = true)
-@Composable
-fun AccountListPreview() {
-    ExpenseTrackerTheme {
-        AccountList(
-             category = "Checking", accountList = listOf(
-                Account(
-                    0,
-                    "8130107852 (BOC)",
-                    "Checking",
-                    "",
-                    "Open",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    0.0,
-                    "",
-                    "",
-                    0,
-                    0,
-                    "",
-                    0.0,
-                    0.0,
-                    0.0,
-                    "",
-                    0.0
-                ),
-                Account(
-                    0,
-                    "8130107852 (BOC)",
-                    "Checking",
-                    "",
-                    "Open",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    0.0,
-                    "",
-                    "",
-                    0,
-                    0,
-                    "",
-                    0.0,
-                    0.0,
-                    0.0,
-                    "",
-                    0.0
-                ),
-                Account(
-                    0,
-                    "8130107852 (BOC)",
-                    "Checking",
-                    "",
-                    "Closed",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    0.0,
-                    "",
-                    "",
-                    0,
-                    0,
-                    "",
-                    0.0,
-                    0.0,
-                    0.0,
-                    "",
-                    0.0
-                )
-            )
-        )
+
+fun formatAsCurrency(value: Double, format: CurrencyFormat): String {
+    return if (format.pfx_symbol.isNotBlank()) {
+        format.pfx_symbol + " " + String.format("%.2f", value)
+    } else {
+        String.format("%.2f", value) + " " + format.sfx_symbol
     }
-}*/
+}

@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.screen.operations.transaction
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,10 +45,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
+import com.example.expensetracker.model.Account
+import com.example.expensetracker.model.Category
+import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -119,7 +124,8 @@ fun TransactionEntryScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(padding),
-            viewModel = viewModel
+            viewModel = viewModel,
+            coroutineScope = coroutineScope
         )
     }
 }
@@ -132,8 +138,8 @@ fun TransactionEntryForm(
     transactionDetails: TransactionDetails,
     onValueChange: (TransactionDetails) -> Unit = {},
     viewModel: TransactionEntryViewModel,
-
-    ) {
+    coroutineScope: CoroutineScope
+) {
     var statusExpanded by remember { mutableStateOf(false) }
     var typeExpanded by remember { mutableStateOf(false) }
     var accountExpanded by remember { mutableStateOf(false) }
@@ -146,8 +152,12 @@ fun TransactionEntryForm(
     val transactionUiState1: TransactionUiState by viewModel.transactionUiState1.collectAsState()
     val transactionUiState2: TransactionUiState by viewModel.transactionUiState2.collectAsState()
 
-    val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+
+    var currentAccount by remember { mutableStateOf(Account()) }
+    var currentPayee by remember { mutableStateOf(Payee()) }
+    var currentCategory by remember { mutableStateOf(Category()) }
+    var currentToAccount by remember { mutableStateOf(Account()) }
 
     LazyColumn(
         modifier = modifier
@@ -222,6 +232,7 @@ fun TransactionEntryForm(
                 value = transactionDetails.transAmount,
                 onValueChange = { onValueChange(transactionDetails.copy(transAmount = it)) },
                 label = { Text("Amount") },
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
 
@@ -277,7 +288,7 @@ fun TransactionEntryForm(
                         .padding(0.dp, 8.dp)
                         .clickable(enabled = true) { accountExpanded = true }
                         .menuAnchor(),
-                    value = transactionDetails.accountId,
+                    value = currentAccount.accountName,
                     readOnly = true,
                     onValueChange = { onValueChange(transactionDetails.copy(accountId = it)) },
                     label = {
@@ -309,6 +320,7 @@ fun TransactionEntryForm(
                             text = { Text(account.accountName) },
                             onClick = {
                                 onValueChange(transactionDetails.copy(accountId = account.accountId.toString()))
+                                currentAccount = account
                                 accountExpanded = false
                             }
                         )
@@ -321,13 +333,10 @@ fun TransactionEntryForm(
                 expanded = payeeExpanded,
                 onExpandedChange = {
                     payeeExpanded = !payeeExpanded
-                    coroutineScope.launch {
-                        viewModel.getAllAccounts()
-                    }
-                    when (transactionDetails.payeeId) {
+                    when (transactionDetails.transCode) {
                         TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
                             coroutineScope.launch {
-
+                                viewModel.getAllAccounts()
                             }
                         }
 
@@ -338,25 +347,15 @@ fun TransactionEntryForm(
                         }
                     }
                 }) {
-                var payeeBoxValue : String = ""
-                when(transactionDetails.transCode) {
-                    TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
-                        payeeBoxValue = transactionDetails.payeeId
-                    }
-                    TransactionCode.TRANSFER.displayName -> {
-                        payeeBoxValue = transactionDetails.toAccountId
-                    }
-                    else -> {}
-                }
 
                 OutlinedTextField(
                     modifier = Modifier
                         .padding(0.dp, 8.dp)
                         .clickable(enabled = true) { payeeExpanded = true }
                         .menuAnchor(),
-                    value = payeeBoxValue,
+                    value = currentPayee.payeeName,
                     readOnly = true,
-                    onValueChange = { onValueChange(transactionDetails.copy(payeeId = it)) },
+                    onValueChange = { },
                     label = {
                         when (transactionDetails.transCode) {
                             TransactionCode.WITHDRAWAL.displayName -> {
@@ -391,8 +390,10 @@ fun TransactionEntryForm(
                                 DropdownMenuItem(
                                     text = { Text(payee.payeeName) },
                                     onClick = {
-                                        onValueChange(transactionDetails.copy(payeeId = payee.payeeId.toString()))
+                                        currentPayee = payee
                                         onValueChange(transactionDetails.copy(toAccountId = "-1"))
+                                        onValueChange(transactionDetails.copy(payeeId = currentPayee.payeeId.toString()))
+                                        Log.d("DEBUG", "TransactionEntryForm: $transactionDetails")
                                         payeeExpanded = false
                                     }
                                 )
@@ -406,6 +407,7 @@ fun TransactionEntryForm(
                                     onClick = {
                                         onValueChange(transactionDetails.copy(payeeId = "-1"))
                                         onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
+                                        currentToAccount = account
                                         payeeExpanded = false
                                     }
                                 )
@@ -425,10 +427,10 @@ fun TransactionEntryForm(
                     }
                 })
             {
-                var categoryName : String = "0"
-/*                coroutineScope.launch {
-                    viewModel.getCategoryName(transactionDetails.categoryId.toInt())
-                }*/
+                var categoryName: String = "0"
+                /*                coroutineScope.launch {
+                                    viewModel.getCategoryName(transactionDetails.categoryId.toInt())
+                                }*/
                 OutlinedTextField(
                     modifier = Modifier
                         .padding(0.dp, 8.dp)
@@ -439,7 +441,7 @@ fun TransactionEntryForm(
                             }
                         }
                         .menuAnchor(),
-                    value = categoryName,
+                    value = currentCategory.categName,
                     readOnly = true,
                     onValueChange = { onValueChange(transactionDetails.copy(categoryId = it)) },
                     label = { Text("Transaction Category *") },
@@ -460,6 +462,7 @@ fun TransactionEntryForm(
                         DropdownMenuItem(
                             text = { Text(category.categName) },
                             onClick = {
+                                currentCategory = category
                                 onValueChange(transactionDetails.copy(categoryId = category.categId.toString()))
                                 categoryExpanded = false
                             }
@@ -472,7 +475,8 @@ fun TransactionEntryForm(
                 value = transactionDetails.transactionNumber,
                 onValueChange = { onValueChange(transactionDetails.copy(transactionNumber = it)) },
                 label = { Text("Number") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
             )
 
             OutlinedTextField(
@@ -485,6 +489,7 @@ fun TransactionEntryForm(
                 value = transactionDetails.color,
                 onValueChange = { onValueChange(transactionDetails.copy(color = it)) },
                 label = { Text("Color") },
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
