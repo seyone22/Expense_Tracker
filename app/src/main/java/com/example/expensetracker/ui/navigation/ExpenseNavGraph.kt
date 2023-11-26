@@ -76,8 +76,9 @@ fun ExpenseNavHost(
         composable(route = AccountEntryDestination.route) {
             AccountEntryScreen(
                 navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
-            )
+                onNavigateUp = { navController.navigateUp() },
+                navigateToScreen = { screen -> navController.navigate(screen) },
+                )
         }
         composable(
             route = AccountDetailDestination.route+"/{accountId}",

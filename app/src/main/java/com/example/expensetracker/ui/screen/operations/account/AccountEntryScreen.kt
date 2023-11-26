@@ -45,14 +45,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -71,6 +69,7 @@ fun AccountEntryScreen(
     navigateBack: () -> Unit = {},
     onNavigateUp: () -> Unit = {},
     canNavigateBack: Boolean = true,
+    navigateToScreen: (screen: String) -> Unit,
     viewModel: AccountEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -102,12 +101,12 @@ fun AccountEntryScreen(
                 actions = {
                     Button(
                         onClick = {
-                        coroutineScope.launch {
-                            viewModel.saveAccount()
-                            navigateBack()
-                        }
+                            coroutineScope.launch {
+                                viewModel.saveAccount()
+                                navigateToScreen("Accounts")
+                            }
                         },
-                        modifier = modifier.padding(0.dp,0.dp,8.dp,0.dp),
+                        modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp),
                         enabled = viewModel.accountUiState.isEntryValid
                     ) {
                         Text(text = "Create")
@@ -411,7 +410,7 @@ fun AccountEntryForm(
             keyboardActions = KeyboardActions(onDone = { })
         )
     }
-    
+
     if (openInitialDateDialog) {
         val datePickerState = rememberDatePickerState()
         val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
@@ -524,16 +523,4 @@ fun AccountEntryForm(
         }
     }
 
-}
-
-
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun AccountEntryFormPreview() {
-    ExpenseTrackerTheme {
-        AccountEntryScreen()
-    }
 }
