@@ -31,6 +31,8 @@ import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.report.ReportScreen
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsScreen
+import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
+import com.example.expensetracker.ui.screen.transactions.TransactionsScreen
 
 /**
  * Provides Navigation graph for the application.
@@ -56,6 +58,11 @@ fun ExpenseNavHost(
         composable(route = EntitiesDestination.route) {
             EntityScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
+            )
+        }
+        composable(route = TransactionsDestination.route) {
+            TransactionsScreen(
+                navigateToScreen = { screen -> navController.navigate(screen) }
             )
         }
         composable(route = ReportsDestination.route) {

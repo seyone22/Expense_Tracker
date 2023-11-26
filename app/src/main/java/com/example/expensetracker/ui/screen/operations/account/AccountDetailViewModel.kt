@@ -53,7 +53,7 @@ class AccountDetailViewModel(
                 initialValue = AccountDetailTransactionUiState()
             )
 
-    suspend fun getAccount(accountId : Int) {
+    suspend fun getAccount() {
         accountDetailAccountUiState = accountsRepository.getAccountStream(accountId)
             .map { account ->
                 AccountDetailAccountUiState(account ?: Account())

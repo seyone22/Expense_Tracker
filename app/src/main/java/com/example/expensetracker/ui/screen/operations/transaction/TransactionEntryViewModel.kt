@@ -153,8 +153,8 @@ data class TransactionUiState(
 data class TransactionDetails(
     val transId: Int = 0,
     val accountId: String = "",
-    val toAccountId: String = "0",
-    val payeeId: String = "",
+    val toAccountId: String = "-1",
+    val payeeId: String = "-1",
     val transCode: String = TransactionCode.WITHDRAWAL.displayName,
     val transAmount: String = "",
     val status: String = TransactionStatus.U.displayName,

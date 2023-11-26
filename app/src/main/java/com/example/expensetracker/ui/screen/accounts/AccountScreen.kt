@@ -239,10 +239,12 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = balance.toString()
+                    text = (accountWithBalance.first.initialBalance?.plus(
+                        balance)).toString()
                 )
                 Text(
-                    text = balance.toString()
+                    text = (accountWithBalance.first.initialBalance?.plus(
+                        balance)).toString()
                 )
             }
         }

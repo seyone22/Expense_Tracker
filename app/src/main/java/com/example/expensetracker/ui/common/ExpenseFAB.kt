@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 fun ExpenseFAB(
     navigateToScreen: (screen: String) -> Unit,
 ) {
-    Log.d("DEBUG", "ExpenseFAB: HOASDF")
     FloatingActionButton(onClick = {
         navigateToScreen("TransactionEntry")
     }) {

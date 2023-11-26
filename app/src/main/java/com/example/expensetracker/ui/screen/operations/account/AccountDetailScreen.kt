@@ -2,10 +2,22 @@ package com.example.expensetracker.ui.screen.operations.account
 
 import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -19,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.expensetracker.R
+import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
@@ -48,6 +61,7 @@ fun AccountDetailScreen(
 
     LaunchedEffect( Unit ) {
         viewModel.getTransactions()
+        viewModel.getAccount()
     }
 
     Scaffold(
@@ -65,14 +79,79 @@ fun AccountDetailScreen(
                 .padding(it)
                 .padding(0.dp, 100.dp)
         ) {
-            if (!accountDetailTransactionUiState.transactions.isNullOrEmpty()) {
-                Card(
-
+            OutlinedCard(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(24.dp, 0.dp)
+            ) {
+                Column(
+                    modifier = modifier
+                        .padding(16.dp, 8.dp)
                 ) {
-                    Text(text = accountDetailTransactionUiState.transactions.toString())
+                    Row {
+                        Column {
+                            Icon(
+                                imageVector = Icons.Outlined.AccountBalanceWallet,
+                                contentDescription = null,
+                                Modifier.size(36.dp, 36.dp)
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = accountDetailAccountUiState.account.accountName,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Text(
+                                text = accountDetailAccountUiState.account.accountType + " Account",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+                        Column {
+                            IconButton(onClick = { /*TODO*/ }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Edit,
+                                    contentDescription = null,
+                                    Modifier.size(36.dp, 36.dp)
+                                )
+                            }
+                        }
+                    }
+                    Text(
+                        text = "Account Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
+                            accountDetailAccountUiState.balance
+                        )).toString(),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Reconciled Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
+                            accountDetailAccountUiState.balance
+                        )).toString(),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+            }
+            if (!accountDetailTransactionUiState.transactions.isNullOrEmpty()) {
+                Column {
+                    TransactionList(transactions = accountDetailTransactionUiState.transactions)
                 }
             }
         }
     }
+}
 
+@Composable
+fun TransactionList(
+    transactions : List<Transaction>
+) {
+    LazyColumn {
+        items(count = transactions.size) {
+            ListItem(
+                headlineContent = {
+                    Text(text = transactions[it].accountId.toString())
+                }
+            )
+            HorizontalDivider()
+
+        }
+    }
 }

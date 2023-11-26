@@ -342,7 +342,7 @@ fun TransactionEntryForm(
 
                         TransactionCode.TRANSFER.displayName -> {
                             coroutineScope.launch {
-
+                                viewModel.getAllAccounts()
                             }
                         }
                     }
@@ -385,7 +385,22 @@ fun TransactionEntryForm(
                     onDismissRequest = { payeeExpanded = false },
                 ) {
                     when (transactionDetails.transCode) {
+                        TransactionCode.TRANSFER.displayName -> {
+                            viewModel.transactionUiState.accountsList.forEach { account ->
+                                Log.d("DEBUG", "TransactionEntryForm: Executes! $account")
+                                DropdownMenuItem(
+                                    text = { Text(account.accountName) },
+                                    onClick = {
+                                        onValueChange(transactionDetails.copy(payeeId = "-1"))
+                                        onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
+                                        currentToAccount = account
+                                        payeeExpanded = false
+                                    }
+                                )
+                            }
+                        }
                         TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
+                            Log.d("DEBUG", "TransactionEntryForm: Executes Other!")
                             transactionUiState2.payeesList.forEach { payee ->
                                 DropdownMenuItem(
                                     text = { Text(payee.payeeName) },
@@ -394,20 +409,6 @@ fun TransactionEntryForm(
                                         onValueChange(transactionDetails.copy(toAccountId = "-1"))
                                         onValueChange(transactionDetails.copy(payeeId = currentPayee.payeeId.toString()))
                                         Log.d("DEBUG", "TransactionEntryForm: $transactionDetails")
-                                        payeeExpanded = false
-                                    }
-                                )
-                            }
-                        }
-
-                        TransactionCode.TRANSFER.displayName -> {
-                            viewModel.transactionUiState.accountsList.forEach { account ->
-                                DropdownMenuItem(
-                                    text = { Text(account.accountName) },
-                                    onClick = {
-                                        onValueChange(transactionDetails.copy(payeeId = "-1"))
-                                        onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
-                                        currentToAccount = account
                                         payeeExpanded = false
                                     }
                                 )
