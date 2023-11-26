@@ -16,9 +16,11 @@ import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
@@ -34,6 +36,20 @@ class AccountViewModel(
     private val metadataRepository: MetadataRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository,
 ) : ViewModel() {
+    // Flow for expenses
+    private val expensesFlow: Flow<Double> = transactionsRepository.getTotalBalanceByCode("Withdrawal")
+
+    // Flow for income
+    private val incomeFlow: Flow<Double> = transactionsRepository.getTotalBalanceByCode("Deposit")
+
+    // Flow for total
+    private val totalFlow: Flow<Double> = transactionsRepository.getTotalBalance()
+
+    // Combine the flows and calculate the totals
+    val totals: Flow<Totals> = combine(expensesFlow, incomeFlow, totalFlow) { expenses, income, total ->
+        Totals(expenses, income, total)
+    }
+
     val baseCurrencyId =
         metadataRepository.getMetadataByNameStream("BASECURRENCYID")
             .map { info ->
@@ -115,3 +131,10 @@ data class AccountsUiStateOne(
     val balancesList: List<TransactionDao.BalanceResult> = emptyList(),
     val grandTotal: Double = 0.0
 )
+
+data class Totals(
+    val expenses: Double = 0.0,
+    val income: Double = 0.0,
+    val total : Double = 0.0
+)
+

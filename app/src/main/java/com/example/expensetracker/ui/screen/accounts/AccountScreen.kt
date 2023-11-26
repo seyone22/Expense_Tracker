@@ -45,6 +45,7 @@ import com.example.expensetracker.ui.screen.accounts.AccountViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import kotlinx.coroutines.CoroutineScope
+import kotlin.math.log
 
 object AccountsDestination : NavigationDestination {
     override val route = "Accounts"
@@ -61,7 +62,8 @@ fun AccountScreen(
 
     ) {
     val accountsUiState by viewModel.accountsUiState.collectAsState()
-
+    val totals by viewModel.totals.collectAsState(Totals())
+    Log.d("DEBUG", "AccountScreen: $totals")
     val isUsed by viewModel.isUsed.collectAsState()
 
     when (isUsed) {
@@ -99,7 +101,7 @@ fun AccountScreen(
                                 .fillMaxHeight()
                         ) {
                             AnimatedCircle(
-                                proportions = listOf(0.25f, 0.5f),
+                                proportions = listOf( (totals.income / totals.total).toFloat() , (totals.expenses / totals.total).toFloat()),
                                 colors = listOf(Color.Green, Color.Red),
                                 modifier = modifier
                                     .height(300.dp)

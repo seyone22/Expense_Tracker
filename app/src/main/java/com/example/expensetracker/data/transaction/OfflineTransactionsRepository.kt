@@ -9,6 +9,8 @@ class OfflineTransactionsRepository(private val transactionDao: TransactionDao) 
     override fun getTransactionsFromAccount(accountId: Int): Flow<List<Transaction>> = transactionDao.getAllTransactionsByAccount(accountId)
     override fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction> = transactionDao.getAllTransactionsByToAccount(toAccountId)
     override fun getBalanceByAccountId() : Flow<List<TransactionDao.BalanceResult>> = transactionDao.getAllAccountBalances()
+    override fun getTotalBalanceByCode(transactionCode : String) : Flow<Double> = transactionDao.getTotalBalanceByCode(transactionCode)
+    override fun getTotalBalance() : Flow<Double> = transactionDao.getTotalBalance()
 
 
     override suspend fun insertTransaction(transaction: Transaction) = transactionDao.insert(transaction)

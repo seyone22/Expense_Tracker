@@ -56,6 +56,11 @@ interface TransactionDao {
             "GROUP BY accountId")
     fun getAllAccountBalances(): Flow<List<BalanceResult>>
 
+    @Query("SELECT SUM(transAmount) AS totalWithdrawal FROM CHECKINGACCOUNT_V1 WHERE transCode = :transCode")
+    fun getTotalBalanceByCode(transCode : String): Flow<Double>
+    @Query("SELECT SUM(transAmount) AS totalWithdrawal FROM CHECKINGACCOUNT_V1")
+    fun getTotalBalance(): Flow<Double>
+
     data class BalanceResult(
         val accountId: Int,
         val balance: Double
