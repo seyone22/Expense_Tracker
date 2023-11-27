@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.screen.entities
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,9 +20,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,15 +59,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
+import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
 import com.example.expensetracker.ui.AppViewModelProvider
+import com.example.expensetracker.ui.common.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 object EntitiesDestination : NavigationDestination {
@@ -135,13 +144,25 @@ fun EntityScreen(
                 }
                 when(state) {
                     0 -> {
-                        CategoryList(list = entityUiState.categoriesList)
+                        CategoryList(
+                            list = entityUiState.categoriesList,
+                            viewModel = viewModel,
+                            coroutineScope = coroutineScope
+                        )
                     }
                     1 -> {
-                        PayeeList(list = entityUiState.payeesList)
+                        PayeeList(
+                            list = entityUiState.payeesList,
+                            viewModel = viewModel,
+                            coroutineScope = coroutineScope
+                        )
                     }
                     2 -> {
-                        CurrenciesList(list = entityUiState.currenciesList)
+                        CurrenciesList(
+                            list = entityUiState.currenciesList,
+                            viewModel = viewModel,
+                            coroutineScope = coroutineScope
+                        )
                     }
                 }
             }
@@ -178,10 +199,13 @@ fun EntityScreen(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryList(
     modifier: Modifier = Modifier,
-    list: List<Category>
+    list: List<Category>,
+    viewModel: EntityViewModel,
+    coroutineScope : CoroutineScope
 ) {
     LazyColumn() {
         items(list) {
@@ -195,19 +219,46 @@ fun CategoryList(
                     )
                 },
                 trailingContent = {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        IconButton(
-                            onClick = { /*TODO*/ },
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowRight,
-                                contentDescription = null,
-                                modifier = modifier.size(36.dp, 36.dp)
-                            )
+                        val openAlertDialog = remember { mutableStateOf(false) }
+                        val moreExpanded = remember { mutableStateOf(false) }
+
+                            IconButton(
+                                onClick = {
+                                    moreExpanded.value = true
+                                },
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = null,
+                                    modifier = modifier.size(36.dp, 36.dp)
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = moreExpanded.value,
+                                onDismissRequest = { moreExpanded.value = false },
+                            ) {
+                                    DropdownMenuItem(
+                                        text = { Text(text = "Edit")},
+                                        onClick = {
+                                            openAlertDialog.value = true
+                                            moreExpanded.value = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(text = "Delete") },
+                                        onClick = {
+                                            openAlertDialog.value = true
+                                            moreExpanded.value = false
+                                        }
+                                    )
+                                }
+
+                        if(openAlertDialog.value) {
+                            DeleteConfirmationDialog({ openAlertDialog.value = false }, { coroutineScope.launch {
+                                viewModel.deleteCategory(it)
+                            } }, "Are you sure you want to delete this category, big boi?")
                         }
-                    }
                 }
             )
             HorizontalDivider()
@@ -218,13 +269,15 @@ fun CategoryList(
 @Composable
 fun PayeeList(
     modifier: Modifier = Modifier,
-    list: List<Payee>
+    list: List<Payee>,
+    coroutineScope : CoroutineScope,
+    viewModel: EntityViewModel
 ) {
     LazyColumn() {
-        items(list) {
+        items(list) {payee ->
             ListItem(
-                headlineContent = { Text(it.payeeName) },
-                overlineContent = { Text(it.payeeId.toString()) },
+                headlineContent = { Text(payee.payeeName) },
+                overlineContent = { Text(payee.payeeId.toString()) },
                 leadingContent = {
                     Icon(
                         Icons.Filled.Favorite,
@@ -232,18 +285,45 @@ fun PayeeList(
                     )
                 },
                 trailingContent = {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
+                    val openAlertDialog = remember { mutableStateOf(false) }
+                    val moreExpanded = remember { mutableStateOf(false) }
+
+                    IconButton(
+                        onClick = {
+                            moreExpanded.value = true
+                        },
                     ) {
-                        IconButton(
-                            onClick = { /*TODO*/ },
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowRight,
-                                contentDescription = null,
-                                modifier = modifier.size(36.dp, 36.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = null,
+                            modifier = modifier.size(36.dp, 36.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = moreExpanded.value,
+                        onDismissRequest = { moreExpanded.value = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(text = "Edit")},
+                            onClick = {
+                                openAlertDialog.value = true
+                                moreExpanded.value = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "Delete") },
+                            onClick = {
+                                openAlertDialog.value = true
+                                moreExpanded.value = false
+                            }
+                        )
+                    }
+
+                    if(openAlertDialog.value) {
+                        DeleteConfirmationDialog({ openAlertDialog.value = false }, { coroutineScope.launch {
+                            viewModel.deletePayee(payee)
+                        } }, "Are you sure you want to delete this payee, big boi?")
                     }
                 }
             )
@@ -255,7 +335,9 @@ fun PayeeList(
 @Composable
 fun CurrenciesList(
     modifier: Modifier = Modifier,
-    list: List<CurrencyFormat>
+    list: List<CurrencyFormat>,
+    coroutineScope: CoroutineScope,
+    viewModel: EntityViewModel
 ) {
     LazyColumn() {
         items(list) {
@@ -264,18 +346,45 @@ fun CurrenciesList(
                 overlineContent = { Text(it.currencyName) },
                 leadingContent = { Text(it.currency_symbol) },
                 trailingContent = {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
+                    val openAlertDialog = remember { mutableStateOf(false) }
+                    val moreExpanded = remember { mutableStateOf(false) }
+
+                    IconButton(
+                        onClick = {
+                            moreExpanded.value = true
+                        },
                     ) {
-                        IconButton(
-                            onClick = { /*TODO*/ },
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowRight,
-                                contentDescription = null,
-                                modifier = modifier.size(36.dp, 36.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = null,
+                            modifier = modifier.size(36.dp, 36.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = moreExpanded.value,
+                        onDismissRequest = { moreExpanded.value = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(text = "Edit")},
+                            onClick = {
+                                openAlertDialog.value = true
+                                moreExpanded.value = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "Delete") },
+                            onClick = {
+                                openAlertDialog.value = true
+                                moreExpanded.value = false
+                            }
+                        )
+                    }
+
+                    if(openAlertDialog.value) {
+                        DeleteConfirmationDialog({ openAlertDialog.value = false }, { coroutineScope.launch {
+                            viewModel.deleteCurrency(it)
+                        } }, "Are you sure you want to delete this currency, big boi?")
                     }
                 }
             )
