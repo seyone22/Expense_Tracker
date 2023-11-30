@@ -27,7 +27,7 @@ interface TransactionDao {
     // DOES NOT ACCOUNT FOR CUSTOM CATEGORIES
     @Query("SELECT " +
             "    CHECKINGACCOUNT_V1.*, " +
-            "    SUBSTRING(PAYEE_V1.payeeName, 5) AS payeeName, " +
+            "    SUBSTRING(PAYEE_V1.payeeName, 0) AS payeeName, " +
             "    SUBSTRING(CATEGORY_V1.categName, 5) AS categName " +
             "FROM " +
             "    CHECKINGACCOUNT_V1 " +
@@ -39,7 +39,7 @@ interface TransactionDao {
 
     @Query("SELECT " +
             "    CHECKINGACCOUNT_V1.*, " +
-            "    SUBSTRING(PAYEE_V1.payeeName, 5) AS payeeName, " +
+            "    SUBSTRING(PAYEE_V1.payeeName, 0) AS payeeName, " +
             "    SUBSTRING(CATEGORY_V1.categName, 5) AS categName " +
             "FROM " +
             "    CHECKINGACCOUNT_V1 " +
