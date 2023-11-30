@@ -1,9 +1,13 @@
 package com.example.expensetracker.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "CURRENCYFORMATS_V1")
+@Entity(tableName = "CURRENCYFORMATS_V1",
+    indices = [
+        Index(value = ["currency_symbol"])
+    ])
 data class CurrencyFormat (
     @PrimaryKey(autoGenerate = true)
     val currencyId : Int = 0,
