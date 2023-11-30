@@ -34,7 +34,7 @@ import com.example.expensetracker.model.TransactionLink
 
 @Database(
     entities = [Account::class, Asset::class, Attachment::class, BillsDeposit::class, BudgetSplitTransaction::class, BudgetTable::class, BudgetYear::class, Category::class, Transaction::class, CurrencyFormat::class, CurrencyHistory::class, CustomFieldData::class, CustomField::class, Metadata::class, Payee::class, Report::class, ShareInfo::class, SplitTransaction::class, StockHistory::class, Stock::class, TransactionLink::class],
-    version = 1,
+    version = 19,
     exportSchema = false
 )
 abstract class MMEXDatabase : RoomDatabase() {
@@ -51,8 +51,8 @@ abstract class MMEXDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context): MMEXDatabase {
             return Instance ?: synchronized(this) {
-                Room.databaseBuilder(context, MMEXDatabase::class.java, "mmex_database")
-                    .createFromAsset("database/prepopulate.db")
+                Room.databaseBuilder(context, MMEXDatabase::class.java, "mmex_database_v19")
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { Instance = it }
             }
