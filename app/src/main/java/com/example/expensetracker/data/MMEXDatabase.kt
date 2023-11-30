@@ -33,7 +33,8 @@ abstract class MMEXDatabase : RoomDatabase() {
         fun getDatabase(context: Context): MMEXDatabase {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, MMEXDatabase::class.java, "mmex_database")
-                    .createFromAsset("database/prepopulate.db")
+                    .createFromAsset("database/prepopulate_v1.db")
+                    //.fallbackToDestructiveMigration()
                     .build()
                     .also { Instance = it }
             }

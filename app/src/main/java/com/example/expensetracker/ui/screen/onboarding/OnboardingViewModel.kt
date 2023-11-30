@@ -97,7 +97,7 @@ class OnboardingViewModel(
                     )
                 )
             )
-            metadataRepository.updateMetadata(
+            metadataRepository.insertMetadata(
                 Metadata(
                     7,
                     "ISUSED",
