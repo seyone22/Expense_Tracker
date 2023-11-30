@@ -6,20 +6,20 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "ASSETS_V1",
     indices = [
-        Index(value = ["assetType"])
+        Index(value = ["ASSETTYPE"])
     ]
 )
 data class Asset(
     @PrimaryKey(autoGenerate = true)
-    val assetId: Int = 0,
-    val startDate: String = "",
-    val assetName: String = "",
-    val assetStatus: String = "",
-    val currencyId: Int = -1,
-    val valueChangeMode: String = "",
-    val value: Double = 0.0,
-    val valueChange: String = "",
-    val notes: String = "",
-    val valueChangeRate: Double = 0.0,
-    val assetType: String = "",
+    val ASSETID: Int = 0,
+    val STARTDATE: String = "",
+    val ASSETNAME: String = "",
+    val ASSETSTATUS: String? = "",
+    val CURRENCYID: Int = -1,
+    val VALUECHANGEMODE: String = "",
+    val VALUE: Double = 0.0,
+    val VALUECHANGE: String = "",
+    val NOTES: String = "",
+    val VALUECHANGERATE: Double = 0.0,
+    val ASSETTYPE: String = "",
 )

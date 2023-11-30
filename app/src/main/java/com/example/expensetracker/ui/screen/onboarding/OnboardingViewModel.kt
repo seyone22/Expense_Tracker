@@ -66,6 +66,8 @@ class OnboardingViewModel(
     val currencyList: StateFlow<CurrencyList> =
         currencyFormatsRepository.getAllCurrencyFormatsStream()
             .map { currencies ->
+                Log.d("DEBUG", "TESTING: $currencies")
+
                 CurrencyList(
                     currenciesList = currencies
                 )
@@ -75,6 +77,7 @@ class OnboardingViewModel(
                 started = SharingStarted.WhileSubscribed(OnboardingViewModel.TIMEOUT_MILLIS),
                 initialValue = CurrencyList()
             )
+
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
