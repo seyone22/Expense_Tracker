@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Transaction
+import com.example.expensetracker.model.TransactionWithDetails
 import com.example.expensetracker.ui.common.AnimatedCircle
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
@@ -101,7 +102,7 @@ fun TransactionsScreen(
 @Composable
 fun TransactionList(
     modifier: Modifier,
-    transactions : List<Transaction>
+    transactions : List<TransactionWithDetails>
 ) {
     LazyColumn {
         items(count = transactions.size) {

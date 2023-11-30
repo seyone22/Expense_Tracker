@@ -6,21 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
-import com.example.expensetracker.model.Category
-import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
-import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
+import com.example.expensetracker.model.TransactionWithDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
-import com.example.expensetracker.ui.screen.operations.transaction.TransactionUiState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlin.math.log
 
 class AccountDetailViewModel(
     private val accountsRepository: AccountsRepository,
@@ -175,5 +169,5 @@ data class AccountDetailAccountUiState(
     val balance: Double = 0.0
 )
 data class AccountDetailTransactionUiState(
-    val transactions: List<Transaction> = listOf(),
+    val transactions: List<TransactionWithDetails> = listOf(),
 )

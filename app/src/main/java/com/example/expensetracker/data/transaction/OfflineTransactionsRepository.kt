@@ -1,12 +1,13 @@
 package com.example.expensetracker.data.transaction
 
 import com.example.expensetracker.model.Transaction
+import com.example.expensetracker.model.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
 
 class OfflineTransactionsRepository(private val transactionDao: TransactionDao) : TransactionsRepository {
-    override fun getAllTransactionsStream(): Flow<List<Transaction>> = transactionDao.getAllTransactions()
+    override fun getAllTransactionsStream(): Flow<List<TransactionWithDetails>> = transactionDao.getAllTransactions()
     override fun getTransactionStream(transId: Int): Flow<Transaction?> = transactionDao.getTransaction(transId)
-    override fun getTransactionsFromAccount(accountId: Int): Flow<List<Transaction>> = transactionDao.getAllTransactionsByAccount(accountId)
+    override fun getTransactionsFromAccount(accountId: Int): Flow<List<TransactionWithDetails>> = transactionDao.getAllTransactionsByAccount(accountId)
     override fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction> = transactionDao.getAllTransactionsByToAccount(toAccountId)
     override fun getBalanceByAccountId() : Flow<List<TransactionDao.BalanceResult>> = transactionDao.getAllAccountBalances()
     override fun getTotalBalanceByCode(transactionCode : String) : Flow<Double> = transactionDao.getTotalBalanceByCode(transactionCode)

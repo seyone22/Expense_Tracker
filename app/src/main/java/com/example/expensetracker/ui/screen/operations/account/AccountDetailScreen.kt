@@ -32,12 +32,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.expensetracker.R
 import com.example.expensetracker.model.Transaction
+import com.example.expensetracker.model.TransactionWithDetails
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
+import com.example.expensetracker.ui.screen.transactions.TransactionList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -132,26 +134,12 @@ fun AccountDetailScreen(
             }
             if (!accountDetailTransactionUiState.transactions.isNullOrEmpty()) {
                 Column {
-                    TransactionList(transactions = accountDetailTransactionUiState.transactions)
+                    TransactionList(
+                        transactions = accountDetailTransactionUiState.transactions,
+                        modifier = modifier
+                    )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun TransactionList(
-    transactions : List<Transaction>
-) {
-    LazyColumn {
-        items(count = transactions.size) {
-            ListItem(
-                headlineContent = {
-                    Text(text = transactions[it].accountId.toString())
-                }
-            )
-            HorizontalDivider()
-
         }
     }
 }

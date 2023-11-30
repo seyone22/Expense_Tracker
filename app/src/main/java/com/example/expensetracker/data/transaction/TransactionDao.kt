@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.expensetracker.model.Transaction
+import com.example.expensetracker.model.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -23,11 +24,33 @@ interface TransactionDao {
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE transId = :transId")
     fun getTransaction(transId: Int): Flow<Transaction>
 
-    @Query("SELECT * FROM CHECKINGACCOUNT_V1 ORDER BY transId ASC")
-    fun getAllTransactions(): Flow<List<Transaction>>
+    // DOES NOT ACCOUNT FOR CUSTOM CATEGORIES
+    @Query("SELECT " +
+            "    CHECKINGACCOUNT_V1.*, " +
+            "    SUBSTRING(PAYEE_V1.payeeName, 5) AS payeeName, " +
+            "    SUBSTRING(CATEGORY_V1.categName, 5) AS categName " +
+            "FROM " +
+            "    CHECKINGACCOUNT_V1 " +
+            "INNER JOIN " +
+            "    PAYEE_V1 ON CHECKINGACCOUNT_V1.payeeId = PAYEE_V1.payeeId " +
+            "INNER JOIN " +
+            "    CATEGORY_V1 ON CHECKINGACCOUNT_V1.categoryId = CATEGORY_V1.categId ")
+    fun getAllTransactions(): Flow<List<TransactionWithDetails>>
 
-    @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE accountId = :accountId")
-    fun getAllTransactionsByAccount(accountId: Int): Flow<List<Transaction>>
+    @Query("SELECT " +
+            "    CHECKINGACCOUNT_V1.*, " +
+            "    SUBSTRING(PAYEE_V1.payeeName, 5) AS payeeName, " +
+            "    SUBSTRING(CATEGORY_V1.categName, 5) AS categName " +
+            "FROM " +
+            "    CHECKINGACCOUNT_V1 " +
+            "INNER JOIN " +
+            "    PAYEE_V1 ON CHECKINGACCOUNT_V1.payeeId = PAYEE_V1.payeeId " +
+            "INNER JOIN " +
+            "    CATEGORY_V1 ON CHECKINGACCOUNT_V1.categoryId = CATEGORY_V1.categId " +
+            "WHERE " +
+            "    CHECKINGACCOUNT_V1.accountId = :accountId")
+    fun getAllTransactionsByAccount(accountId: Int): Flow<List<TransactionWithDetails>>
+
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE toAccountId = :toAccountId")
     fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction>
