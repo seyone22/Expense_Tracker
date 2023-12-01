@@ -1,7 +1,6 @@
 package com.example.expensetracker.ui.screen.entities
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
@@ -26,8 +24,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
@@ -90,7 +85,7 @@ fun EntityScreen(
 
     var state by remember { mutableIntStateOf(0) }
     val titles = listOf("Categories", "Payees", "Currencies")
-    //TODO: Refactor this to be more elegant
+
     val entityUiState : EntitiesUiState by viewModel.entitiesUiState.collectAsState(EntitiesUiState())
 
     var showCategoryDialog by remember { mutableStateOf(false) }
@@ -132,6 +127,7 @@ fun EntityScreen(
                 PrimaryTabRow(
                     selectedTabIndex = state,
                     containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+
                 ) {
                     titles.forEachIndexed { index, title ->
                         Tab(
@@ -199,7 +195,6 @@ fun EntityScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryList(
     modifier: Modifier = Modifier,

@@ -1,19 +1,33 @@
 package com.example.expensetracker.ui.screen.settings
 
 import androidx.lifecycle.ViewModel
-import com.example.expensetracker.data.payee.PayeesRepository
+import com.example.expensetracker.data.metadata.MetadataRepository
+import com.example.expensetracker.model.Metadata
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
 /**
  * ViewModel to retrieve all items in the Room database.
  */
 class SettingsViewModel(
-
-    private val payeesRepository: PayeesRepository,
+    private val metadataRepository: MetadataRepository,
 
 ) : ViewModel() {
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
+
+    // Flow for username
+    private val usernameFlow: Flow<Metadata?> = metadataRepository.getMetadataByNameStream("USERNAME")
+
+    // Flow for baseCurrency
+    private val baseCurrencyIdFlow: Flow<Metadata?> = metadataRepository.getMetadataByNameStream("BASECURRENCYID")
+
+    // Combine the flows and calculate the totals
+    val metadataList: Flow<List<Metadata?>> =
+        combine(usernameFlow, baseCurrencyIdFlow) { username, basecurrencyid ->
+            listOf(username, basecurrencyid)
+        }
 }
 
 // TODO : Recurring Transactions

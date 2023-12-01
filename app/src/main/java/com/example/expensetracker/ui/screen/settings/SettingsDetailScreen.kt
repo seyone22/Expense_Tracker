@@ -1,12 +1,10 @@
 package com.example.expensetracker.ui.screen.settings
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CatchingPokemon
@@ -21,14 +19,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.ui.common.ExpenseFAB
-import com.example.expensetracker.ui.common.ExpenseNavBar
-import com.example.expensetracker.ui.common.ExpenseTopBar
+import com.example.expensetracker.model.Metadata
+import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
 
 object SettingsDetailDestination : NavigationDestination {
@@ -44,8 +43,10 @@ fun SettingsDetailScreen(
     navigateToScreen: (screen: String) -> Unit,
     navigateBack : ()  -> Unit,
     backStackEntry: String,
-    //viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
+    val metadataList by viewModel.metadataList.collectAsState(listOf())
+
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -73,10 +74,14 @@ fun SettingsDetailScreen(
         ) {
             when(backStackEntry) {
                 "General" -> {
-                    GeneralSettingsList()
+                    GeneralSettingsList(
+                        metadata = metadataList
+                    )
                 }
                 "Appearance" -> {
-                    GeneralSettingsList()
+                    GeneralSettingsList(
+                        metadata = metadataList
+                    )
                 }
                 "About" -> {
                     AboutList()
@@ -87,18 +92,23 @@ fun SettingsDetailScreen(
 }
 
 @Composable
-fun GeneralSettingsList() {
+fun GeneralSettingsList(
+    metadata: List<Metadata?>
+) {
+
     Column {
         ListItem(
             headlineContent = { Text(text = "Username") },
-            supportingContent = { Text(text = "current username") },
+            supportingContent = { metadata.find { it?.infoName ?: "USERNAME" == "USERNAME" }
+                ?.let { Text(text = it.infoValue) } },
             modifier = Modifier.clickable {  }
 
 
         )
         ListItem(
             headlineContent = { Text(text = "Base Currency") },
-            supportingContent = { Text(text = "LKR") },
+            supportingContent = { metadata.find { it?.infoName ?: "BASECURRENCYID" == "BASECURRENCYID" }
+                ?.let { Text(text = it.infoValue) } },
             modifier = Modifier.clickable {  }
 
         )

@@ -1,7 +1,6 @@
 package com.example.expensetracker.ui
 
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -75,7 +74,7 @@ object AppViewModelProvider {
         }
         // Initializer for Settings ViewModel
         initializer {
-            SettingsViewModel(expenseApplication().container.payeesRepository)
+            SettingsViewModel(expenseApplication().container.metadataRepository)
         }
         // Initializer for Onboarding ViewModel
         initializer {

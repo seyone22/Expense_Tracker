@@ -1,9 +1,5 @@
 package com.example.expensetracker.ui.screen.settings
 
-import android.content.Context
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -23,10 +19,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.ui.common.ExpenseFAB
-import com.example.expensetracker.ui.common.ExpenseNavBar
-import com.example.expensetracker.ui.common.ExpenseTopBar
+import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
 
 object SettingsDestination : NavigationDestination {
@@ -41,7 +36,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
     navigateBack : ()  -> Unit,
-    //viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     Scaffold(
         modifier = modifier,
