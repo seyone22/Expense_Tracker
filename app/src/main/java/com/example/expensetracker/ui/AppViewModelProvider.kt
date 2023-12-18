@@ -15,6 +15,7 @@ import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyE
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.report.BudgetViewModel
+import com.example.expensetracker.ui.screen.report.ReportViewModel
 import com.example.expensetracker.ui.screen.settings.SettingsViewModel
 import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
 
@@ -42,6 +43,12 @@ object AppViewModelProvider {
         }
         initializer {
             BudgetViewModel(expenseApplication().container.payeesRepository)
+        }
+        initializer {
+            ReportViewModel(
+                expenseApplication().container.transactionsRepository,
+                expenseApplication().container.categoriesRepository
+            )
         }
         //Initializer for AccountEntryViewModel
         initializer {
@@ -78,7 +85,10 @@ object AppViewModelProvider {
         }
         // Initializer for Onboarding ViewModel
         initializer {
-            OnboardingViewModel(expenseApplication().container.metadataRepository, expenseApplication().container.currenciesRepository)
+            OnboardingViewModel(
+                expenseApplication().container.metadataRepository,
+                expenseApplication().container.currenciesRepository
+            )
         }
     }
 }

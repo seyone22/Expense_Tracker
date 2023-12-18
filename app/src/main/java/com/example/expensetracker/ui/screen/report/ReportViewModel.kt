@@ -1,57 +1,39 @@
 package com.example.expensetracker.ui.screen.report
 
 import androidx.lifecycle.ViewModel
+import com.example.expensetracker.data.category.CategoriesRepository
 import com.example.expensetracker.data.payee.PayeesRepository
+import com.example.expensetracker.data.transaction.TransactionsRepository
+import com.example.expensetracker.model.Category
+import com.example.expensetracker.model.Transaction
+import com.example.expensetracker.model.TransactionWithDetails
+import com.example.expensetracker.ui.screen.accounts.Totals
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
 /**
  * ViewModel to retrieve all items in the Room database.
  */
 class ReportViewModel(
-
-    private val payeesRepository: PayeesRepository,
-
+    private val transactionsRepository: TransactionsRepository,
+    private val categoriesRepository: CategoriesRepository
 ) : ViewModel() {
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
+
+    // Flow for expenses
+    private val expensesFlow: Flow<List<TransactionWithDetails>> =
+        transactionsRepository.getAllTransactionsStream()
+
+    // Flow for expenses
+    private val categoriesFlow: Flow<List<Category>> =
+        categoriesRepository.getAllCategoriesStream()
+
+    //TODO: THIS
+    // Combine the flows and get the chart data
+    //val categoryChartData: Flow<Pair<>> =
+      //  combine(expensesFlow, incomeFlow, totalFlow) { expenses, income, total ->
+     //       Totals(expenses, income, total)
+     //   }
 }
-
-// TODO : Recurring Transactions
-// TODO: Reports, Transaction Reports PRIORITY
-// TODO: Budget setup, Budgets
-// TODO: Stock Portfolio
-// TODO: Assets
-// TODO: Import/Export databases, transactions -> as format mmdb, csv, etc...
-// TODO: Handle Attachments
-
-// TODO : Multiple databases / switching databases
-
-/* Settings stuff
-    user name
-    language
-    date format
-    base currency
-    currency format
-    currency history
-    financial year start day
-    financial year start month
-    use original date when pasting transactions
-    use original date when duplicating transactions
-
-    view budgets as financial yars
-    view budgets with transfer transactions
-    view budget category report with summaries
-    override yearly budget with munthly budget
-    subtract monthly budgets from yearly budget in reporting
-    budget offset days
-    startday of month for repoirting
-    ignore future transactions
-
-    Defaults for new transaction dialog
-    backup options
-    deleted transactions retainment
-    csv delimiter
-*/
-
-// NEW FEATURES
-// TODO: automatic Interest handling for accounts
