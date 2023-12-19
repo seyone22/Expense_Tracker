@@ -47,7 +47,8 @@ object AppViewModelProvider {
         initializer {
             ReportViewModel(
                 expenseApplication().container.transactionsRepository,
-                expenseApplication().container.categoriesRepository
+                expenseApplication().container.categoriesRepository,
+                expenseApplication().container.payeesRepository
             )
         }
         //Initializer for AccountEntryViewModel

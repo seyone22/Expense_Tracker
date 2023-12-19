@@ -11,9 +11,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
@@ -36,7 +39,7 @@ object ReportsDestination : NavigationDestination {
 fun ReportScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
-    viewModel: BudgetViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
@@ -57,26 +60,76 @@ fun ReportScreen(
         Column(
             Modifier.padding(innerPadding)
         ) {
-            ReportByCategory()
+            ReportByPayee(viewModel)
+            ReportByCategory(viewModel)
         }
     }
 }
 
 @Composable
-fun ReportByCategory() {
+fun ReportByPayee(
+    viewModel: ReportViewModel
+) {
+    // Collect the flow and automatically recompose when the data changes
+    val byPayeeData by viewModel.byPayeeData.collectAsState(
+        initial = Pair(emptyList(), emptyList())
+    )
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp, 12.dp)
+            .padding(24.dp, 12.dp),
+
     ) {
         AnimatedCircle(
-            proportions = listOf(0.2f, 0.3f, 0.4f, 0.1f),
-            colors = listOf(Color.Green, Color.Red, Color.Blue, Color.Yellow),
+            proportions = byPayeeData.second.map { it.toFloat() },
+            colors = viewModel.generateDistinctColors(byPayeeData.second.size),
             modifier = Modifier
                 .height(300.dp)
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally)
                 .fillMaxWidth()
         )
+        Text(
+            text = "Transactions by Payees",
+            modifier = Modifier
+                .padding(16.dp),
+            textAlign = TextAlign.Center,
+        )
+
+    }
+}
+
+@Composable
+fun ReportByCategory(
+    viewModel: ReportViewModel
+) {
+    // Collect the flow and automatically recompose when the data changes
+    val byCategoryData by viewModel.byCategoryData.collectAsState(
+        initial = Pair(emptyList(), emptyList())
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp, 12.dp),
+
+        ) {
+        AnimatedCircle(
+            proportions = byCategoryData.second.map { it.toFloat() },
+            colors = viewModel.generateDistinctColors(byCategoryData.second.size),
+            modifier = Modifier
+                .height(300.dp)
+                .padding(16.dp)
+                .align(Alignment.CenterHorizontally)
+                .fillMaxWidth()
+        )
+        Text(
+            text = "Transactions by Categories",
+            modifier = Modifier
+                .padding(16.dp),
+            textAlign = TextAlign.Center,
+        )
+
     }
 }
