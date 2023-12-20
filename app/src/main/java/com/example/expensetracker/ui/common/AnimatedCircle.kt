@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.common
 
+import android.graphics.Typeface
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
@@ -14,9 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 private const val DividerLengthInDegrees = 1.8f
 
@@ -33,7 +37,7 @@ fun AnimatedCircle(
         MutableTransitionState(AnimatedCircleProgress.START)
             .apply { targetState = AnimatedCircleProgress.END }
     }
-    val stroke = with(LocalDensity.current) { Stroke(5.dp.toPx()) }
+    val stroke = with(LocalDensity.current) { Stroke(50.dp.toPx()) }
     val transition = updateTransition(currentState)
     val angleOffset by transition.animateFloat(
         transitionSpec = {
@@ -88,6 +92,8 @@ fun AnimatedCircle(
             )
             startAngle += sweep
         }
+
+
     }
 }
 private enum class AnimatedCircleProgress { START, END }

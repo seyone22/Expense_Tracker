@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.report
 
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.example.expensetracker.data.category.CategoriesRepository
@@ -12,6 +13,7 @@ import com.example.expensetracker.model.TransactionWithDetails
 import com.example.expensetracker.ui.screen.accounts.Totals
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlin.math.log
 import kotlin.random.Random
 
 /**
@@ -27,8 +29,12 @@ class ReportViewModel(
     }
 
     // Flow for expenses
-    private val transactionsFlow: Flow<List<TransactionWithDetails>> =
-        transactionsRepository.getAllTransactionsStream()
+    private val transactionsExpenseFlow: Flow<List<Transaction>> =
+        transactionsRepository.getAllTransactionsByCode("Withdrawal")
+
+    // Flow for income
+    private val transactionsIncomeFlow: Flow<List<Transaction>> =
+        transactionsRepository.getAllTransactionsByCode("Deposit")
 
     // Flow for categories
     private val categoriesFlow: Flow<List<Category>> =
@@ -40,7 +46,7 @@ class ReportViewModel(
 
     // Combine the flows and get the chart data
     val byPayeeData: Flow<Pair<List<Payee>, List<Double>>> =
-        combine(payeesFlow, transactionsFlow) { payees, transactions ->
+        combine(payeesFlow, transactionsIncomeFlow) { payees, transactions ->
             // Separate payees and total amounts into two lists
             val payeeList = payees.toList()
 
@@ -57,21 +63,19 @@ class ReportViewModel(
                     .sumOf { it.transAmount }
 
                 // Calculate the fraction dynamically based on the total sum
-                val fraction = if (totalSum != 0.0) totalAmount.toFloat() / totalSum else 0.0f
+                val fraction = if (totalSum != 0.0) totalAmount / totalSum else 0.0
 
-                fraction as Double // Explicitly cast to Float
-
+                fraction
             }
-
             Pair(payeeList, totalAmountList)
         }
 
     // Combine the flows and get the chart data
     val byCategoryData: Flow<Pair<List<Category>, List<Double>>> =
-        combine(categoriesFlow, transactionsFlow) { categories, transactions ->
+        combine(categoriesFlow, transactionsIncomeFlow) { categories, transactions ->
             // Separate categories and total amounts into two lists
             val categoryList = categories.toList()
-
+            Log.d("TAG", ": $transactions")
             // Calculate the total sum of all payees' total amounts
             val totalSum = categories.sumOf { category ->
                 transactions
@@ -85,15 +89,11 @@ class ReportViewModel(
                     .sumOf { it.transAmount }
 
                 // Calculate the fraction dynamically based on the total sum
-                val fraction = if (totalSum != 0.0) totalAmount.toFloat() / totalSum else 0.0f
-
-                fraction as Double // Explicitly cast to Float
-
+                val fraction = if (totalSum != 0.0) totalAmount / totalSum else 0.0
+                fraction
             }
-
             Pair(categoryList, totalAmountList)
         }
-
 
     fun generateDistinctColors(numberOfColors: Int): List<Color> {
         return List(numberOfColors) {

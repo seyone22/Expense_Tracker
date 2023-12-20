@@ -55,6 +55,9 @@ interface TransactionDao {
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE toAccountId = :toAccountId")
     fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction>
 
+    @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE transCode = :transCode")
+    fun getAllTransactionsByCode(transCode: String): Flow<List<Transaction>>
+
     @Query("SELECT " +
             "    accountId, " +
             "    SUM(balanceChange) AS balance " +

@@ -9,6 +9,8 @@ interface TransactionsRepository {
     fun getTransactionStream(transId: Int): Flow<Transaction?>
     fun getTransactionsFromAccount(accountId: Int): Flow<List<TransactionWithDetails>>
     fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction>
+    fun getAllTransactionsByCode(transCode: String): Flow<List<Transaction>>
+
     fun getBalanceByAccountId() : Flow<List<TransactionDao.BalanceResult>>
     fun getTotalBalanceByCode(transactionCode : String) : Flow<Double>
     fun getTotalBalance() : Flow<Double>

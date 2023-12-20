@@ -32,6 +32,7 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
+import com.example.expensetracker.ui.common.AnimatedBar
 import com.example.expensetracker.ui.common.AnimatedCircle
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
@@ -93,6 +94,8 @@ fun AccountScreen(
                                 .fillMaxWidth()
                                 .fillMaxHeight()
                         ) {
+
+
                             AnimatedCircle(
                                 proportions = listOf( (totals.income / totals.total).toFloat() , (totals.expenses / totals.total).toFloat()),
                                 colors = listOf(Color.Green, Color.Red),
