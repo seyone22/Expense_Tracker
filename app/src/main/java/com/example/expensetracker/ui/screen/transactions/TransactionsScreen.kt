@@ -55,7 +55,7 @@ fun TransactionsScreen(
 
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
                  when(isSelected) {
                      false -> {
@@ -68,7 +68,7 @@ fun TransactionsScreen(
                      true -> {
                          TopAppBar(
                              colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                 containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                                 containerColor = MaterialTheme.colorScheme.background,
                                  titleContentColor = MaterialTheme.colorScheme.onSurface,
                              ),
                              title = { Text(text = "1") }

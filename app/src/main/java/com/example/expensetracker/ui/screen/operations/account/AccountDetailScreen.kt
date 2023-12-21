@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +56,7 @@ fun AccountDetailScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             ExpenseTopBar(
                 selectedActivity = AccountsDestination.routeId,
@@ -68,7 +70,7 @@ fun AccountDetailScreen(
                 .padding(it)
                 .padding(0.dp, 100.dp)
         ) {
-            OutlinedCard(
+            Card(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(24.dp, 0.dp)
@@ -79,16 +81,9 @@ fun AccountDetailScreen(
                 ) {
                     Row {
                         Column {
-                            Icon(
-                                imageVector = Icons.Outlined.AccountBalanceWallet,
-                                contentDescription = null,
-                                Modifier.size(36.dp, 36.dp)
-                            )
-                        }
-                        Column {
                             Text(
                                 text = accountDetailAccountUiState.account.accountName,
-                                style = MaterialTheme.typography.titleLarge
+                                style = MaterialTheme.typography.headlineSmall
                             )
                             Text(
                                 text = accountDetailAccountUiState.account.accountType + " Account",
@@ -105,6 +100,7 @@ fun AccountDetailScreen(
                             }
                         }
                     }
+                    HorizontalDivider()
                     Text(
                         text = "Account Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
                             accountDetailAccountUiState.balance

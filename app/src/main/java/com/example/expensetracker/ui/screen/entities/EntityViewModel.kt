@@ -70,6 +70,11 @@ class EntityViewModel(
             categoriesRepository.insertCategory(categoryUiState.categoryDetails.toCategory())
         }
     }
+    suspend fun editCategory() {
+        if(validateCategoryInput()) {
+            categoriesRepository.updateCategory(categoryUiState.categoryDetails.toCategory())
+        }
+    }
     suspend fun deleteCategory(category : Category) {
         categoriesRepository.deleteCategory(category)
     }
@@ -88,6 +93,11 @@ class EntityViewModel(
     suspend fun savePayee() {
         if(validatePayeeInput()) {
             payeesRepository.insertPayee(payeeUiState.payeeDetails.toPayee())
+        }
+    }
+    suspend fun editPayee() {
+        if(validatePayeeInput()) {
+            payeesRepository.updatePayee(payeeUiState.payeeDetails.toPayee())
         }
     }
     suspend fun deletePayee(payee : Payee) {
@@ -109,6 +119,11 @@ class EntityViewModel(
     suspend fun saveCurrency() {
         if(validateCurrencyInput()) {
             currencyFormatsRepository.insertCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
+        }
+    }
+    suspend fun editCurrency() {
+        if(validateCurrencyInput()) {
+            currencyFormatsRepository.updateCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
         }
     }
     suspend fun deleteCurrency(currency : CurrencyFormat) {

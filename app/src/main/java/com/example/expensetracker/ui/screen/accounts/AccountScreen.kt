@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.screen.accounts
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
@@ -25,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
@@ -32,8 +35,10 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.common.AnimatedBar
 import com.example.expensetracker.ui.common.AnimatedCircle
+import com.example.expensetracker.ui.common.DonutChart
+import com.example.expensetracker.ui.common.DonutChartData
+import com.example.expensetracker.ui.common.DonutChartDataCollection
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
@@ -67,7 +72,7 @@ fun AccountScreen(
 
         "TRUE" -> {
             Scaffold(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                containerColor = MaterialTheme.colorScheme.background,
                 topBar = {
                     ExpenseTopBar(
                         selectedActivity = AccountsDestination.routeId,
@@ -95,15 +100,19 @@ fun AccountScreen(
                                 .fillMaxHeight()
                         ) {
 
-
-                            AnimatedCircle(
-                                proportions = listOf( (totals.income / totals.total).toFloat() , (totals.expenses / totals.total).toFloat()),
-                                colors = listOf(Color.Green, Color.Red),
-                                modifier = modifier
-                                    .height(300.dp)
-                                    .align(Alignment.CenterHorizontally)
-                                    .fillMaxWidth()
-                            )
+                            DonutChart(
+                                data = DonutChartDataCollection(listOf(
+                                    DonutChartData(totals.income.toFloat(), MaterialTheme.colorScheme.primary, "Income"),
+                                    DonutChartData(totals.expenses.toFloat(), MaterialTheme.colorScheme.secondary, "Expense")
+                                ))
+                            ) { selected ->
+                                AnimatedContent(targetState = selected, label = "") {
+                                    Column(modifier = Modifier.width(100.dp)) {
+                                        Text(text = it?.title ?: "", textAlign = TextAlign.Center)
+                                        Text(text = (it?.amount ?: "").toString(), textAlign = TextAlign.Center)
+                                    }
+                                }
+                            }
                         }
 
                         Column(

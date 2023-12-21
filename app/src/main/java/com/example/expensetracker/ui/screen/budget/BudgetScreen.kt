@@ -36,7 +36,7 @@ fun BudgetScreen(
     var state by remember { mutableIntStateOf(0) }
     val titles = listOf("Categories", "Payees", "Currencies")
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             ExpenseTopBar(
                 selectedActivity = BudgetsDestination.routeId,

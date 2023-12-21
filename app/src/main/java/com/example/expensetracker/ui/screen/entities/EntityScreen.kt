@@ -64,6 +64,12 @@ import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.operations.entity.category.CategoryDetails
+import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
+import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
+import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrencyDetails
+import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
+import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -94,7 +100,7 @@ fun EntityScreen(
 
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             ExpenseTopBar(
                 selectedActivity = EntitiesDestination.routeId,
@@ -131,7 +137,7 @@ fun EntityScreen(
         ) {
             PrimaryTabRow(
                 selectedTabIndex = state,
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                containerColor = MaterialTheme.colorScheme.background,
 
                 ) {
                 titles.forEachIndexed { index, title ->
@@ -185,6 +191,7 @@ fun EntityScreen(
             onConfirmClick = {
                 coroutineScope.launch {
                     viewModel.saveCategory()
+
                 }
             }
         )
@@ -284,11 +291,16 @@ fun CategoryList(
                     }
                     if (openEditDialog.value) {
                         CategoryEntryDialog(
-                            onConfirmClick = { },
+                            onConfirmClick = {
+                                coroutineScope.launch {
+                                    viewModel.editCategory()
+                                }
+                            },
                             onDismissRequest = { openEditDialog.value = !openEditDialog.value },
                             viewModel = viewModel,
-                            //edit = true,
-                            
+                            edit = true,
+                            title = "Edit Category",
+                            selectedCategory = it.toCategoryDetails()
                         )
                     }
                 }
@@ -306,10 +318,10 @@ fun PayeeList(
     viewModel: EntityViewModel
 ) {
     LazyColumn {
-        items(list) { payee ->
+        items(list) {
             ListItem(
-                headlineContent = { Text(payee.payeeName) },
-                overlineContent = { Text(payee.payeeId.toString()) },
+                headlineContent = { Text(it.payeeName) },
+                overlineContent = { Text(it.payeeId.toString()) },
                 leadingContent = {
                     Icon(
                         Icons.Filled.Favorite,
@@ -317,7 +329,8 @@ fun PayeeList(
                     )
                 },
                 trailingContent = {
-                    val openAlertDialog = remember { mutableStateOf(false) }
+                    val openDeleteAlertDialog = remember { mutableStateOf(false) }
+                    val openEditDialog = remember { mutableStateOf(false) }
                     val moreExpanded = remember { mutableStateOf(false) }
 
                     IconButton(
@@ -339,25 +352,39 @@ fun PayeeList(
                         DropdownMenuItem(
                             text = { Text(text = "Edit") },
                             onClick = {
-                                openAlertDialog.value = true
+                                openEditDialog.value = true
                                 moreExpanded.value = false
                             }
                         )
                         DropdownMenuItem(
                             text = { Text(text = "Delete") },
                             onClick = {
-                                openAlertDialog.value = true
+                                openDeleteAlertDialog.value = true
                                 moreExpanded.value = false
                             }
                         )
                     }
 
-                    if (openAlertDialog.value) {
-                        DeleteConfirmationDialog({ openAlertDialog.value = false }, {
+                    if (openDeleteAlertDialog.value) {
+                        DeleteConfirmationDialog({ openDeleteAlertDialog.value = false }, {
                             coroutineScope.launch {
-                                viewModel.deletePayee(payee)
+                                viewModel.deletePayee(it)
                             }
                         }, "Are you sure you want to delete this payee, big boi?")
+                    }
+                    if (openEditDialog.value) {
+                        PayeeEntryDialog(
+                            onConfirmClick = {
+                                coroutineScope.launch {
+                                    viewModel.editPayee()
+                                }
+                            },
+                            onDismissRequest = { openEditDialog.value = !openEditDialog.value },
+                            viewModel = viewModel,
+                            edit = true,
+                            title = "Edit Payee",
+                            selectedPayee = it.toPayeeDetails()
+                        )
                     }
                 }
             )
@@ -380,7 +407,8 @@ fun CurrenciesList(
                 overlineContent = { Text(it.currencyName) },
                 leadingContent = { Text(it.currency_symbol) },
                 trailingContent = {
-                    val openAlertDialog = remember { mutableStateOf(false) }
+                    val openDeleteAlertDialog = remember { mutableStateOf(false) }
+                    val openEditDialog = remember { mutableStateOf(false) }
                     val moreExpanded = remember { mutableStateOf(false) }
 
                     IconButton(
@@ -402,25 +430,39 @@ fun CurrenciesList(
                         DropdownMenuItem(
                             text = { Text(text = "Edit") },
                             onClick = {
-                                openAlertDialog.value = true
+                                openEditDialog.value = true
                                 moreExpanded.value = false
                             }
                         )
                         DropdownMenuItem(
                             text = { Text(text = "Delete") },
                             onClick = {
-                                openAlertDialog.value = true
+                                openDeleteAlertDialog.value = true
                                 moreExpanded.value = false
                             }
                         )
                     }
 
-                    if (openAlertDialog.value) {
-                        DeleteConfirmationDialog({ openAlertDialog.value = false }, {
+                    if (openDeleteAlertDialog.value) {
+                        DeleteConfirmationDialog({ openDeleteAlertDialog.value = false }, {
                             coroutineScope.launch {
                                 viewModel.deleteCurrency(it)
                             }
                         }, "Are you sure you want to delete this currency, big boi?")
+                    }
+                    if (openEditDialog.value) {
+                        CurrencyEntryDialog(
+                            onConfirmClick = {
+                                coroutineScope.launch {
+                                    viewModel.editCurrency()
+                                }
+                            },
+                            onDismissRequest = { openEditDialog.value = !openEditDialog.value },
+                            viewModel = viewModel,
+                            edit = true,
+                            title = "Edit Currency",
+                            selectedCurrency = it.toCurrencyDetails()
+                        )
                     }
                 }
             )
@@ -433,11 +475,25 @@ fun CurrenciesList(
 @Composable
 fun CategoryEntryDialog(
     modifier: Modifier = Modifier,
+    title : String = "Add Category",
+    selectedCategory : CategoryDetails = CategoryDetails(categName = ""),
     onConfirmClick: () -> Unit,
     onDismissRequest: () -> Unit,
-    viewModel: EntityViewModel
+    viewModel: EntityViewModel,
+    edit : Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
+    var categorySelected by remember { mutableStateOf(selectedCategory) }
+
+    viewModel.updateCategoryState(
+        viewModel.categoryUiState.categoryDetails.copy(
+            categName = categorySelected.categName,
+            categId = categorySelected.categId,
+            active = categorySelected.active,
+            parentId = categorySelected.parentId
+        )
+    )
+
     Dialog(
         onDismissRequest = { onDismissRequest() }
     )
@@ -458,15 +514,16 @@ fun CategoryEntryDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Add Category",
+                    text = title,
                     style = MaterialTheme.typography.titleLarge
                 )
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
-                    value = viewModel.categoryUiState.categoryDetails.categName,
+                    value = categorySelected.categName,
                     onValueChange = {
+                        categorySelected.categName = it
                         viewModel.updateCategoryState(
-                            viewModel.categoryUiState.categoryDetails.copy(
+                            categorySelected.copy(
                                 categName = it
                             )
                         )
@@ -495,11 +552,7 @@ fun CategoryEntryDialog(
                         onClick = {
                             viewModel.updateCategoryState(
                                 viewModel.categoryUiState.categoryDetails.copy(
-                                    active = "1"
-                                )
-                            )
-                            viewModel.updateCategoryState(
-                                viewModel.categoryUiState.categoryDetails.copy(
+                                    active = "1",
                                     parentId = "-1"
                                 )
                             )
@@ -522,11 +575,27 @@ fun CategoryEntryDialog(
 @Composable
 fun PayeeEntryDialog(
     modifier: Modifier = Modifier,
+    title : String = "Add Payee",
+    selectedPayee : PayeeDetails = PayeeDetails(payeeName = ""),
     onConfirmClick: () -> Unit,
     onDismissRequest: () -> Unit,
-    viewModel: EntityViewModel
+    viewModel: EntityViewModel,
+    edit : Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
+    var payeeSelected by remember { mutableStateOf(selectedPayee) }
+
+    viewModel.updatePayeeState(
+        viewModel.payeeUiState.payeeDetails.copy(
+            payeeName = payeeSelected.payeeName,
+            payeeId = payeeSelected.payeeId,
+            categId = payeeSelected.categId,
+            number = payeeSelected.number,
+            website = payeeSelected.website,
+            notes = payeeSelected.notes,
+            active = payeeSelected.active
+        )
+    )
     Dialog(
         onDismissRequest = { onDismissRequest() }
     )
@@ -547,13 +616,14 @@ fun PayeeEntryDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Add Payee",
+                    text = title,
                     style = MaterialTheme.typography.titleLarge
                 )
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
-                    value = viewModel.payeeUiState.payeeDetails.payeeName,
+                    value = payeeSelected.payeeName,
                     onValueChange = {
+                        payeeSelected.payeeName = it
                         viewModel.updatePayeeState(
                             viewModel.payeeUiState.payeeDetails.copy(
                                 payeeName = it
@@ -572,8 +642,9 @@ fun PayeeEntryDialog(
                     modifier = Modifier.padding(0.dp, 8.dp),
                 ) {
                     Checkbox(
-                        checked = viewModel.payeeUiState.payeeDetails.active.toBoolean(),
+                        checked = payeeSelected.active.toBoolean(),
                         onCheckedChange = {
+                            payeeSelected.active = it.toString()
                             viewModel.updatePayeeState(
                                 viewModel.payeeUiState.payeeDetails.copy(
                                     active = (it).toString()
@@ -590,8 +661,9 @@ fun PayeeEntryDialog(
                 // We're obviously not including last used category -_-
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
-                    value = viewModel.payeeUiState.payeeDetails.number,
+                    value = payeeSelected.number,
                     onValueChange = {
+                        payeeSelected.number = it
                         viewModel.updatePayeeState(
                             viewModel.payeeUiState.payeeDetails.copy(
                                 number = it
@@ -609,8 +681,9 @@ fun PayeeEntryDialog(
                 )
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
-                    value = viewModel.payeeUiState.payeeDetails.website,
+                    value = payeeSelected.website,
                     onValueChange = {
+                        payeeSelected.website = it
                         viewModel.updatePayeeState(
                             viewModel.payeeUiState.payeeDetails.copy(
                                 website = it
@@ -627,8 +700,9 @@ fun PayeeEntryDialog(
                 )
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
-                    value = viewModel.payeeUiState.payeeDetails.notes,
+                    value = payeeSelected.notes,
                     onValueChange = {
+                        payeeSelected.notes = it
                         viewModel.updatePayeeState(
                             viewModel.payeeUiState.payeeDetails.copy(
                                 notes = it
@@ -676,11 +750,21 @@ fun PayeeEntryDialog(
 @Composable
 fun CurrencyEntryDialog(
     modifier: Modifier = Modifier,
+    title : String = "Add Currency",
+    selectedCurrency : CurrencyDetails = CurrencyDetails(),
     onConfirmClick: () -> Unit,
     onDismissRequest: () -> Unit,
-    viewModel: EntityViewModel
+    viewModel: EntityViewModel,
+    edit : Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
+    var currencySelected by remember { mutableStateOf(selectedCurrency) }
+
+    viewModel.updateCurrencyState(
+        viewModel.currencyUiState.currencyDetails.copy(
+            currencyName = selectedCurrency.currencyName
+        )
+    )
     Dialog(
         onDismissRequest = { onDismissRequest() }
     )
@@ -701,13 +785,14 @@ fun CurrencyEntryDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Add Currency",
+                    text = title,
                     style = MaterialTheme.typography.titleLarge
                 )
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
-                    value = viewModel.categoryUiState.categoryDetails.categName,
+                    value = currencySelected.currencyName,
                     onValueChange = {
+                        currencySelected.currencyName = it
                         viewModel.updateCurrencyState(
                             viewModel.currencyUiState.currencyDetails.copy(
                                 currencyName = it
@@ -811,6 +896,5 @@ fun CurrencyEntryDialog(
                 }
             }
         }
-
     }
 }

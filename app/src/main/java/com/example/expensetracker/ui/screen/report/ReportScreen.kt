@@ -61,7 +61,7 @@ fun ReportScreen(
     viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             ExpenseTopBar(
                 selectedActivity = ReportsDestination.routeId,

@@ -43,12 +43,12 @@ data class PayeeUiState(
 //Data class for PayeeDetails
 data class PayeeDetails(
     val payeeId: Int = 0,
-    val payeeName: String = "",
+    var payeeName: String = "",
     val categId: String = "0",
-    val number: String = "",
-    val website: String = "",
-    val notes: String = "",
-    val active: String = "false"
+    var number: String = "",
+    var website: String = "",
+    var notes: String = "",
+    var active: String = "false"
 )
 
 

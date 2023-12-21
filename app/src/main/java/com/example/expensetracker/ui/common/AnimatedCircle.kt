@@ -70,7 +70,10 @@ fun AnimatedCircle(
         }
     }
 
-    Canvas(modifier) {
+    Canvas(
+        modifier = modifier
+
+    ) {
         val innerRadius = (size.minDimension - stroke.width) / 2
         val halfSize = size / 2.0f
         val topLeft = Offset(

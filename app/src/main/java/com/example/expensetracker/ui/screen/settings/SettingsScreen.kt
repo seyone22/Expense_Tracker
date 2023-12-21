@@ -40,11 +40,11 @@ fun SettingsScreen(
 ) {
     Scaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
                  TopAppBar(
                      colors = TopAppBarDefaults.topAppBarColors(
-                         containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                         containerColor = MaterialTheme.colorScheme.background,
                          titleContentColor = MaterialTheme.colorScheme.onSurface,
                      ),
                      title = { Text(text = "Settings") },
