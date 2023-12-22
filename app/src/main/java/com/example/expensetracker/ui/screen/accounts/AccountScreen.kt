@@ -22,11 +22,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -35,13 +38,13 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.common.AnimatedCircle
 import com.example.expensetracker.ui.common.DonutChart
 import com.example.expensetracker.ui.common.DonutChartData
 import com.example.expensetracker.ui.common.DonutChartDataCollection
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
+import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
@@ -192,6 +195,14 @@ fun AccountCard(
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
 ) {
+    // Code block to get the current currency's detail.
+    // For now, it's taking default currency. TODO: Take account currency.
+    var baseCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
+    // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
+    LaunchedEffect(accountWithBalance.first.currencyId) {
+        baseCurrencyInfo = viewModel.getBaseCurrencyInfo(baseCurrencyId = accountWithBalance.first.currencyId)
+    }
+
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -201,7 +212,7 @@ fun AccountCard(
             .height(104.dp)
             .padding(0.dp, 12.dp)
             .clickable {
-                var accountId = accountWithBalance.first.accountId
+                val accountId = accountWithBalance.first.accountId
                 navigateToScreen("AccountDetails/$accountId")
             }
     ) {
@@ -245,22 +256,15 @@ fun AccountCard(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = ( String.format("%.2f", (accountWithBalance.first.initialBalance?.plus(balance))) )
+                FormattedCurrency(
+                    value = accountWithBalance.first.initialBalance?.plus(balance)!!,
+                    currency = baseCurrencyInfo
                 )
-                Text(
-                    text = ( String.format("%.2f", (accountWithBalance.first.initialBalance?.plus(balance))) )
+                FormattedCurrency(
+                    value = accountWithBalance.first.initialBalance?.plus(balance)!!,
+                    currency = baseCurrencyInfo
                 )
             }
         }
-    }
-}
-
-
-fun formatAsCurrency(value: Double, format: CurrencyFormat): String {
-    return if (format.pfx_symbol.isNotBlank()) {
-        format.pfx_symbol + " " + String.format("%.2f", value)
-    } else {
-        String.format("%.2f", value) + " " + format.sfx_symbol
     }
 }

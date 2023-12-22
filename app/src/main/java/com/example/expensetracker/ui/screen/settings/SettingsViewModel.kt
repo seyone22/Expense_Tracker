@@ -7,7 +7,6 @@ import com.example.expensetracker.data.metadata.MetadataRepository
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
-import com.example.expensetracker.ui.screen.onboarding.OnboardingViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,12 +47,12 @@ class SettingsViewModel(
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(SettingsViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = CurrencyList()
             )
 
     suspend fun getBaseCurrencyInfo(baseCurrencyId: Int): CurrencyFormat {
-        val x = currencyFormatsRepository.getCurrencyFormatsStream(baseCurrencyId)
+        val x = currencyFormatsRepository.getCurrencyFormatStream(baseCurrencyId)
             .firstOrNull() ?: CurrencyFormat()
         return x
     }

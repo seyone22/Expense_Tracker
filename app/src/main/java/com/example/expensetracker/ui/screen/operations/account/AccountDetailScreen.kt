@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -115,12 +113,12 @@ fun AccountDetailScreen(
                     )
                 }
             }
-            if (!accountDetailTransactionUiState.transactions.isNullOrEmpty()) {
+            if (accountDetailTransactionUiState.transactions.isNotEmpty()) {
                 Column {
                     TransactionList(
                         transactions = accountDetailTransactionUiState.transactions,
                         modifier = modifier,
-                        setSelected = { }
+                        longClicked = { }
                     )
                 }
             }

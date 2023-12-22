@@ -92,7 +92,7 @@ class AccountViewModel(
 
     //TODO : FIX
     suspend fun getBaseCurrencyInfo(baseCurrencyId: Int): CurrencyFormat {
-        val x = currencyFormatsRepository.getCurrencyFormatsStream(baseCurrencyId)
+        val x = currencyFormatsRepository.getCurrencyFormatStream(baseCurrencyId)
             .firstOrNull() ?: CurrencyFormat()
         return x
     }

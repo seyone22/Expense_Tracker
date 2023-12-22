@@ -130,7 +130,6 @@ class EntityViewModel(
         currencyFormatsRepository.deleteCurrencyFormat(currency)
     }
 
-
     private fun validateCurrencyInput(uiState: CurrencyDetails = currencyUiState.currencyDetails): Boolean {
         return with(uiState) {
             currencyName.isNotBlank()
