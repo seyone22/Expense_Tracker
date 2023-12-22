@@ -209,7 +209,7 @@ fun GeneralSettingsList(
                                 coroutineScope.launch {
                                     viewModel.changeUsername(newName)
                                 }
-                                },
+                            },
                             modifier = Modifier.padding(8.dp),
                         ) {
                             Text("Confirm")
@@ -222,11 +222,12 @@ fun GeneralSettingsList(
     // Edit Currency Dialog
     if (editCurrency) {
         val currencyList by viewModel.currencyList.collectAsState()
-        var newCurrency: String by remember {
+        var newCurrencyId: String by remember {
             mutableStateOf(
                 metadata.find { it?.infoName == "BASECURRENCYID" }?.infoValue ?: ""
             )
         }
+        var newCurrency: CurrencyFormat = CurrencyFormat()
         var baseCurrencyExpanded by remember { mutableStateOf(false) }
 
         Dialog(
@@ -257,9 +258,11 @@ fun GeneralSettingsList(
                                 .padding(0.dp, 8.dp)
                                 .clickable(enabled = true) { baseCurrencyExpanded = true }
                                 .menuAnchor(),
-                            value = baseCurrencyName,
+                            value = newCurrency.currencyName,
                             readOnly = true,
-                            onValueChange = { },
+                            onValueChange = {
+
+                            },
                             label = { Text("Base Currency") },
                             singleLine = true,
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = baseCurrencyExpanded) },
@@ -273,7 +276,7 @@ fun GeneralSettingsList(
                                 DropdownMenuItem(
                                     text = { Text(currency.currencyName) },
                                     onClick = {
-                                        newCurrency = currency.currencyName
+                                        newCurrency = currency
                                         baseCurrencyExpanded = false
                                     }
                                 )
@@ -295,9 +298,9 @@ fun GeneralSettingsList(
                             onClick = {
                                 editCurrency = !editCurrency
                                 coroutineScope.launch {
-                                    viewModel.changeUsername(newCurrency)
+                                    viewModel.changeCurrency(newCurrency.currencyId)
                                 }
-                                      },
+                            },
                             modifier = Modifier.padding(8.dp),
                         ) {
                             Text("Confirm")
