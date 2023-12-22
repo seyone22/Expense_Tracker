@@ -12,7 +12,6 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
-import com.example.expensetracker.ui.screen.onboarding.OnboardingViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -31,7 +30,7 @@ class AccountEntryViewModel(
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(AccountEntryViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = CurrencyList()
             )
 
@@ -111,7 +110,7 @@ fun AccountDetails.toAccount(): Account = Account(
     initialBalance = initialBalance?.toDoubleOrNull() ?: 0.0,
     initialDate = initialDate,
     favoriteAccount = favoriteAccount,
-    currencyId = currencyId?.toIntOrNull() ?: 0,
+    currencyId = currencyId.toIntOrNull() ?: 0,
     statementLocked = statementLocked?.toIntOrNull() ?: 0,
     statementDate = statementDate,
     minimumBalance = minimumBalance?.toDoubleOrNull() ?: 0.0,
@@ -148,8 +147,4 @@ fun Account.toAccountDetails(): AccountDetails = AccountDetails(
     interestRate = interestRate?.toString(),
     paymentDueDate = paymentDueDate,
     minimumPayment = minimumPayment?.toString()
-)
-
-data class CurrencyList(
-    val currenciesList: List<CurrencyFormat> = listOf(),
 )
