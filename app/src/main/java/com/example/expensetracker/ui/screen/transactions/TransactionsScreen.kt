@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.transactions
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,8 @@ import com.example.expensetracker.ui.common.SortBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object TransactionsDestination : NavigationDestination {
     override val route = "Entries"
@@ -121,7 +124,7 @@ fun TransactionsScreen(
         Column(
             modifier = Modifier.padding(innerPadding)
         ) {
-            SortBar()
+
             TransactionList(
                 transactions = transactionsUiState.transactions,
                 longClicked = { isSelected = !isSelected },
@@ -140,20 +143,35 @@ fun TransactionList(
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val haptics = LocalHapticFeedback.current
+    var filteredTransactions by remember { mutableStateOf(transactions) }
+
+    SortBar(
+        periodSortAction = { sortCase ->
+            filteredTransactions = when (sortCase) {
+                0 -> transactions.filter {
+                    val transactionDate = LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
+                    transactionDate.monthValue == LocalDate.now().monthValue
+                }
+                // Add more cases as needed
+                else -> transactions // No filtering for other cases
+            }
+        }
+    )
+
     LazyColumn(
         modifier = modifier
     ) {
-        items(count = transactions.size) {
+        items(count = filteredTransactions.size) {
             ListItem(
                 headlineContent = {
-                    Text(text = transactions[it].payeeName)
+                    Text(text = filteredTransactions[it].payeeName)
                 },
                 supportingContent = {
-                    Text(text = transactions[it].categName)
+                    Text(text = filteredTransactions[it].categName)
                 },
                 trailingContent = {
-                    val accountId = transactions[it].accountId
-                    var currencyFormat : CurrencyFormat = CurrencyFormat()
+                    val accountId = filteredTransactions[it].accountId
+                    var currencyFormat = CurrencyFormat()
 
                     LaunchedEffect(accountId) {
                         val currencyFormatFunction =
@@ -163,13 +181,13 @@ fun TransactionList(
                     }
                     // Now you can use 'currencyFormat' in your FormattedCurrency composable
                     //TODO : DOESN'T WORK
-                    FormattedCurrency(value = transactions[it].transAmount, currency = currencyFormat)
+                    FormattedCurrency(value = filteredTransactions[it].transAmount, currency = currencyFormat)
                 },
                 leadingContent = {
-                    Text(text = transactions[it].transCode[0].toString())
+                    Text(text = filteredTransactions[it].transCode[0].toString())
                 },
                 overlineContent = {
-                    Text(text = transactions[it].transDate!!)
+                    Text(text = filteredTransactions[it].transDate!!)
                 },
                 modifier = Modifier.combinedClickable(
                     onClick = {},
@@ -181,7 +199,6 @@ fun TransactionList(
                 )
             )
             HorizontalDivider()
-
         }
     }
 }

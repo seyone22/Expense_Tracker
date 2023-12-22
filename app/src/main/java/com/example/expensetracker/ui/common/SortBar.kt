@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SortBar(
-    modifier : Modifier = Modifier
+    modifier : Modifier = Modifier,
+    periodSortAction : (Int) -> Unit
 ) {
     Row(
         modifier = modifier
@@ -61,6 +62,8 @@ fun SortBar(
                         onClick = {
                             selectedIndex = index
                             expanded = false
+                            // Perform Sort action
+                            periodSortAction(selectedIndex)
                         },
                         text = { Text(text = item) }
                     )
