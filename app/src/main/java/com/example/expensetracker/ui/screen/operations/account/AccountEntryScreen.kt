@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,14 +46,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -71,16 +70,17 @@ fun AccountEntryScreen(
     navigateBack: () -> Unit = {},
     onNavigateUp: () -> Unit = {},
     canNavigateBack: Boolean = true,
+    navigateToScreen: (screen: String) -> Unit,
     viewModel: AccountEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 title = {
@@ -102,12 +102,12 @@ fun AccountEntryScreen(
                 actions = {
                     Button(
                         onClick = {
-                        coroutineScope.launch {
-                            viewModel.saveAccount()
-                            navigateBack()
-                        }
+                            coroutineScope.launch {
+                                viewModel.saveAccount()
+                                navigateToScreen("Accounts")
+                            }
                         },
-                        modifier = modifier.padding(0.dp,0.dp,8.dp,0.dp),
+                        modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp),
                         enabled = viewModel.accountUiState.isEntryValid
                     ) {
                         Text(text = "Create")
@@ -121,7 +121,8 @@ fun AccountEntryScreen(
         AccountEntryBody(
             accountUiState = viewModel.accountUiState,
             onAccountValueChange = viewModel::updateUiState,
-            modifier = modifier.padding(padding)
+            modifier = modifier.padding(padding),
+            viewModel = viewModel
         )
     }
 
@@ -132,6 +133,7 @@ fun AccountEntryBody(
     modifier: Modifier = Modifier,
     accountUiState: AccountUiState = AccountUiState(),
     onAccountValueChange: (AccountDetails) -> Unit = {},
+    viewModel: AccountEntryViewModel
 ) {
     LazyColumn(
         modifier = modifier
@@ -142,7 +144,8 @@ fun AccountEntryBody(
             AccountEntryForm(
                 accountDetails = accountUiState.accountDetails,
                 onValueChange = onAccountValueChange,
-                modifier = Modifier
+                modifier = Modifier,
+                viewModel = viewModel
             )
         }
     }
@@ -155,11 +158,15 @@ fun AccountEntryForm(
     modifier: Modifier = Modifier,
     accountDetails: AccountDetails,
     onValueChange: (AccountDetails) -> Unit = {},
+    viewModel: AccountEntryViewModel
 ) {
     var accountTypeExpanded by remember { mutableStateOf(false) }
+    var baseCurrencyExpanded by remember { mutableStateOf(false) }
     var openInitialDateDialog by remember { mutableStateOf(false) }
     var openPaymentDueDateDialog by remember { mutableStateOf(false) }
     var openStatementDateDialog by remember { mutableStateOf(false) }
+
+    val currencyList by viewModel.currencyList.collectAsState()
 
     val focusManager = LocalFocusManager.current
 
@@ -169,6 +176,38 @@ fun AccountEntryForm(
             .padding(0.dp, 8.dp)
     )
     {
+        ExposedDropdownMenuBox(
+            expanded = baseCurrencyExpanded,
+            onExpandedChange = { baseCurrencyExpanded = !baseCurrencyExpanded }) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .padding(0.dp, 8.dp)
+                    .clickable(enabled = true) { baseCurrencyExpanded = true }
+                    .menuAnchor(),
+                value = (currencyList.currenciesList.find { it.currencyId == accountDetails.currencyId.toInt() })?.currencyName
+                    ?: "",
+                readOnly = true,
+                onValueChange = { },
+                label = { Text("Base Currency") },
+                singleLine = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = baseCurrencyExpanded) },
+            )
+
+            ExposedDropdownMenu(
+                expanded = baseCurrencyExpanded,
+                onDismissRequest = { baseCurrencyExpanded = false },
+            ) {
+                currencyList.currenciesList.forEach { currency ->
+                    DropdownMenuItem(
+                        text = { Text(currency.currencyName) },
+                        onClick = {
+                            onValueChange(accountDetails.copy(currencyId = currency.currencyId.toString()))
+                            baseCurrencyExpanded = false
+                        }
+                    )
+                }
+            }
+        }
         ExposedDropdownMenuBox(
             expanded = accountTypeExpanded,
             onExpandedChange = { accountTypeExpanded = !accountTypeExpanded }) {
@@ -411,7 +450,7 @@ fun AccountEntryForm(
             keyboardActions = KeyboardActions(onDone = { })
         )
     }
-    
+
     if (openInitialDateDialog) {
         val datePickerState = rememberDatePickerState()
         val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
@@ -524,16 +563,4 @@ fun AccountEntryForm(
         }
     }
 
-}
-
-
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun AccountEntryFormPreview() {
-    ExpenseTrackerTheme {
-        AccountEntryScreen()
-    }
 }

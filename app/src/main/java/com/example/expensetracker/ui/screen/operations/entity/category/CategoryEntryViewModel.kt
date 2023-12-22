@@ -42,7 +42,7 @@ data class CategoryUiState(
 //Data class for CategoryDetails
 data class CategoryDetails(
     val categId : Int = 0,
-    val categName : String,
+    var categName : String,
     val active : String = "1",
     val parentId : String = "-1"
 )

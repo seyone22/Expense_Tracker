@@ -27,6 +27,8 @@ import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryDe
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryScreen
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryScreen
+import com.example.expensetracker.ui.screen.report.BudgetScreen
+import com.example.expensetracker.ui.screen.report.BudgetsDestination
 import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.report.ReportScreen
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
@@ -72,12 +74,18 @@ fun ExpenseNavHost(
                 navigateToScreen = { screen -> navController.navigate(screen) },
             )
         }
+        composable(route = BudgetsDestination.route) {
+            BudgetScreen(
+                navigateToScreen = { screen -> navController.navigate(screen) },
+            )
+        }
         // Routes to pages for CRUD operations
         composable(route = AccountEntryDestination.route) {
             AccountEntryScreen(
                 navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
-            )
+                onNavigateUp = { navController.navigateUp() },
+                navigateToScreen = { screen -> navController.navigate(screen) },
+                )
         }
         composable(
             route = AccountDetailDestination.route+"/{accountId}",

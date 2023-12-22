@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 class OfflineCurrencyFormatsRepository(private val currencyFormatDao: CurrencyFormatDao) : CurrencyFormatsRepository {
     override fun getAllCurrencyFormatsStream(): Flow<List<CurrencyFormat>> = currencyFormatDao.getAllCurrencyFormats()
-    override fun getCurrencyFormatsStream(currencyId: Int): Flow<CurrencyFormat?> = currencyFormatDao.getCurrencyFormat(currencyId)
+    override fun getCurrencyFormatStream(currencyId: Int): Flow<CurrencyFormat?> = currencyFormatDao.getCurrencyFormat(currencyId)
     override fun getCurrencyFormatsFromTypeStream(currencyId: Int): Flow<List<CurrencyFormat>> = currencyFormatDao.getAllCurrencyFormatsByCurrencyFormat(currencyId)
 
     override suspend fun insertCurrencyFormat(currency: CurrencyFormat) = currencyFormatDao.insert(currency)

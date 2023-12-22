@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface CurrencyFormatsRepository {
     fun getAllCurrencyFormatsStream(): Flow<List<CurrencyFormat>>
-    fun getCurrencyFormatsStream(currencyId: Int): Flow<CurrencyFormat?>
+    fun getCurrencyFormatStream(currencyId: Int): Flow<CurrencyFormat?>
     fun getCurrencyFormatsFromTypeStream(currencyId: Int): Flow<List<CurrencyFormat>>
 
     suspend fun insertCurrencyFormat(currency: CurrencyFormat)

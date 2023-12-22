@@ -1,25 +1,27 @@
 package com.example.expensetracker.ui.screen.transactions
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusGroup
+import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,31 +30,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.model.Metadata
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import com.example.expensetracker.model.AccountTypes
+import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Transaction
-import com.example.expensetracker.ui.common.AnimatedCircle
+import com.example.expensetracker.model.TransactionWithDetails
+import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
-import com.example.expensetracker.ui.screen.accounts.AccountList
-import com.example.expensetracker.ui.screen.accounts.AccountsDestination
-import com.example.expensetracker.ui.screen.onboarding.OnboardingSheet
-import com.example.expensetracker.ui.screen.onboarding.OnboardingViewModel
+import com.example.expensetracker.ui.common.FormattedCurrency
+import com.example.expensetracker.ui.common.SortBar
+import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
-import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object TransactionsDestination : NavigationDestination {
     override val route = "Entries"
@@ -63,22 +58,58 @@ object TransactionsDestination : NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsScreen(
-    modifier: Modifier = Modifier
-        .padding(16.dp, 12.dp),
+    modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     ) {
     val transactionsUiState by viewModel.transactionsUiState.collectAsState()
+    var isSelected by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            ExpenseTopBar(
-                selectedActivity = TransactionsDestination.routeId,
-                navBarAction = { navigateToScreen(AccountEntryDestination.route) },
-                navigateToSettings = { navigateToScreen(SettingsDestination.route) }
-            )
+            if(isSelected) {
+                TopAppBar(
+                    title = { Text(text = TransactionsDestination.route) },
+                    navigationIcon = {
+                        IconButton(onClick = { isSelected = !isSelected }) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "Close"
+                            )
+                        }
+                    },
+                    actions = {
+                        Row {
+                            IconButton(onClick = { isSelected = !isSelected }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Edit,
+                                    contentDescription = "Edit"
+                                )
+                            }
+                            IconButton(onClick = { isSelected = !isSelected }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Delete"
+                                )
+                            }
+                            IconButton(onClick = { isSelected = !isSelected }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Share,
+                                    contentDescription = "Share"
+                                )
+                            }
+                        }
+                    }
+                )
+            } else {
+                ExpenseTopBar(
+                    selectedActivity = TransactionsDestination.routeId,
+                    navBarAction = { navigateToScreen(AccountEntryDestination.route) },
+                    navigateToSettings = { navigateToScreen(SettingsDestination.route) }
+                )
+            }
         },
         bottomBar = {
             ExpenseNavBar(
@@ -91,27 +122,83 @@ fun TransactionsScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = modifier.padding(0.dp,120.dp)
+            modifier = Modifier.padding(innerPadding)
         ) {
-            TransactionList(modifier = modifier.padding(innerPadding), transactions = transactionsUiState.transactions)
+
+            TransactionList(
+                transactions = transactionsUiState.transactions,
+                longClicked = { isSelected = !isSelected },
+                viewModel = viewModel
+            )
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TransactionList(
-    modifier: Modifier,
-    transactions : List<Transaction>
+    modifier: Modifier = Modifier,
+    transactions: List<TransactionWithDetails>,
+    longClicked: () -> Unit,
+    viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    LazyColumn {
-        items(count = transactions.size) {
+    val haptics = LocalHapticFeedback.current
+    var filteredTransactions by remember { mutableStateOf(transactions) }
+
+    SortBar(
+        periodSortAction = { sortCase ->
+            filteredTransactions = when (sortCase) {
+                0 -> transactions.filter {
+                    val transactionDate = LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
+                    transactionDate.monthValue == LocalDate.now().monthValue
+                }
+                // Add more cases as needed
+                else -> transactions // No filtering for other cases
+            }
+        }
+    )
+
+    LazyColumn(
+        modifier = modifier
+    ) {
+        items(count = filteredTransactions.size) {
             ListItem(
                 headlineContent = {
-                    Text(text = transactions[it].accountId.toString())
-                }
+                    Text(text = filteredTransactions[it].payeeName)
+                },
+                supportingContent = {
+                    Text(text = filteredTransactions[it].categName)
+                },
+                trailingContent = {
+                    val accountId = filteredTransactions[it].accountId
+                    var currencyFormat = CurrencyFormat()
+
+                    LaunchedEffect(accountId) {
+                        val currencyFormatFunction =
+                            viewModel.getAccountFromId(accountId)
+                                ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
+                        currencyFormat = currencyFormatFunction!!
+                    }
+                    // Now you can use 'currencyFormat' in your FormattedCurrency composable
+                    //TODO : DOESN'T WORK
+                    FormattedCurrency(value = filteredTransactions[it].transAmount, currency = currencyFormat)
+                },
+                leadingContent = {
+                    Text(text = filteredTransactions[it].transCode[0].toString())
+                },
+                overlineContent = {
+                    Text(text = filteredTransactions[it].transDate!!)
+                },
+                modifier = Modifier.combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        longClicked()
+                    },
+                    onLongClickLabel = "  "
+                )
             )
             HorizontalDivider()
-
         }
     }
 }

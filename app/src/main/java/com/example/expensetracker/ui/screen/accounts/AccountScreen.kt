@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.screen.accounts
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,12 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -24,28 +25,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.common.AnimatedCircle
+import com.example.expensetracker.ui.common.DonutChart
+import com.example.expensetracker.ui.common.DonutChartData
+import com.example.expensetracker.ui.common.DonutChartDataCollection
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
+import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.accounts.AccountViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
-import kotlinx.coroutines.CoroutineScope
-import kotlin.math.log
 
 object AccountsDestination : NavigationDestination {
     override val route = "Accounts"
@@ -63,7 +66,6 @@ fun AccountScreen(
     ) {
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
-    Log.d("DEBUG", "AccountScreen: $totals")
     val isUsed by viewModel.isUsed.collectAsState()
 
     when (isUsed) {
@@ -73,7 +75,7 @@ fun AccountScreen(
 
         "TRUE" -> {
             Scaffold(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                containerColor = MaterialTheme.colorScheme.background,
                 topBar = {
                     ExpenseTopBar(
                         selectedActivity = AccountsDestination.routeId,
@@ -100,24 +102,51 @@ fun AccountScreen(
                                 .fillMaxWidth()
                                 .fillMaxHeight()
                         ) {
-                            AnimatedCircle(
-                                proportions = listOf( (totals.income / totals.total).toFloat() , (totals.expenses / totals.total).toFloat()),
-                                colors = listOf(Color.Green, Color.Red),
-                                modifier = modifier
-                                    .height(300.dp)
-                                    .align(Alignment.CenterHorizontally)
-                                    .fillMaxWidth()
-                            )
+                            // Code block to get the current currency's detail.
+                            val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
+                            var baseCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
+                            // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
+                            LaunchedEffect(baseCurrencyId) {
+                                baseCurrencyInfo =
+                                    viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
+                            }
+
+                            DonutChart(
+                                data = DonutChartDataCollection(
+                                    listOf(
+                                        DonutChartData(
+                                            totals.income.toFloat(),
+                                            MaterialTheme.colorScheme.primary,
+                                            "Income"
+                                        ),
+                                        DonutChartData(
+                                            totals.expenses.toFloat(),
+                                            MaterialTheme.colorScheme.secondary,
+                                            "Expense"
+                                        )
+                                    )
+                                )
+                            ) { selected ->
+                                AnimatedContent(targetState = selected, label = "") {
+                                    if (it != null) {
+                                        Column(modifier = Modifier.width(100.dp)) {
+                                            Text(
+                                                text = it.title ?: "",
+                                                textAlign = TextAlign.Center
+                                            )
+                                            FormattedCurrency(
+                                                value = (it.amount ?: 0).toDouble(),
+                                                currency = baseCurrencyInfo
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         Column(
                             modifier = modifier,
                         ) {
-                            Text("Current Month Summary")
-                            Text(
-                                text = accountsUiState.grandTotal.toString()
-                            )
-
                             Text(
                                 text = "Summary of Accounts",
                                 style = MaterialTheme.typography.titleLarge
@@ -165,7 +194,9 @@ fun AccountList(
         )
 
         accountList.forEach { accountPair ->
-            val balance: Double = data.balancesList.find { it.accountId == accountPair.first.accountId }?.balance ?: 0.0
+            val balance: Double =
+                data.balancesList.find { it.accountId == accountPair.first.accountId }?.balance
+                    ?: 0.0
             if (accountPair.first.accountType == category) {
                 AccountCard(
                     accountWithBalance = accountPair,
@@ -187,6 +218,14 @@ fun AccountCard(
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
 ) {
+    // Code block to get the current currency's detail.
+    var accountCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
+    // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
+    LaunchedEffect(accountWithBalance.first.currencyId) {
+        accountCurrencyInfo =
+            viewModel.getBaseCurrencyInfo(baseCurrencyId = accountWithBalance.first.currencyId)
+    }
+
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -196,7 +235,7 @@ fun AccountCard(
             .height(104.dp)
             .padding(0.dp, 12.dp)
             .clickable {
-                var accountId = accountWithBalance.first.accountId
+                val accountId = accountWithBalance.first.accountId
                 navigateToScreen("AccountDetails/$accountId")
             }
     ) {
@@ -240,24 +279,15 @@ fun AccountCard(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = (accountWithBalance.first.initialBalance?.plus(
-                        balance)).toString()
+                FormattedCurrency(
+                    value = accountWithBalance.first.initialBalance?.plus(balance)!!,
+                    currency = accountCurrencyInfo
                 )
-                Text(
-                    text = (accountWithBalance.first.initialBalance?.plus(
-                        balance)).toString()
+                FormattedCurrency(
+                    value = accountWithBalance.first.initialBalance?.plus(balance)!!,
+                    currency = accountCurrencyInfo
                 )
             }
         }
-    }
-}
-
-
-fun formatAsCurrency(value: Double, format: CurrencyFormat): String {
-    return if (format.pfx_symbol.isNotBlank()) {
-        format.pfx_symbol + " " + String.format("%.2f", value)
-    } else {
-        String.format("%.2f", value) + " " + format.sfx_symbol
     }
 }

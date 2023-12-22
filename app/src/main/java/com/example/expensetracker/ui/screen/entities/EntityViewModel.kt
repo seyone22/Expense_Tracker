@@ -70,6 +70,14 @@ class EntityViewModel(
             categoriesRepository.insertCategory(categoryUiState.categoryDetails.toCategory())
         }
     }
+    suspend fun editCategory() {
+        if(validateCategoryInput()) {
+            categoriesRepository.updateCategory(categoryUiState.categoryDetails.toCategory())
+        }
+    }
+    suspend fun deleteCategory(category : Category) {
+        categoriesRepository.deleteCategory(category)
+    }
 
     private fun validateCategoryInput(uiState: CategoryDetails = categoryUiState.categoryDetails): Boolean {
         return with(uiState) {
@@ -87,6 +95,15 @@ class EntityViewModel(
             payeesRepository.insertPayee(payeeUiState.payeeDetails.toPayee())
         }
     }
+    suspend fun editPayee() {
+        if(validatePayeeInput()) {
+            payeesRepository.updatePayee(payeeUiState.payeeDetails.toPayee())
+        }
+    }
+    suspend fun deletePayee(payee : Payee) {
+        payeesRepository.deletePayee(payee)
+    }
+
 
     private fun validatePayeeInput(uiState: PayeeDetails = payeeUiState.payeeDetails): Boolean {
         return with(uiState) {
@@ -103,6 +120,14 @@ class EntityViewModel(
         if(validateCurrencyInput()) {
             currencyFormatsRepository.insertCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
         }
+    }
+    suspend fun editCurrency() {
+        if(validateCurrencyInput()) {
+            currencyFormatsRepository.updateCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
+        }
+    }
+    suspend fun deleteCurrency(currency : CurrencyFormat) {
+        currencyFormatsRepository.deleteCurrencyFormat(currency)
     }
 
     private fun validateCurrencyInput(uiState: CurrencyDetails = currencyUiState.currencyDetails): Boolean {

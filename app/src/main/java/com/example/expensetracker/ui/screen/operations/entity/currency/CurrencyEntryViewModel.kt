@@ -42,7 +42,7 @@ data class CurrencyUiState(
 //Data class for CurrencyDetails
 data class CurrencyDetails(
     val currencyId : Int = 0,
-    val currencyName : String = "",
+    var currencyName : String = "",
     val pfx_symbol : String = "",
     val sfx_symbol : String = "",
     val decimal_point : String = "",

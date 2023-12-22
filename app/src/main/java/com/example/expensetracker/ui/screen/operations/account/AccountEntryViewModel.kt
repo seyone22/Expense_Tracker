@@ -5,11 +5,36 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
+import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
+import com.example.expensetracker.model.CurrencyFormat
+import com.example.expensetracker.ui.screen.onboarding.CurrencyList
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
-class AccountEntryViewModel(private val accountsRepository: AccountsRepository) : ViewModel() {
+class AccountEntryViewModel(
+    private val accountsRepository: AccountsRepository,
+    private val currencyFormatsRepository: CurrencyFormatsRepository
+) : ViewModel() {
+    val currencyList: StateFlow<CurrencyList> =
+        currencyFormatsRepository.getAllCurrencyFormatsStream()
+            .map { currencies ->
+                CurrencyList(
+                    currenciesList = currencies
+                )
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = CurrencyList()
+            )
+
+
     var accountUiState by mutableStateOf(AccountUiState())
         private set
 
@@ -32,6 +57,10 @@ class AccountEntryViewModel(private val accountsRepository: AccountsRepository) 
         return with(uiState) {
             accountName.isNotBlank() && (initialDate?.isNotBlank() ?: false)
         }
+    }
+
+    companion object {
+        private const val TIMEOUT_MILLIS = 5_000L
     }
 }
 
@@ -81,7 +110,7 @@ fun AccountDetails.toAccount(): Account = Account(
     initialBalance = initialBalance?.toDoubleOrNull() ?: 0.0,
     initialDate = initialDate,
     favoriteAccount = favoriteAccount,
-    currencyId = currencyId?.toIntOrNull() ?: 0,
+    currencyId = currencyId.toIntOrNull() ?: 0,
     statementLocked = statementLocked?.toIntOrNull() ?: 0,
     statementDate = statementDate,
     minimumBalance = minimumBalance?.toDoubleOrNull() ?: 0.0,

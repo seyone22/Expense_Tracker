@@ -1,45 +1,34 @@
 package com.example.expensetracker.ui.screen.operations.account
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.expensetracker.R
-import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import com.example.expensetracker.ui.screen.transactions.TransactionList
 
 object AccountDetailDestination : NavigationDestination {
     override val route = "AccountDetails"
@@ -65,7 +54,7 @@ fun AccountDetailScreen(
     }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             ExpenseTopBar(
                 selectedActivity = AccountsDestination.routeId,
@@ -79,7 +68,7 @@ fun AccountDetailScreen(
                 .padding(it)
                 .padding(0.dp, 100.dp)
         ) {
-            OutlinedCard(
+            Card(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(24.dp, 0.dp)
@@ -90,16 +79,9 @@ fun AccountDetailScreen(
                 ) {
                     Row {
                         Column {
-                            Icon(
-                                imageVector = Icons.Outlined.AccountBalanceWallet,
-                                contentDescription = null,
-                                Modifier.size(36.dp, 36.dp)
-                            )
-                        }
-                        Column {
                             Text(
                                 text = accountDetailAccountUiState.account.accountName,
-                                style = MaterialTheme.typography.titleLarge
+                                style = MaterialTheme.typography.headlineSmall
                             )
                             Text(
                                 text = accountDetailAccountUiState.account.accountType + " Account",
@@ -116,6 +98,7 @@ fun AccountDetailScreen(
                             }
                         }
                     }
+                    HorizontalDivider()
                     Text(
                         text = "Account Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
                             accountDetailAccountUiState.balance
@@ -130,28 +113,15 @@ fun AccountDetailScreen(
                     )
                 }
             }
-            if (!accountDetailTransactionUiState.transactions.isNullOrEmpty()) {
+            if (accountDetailTransactionUiState.transactions.isNotEmpty()) {
                 Column {
-                    TransactionList(transactions = accountDetailTransactionUiState.transactions)
+                    TransactionList(
+                        transactions = accountDetailTransactionUiState.transactions,
+                        modifier = modifier,
+                        longClicked = { },
+                    )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun TransactionList(
-    transactions : List<Transaction>
-) {
-    LazyColumn {
-        items(count = transactions.size) {
-            ListItem(
-                headlineContent = {
-                    Text(text = transactions[it].accountId.toString())
-                }
-            )
-            HorizontalDivider()
-
         }
     }
 }

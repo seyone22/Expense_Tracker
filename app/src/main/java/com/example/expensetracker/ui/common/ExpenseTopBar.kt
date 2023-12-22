@@ -32,7 +32,7 @@ fun ExpenseTopBar(
 
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+            containerColor = MaterialTheme.colorScheme.background,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
         ),
         title = {
