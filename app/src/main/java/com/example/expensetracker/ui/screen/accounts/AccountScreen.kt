@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -65,7 +66,6 @@ fun AccountScreen(
     ) {
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
-    Log.d("DEBUG", "AccountScreen: $totals")
     val isUsed by viewModel.isUsed.collectAsState()
 
     when (isUsed) {
@@ -102,17 +102,43 @@ fun AccountScreen(
                                 .fillMaxWidth()
                                 .fillMaxHeight()
                         ) {
+                            // Code block to get the current currency's detail.
+                            val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
+                            var baseCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
+                            // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
+                            LaunchedEffect(baseCurrencyId) {
+                                baseCurrencyInfo =
+                                    viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
+                            }
 
                             DonutChart(
-                                data = DonutChartDataCollection(listOf(
-                                    DonutChartData(totals.income.toFloat(), MaterialTheme.colorScheme.primary, "Income"),
-                                    DonutChartData(totals.expenses.toFloat(), MaterialTheme.colorScheme.secondary, "Expense")
-                                ))
+                                data = DonutChartDataCollection(
+                                    listOf(
+                                        DonutChartData(
+                                            totals.income.toFloat(),
+                                            MaterialTheme.colorScheme.primary,
+                                            "Income"
+                                        ),
+                                        DonutChartData(
+                                            totals.expenses.toFloat(),
+                                            MaterialTheme.colorScheme.secondary,
+                                            "Expense"
+                                        )
+                                    )
+                                )
                             ) { selected ->
                                 AnimatedContent(targetState = selected, label = "") {
-                                    Column(modifier = Modifier.width(100.dp)) {
-                                        Text(text = it?.title ?: "", textAlign = TextAlign.Center)
-                                        Text(text = (it?.amount ?: "").toString(), textAlign = TextAlign.Center)
+                                    if (it != null) {
+                                        Column(modifier = Modifier.width(100.dp)) {
+                                            Text(
+                                                text = it.title ?: "",
+                                                textAlign = TextAlign.Center
+                                            )
+                                            FormattedCurrency(
+                                                value = (it.amount ?: 0).toDouble(),
+                                                currency = baseCurrencyInfo
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -121,11 +147,6 @@ fun AccountScreen(
                         Column(
                             modifier = modifier,
                         ) {
-                            Text("Current Month Summary")
-                            Text(
-                                text = accountsUiState.grandTotal.toString()
-                            )
-
                             Text(
                                 text = "Summary of Accounts",
                                 style = MaterialTheme.typography.titleLarge
@@ -173,7 +194,9 @@ fun AccountList(
         )
 
         accountList.forEach { accountPair ->
-            val balance: Double = data.balancesList.find { it.accountId == accountPair.first.accountId }?.balance ?: 0.0
+            val balance: Double =
+                data.balancesList.find { it.accountId == accountPair.first.accountId }?.balance
+                    ?: 0.0
             if (accountPair.first.accountType == category) {
                 AccountCard(
                     accountWithBalance = accountPair,
@@ -196,11 +219,11 @@ fun AccountCard(
     navigateToScreen: (screen: String) -> Unit,
 ) {
     // Code block to get the current currency's detail.
-    // For now, it's taking default currency. TODO: Take account currency.
-    var baseCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
+    var accountCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
     // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
     LaunchedEffect(accountWithBalance.first.currencyId) {
-        baseCurrencyInfo = viewModel.getBaseCurrencyInfo(baseCurrencyId = accountWithBalance.first.currencyId)
+        accountCurrencyInfo =
+            viewModel.getBaseCurrencyInfo(baseCurrencyId = accountWithBalance.first.currencyId)
     }
 
     ElevatedCard(
@@ -258,11 +281,11 @@ fun AccountCard(
             ) {
                 FormattedCurrency(
                     value = accountWithBalance.first.initialBalance?.plus(balance)!!,
-                    currency = baseCurrencyInfo
+                    currency = accountCurrencyInfo
                 )
                 FormattedCurrency(
                     value = accountWithBalance.first.initialBalance?.plus(balance)!!,
-                    currency = baseCurrencyInfo
+                    currency = accountCurrencyInfo
                 )
             }
         }
