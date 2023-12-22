@@ -118,7 +118,7 @@ fun AccountDetailScreen(
                     TransactionList(
                         transactions = accountDetailTransactionUiState.transactions,
                         modifier = modifier,
-                        longClicked = { }
+                        longClicked = { },
                     )
                 }
             }
