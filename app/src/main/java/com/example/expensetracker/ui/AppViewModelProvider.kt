@@ -53,7 +53,10 @@ object AppViewModelProvider {
         }
         //Initializer for AccountEntryViewModel
         initializer {
-            AccountEntryViewModel(expenseApplication().container.accountsRepository)
+            AccountEntryViewModel(
+                expenseApplication().container.accountsRepository,
+                expenseApplication().container.currenciesRepository
+            )
         }
         initializer {
             TransactionEntryViewModel(

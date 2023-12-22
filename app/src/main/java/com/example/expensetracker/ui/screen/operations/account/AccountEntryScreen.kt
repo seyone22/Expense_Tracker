@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -120,7 +121,8 @@ fun AccountEntryScreen(
         AccountEntryBody(
             accountUiState = viewModel.accountUiState,
             onAccountValueChange = viewModel::updateUiState,
-            modifier = modifier.padding(padding)
+            modifier = modifier.padding(padding),
+            viewModel = viewModel
         )
     }
 
@@ -131,6 +133,7 @@ fun AccountEntryBody(
     modifier: Modifier = Modifier,
     accountUiState: AccountUiState = AccountUiState(),
     onAccountValueChange: (AccountDetails) -> Unit = {},
+    viewModel: AccountEntryViewModel
 ) {
     LazyColumn(
         modifier = modifier
@@ -141,7 +144,8 @@ fun AccountEntryBody(
             AccountEntryForm(
                 accountDetails = accountUiState.accountDetails,
                 onValueChange = onAccountValueChange,
-                modifier = Modifier
+                modifier = Modifier,
+                viewModel = viewModel
             )
         }
     }
@@ -154,11 +158,15 @@ fun AccountEntryForm(
     modifier: Modifier = Modifier,
     accountDetails: AccountDetails,
     onValueChange: (AccountDetails) -> Unit = {},
+    viewModel: AccountEntryViewModel
 ) {
     var accountTypeExpanded by remember { mutableStateOf(false) }
+    var baseCurrencyExpanded by remember { mutableStateOf(false) }
     var openInitialDateDialog by remember { mutableStateOf(false) }
     var openPaymentDueDateDialog by remember { mutableStateOf(false) }
     var openStatementDateDialog by remember { mutableStateOf(false) }
+
+    val currencyList by viewModel.currencyList.collectAsState()
 
     val focusManager = LocalFocusManager.current
 
@@ -168,6 +176,38 @@ fun AccountEntryForm(
             .padding(0.dp, 8.dp)
     )
     {
+        ExposedDropdownMenuBox(
+            expanded = baseCurrencyExpanded,
+            onExpandedChange = { baseCurrencyExpanded = !baseCurrencyExpanded }) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .padding(0.dp, 8.dp)
+                    .clickable(enabled = true) { baseCurrencyExpanded = true }
+                    .menuAnchor(),
+                value = (currencyList.currenciesList.find { it.currencyId == accountDetails.currencyId.toInt() })?.currencyName
+                    ?: "",
+                readOnly = true,
+                onValueChange = { },
+                label = { Text("Base Currency") },
+                singleLine = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = baseCurrencyExpanded) },
+            )
+
+            ExposedDropdownMenu(
+                expanded = baseCurrencyExpanded,
+                onDismissRequest = { baseCurrencyExpanded = false },
+            ) {
+                currencyList.currenciesList.forEach { currency ->
+                    DropdownMenuItem(
+                        text = { Text(currency.currencyName) },
+                        onClick = {
+                            onValueChange(accountDetails.copy(currencyId = currency.currencyId.toString()))
+                            baseCurrencyExpanded = false
+                        }
+                    )
+                }
+            }
+        }
         ExposedDropdownMenuBox(
             expanded = accountTypeExpanded,
             onExpandedChange = { accountTypeExpanded = !accountTypeExpanded }) {
