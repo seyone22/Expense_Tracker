@@ -8,7 +8,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.example.expensetracker.data.AppContainer
 import com.example.expensetracker.data.AppDataContainer
 import com.example.expensetracker.data.MMEXDatabase
-import com.example.expensetracker.data.userPreferences.UserPreferencesRepository
 import dagger.hilt.android.HiltAndroidApp
 
 private const val BASECURRENCYIDT_PREFERENCE_NAME = "baseCurrencyId"
