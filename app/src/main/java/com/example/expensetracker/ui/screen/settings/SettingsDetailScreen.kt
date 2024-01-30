@@ -52,6 +52,7 @@ import com.example.expensetracker.R
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.ui.AppViewModelProvider
+import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch
 
@@ -152,7 +153,7 @@ fun GeneralSettingsList(
                         Log.d("TAG", "GeneralSettingsList: $baseCurrencyName")
                     }
                 }
-                Text(text = baseCurrencyName)
+                Text(text = removeTrPrefix(baseCurrencyName))
             },
             modifier = Modifier.clickable { editCurrency = !editCurrency }
 
@@ -228,6 +229,7 @@ fun GeneralSettingsList(
             )
         }
         var newCurrency: CurrencyFormat = CurrencyFormat()
+        newCurrency.currencyName = removeTrPrefix(baseCurrencyName)
         var baseCurrencyExpanded by remember { mutableStateOf(false) }
 
         Dialog(
@@ -274,7 +276,7 @@ fun GeneralSettingsList(
                         ) {
                             currencyList.currenciesList.forEach { currency ->
                                 DropdownMenuItem(
-                                    text = { Text(currency.currencyName) },
+                                    text = { Text(removeTrPrefix(currency.currencyName)) },
                                     onClick = {
                                         newCurrency = currency
                                         baseCurrencyExpanded = false

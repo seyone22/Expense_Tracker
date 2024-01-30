@@ -63,6 +63,7 @@ import com.example.expensetracker.ui.common.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
+import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.operations.entity.category.CategoryDetails
 import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
@@ -231,7 +232,7 @@ fun CategoryList(
     LazyColumn {
         items(list) {
             ListItem(
-                headlineContent = { Text(it.categName) },
+                headlineContent = { Text( removeTrPrefix(it.categName)) },
                 overlineContent = {
                     if (it.parentId != -1) {
                         Text(it.parentId.toString())
@@ -404,7 +405,7 @@ fun CurrenciesList(
         items(list) {
             ListItem(
                 headlineContent = { Text(it.baseConvRate.toString()) },
-                overlineContent = { Text(it.currencyName) },
+                overlineContent = { Text( removeTrPrefix(it.currencyName)) },
                 leadingContent = { Text(it.currency_symbol) },
                 trailingContent = {
                     val openDeleteAlertDialog = remember { mutableStateOf(false) }

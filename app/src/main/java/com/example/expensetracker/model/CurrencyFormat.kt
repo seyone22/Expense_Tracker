@@ -11,7 +11,7 @@ import androidx.room.PrimaryKey
 data class CurrencyFormat (
     @PrimaryKey(autoGenerate = true)
     val currencyId : Int = 0,
-    val currencyName : String = "",
+    var currencyName : String = "",
     val pfx_symbol : String = "",
     val sfx_symbol : String = "",
     val decimal_point : String = "",

@@ -18,3 +18,13 @@ fun FormattedCurrency(
         Text(text = "${DecimalFormat("#.##").format(value)}${currency.sfx_symbol}")
     }
 }
+
+fun removeTrPrefix(input: String): String {
+    val prefix = "_tr_"
+
+    return if (input.startsWith(prefix)) {
+        input.removePrefix(prefix)
+    } else {
+        input
+    }
+}
