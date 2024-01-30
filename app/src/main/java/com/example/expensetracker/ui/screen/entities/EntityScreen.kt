@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
@@ -242,7 +243,7 @@ fun CategoryList(
                 },
                 leadingContent = {
                     Icon(
-                        Icons.Filled.Favorite,
+                        Icons.Filled.Bookmark,
                         contentDescription = "Localized description",
                     )
                 },
