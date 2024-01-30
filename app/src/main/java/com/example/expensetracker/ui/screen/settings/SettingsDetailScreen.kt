@@ -1,7 +1,9 @@
 package com.example.expensetracker.ui.screen.settings
 
+import android.provider.MediaStore.Audio.Radio
 import android.util.Log
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CatchingPokemon
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -27,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -106,7 +110,7 @@ fun SettingsDetailScreen(
                 }
 
                 "Appearance" -> {
-                    GeneralSettingsList(
+                    AppearanceSettingsList(
                         metadata = metadataList,
                         viewModel = viewModel
                     )
@@ -336,5 +340,70 @@ fun AboutList() {
             supportingContent = { Text(text = "Alpha v0.1.1 (25/11/2023 : 00:00)") },
             modifier = Modifier.clickable { }
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppearanceSettingsList(
+    metadata: List<Metadata?>,
+    viewModel: SettingsViewModel
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    var editTheme by remember { mutableStateOf(false) }
+
+    Column {
+        ListItem(
+            headlineContent = { Text(text = "Theme") },
+            supportingContent = {
+                if (isSystemInDarkTheme()) {
+                    Text(text = "Dark")
+                } else {
+                    Text(text = "Light")
+                }
+            },
+            modifier = Modifier.clickable { editTheme = !editTheme }
+        )
+
+        // Edit Theme Dialog
+        if (editTheme) {
+
+            Dialog(
+                onDismissRequest = { editTheme = !editTheme },
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(275.dp)
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.Start,
+                    ) {
+                        Text(
+                            text = "Theme",
+                            modifier = Modifier.padding(8.dp)
+                        )
+                        Row {
+                            RadioButton(selected = false, onClick = { /*TODO*/ })
+                            Text(text = "Light")
+                        }
+                        Row {
+                            RadioButton(selected = false, onClick = { /*TODO*/ })
+                            Text(text = "Dark")
+                        }
+                        Row {
+                            RadioButton(selected = true, onClick = { /*TODO*/ })
+                            Text(text = "System Default")
+                        }
+                    }
+                }
+            }
+        }
     }
 }
