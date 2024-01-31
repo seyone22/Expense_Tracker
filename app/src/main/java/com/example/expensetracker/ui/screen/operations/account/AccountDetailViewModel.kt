@@ -162,6 +162,22 @@ class AccountDetailViewModel(
 
         return balance
     }
+
+    suspend fun deleteTransaction(transaction: Transaction) : Boolean {
+        return try {
+            transactionsRepository.deleteTransaction(transaction)
+            Log.d("TAG", "deleteTransaction: pass ")
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.d("TAG", "deleteTransaction: fail")
+            false
+        }
+    }
+
+    fun editTransaction() {
+        TODO("Not yet implemented")
+    }
 }
 
 data class AccountDetailAccountUiState(
