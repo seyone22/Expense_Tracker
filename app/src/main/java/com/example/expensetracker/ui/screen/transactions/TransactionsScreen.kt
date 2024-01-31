@@ -298,7 +298,7 @@ fun TransactionEditDialog(
     edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
-    var transactionSelected by remember { mutableStateOf(selectedTransaction) }
+    val transactionSelected by remember { mutableStateOf(selectedTransaction) }
 
     /*    viewModel.updateCurrencyState(
             viewModel.currencyUiState.currencyDetails.copy(
