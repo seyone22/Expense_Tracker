@@ -74,6 +74,7 @@ fun SortBar(
 }
 
 val menuItems = listOf(
+    "All",
     "Current Month",
     "Current Month to Date",
     "Last Month",

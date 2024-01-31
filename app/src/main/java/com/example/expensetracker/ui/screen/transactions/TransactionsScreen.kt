@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.screen.transactions
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -12,10 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -28,15 +26,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,12 +40,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -66,11 +60,7 @@ import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.SortBar
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.entities.CategoryEntryDialog
-import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
-import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
-import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -101,7 +91,7 @@ fun TransactionsScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            if(isSelected) {
+            if (isSelected) {
                 TopAppBar(
                     title = { Text(text = TransactionsDestination.route) },
                     navigationIcon = {
@@ -126,7 +116,11 @@ fun TransactionsScreen(
                             IconButton(
                                 onClick = {
                                     isSelected = !isSelected
-                                    coroutineScope.launch { viewModel.deleteTransaction(selectedTransaction) }
+                                    coroutineScope.launch {
+                                        viewModel.deleteTransaction(
+                                            selectedTransaction
+                                        )
+                                    }
                                 }
 
                             ) {
@@ -175,7 +169,7 @@ fun TransactionsScreen(
                 longClicked = { selected ->
                     isSelected = !isSelected
                     selectedTransaction = selected
-                              },
+                },
                 viewModel = viewModel
             )
         }
@@ -207,13 +201,36 @@ fun TransactionList(
 ) {
     val haptics = LocalHapticFeedback.current
     var filteredTransactions by remember { mutableStateOf(transactions) }
+    // Use derivedStateOf to update filteredTransactions when transactions change
+    val derivedFilteredTransactions by remember(transactions) {
+        derivedStateOf {
+            transactions // or apply your filtering logic here
+        }
+    }
+    filteredTransactions = derivedFilteredTransactions
+    Log.d("TAAG", "$transactions")
 
     SortBar(
         periodSortAction = { sortCase ->
             filteredTransactions = when (sortCase) {
-                0 -> transactions.filter {
-                    val transactionDate = LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
+                0 -> transactions
+                1 -> transactions.filter {
+                    val transactionDate =
+                        LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
                     transactionDate.monthValue == LocalDate.now().monthValue
+                }
+
+                3 -> transactions.filter {
+                    val transactionDate =
+                        LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
+                    // Check if the transaction date is in the last month
+                    when {
+                        LocalDate.now().monthValue != 1 ->
+                            transactionDate.monthValue == LocalDate.now().monthValue - 1
+
+                        else ->
+                            transactionDate.year == LocalDate.now().year - 1 && transactionDate.monthValue == 12
+                    }
                 }
                 // Add more cases as needed
                 else -> transactions // No filtering for other cases
@@ -230,7 +247,7 @@ fun TransactionList(
                     Text(text = filteredTransactions[it].payeeName)
                 },
                 supportingContent = {
-                    Text(text =  removeTrPrefix(filteredTransactions[it].categName))
+                    Text(text = removeTrPrefix(filteredTransactions[it].categName))
                 },
                 trailingContent = {
                     val accountId = filteredTransactions[it].accountId
@@ -244,7 +261,10 @@ fun TransactionList(
                     }
                     // Now you can use 'currencyFormat' in your FormattedCurrency composable
                     //TODO : DOESN'T WORK
-                    FormattedCurrency(value = filteredTransactions[it].transAmount, currency = currencyFormat)
+                    FormattedCurrency(
+                        value = filteredTransactions[it].transAmount,
+                        currency = currencyFormat
+                    )
                 },
                 leadingContent = {
                     Text(text = filteredTransactions[it].transCode[0].toString())
@@ -270,21 +290,21 @@ fun TransactionList(
 @Composable
 fun TransactionEditDialog(
     modifier: Modifier = Modifier,
-    title : String,
-    selectedTransaction : Transaction,
+    title: String,
+    selectedTransaction: Transaction,
     onConfirmClick: () -> Unit,
     onDismissRequest: () -> Unit,
     viewModel: TransactionsViewModel,
-    edit : Boolean = false
+    edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
     var transactionSelected by remember { mutableStateOf(selectedTransaction) }
 
-/*    viewModel.updateCurrencyState(
-        viewModel.currencyUiState.currencyDetails.copy(
-            currencyName = selectedCurrency.currencyName
-        )
-    )*/
+    /*    viewModel.updateCurrencyState(
+            viewModel.currencyUiState.currencyDetails.copy(
+                currencyName = selectedCurrency.currencyName
+            )
+        )*/
     Dialog(
         onDismissRequest = { onDismissRequest() }
     )
