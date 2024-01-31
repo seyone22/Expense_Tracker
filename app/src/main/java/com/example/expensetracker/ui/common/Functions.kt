@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.common
 
 import android.icu.text.DecimalFormat
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,11 +20,13 @@ fun FormattedCurrency(
 ) {
     if (currency.pfx_symbol != "") {
         Text(
+            style = MaterialTheme.typography.titleMedium,
             text = "${currency.pfx_symbol}${DecimalFormat("#.##").format(value)}",
             color = if(type == TransactionType.DEBIT) { Color.Red } else  { Color.Black }
         )
     } else {
         Text(
+            style = MaterialTheme.typography.titleMedium,
             text = "${DecimalFormat("#.##").format(value)}${currency.sfx_symbol}",
             color = if(type == TransactionType.DEBIT) { Color.Red } else  { Color.Black }
         )

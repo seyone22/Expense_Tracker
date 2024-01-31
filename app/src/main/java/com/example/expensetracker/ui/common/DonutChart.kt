@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -72,10 +73,10 @@ fun DonutChart(
     modifier: Modifier = Modifier,
     chartSize: Dp = 350.dp,
     data: DonutChartDataCollection,
-    gapPercentage: Float = 0.01f,
+    gapPercentage: Float = 0.001f,
     selectionView: @Composable (selectedItem: DonutChartData?) -> Unit = {},
 ) {
-    var selectedIndex by remember { mutableStateOf(-1) }
+    var selectedIndex by remember { mutableIntStateOf(-1) }
     val animationTargetState = (0..data.items.size).map {
         remember { mutableStateOf(DonutChartState()) }
     }
