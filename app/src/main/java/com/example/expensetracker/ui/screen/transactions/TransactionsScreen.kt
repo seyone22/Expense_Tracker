@@ -58,6 +58,8 @@ import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.SortBar
+import com.example.expensetracker.ui.common.TransactionType
+import com.example.expensetracker.ui.common.getAbbreviatedMonthName
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
@@ -208,7 +210,6 @@ fun TransactionList(
         }
     }
     filteredTransactions = derivedFilteredTransactions
-    Log.d("TAAG", "$transactions")
 
     SortBar(
         periodSortAction = { sortCase ->
@@ -250,27 +251,28 @@ fun TransactionList(
                     Text(text = removeTrPrefix(filteredTransactions[it].categName))
                 },
                 trailingContent = {
-                    val accountId = filteredTransactions[it].accountId
-                    var currencyFormat = CurrencyFormat()
+                    var currencyFormat by remember { mutableStateOf(CurrencyFormat()) }
 
-                    LaunchedEffect(accountId) {
+                    LaunchedEffect(filteredTransactions[it].accountId) {
                         val currencyFormatFunction =
-                            viewModel.getAccountFromId(accountId)
+                            viewModel.getAccountFromId(filteredTransactions[it].accountId)
                                 ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
                         currencyFormat = currencyFormatFunction!!
                     }
-                    // Now you can use 'currencyFormat' in your FormattedCurrency composable
-                    //TODO : DOESN'T WORK
+
                     FormattedCurrency(
                         value = filteredTransactions[it].transAmount,
-                        currency = currencyFormat
+                        currency = currencyFormat,
+                        type = if(filteredTransactions[it].transCode == "Deposit") { TransactionType.CREDIT } else { TransactionType.DEBIT }
                     )
                 },
                 leadingContent = {
-                    Text(text = filteredTransactions[it].transCode[0].toString())
-                },
-                overlineContent = {
-                    Text(text = filteredTransactions[it].transDate!!)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = getAbbreviatedMonthName(filteredTransactions[it].transDate!!.substring(5,7).toInt()))
+                        Text(text = filteredTransactions[it].transDate!!.substring(8,10))
+                    }
                 },
                 modifier = Modifier.combinedClickable(
                     onClick = {},
