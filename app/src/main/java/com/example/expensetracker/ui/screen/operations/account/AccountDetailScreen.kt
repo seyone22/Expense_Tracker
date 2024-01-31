@@ -1,11 +1,13 @@
 package com.example.expensetracker.ui.screen.operations.account
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -29,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -149,44 +152,46 @@ fun AccountDetailScreen(
                     .fillMaxWidth()
                     .padding(24.dp, 0.dp)
             ) {
-                Column(
+                Row(
                     modifier = modifier
-                        .padding(16.dp, 8.dp)
+                        .padding(16.dp, 8.dp, 0.dp, 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Row {
-                        Column {
-                            Text(
-                                text = accountDetailAccountUiState.account.accountName,
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                            Text(
-                                text = accountDetailAccountUiState.account.accountType + " Account",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                        Column {
-                            IconButton(onClick = { /*TODO*/ }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Edit,
-                                    contentDescription = null,
-                                    Modifier.size(36.dp, 36.dp)
+                    Column(
+                        modifier = Modifier.width(300.dp)
+                    ) {
+                            Column {
+                                Text(
+                                    text = accountDetailAccountUiState.account.accountName,
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
+                                Text(
+                                    text = accountDetailAccountUiState.account.accountType + " Account",
+                                    style = MaterialTheme.typography.titleMedium
                                 )
                             }
-                        }
+                        HorizontalDivider()
+                        Text(
+                            text = "Account Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
+                                accountDetailAccountUiState.balance
+                            )).toString(),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Reconciled Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
+                                accountDetailAccountUiState.balance
+                            )).toString(),
+                            style = MaterialTheme.typography.titleSmall
+                        )
                     }
-                    HorizontalDivider()
-                    Text(
-                        text = "Account Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
-                            accountDetailAccountUiState.balance
-                        )).toString(),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Reconciled Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
-                            accountDetailAccountUiState.balance
-                        )).toString(),
-                        style = MaterialTheme.typography.titleSmall
-                    )
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Edit,
+                            contentDescription = null,
+                            Modifier.size(24.dp, 24.dp)
+                        )
+                    }
                 }
             }
             if (accountDetailTransactionUiState.transactions.isNotEmpty()) {
