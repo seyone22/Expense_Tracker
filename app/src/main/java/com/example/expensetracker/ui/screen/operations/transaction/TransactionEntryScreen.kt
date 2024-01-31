@@ -55,6 +55,7 @@ import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.AppViewModelProvider
+import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -464,7 +465,7 @@ fun TransactionEntryForm(
                             }
                         }
                         .menuAnchor(),
-                    value = currentCategory.categName,
+                    value =  removeTrPrefix(currentCategory.categName),
                     readOnly = true,
                     onValueChange = { onValueChange(transactionDetails.copy(categoryId = it)) },
                     label = { Text("Transaction Category *") },
@@ -483,7 +484,7 @@ fun TransactionEntryForm(
                 ) {
                     transactionUiState1.categoriesList.forEach { category ->
                         DropdownMenuItem(
-                            text = { Text(category.categName) },
+                            text = { Text( removeTrPrefix(category.categName)) },
                             onClick = {
                                 currentCategory = category
                                 onValueChange(transactionDetails.copy(categoryId = category.categId.toString()))
