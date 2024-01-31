@@ -71,7 +71,7 @@ fun AccountDetailScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    LaunchedEffect( Unit ) {
+    LaunchedEffect(Unit) {
         viewModel.getTransactions()
         viewModel.getAccount()
     }
@@ -79,7 +79,7 @@ fun AccountDetailScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            if(isSelected) {
+            if (isSelected) {
                 TopAppBar(
                     title = { Text(text = TransactionsDestination.route) },
                     navigationIcon = {
@@ -104,7 +104,11 @@ fun AccountDetailScreen(
                             IconButton(
                                 onClick = {
                                     isSelected = !isSelected
-                                    coroutineScope.launch { viewModel.deleteTransaction(selectedTransaction) }
+                                    coroutineScope.launch {
+                                        viewModel.deleteTransaction(
+                                            selectedTransaction
+                                        )
+                                    }
                                 }
 
                             ) {
@@ -134,7 +138,7 @@ fun AccountDetailScreen(
                 )
             }
         }
-        ) {
+    ) {
         Column(
             modifier = modifier
                 .padding(it)
@@ -193,7 +197,7 @@ fun AccountDetailScreen(
                         longClicked = { selected ->
                             isSelected = !isSelected
                             selectedTransaction = selected
-                                      },
+                        },
                     )
                 }
             }
