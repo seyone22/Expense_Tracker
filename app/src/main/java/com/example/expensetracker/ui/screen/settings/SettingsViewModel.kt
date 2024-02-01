@@ -2,9 +2,12 @@ package com.example.expensetracker.ui.screen.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
 import com.example.expensetracker.data.metadata.MetadataRepository
 import com.example.expensetracker.model.CurrencyFormat
+import com.example.expensetracker.model.InfoEuro
 import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +17,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel to retrieve all items in the Room database.
@@ -26,6 +30,8 @@ class SettingsViewModel(
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
+
+    public var monthlyRatesUiState : List<InfoEuro> = listOf()
 
     // Flow for username
     private val usernameFlow: Flow<Metadata?> = metadataRepository.getMetadataByNameStream("USERNAME")
@@ -67,6 +73,13 @@ class SettingsViewModel(
         metadataRepository.updateMetadata(
             Metadata(5, "BASECURRENCYID", newCurrency.toString())
         )
+    }
+
+    public fun getMonthlyRates() {
+        viewModelScope.launch {
+            val listResult = InfoEuroApi.retrofitService.getMonthlyRates()
+            monthlyRatesUiState = listResult
+        }
     }
 }
 

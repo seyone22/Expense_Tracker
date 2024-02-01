@@ -230,8 +230,8 @@ fun CategoryList(
     viewModel: EntityViewModel,
     coroutineScope: CoroutineScope
 ) {
-    LazyColumn {
-        items(list) {
+    LazyColumn() {
+        items(list, { item -> item.categId } ) {
             ListItem(
                 headlineContent = { Text( removeTrPrefix(it.categName)) },
                 overlineContent = {

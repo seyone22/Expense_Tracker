@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.settings
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -97,7 +98,11 @@ fun SettingsScreen(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 },
-                modifier = Modifier.clickable { navigateToScreen("SettingsDetail/About") }
+                modifier = Modifier.clickable {
+                    navigateToScreen("SettingsDetail/About")
+                    viewModel.getMonthlyRates()
+                    Log.d("TAG", "${viewModel.monthlyRatesUiState}")
+                }
             )
         }
     }
