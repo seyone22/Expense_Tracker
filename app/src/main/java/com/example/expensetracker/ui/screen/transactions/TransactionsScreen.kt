@@ -1,25 +1,17 @@
 package com.example.expensetracker.ui.screen.transactions
 
-import android.annotation.SuppressLint
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -42,10 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.CurrencyFormat
@@ -58,6 +47,7 @@ import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.SortBar
+import com.example.expensetracker.ui.common.TransactionEditDialog
 import com.example.expensetracker.ui.common.TransactionType
 import com.example.expensetracker.ui.common.getAbbreviatedMonthName
 import com.example.expensetracker.ui.common.removeTrPrefix
@@ -185,7 +175,6 @@ fun TransactionsScreen(
                 }
             },
             onDismissRequest = { openEditDialog.value = !openEditDialog.value },
-            viewModel = viewModel,
             edit = true,
             title = "Edit Transaction",
             selectedTransaction = selectedTransaction
@@ -284,50 +273,6 @@ fun TransactionList(
                 )
             )
             HorizontalDivider()
-        }
-    }
-}
-
-@SuppressLint("UnrememberedMutableState")
-@Composable
-fun TransactionEditDialog(
-    modifier: Modifier = Modifier,
-    title: String,
-    selectedTransaction: Transaction,
-    onConfirmClick: () -> Unit,
-    onDismissRequest: () -> Unit,
-    viewModel: TransactionsViewModel,
-    edit: Boolean = false
-) {
-    val focusManager = LocalFocusManager.current
-    val transactionSelected by remember { mutableStateOf(selectedTransaction) }
-
-    /*    viewModel.updateCurrencyState(
-            viewModel.currencyUiState.currencyDetails.copy(
-                currencyName = selectedCurrency.currencyName
-            )
-        )*/
-    Dialog(
-        onDismissRequest = { onDismissRequest() }
-    )
-    {
-        // Draw a rectangle shape with rounded corners inside the dialog
-        Card(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(225.dp)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp, 0.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(text = transactionSelected.transCode)
-            }
         }
     }
 }

@@ -47,11 +47,13 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -122,7 +124,6 @@ fun AccountEntryScreen(
             accountUiState = viewModel.accountUiState,
             onAccountValueChange = viewModel::updateUiState,
             modifier = modifier.padding(padding),
-            viewModel = viewModel
         )
     }
 
@@ -133,7 +134,6 @@ fun AccountEntryBody(
     modifier: Modifier = Modifier,
     accountUiState: AccountUiState = AccountUiState(),
     onAccountValueChange: (AccountDetails) -> Unit = {},
-    viewModel: AccountEntryViewModel
 ) {
     LazyColumn(
         modifier = modifier
@@ -145,7 +145,6 @@ fun AccountEntryBody(
                 accountDetails = accountUiState.accountDetails,
                 onValueChange = onAccountValueChange,
                 modifier = Modifier,
-                viewModel = viewModel
             )
         }
     }
@@ -158,13 +157,14 @@ fun AccountEntryForm(
     modifier: Modifier = Modifier,
     accountDetails: AccountDetails,
     onValueChange: (AccountDetails) -> Unit = {},
-    viewModel: AccountEntryViewModel
 ) {
     var accountTypeExpanded by remember { mutableStateOf(false) }
     var baseCurrencyExpanded by remember { mutableStateOf(false) }
     var openInitialDateDialog by remember { mutableStateOf(false) }
     var openPaymentDueDateDialog by remember { mutableStateOf(false) }
     var openStatementDateDialog by remember { mutableStateOf(false) }
+
+    val viewModel: AccountEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
     val currencyList by viewModel.currencyList.collectAsState()
 
@@ -241,7 +241,6 @@ fun AccountEntryForm(
                 }
             }
         }
-
 
         OutlinedTextField(
             modifier = Modifier.padding(0.dp, 8.dp),
