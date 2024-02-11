@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -96,7 +98,7 @@ object EntitiesDestination : NavigationDestination {
     override val routeId = 1
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun EntityScreen(
     modifier: Modifier = Modifier,
@@ -110,9 +112,7 @@ fun EntityScreen(
 
     val entityUiState: EntitiesUiState by viewModel.entitiesUiState.collectAsState(EntitiesUiState())
 
-    var showCategoryDialog by remember { mutableStateOf(false) }
-    var showPayeeDialog by remember { mutableStateOf(false) }
-    var showCurrencyDialog by remember { mutableStateOf(false) }
+    var showNewDialog by remember { mutableStateOf(false) }
 
     var isSelected by remember { mutableStateOf(false) }
     var selectedCurrency by remember { mutableStateOf(CurrencyFormat()) }
@@ -123,6 +123,9 @@ fun EntityScreen(
 
     val openEditDialog = remember { mutableStateOf(false) }
     val openDeleteAlertDialog = remember { mutableStateOf(false) }
+
+
+    val pagerState = rememberPagerState(pageCount = { 3 })
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -181,21 +184,7 @@ fun EntityScreen(
             } else {
                 ExpenseTopBar(
                     selectedActivity = EntitiesDestination.routeId,
-                    navBarAction = {
-                        when (state) {
-                            0 -> {
-                                showCategoryDialog = true
-                            }
-
-                            1 -> {
-                                showPayeeDialog = true
-                            }
-
-                            2 -> {
-                                showCurrencyDialog = true
-                            }
-                        }
-                    },
+                    navBarAction = { showNewDialog = true },
                     navigateToSettings = { navigateToScreen(SettingsDestination.route) }
                 )
             }
@@ -221,7 +210,10 @@ fun EntityScreen(
                 titles.forEachIndexed { index, title ->
                     Tab(
                         selected = state == index,
-                        onClick = { state = index },
+                        onClick = {
+                            state = index
+                            coroutineScope.launch { pagerState.animateScrollToPage(index) }
+                        },
                         text = {
                             Text(
                                 text = title,
@@ -233,80 +225,88 @@ fun EntityScreen(
 
                 }
             }
-            when (state) {
-                0 -> {
-                    CategoryList(
-                        list = entityUiState.categoriesList,
-                        viewModel = viewModel,
-                        coroutineScope = coroutineScope,
-                        longClicked = { selected ->
-                            isSelected = !isSelected
-                            selectedCategory = selected
-                        },
-                    )
-                }
+            HorizontalPager(state = pagerState, verticalAlignment = Alignment.Top) { page ->
+                when (page) {
+                    0 -> {
+                        CategoryList(
+                            list = entityUiState.categoriesList,
+                            viewModel = viewModel,
+                            coroutineScope = coroutineScope,
+                            longClicked = { selected ->
+                                isSelected = !isSelected
+                                selectedCategory = selected
+                            },
+                        )
+                    }
 
-                1 -> {
-                    PayeeList(
-                        list = entityUiState.payeesList,
-                        viewModel = viewModel,
-                        coroutineScope = coroutineScope,
-                        longClicked = { selected ->
-                            isSelected = !isSelected
-                            selectedPayee = selected
-                        },
-                    )
-                }
+                    1 -> {
+                        PayeeList(
+                            list = entityUiState.payeesList,
+                            viewModel = viewModel,
+                            coroutineScope = coroutineScope,
+                            longClicked = { selected ->
+                                isSelected = !isSelected
+                                selectedPayee = selected
+                            },
+                        )
+                    }
 
-                2 -> {
-                    CurrenciesList(
-                        list = entityUiState.currenciesList,
-                        viewModel = viewModel,
-                        coroutineScope = coroutineScope,
-                        longClicked = { selected ->
-                            isSelected = !isSelected
-                            selectedCurrency = selected
-                        },
-                    )
+                    2 -> {
+                        CurrenciesList(
+                            list = entityUiState.currenciesList,
+                            viewModel = viewModel,
+                            coroutineScope = coroutineScope,
+                            longClicked = { selected ->
+                                isSelected = !isSelected
+                                selectedCurrency = selected
+                            },
+                        )
+                    }
                 }
             }
         }
 
     }
 
-    if (showCategoryDialog) {
-        CategoryEntryDialog(
-            onDismissRequest = { showCategoryDialog = false },
-            viewModel = viewModel,
-            onConfirmClick = {
-                coroutineScope.launch {
-                    viewModel.saveCategory()
+    if (showNewDialog) {
+        when (state) {
+            0 -> {
+                CategoryEntryDialog(
+                    onDismissRequest = { showNewDialog = false },
+                    viewModel = viewModel,
+                    onConfirmClick = {
+                        coroutineScope.launch {
+                            viewModel.saveCategory()
 
-                }
+                        }
+                    }
+                )
             }
-        )
-    }
-    if (showPayeeDialog) {
-        PayeeEntryDialog(
-            onDismissRequest = { showPayeeDialog = false },
-            viewModel = viewModel,
-            onConfirmClick = {
-                coroutineScope.launch {
-                    viewModel.savePayee()
-                }
+
+            1 -> {
+                PayeeEntryDialog(
+                    onDismissRequest = { showNewDialog = false },
+                    viewModel = viewModel,
+                    onConfirmClick = {
+                        coroutineScope.launch {
+                            viewModel.savePayee()
+                        }
+                    }
+                )
             }
-        )
-    }
-    if (showCurrencyDialog) {
-        CurrencyEntryDialog(
-            onDismissRequest = { showCurrencyDialog = false },
-            viewModel = viewModel,
-            onConfirmClick = {
-                coroutineScope.launch {
-                    viewModel.saveCurrency()
-                }
+
+            2 -> {
+                CurrencyEntryDialog(
+                    onDismissRequest = { showNewDialog = false },
+                    viewModel = viewModel,
+                    onConfirmClick = {
+                        coroutineScope.launch {
+                            viewModel.saveCurrency()
+                        }
+                    }
+                )
             }
-        )
+        }
     }
 
     if (openDeleteAlertDialog.value) {
@@ -318,6 +318,7 @@ fun EntityScreen(
                     }
                 }, "Are you sure you want to delete this category, big boi?")
             }
+
             1 -> {
                 DeleteConfirmationDialog({ openDeleteAlertDialog.value = false }, {
                     coroutineScope.launch {
@@ -325,6 +326,7 @@ fun EntityScreen(
                     }
                 }, "Are you sure you want to delete this payee, big boi?")
             }
+
             2 -> {
                 DeleteConfirmationDialog({ openDeleteAlertDialog.value = false }, {
                     coroutineScope.launch {
@@ -350,6 +352,7 @@ fun EntityScreen(
                     selectedCategory = selectedCategory.toCategoryDetails()
                 )
             }
+
             1 -> {
                 PayeeEntryDialog(
                     onConfirmClick = {
@@ -364,6 +367,7 @@ fun EntityScreen(
                     selectedPayee = selectedPayee.toPayeeDetails()
                 )
             }
+
             2 -> {
                 CurrencyEntryDialog(
                     onConfirmClick = {
@@ -395,9 +399,9 @@ fun CategoryList(
     val haptics = LocalHapticFeedback.current
 
     LazyColumn() {
-        items(list, { item -> item.categId } ) {
+        items(list, { item -> item.categId }) {
             ListItem(
-                headlineContent = { Text( removeTrPrefix(it.categName)) },
+                headlineContent = { Text(removeTrPrefix(it.categName)) },
                 overlineContent = {
                     if (it.parentId != -1) {
                         Text(it.parentId.toString())
@@ -475,8 +479,13 @@ fun CurrenciesList(
     LazyColumn {
         items(list, key = { it.currencyId }) {
             ListItem(
-                headlineContent = { FormattedCurrency(value = it.baseConvRate, currency = CurrencyFormat()) },
-                overlineContent = { Text( removeTrPrefix(it.currencyName)) },
+                headlineContent = {
+                    FormattedCurrency(
+                        value = it.baseConvRate,
+                        currency = CurrencyFormat()
+                    )
+                },
+                overlineContent = { Text(removeTrPrefix(it.currencyName)) },
                 leadingContent = { Text(it.currency_symbol) },
                 modifier = Modifier.combinedClickable(
                     onClick = {},
@@ -496,12 +505,12 @@ fun CurrenciesList(
 @Composable
 fun CategoryEntryDialog(
     modifier: Modifier = Modifier,
-    title : String = "Add Category",
-    selectedCategory : CategoryDetails = CategoryDetails(categName = ""),
+    title: String = "Add Category",
+    selectedCategory: CategoryDetails = CategoryDetails(categName = ""),
     onConfirmClick: () -> Unit,
     onDismissRequest: () -> Unit,
     viewModel: EntityViewModel,
-    edit : Boolean = false
+    edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
     var categorySelected by remember { mutableStateOf(selectedCategory) }
@@ -596,12 +605,12 @@ fun CategoryEntryDialog(
 @Composable
 fun PayeeEntryDialog(
     modifier: Modifier = Modifier,
-    title : String = "Add Payee",
-    selectedPayee : PayeeDetails = PayeeDetails(payeeName = ""),
+    title: String = "Add Payee",
+    selectedPayee: PayeeDetails = PayeeDetails(payeeName = ""),
     onConfirmClick: () -> Unit,
     onDismissRequest: () -> Unit,
     viewModel: EntityViewModel,
-    edit : Boolean = false
+    edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
     var payeeSelected by remember { mutableStateOf(selectedPayee) }
@@ -771,12 +780,12 @@ fun PayeeEntryDialog(
 @Composable
 fun CurrencyEntryDialog(
     modifier: Modifier = Modifier,
-    title : String = "Add Currency",
-    selectedCurrency : CurrencyDetails = CurrencyDetails(),
+    title: String = "Add Currency",
+    selectedCurrency: CurrencyDetails = CurrencyDetails(),
     onConfirmClick: () -> Unit,
     onDismissRequest: () -> Unit,
     viewModel: EntityViewModel,
-    edit : Boolean = false
+    edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
     var currencySelected by remember { mutableStateOf(selectedCurrency) }
