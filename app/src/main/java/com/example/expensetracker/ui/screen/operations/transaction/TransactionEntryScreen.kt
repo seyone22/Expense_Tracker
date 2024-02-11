@@ -154,7 +154,7 @@ fun TransactionEntryForm(
     var openTransactionDateDialog by remember { mutableStateOf(false) }
 
     //TODO: Refactor this to be more elegant
-    val transactionUiState1: TransactionUiState by viewModel.transactionUiState1.collectAsState()
+    val transactionUiState: TransactionUiState by viewModel.transactionUiState1.collectAsState()
 
     val focusManager = LocalFocusManager.current
 
@@ -482,7 +482,7 @@ fun TransactionEntryForm(
                     expanded = categoryExpanded,
                     onDismissRequest = { categoryExpanded = false },
                 ) {
-                    transactionUiState1.categoriesList.forEach { category ->
+                    transactionUiState.categoriesList.forEach { category ->
                         DropdownMenuItem(
                             text = { Text( removeTrPrefix(category.categName)) },
                             onClick = {
