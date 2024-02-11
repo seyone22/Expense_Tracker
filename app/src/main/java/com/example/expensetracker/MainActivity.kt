@@ -44,7 +44,6 @@ class MainActivity : ComponentActivity() {
                 isUsed = metadata?.infoValue == "TRUE"
             }
         }
-
         return isUsed
     }
 }
