@@ -1,6 +1,9 @@
 package com.example.expensetracker.ui.screen.entities
 
 import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,8 +21,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -37,6 +44,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,7 +56,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,6 +77,7 @@ import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.operations.entity.category.CategoryDetails
 import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
@@ -73,6 +85,7 @@ import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrenc
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
+import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -100,29 +113,91 @@ fun EntityScreen(
     var showPayeeDialog by remember { mutableStateOf(false) }
     var showCurrencyDialog by remember { mutableStateOf(false) }
 
+    var isSelected by remember { mutableStateOf(false) }
+    var selectedCurrency by remember { mutableStateOf(CurrencyFormat()) }
+    var selectedPayee by remember { mutableStateOf(Payee()) }
+    var selectedCategory by remember { mutableStateOf(Category()) }
+
+    val context = LocalContext.current
+
+    val openEditDialog = remember { mutableStateOf(false) }
+    val openDeleteAlertDialog = remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            ExpenseTopBar(
-                selectedActivity = EntitiesDestination.routeId,
-                navBarAction = {
-                    when (state) {
-                        0 -> {
-                            showCategoryDialog = true
+            if (isSelected) {
+                TopAppBar(
+                    title = { Text(text = EntitiesDestination.route) },
+                    navigationIcon = {
+                        IconButton(onClick = { isSelected = !isSelected }) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = "Close"
+                            )
                         }
+                    },
+                    actions = {
+                        Row {
+                            IconButton(onClick = {
+                                isSelected = !isSelected
+                                openEditDialog.value = !openEditDialog.value
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Edit,
+                                    contentDescription = "Edit"
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    isSelected = !isSelected
+                                    coroutineScope.launch {
+                                        viewModel.deleteCurrency(
+                                            selectedCurrency
+                                        )
+                                    }
+                                }
 
-                        1 -> {
-                            showPayeeDialog = true
-                        }
-
-                        2 -> {
-                            showCurrencyDialog = true
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Delete"
+                                )
+                            }
+                            IconButton(onClick = {
+                                isSelected = !isSelected
+                                Toast.makeText(context, "Unimplemented", Toast.LENGTH_SHORT).show()
+                            }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Share,
+                                    contentDescription = "Share"
+                                )
+                            }
                         }
                     }
-                },
-                navigateToSettings = { navigateToScreen(SettingsDestination.route) }
-            )
+                )
+            } else {
+                ExpenseTopBar(
+                    selectedActivity = EntitiesDestination.routeId,
+                    navBarAction = {
+                        when (state) {
+                            0 -> {
+                                showCategoryDialog = true
+                            }
+
+                            1 -> {
+                                showPayeeDialog = true
+                            }
+
+                            2 -> {
+                                showCurrencyDialog = true
+                            }
+                        }
+                    },
+                    navigateToSettings = { navigateToScreen(SettingsDestination.route) }
+                )
+            }
         },
         bottomBar = {
             ExpenseNavBar(
@@ -162,7 +237,11 @@ fun EntityScreen(
                     CategoryList(
                         list = entityUiState.categoriesList,
                         viewModel = viewModel,
-                        coroutineScope = coroutineScope
+                        coroutineScope = coroutineScope,
+                        longClicked = { selected ->
+                            isSelected = !isSelected
+                            selectedCategory = selected
+                        },
                     )
                 }
 
@@ -170,7 +249,11 @@ fun EntityScreen(
                     PayeeList(
                         list = entityUiState.payeesList,
                         viewModel = viewModel,
-                        coroutineScope = coroutineScope
+                        coroutineScope = coroutineScope,
+                        longClicked = { selected ->
+                            isSelected = !isSelected
+                            selectedPayee = selected
+                        },
                     )
                 }
 
@@ -178,7 +261,11 @@ fun EntityScreen(
                     CurrenciesList(
                         list = entityUiState.currenciesList,
                         viewModel = viewModel,
-                        coroutineScope = coroutineScope
+                        coroutineScope = coroutineScope,
+                        longClicked = { selected ->
+                            isSelected = !isSelected
+                            selectedCurrency = selected
+                        },
                     )
                 }
             }
@@ -220,16 +307,92 @@ fun EntityScreen(
             }
         )
     }
+
+    if (openDeleteAlertDialog.value) {
+        when (state) {
+            0 -> {
+                DeleteConfirmationDialog({ openDeleteAlertDialog.value = false }, {
+                    coroutineScope.launch {
+                        viewModel.deleteCategory(selectedCategory)
+                    }
+                }, "Are you sure you want to delete this category, big boi?")
+            }
+            1 -> {
+                DeleteConfirmationDialog({ openDeleteAlertDialog.value = false }, {
+                    coroutineScope.launch {
+                        viewModel.deletePayee(selectedPayee)
+                    }
+                }, "Are you sure you want to delete this payee, big boi?")
+            }
+            2 -> {
+                DeleteConfirmationDialog({ openDeleteAlertDialog.value = false }, {
+                    coroutineScope.launch {
+                        viewModel.deleteCurrency(selectedCurrency)
+                    }
+                }, "Are you sure you want to delete this currency, big boi?")
+            }
+        }
+    }
+    if (openEditDialog.value) {
+        when (state) {
+            0 -> {
+                CategoryEntryDialog(
+                    onConfirmClick = {
+                        coroutineScope.launch {
+                            viewModel.editCategory()
+                        }
+                    },
+                    onDismissRequest = { openEditDialog.value = !openEditDialog.value },
+                    viewModel = viewModel,
+                    edit = true,
+                    title = "Edit Category",
+                    selectedCategory = selectedCategory.toCategoryDetails()
+                )
+            }
+            1 -> {
+                PayeeEntryDialog(
+                    onConfirmClick = {
+                        coroutineScope.launch {
+                            viewModel.editPayee()
+                        }
+                    },
+                    onDismissRequest = { openEditDialog.value = !openEditDialog.value },
+                    viewModel = viewModel,
+                    edit = true,
+                    title = "Edit Payee",
+                    selectedPayee = selectedPayee.toPayeeDetails()
+                )
+            }
+            2 -> {
+                CurrencyEntryDialog(
+                    onConfirmClick = {
+                        coroutineScope.launch {
+                            viewModel.editCurrency()
+                        }
+                    },
+                    onDismissRequest = { openEditDialog.value = !openEditDialog.value },
+                    viewModel = viewModel,
+                    edit = true,
+                    title = "Edit Currency",
+                    selectedCurrency = selectedCurrency.toCurrencyDetails()
+                )
+            }
+        }
+    }
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CategoryList(
     modifier: Modifier = Modifier,
     list: List<Category>,
     viewModel: EntityViewModel,
+    longClicked: (Category) -> Unit,
     coroutineScope: CoroutineScope
 ) {
+    val haptics = LocalHapticFeedback.current
+
     LazyColumn() {
         items(list, { item -> item.categId } ) {
             ListItem(
@@ -247,80 +410,33 @@ fun CategoryList(
                         contentDescription = "Localized description",
                     )
                 },
-                trailingContent = {
-                    val openDeleteAlertDialog = remember { mutableStateOf(false) }
-                    val openEditDialog = remember { mutableStateOf(false) }
-                    val moreExpanded = remember { mutableStateOf(false) }
-
-                    IconButton(
-                        onClick = {
-                            moreExpanded.value = true
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = null,
-                            modifier = modifier.size(36.dp, 36.dp)
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = moreExpanded.value,
-                        onDismissRequest = { moreExpanded.value = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(text = "Edit") },
-                            onClick = {
-                                openEditDialog.value = true
-                                moreExpanded.value = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(text = "Delete") },
-                            onClick = {
-                                openDeleteAlertDialog.value = true
-                                moreExpanded.value = false
-                            }
-                        )
-                    }
-
-                    if (openDeleteAlertDialog.value) {
-                        DeleteConfirmationDialog({ openDeleteAlertDialog.value = false }, {
-                            coroutineScope.launch {
-                                viewModel.deleteCategory(it)
-                            }
-                        }, "Are you sure you want to delete this category, big boi?")
-                    }
-                    if (openEditDialog.value) {
-                        CategoryEntryDialog(
-                            onConfirmClick = {
-                                coroutineScope.launch {
-                                    viewModel.editCategory()
-                                }
-                            },
-                            onDismissRequest = { openEditDialog.value = !openEditDialog.value },
-                            viewModel = viewModel,
-                            edit = true,
-                            title = "Edit Category",
-                            selectedCategory = it.toCategoryDetails()
-                        )
-                    }
-                }
+                modifier = Modifier.combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        longClicked(it)
+                    },
+                    onLongClickLabel = "  "
+                )
             )
             HorizontalDivider()
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PayeeList(
     modifier: Modifier = Modifier,
     list: List<Payee>,
     coroutineScope: CoroutineScope,
+    longClicked: (Payee) -> Unit,
     viewModel: EntityViewModel
 ) {
+    val haptics = LocalHapticFeedback.current
+
     LazyColumn {
-        items(list) {
+        items(list, key = { it.payeeId }) {
             ListItem(
                 headlineContent = { Text(it.payeeName) },
                 overlineContent = { Text(it.payeeId.toString()) },
@@ -330,143 +446,45 @@ fun PayeeList(
                         contentDescription = "Localized description",
                     )
                 },
-                trailingContent = {
-                    val openDeleteAlertDialog = remember { mutableStateOf(false) }
-                    val openEditDialog = remember { mutableStateOf(false) }
-                    val moreExpanded = remember { mutableStateOf(false) }
-
-                    IconButton(
-                        onClick = {
-                            moreExpanded.value = true
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = null,
-                            modifier = modifier.size(36.dp, 36.dp)
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = moreExpanded.value,
-                        onDismissRequest = { moreExpanded.value = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(text = "Edit") },
-                            onClick = {
-                                openEditDialog.value = true
-                                moreExpanded.value = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(text = "Delete") },
-                            onClick = {
-                                openDeleteAlertDialog.value = true
-                                moreExpanded.value = false
-                            }
-                        )
-                    }
-
-                    if (openDeleteAlertDialog.value) {
-                        DeleteConfirmationDialog({ openDeleteAlertDialog.value = false }, {
-                            coroutineScope.launch {
-                                viewModel.deletePayee(it)
-                            }
-                        }, "Are you sure you want to delete this payee, big boi?")
-                    }
-                    if (openEditDialog.value) {
-                        PayeeEntryDialog(
-                            onConfirmClick = {
-                                coroutineScope.launch {
-                                    viewModel.editPayee()
-                                }
-                            },
-                            onDismissRequest = { openEditDialog.value = !openEditDialog.value },
-                            viewModel = viewModel,
-                            edit = true,
-                            title = "Edit Payee",
-                            selectedPayee = it.toPayeeDetails()
-                        )
-                    }
-                }
+                modifier = Modifier.combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        longClicked(it)
+                    },
+                    onLongClickLabel = "  "
+                )
             )
             HorizontalDivider()
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CurrenciesList(
     modifier: Modifier = Modifier,
     list: List<CurrencyFormat>,
     coroutineScope: CoroutineScope,
+    longClicked: (CurrencyFormat) -> Unit,
     viewModel: EntityViewModel
 ) {
+    val haptics = LocalHapticFeedback.current
+
     LazyColumn {
-        items(list) {
+        items(list, key = { it.currencyId }) {
             ListItem(
                 headlineContent = { Text(it.baseConvRate.toString()) },
                 overlineContent = { Text( removeTrPrefix(it.currencyName)) },
                 leadingContent = { Text(it.currency_symbol) },
-                trailingContent = {
-                    val openDeleteAlertDialog = remember { mutableStateOf(false) }
-                    val openEditDialog = remember { mutableStateOf(false) }
-                    val moreExpanded = remember { mutableStateOf(false) }
-
-                    IconButton(
-                        onClick = {
-                            moreExpanded.value = true
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = null,
-                            modifier = modifier.size(36.dp, 36.dp)
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = moreExpanded.value,
-                        onDismissRequest = { moreExpanded.value = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(text = "Edit") },
-                            onClick = {
-                                openEditDialog.value = true
-                                moreExpanded.value = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(text = "Delete") },
-                            onClick = {
-                                openDeleteAlertDialog.value = true
-                                moreExpanded.value = false
-                            }
-                        )
-                    }
-
-                    if (openDeleteAlertDialog.value) {
-                        DeleteConfirmationDialog({ openDeleteAlertDialog.value = false }, {
-                            coroutineScope.launch {
-                                viewModel.deleteCurrency(it)
-                            }
-                        }, "Are you sure you want to delete this currency, big boi?")
-                    }
-                    if (openEditDialog.value) {
-                        CurrencyEntryDialog(
-                            onConfirmClick = {
-                                coroutineScope.launch {
-                                    viewModel.editCurrency()
-                                }
-                            },
-                            onDismissRequest = { openEditDialog.value = !openEditDialog.value },
-                            viewModel = viewModel,
-                            edit = true,
-                            title = "Edit Currency",
-                            selectedCurrency = it.toCurrencyDetails()
-                        )
-                    }
-                }
+                modifier = Modifier.combinedClickable(
+                    onClick = {},
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        longClicked(it)
+                    },
+                    onLongClickLabel = "  "
+                )
             )
             HorizontalDivider()
         }
