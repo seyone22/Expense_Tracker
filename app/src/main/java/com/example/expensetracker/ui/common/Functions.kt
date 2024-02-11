@@ -53,3 +53,12 @@ enum class TransactionType {
     CREDIT,
     NEUTRAL
 }
+
+
+enum class EntryFields {
+    STATUS,
+    TYPE,
+    ACCOUNT,
+    PAYEE,
+    CATEGORY
+}
