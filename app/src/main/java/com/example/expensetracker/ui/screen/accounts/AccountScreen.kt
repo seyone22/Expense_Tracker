@@ -108,7 +108,6 @@ fun AccountScreen(
                                 baseCurrencyInfo =
                                     viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
                             }
-
                             DonutChart(
                                 data = DonutChartDataCollection(
                                     listOf(
@@ -119,7 +118,7 @@ fun AccountScreen(
                                         ),
                                         DonutChartData(
                                             totals.expenses.toFloat(),
-                                            MaterialTheme.colorScheme.secondary,
+                                            MaterialTheme.colorScheme.error,
                                             "Expense"
                                         )
                                     )

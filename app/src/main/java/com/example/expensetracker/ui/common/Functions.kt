@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.icu.text.DecimalFormat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,16 +21,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.screen.operations.account.AccountEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryForm
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.toTransactionDetails
@@ -94,7 +93,7 @@ enum class EntryFields {
 @Composable
 fun TransactionEditDialog(
     modifier: Modifier = Modifier,
-    title: String,
+    title: String = "Edit Transaction",
     selectedTransaction: Transaction,
     onConfirmClick: () -> Unit,
     onDismissRequest: () -> Unit,
@@ -120,7 +119,7 @@ fun TransactionEditDialog(
         Card(
             modifier = modifier
                 .fillMaxWidth()
-                .height(225.dp)
+                .height(900.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
@@ -131,11 +130,40 @@ fun TransactionEditDialog(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge
+                )
                 TransactionEntryForm(
                     transactionDetails = transactionSelected.toTransactionDetails(),
                     viewModel = viewModel,
                     coroutineScope = coroutineScope
                 )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    TextButton(
+                        onClick = { onDismissRequest() },
+                        modifier = Modifier.padding(8.dp),
+                    ) {
+                        Text("Dismiss")
+                    }
+                    TextButton(
+                        onClick = {
+                            onConfirmClick()
+                            onDismissRequest()
+                        },
+                        modifier = Modifier.padding(8.dp),
+                        enabled = true
+                    ) {
+                        Text("Confirm")
+                    }
+                }
+
+
             }
         }
     }

@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -246,7 +247,7 @@ fun AccountDetailScreen(
                     onDismissRequest = { openEditDialog.value = !openEditDialog.value },
                     viewModel = viewModel,
                     edit = true,
-                    title = "Edit Transaction",
+                    title = "Edit Account",
                     selectedAccount = accountDetailAccountUiState.account
                 )
             }
@@ -295,9 +296,37 @@ fun AccountEditDialog(
             ) {
                 LazyColumn() {
                     item {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+
                         AccountEntryForm(
                             accountDetails = accountSelected
                         )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            TextButton(
+                                onClick = { onDismissRequest() },
+                                modifier = Modifier.padding(8.dp),
+                            ) {
+                                Text("Dismiss")
+                            }
+                            TextButton(
+                                onClick = {
+                                    onConfirmClick()
+                                    onDismissRequest()
+                                },
+                                modifier = Modifier.padding(8.dp),
+                                enabled = true
+                            ) {
+                                Text("Confirm")
+                            }
+                        }
                     }
                 }
             }
