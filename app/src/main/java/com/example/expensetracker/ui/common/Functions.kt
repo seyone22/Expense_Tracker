@@ -22,13 +22,13 @@ fun FormattedCurrency(
         Text(
             style = MaterialTheme.typography.titleMedium,
             text = "${currency.pfx_symbol}${DecimalFormat("#.##").format(value)}",
-            color = if(type == TransactionType.DEBIT) { Color.Red } else  { Color.Black }
+            color = if(type == TransactionType.DEBIT) { Color.Red } else  { MaterialTheme.colorScheme.onBackground }
         )
     } else {
         Text(
             style = MaterialTheme.typography.titleMedium,
             text = "${DecimalFormat("#.##").format(value)}${currency.sfx_symbol}",
-            color = if(type == TransactionType.DEBIT) { Color.Red } else  { Color.Black }
+            color = if(type == TransactionType.DEBIT) { Color.Red } else  { MaterialTheme.colorScheme.onBackground }
         )
     }
 }

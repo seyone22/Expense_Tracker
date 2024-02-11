@@ -75,6 +75,7 @@ import com.example.expensetracker.ui.common.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
+import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
@@ -474,7 +475,7 @@ fun CurrenciesList(
     LazyColumn {
         items(list, key = { it.currencyId }) {
             ListItem(
-                headlineContent = { Text(it.baseConvRate.toString()) },
+                headlineContent = { FormattedCurrency(value = it.baseConvRate, currency = CurrencyFormat()) },
                 overlineContent = { Text( removeTrPrefix(it.currencyName)) },
                 leadingContent = { Text(it.currency_symbol) },
                 modifier = Modifier.combinedClickable(
