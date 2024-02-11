@@ -609,7 +609,7 @@ fun PayeeEntryDialog(
     selectedPayee: PayeeDetails = PayeeDetails(payeeName = ""),
     onConfirmClick: () -> Unit,
     onDismissRequest: () -> Unit,
-    viewModel: EntityViewModel,
+    viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
     edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
