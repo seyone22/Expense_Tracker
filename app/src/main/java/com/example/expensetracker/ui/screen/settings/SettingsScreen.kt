@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -89,6 +90,18 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { navigateToScreen("SettingsDetail/Appearance") }
             )
             ListItem(
+                headlineContent = { Text(text = "Fetch Data") },
+                supportingContent = { Text(text = "Update Exchange Rates, ") },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Outlined.Update,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                modifier = Modifier.clickable { navigateToScreen("SettingsDetail/Data") }
+            )
+            ListItem(
                 headlineContent = { Text(text = "About") },
                 supportingContent = { Text(text = "Expense Tracker v0.1.0-alpha") },
                 leadingContent = {
@@ -100,8 +113,6 @@ fun SettingsScreen(
                 },
                 modifier = Modifier.clickable {
                     navigateToScreen("SettingsDetail/About")
-                    viewModel.getMonthlyRates()
-                    Log.d("TAG", "${viewModel.monthlyRatesUiState}")
                 }
             )
         }

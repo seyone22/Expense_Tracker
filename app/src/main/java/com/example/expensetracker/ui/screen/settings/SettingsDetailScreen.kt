@@ -116,6 +116,13 @@ fun SettingsDetailScreen(
                     )
                 }
 
+                "Data" -> {
+                    DataSettingsList(
+                        metadata = metadataList,
+                        viewModel = viewModel
+                    )
+                }
+
                 "About" -> {
                     AboutList(
 
@@ -405,5 +412,27 @@ fun AppearanceSettingsList(
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DataSettingsList(
+    metadata: List<Metadata?>,
+    viewModel: SettingsViewModel,
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    Column {
+        ListItem(
+            headlineContent = { Text(text = "Update Currency Formats") },
+            supportingContent = { Text(text = "Exchange rates are updated monthly") },
+            modifier = Modifier.clickable {
+                Log.d("TAG",metadata.toString())
+                viewModel.getMonthlyRates(
+                    baseCurrencyId = metadata.find { it -> it!!.infoName == "BASECURRENCYID" }!!.infoValue.toInt()
+                )
+            }
+        )
     }
 }

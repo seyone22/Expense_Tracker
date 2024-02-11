@@ -1,8 +1,8 @@
 package com.example.expensetracker.ui.screen.settings
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
 import com.example.expensetracker.data.metadata.MetadataRepository
@@ -10,14 +10,20 @@ import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.InfoEuro
 import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * ViewModel to retrieve all items in the Room database.
@@ -31,13 +37,15 @@ class SettingsViewModel(
         private const val TIMEOUT_MILLIS = 5_000L
     }
 
-    public var monthlyRatesUiState : List<InfoEuro> = listOf()
+    public var monthlyRatesUiState: List<InfoEuro> = listOf()
 
     // Flow for username
-    private val usernameFlow: Flow<Metadata?> = metadataRepository.getMetadataByNameStream("USERNAME")
+    private val usernameFlow: Flow<Metadata?> =
+        metadataRepository.getMetadataByNameStream("USERNAME")
 
     // Flow for baseCurrency
-    private val baseCurrencyIdFlow: Flow<Metadata?> = metadataRepository.getMetadataByNameStream("BASECURRENCYID")
+    private val baseCurrencyIdFlow: Flow<Metadata?> =
+        metadataRepository.getMetadataByNameStream("BASECURRENCYID")
 
     // Combine the flows and calculate the totals
     val metadataList: Flow<List<Metadata?>> =
@@ -58,9 +66,8 @@ class SettingsViewModel(
             )
 
     suspend fun getBaseCurrencyInfo(baseCurrencyId: Int): CurrencyFormat {
-        val x = currencyFormatsRepository.getCurrencyFormatStream(baseCurrencyId)
+        return currencyFormatsRepository.getCurrencyFormatStream(baseCurrencyId)
             .firstOrNull() ?: CurrencyFormat()
-        return x
     }
 
     suspend fun changeUsername(newName: String) {
@@ -75,11 +82,51 @@ class SettingsViewModel(
         )
     }
 
-    public fun getMonthlyRates() {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    public fun getMonthlyRates(baseCurrencyId: Int) {
         viewModelScope.launch {
-            val listResult = InfoEuroApi.retrofitService.getMonthlyRates()
-            monthlyRatesUiState = listResult
+            val onlineData = withContext(Dispatchers.IO) {
+                InfoEuroApi.retrofitService.getMonthlyRates()
+            }
+
+            val baseCurrency = getBaseCurrencyInfo(baseCurrencyId)
+
+            currencyFormatsRepository.getAllCurrencyFormatsStream()
+                .flatMapConcat { currencyList ->
+                    flow {
+                        val onlineDataMap = onlineData.associateBy { it.isoA3Code }
+                        val baseCurrExchangeRate =
+                            (onlineData.find { it.isoA3Code == baseCurrency.currency_symbol })!!.value
+
+                        for (currency in currencyList) {
+                            val datum = onlineDataMap[currency.currency_symbol]
+                            if (datum != null) {
+                                val updatedCurr = CurrencyFormat(
+                                    currency.currencyId,
+                                    currency.currencyName,
+                                    currency.pfx_symbol,
+                                    currency.sfx_symbol,
+                                    currency.decimal_point,
+                                    currency.group_seperator,
+                                    currency.unit_name,
+                                    currency.cent_name,
+                                    currency.scale,
+                                    ((1 / datum.value) * baseCurrExchangeRate),
+                                    currency.currency_symbol,
+                                    currency.currency_type
+                                )
+                                emit(updatedCurr)
+                            } else {
+                                emit(currency) // Emit the original currency format if data is not found
+                            }
+                        }
+                    }
+                }.collect {
+                    currencyFormatsRepository.updateCurrencyFormat(it);
+                    Log.d("TAG", it.toString());
+                }
         }
+
     }
 }
 
