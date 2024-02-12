@@ -12,7 +12,21 @@ Expense Tracker currently offers the following features:
 - **Entity Management:** Manage categories, payees, and currencies to customize the app according to individual needs.
 - **Automatic Currency Updates:** Expense Tracker fetches currency exchange rates from the European Union InfoEuro system for monthly updates.
 
-![Settings](assets/Screenshot_20240212_120717.png)
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <img src="assets/Screenshot_20240212_120717.png" alt="Settings" width="300" style="margin: 10px;">
+    <img src="assets/Screenshot_20240212_120812.png" alt="Categories" width="300" style="margin: 10px;">
+    <img src="assets/Screenshot_20240212_120830.png" alt="Payees" width="300" style="margin: 10px;">
+</div>
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <img src="assets/Screenshot_20240212_120835.png" alt="Settings" width="300" style="margin: 10px;">
+    <img src="assets/Screenshot_20240212_120845.png" alt="Settings" width="300" style="margin: 10px;">
+    <img src="assets/Screenshot_20240212_120857.png" alt="Settings" width="300" style="margin: 10px;">
+</div>
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <img src="assets/Screenshot_20240212_120908.png" alt="Settings" width="300" style="margin: 10px;">
+    <img src="assets/Screenshot_20240212_120919.png" alt="Settings" width="300" style="margin: 10px;">
+</div>
+
 
 ## Installation
 
