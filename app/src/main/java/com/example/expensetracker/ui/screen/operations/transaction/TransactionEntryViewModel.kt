@@ -17,6 +17,9 @@ import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.screen.accounts.AccountsUiState
+import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
+import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeUiState
+import com.example.expensetracker.ui.screen.operations.entity.payee.toPayee
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -111,6 +114,24 @@ class TransactionEntryViewModel(
             transAmount.isNotBlank() && transDate.isNotBlank()&& accountId.isNotBlank() && categoryId.isNotBlank()
         }
     }
+
+    var payeeUiState by mutableStateOf(PayeeUiState())
+        private set
+    suspend fun savePayee() {
+        if(validatePayeeInput()) {
+            payeesRepository.insertPayee(payeeUiState.payeeDetails.toPayee())
+        }
+    }
+    private fun validatePayeeInput(uiState: PayeeDetails = payeeUiState.payeeDetails): Boolean {
+        return with(uiState) {
+            payeeName.isNotBlank()
+        }
+    }
+    fun updatePayeeState(payeeDetails: PayeeDetails) {
+        payeeUiState =
+            PayeeUiState(payeeDetails = payeeDetails, isEntryValid = validatePayeeInput(payeeDetails))
+    }
+
 
 }
 

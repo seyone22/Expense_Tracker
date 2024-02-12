@@ -150,3 +150,9 @@ data class EntitiesUiState(
     val payeesList: List<Payee> = listOf(),
     val currenciesList: List<CurrencyFormat> = listOf(),
 )
+
+enum class Entity(val displayName : String, val pluralDisplayName : String) {
+    CATEGORY("Category", "Categories"),
+    PAYEE("Payee", "Payees"),
+    CURRENCY("Currency", "Currencies")
+}

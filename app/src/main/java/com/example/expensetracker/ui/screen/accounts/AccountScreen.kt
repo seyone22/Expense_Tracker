@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screen.accounts
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -110,7 +108,6 @@ fun AccountScreen(
                                 baseCurrencyInfo =
                                     viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
                             }
-
                             DonutChart(
                                 data = DonutChartDataCollection(
                                     listOf(
@@ -121,7 +118,7 @@ fun AccountScreen(
                                         ),
                                         DonutChartData(
                                             totals.expenses.toFloat(),
-                                            MaterialTheme.colorScheme.secondary,
+                                            MaterialTheme.colorScheme.error,
                                             "Expense"
                                         )
                                     )

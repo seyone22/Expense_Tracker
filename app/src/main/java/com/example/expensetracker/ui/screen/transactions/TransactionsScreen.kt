@@ -1,6 +1,6 @@
 package com.example.expensetracker.ui.screen.transactions
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -25,27 +24,37 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.CurrencyFormat
+import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionWithDetails
+import com.example.expensetracker.model.toTransaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.SortBar
+import com.example.expensetracker.ui.common.TransactionEditDialog
+import com.example.expensetracker.ui.common.TransactionType
+import com.example.expensetracker.ui.common.getAbbreviatedMonthName
+import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -65,11 +74,16 @@ fun TransactionsScreen(
     ) {
     val transactionsUiState by viewModel.transactionsUiState.collectAsState()
     var isSelected by remember { mutableStateOf(false) }
+    var selectedTransaction by remember { mutableStateOf(Transaction()) }
 
+    val openEditDialog = remember { mutableStateOf(false) }
+
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            if(isSelected) {
+            if (isSelected) {
                 TopAppBar(
                     title = { Text(text = TransactionsDestination.route) },
                     navigationIcon = {
@@ -82,19 +96,36 @@ fun TransactionsScreen(
                     },
                     actions = {
                         Row {
-                            IconButton(onClick = { isSelected = !isSelected }) {
+                            IconButton(onClick = {
+                                isSelected = !isSelected
+                                openEditDialog.value = !openEditDialog.value
+                            }) {
                                 Icon(
                                     imageVector = Icons.Filled.Edit,
                                     contentDescription = "Edit"
                                 )
                             }
-                            IconButton(onClick = { isSelected = !isSelected }) {
+                            IconButton(
+                                onClick = {
+                                    isSelected = !isSelected
+                                    coroutineScope.launch {
+                                        viewModel.deleteTransaction(
+                                            selectedTransaction
+                                        )
+                                    }
+                                }
+
+                            ) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
                                     contentDescription = "Delete"
                                 )
                             }
-                            IconButton(onClick = { isSelected = !isSelected }) {
+                            IconButton(onClick = {
+                                isSelected = !isSelected
+                                Toast.makeText(context, "Unimplemented", Toast.LENGTH_SHORT).show()
+                            }
+                            ) {
                                 Icon(
                                     imageVector = Icons.Filled.Share,
                                     contentDescription = "Share"
@@ -127,10 +158,27 @@ fun TransactionsScreen(
 
             TransactionList(
                 transactions = transactionsUiState.transactions,
-                longClicked = { isSelected = !isSelected },
+                longClicked = { selected ->
+                    isSelected = !isSelected
+                    selectedTransaction = selected
+                },
                 viewModel = viewModel
             )
         }
+    }
+
+    if (openEditDialog.value) {
+        TransactionEditDialog(
+            onConfirmClick = {
+                coroutineScope.launch {
+                    viewModel.editTransaction()
+                }
+            },
+            onDismissRequest = { openEditDialog.value = !openEditDialog.value },
+            edit = true,
+            title = "Edit Transaction",
+            selectedTransaction = selectedTransaction
+        )
     }
 }
 
@@ -139,18 +187,40 @@ fun TransactionsScreen(
 fun TransactionList(
     modifier: Modifier = Modifier,
     transactions: List<TransactionWithDetails>,
-    longClicked: () -> Unit,
+    longClicked: (Transaction) -> Unit,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val haptics = LocalHapticFeedback.current
     var filteredTransactions by remember { mutableStateOf(transactions) }
+    // Use derivedStateOf to update filteredTransactions when transactions change
+    val derivedFilteredTransactions by remember(transactions) {
+        derivedStateOf {
+            transactions // or apply your filtering logic here
+        }
+    }
+    filteredTransactions = derivedFilteredTransactions
 
     SortBar(
         periodSortAction = { sortCase ->
             filteredTransactions = when (sortCase) {
-                0 -> transactions.filter {
-                    val transactionDate = LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
+                0 -> transactions
+                1 -> transactions.filter {
+                    val transactionDate =
+                        LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
                     transactionDate.monthValue == LocalDate.now().monthValue
+                }
+
+                3 -> transactions.filter {
+                    val transactionDate =
+                        LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
+                    // Check if the transaction date is in the last month
+                    when {
+                        LocalDate.now().monthValue != 1 ->
+                            transactionDate.monthValue == LocalDate.now().monthValue - 1
+
+                        else ->
+                            transactionDate.year == LocalDate.now().year - 1 && transactionDate.monthValue == 12
+                    }
                 }
                 // Add more cases as needed
                 else -> transactions // No filtering for other cases
@@ -167,33 +237,37 @@ fun TransactionList(
                     Text(text = filteredTransactions[it].payeeName)
                 },
                 supportingContent = {
-                    Text(text = filteredTransactions[it].categName)
+                    Text(text = removeTrPrefix(filteredTransactions[it].categName))
                 },
                 trailingContent = {
-                    val accountId = filteredTransactions[it].accountId
-                    var currencyFormat = CurrencyFormat()
+                    var currencyFormat by remember { mutableStateOf(CurrencyFormat()) }
 
-                    LaunchedEffect(accountId) {
+                    LaunchedEffect(filteredTransactions[it].accountId) {
                         val currencyFormatFunction =
-                            viewModel.getAccountFromId(accountId)
+                            viewModel.getAccountFromId(filteredTransactions[it].accountId)
                                 ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
                         currencyFormat = currencyFormatFunction!!
                     }
-                    // Now you can use 'currencyFormat' in your FormattedCurrency composable
-                    //TODO : DOESN'T WORK
-                    FormattedCurrency(value = filteredTransactions[it].transAmount, currency = currencyFormat)
+
+                    FormattedCurrency(
+                        value = filteredTransactions[it].transAmount,
+                        currency = currencyFormat,
+                        type = if(filteredTransactions[it].transCode == "Deposit") { TransactionType.CREDIT } else { TransactionType.DEBIT }
+                    )
                 },
                 leadingContent = {
-                    Text(text = filteredTransactions[it].transCode[0].toString())
-                },
-                overlineContent = {
-                    Text(text = filteredTransactions[it].transDate!!)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = getAbbreviatedMonthName(filteredTransactions[it].transDate!!.substring(5,7).toInt()))
+                        Text(text = filteredTransactions[it].transDate!!.substring(8,10))
+                    }
                 },
                 modifier = Modifier.combinedClickable(
                     onClick = {},
                     onLongClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        longClicked()
+                        longClicked(filteredTransactions[it].toTransaction())
                     },
                     onLongClickLabel = "  "
                 )
