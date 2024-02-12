@@ -12,6 +12,8 @@ Expense Tracker currently offers the following features:
 - **Entity Management:** Manage categories, payees, and currencies to customize the app according to individual needs.
 - **Automatic Currency Updates:** Expense Tracker fetches currency exchange rates from the European Union InfoEuro system for monthly updates.
 
+![Settings](assets/Screenshot_20240212_120717.png)
+
 ## Installation
 
 ### APK Installation
