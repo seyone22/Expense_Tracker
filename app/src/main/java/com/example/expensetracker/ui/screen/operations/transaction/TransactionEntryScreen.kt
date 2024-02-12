@@ -4,14 +4,24 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -43,6 +53,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.Account
@@ -51,7 +62,10 @@ import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.AppViewModelProvider
+import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.entities.EntityViewModel
+import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -146,10 +160,12 @@ fun TransactionEntryForm(
     var payeeExpanded by remember { mutableStateOf(false) }
     var categoryExpanded by remember { mutableStateOf(false) }
 
+    var openNewPayeeDialog by remember { mutableStateOf(false) }
+
     var openTransactionDateDialog by remember { mutableStateOf(false) }
 
     //TODO: Refactor this to be more elegant
-    val transactionUiState1: TransactionUiState by viewModel.transactionUiState1.collectAsState()
+    val transactionUiState: TransactionUiState by viewModel.transactionUiState1.collectAsState()
 
     val focusManager = LocalFocusManager.current
 
@@ -327,97 +343,117 @@ fun TransactionEntryForm(
                 }
             }
 
-            // Transaction Payee/To Dropdown
-            ExposedDropdownMenuBox(
-                expanded = payeeExpanded,
-                onExpandedChange = {
-                    payeeExpanded = !payeeExpanded
-                    when (transactionDetails.transCode) {
-                        TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
-
-                            coroutineScope.launch {
-                                Log.d("DEBUG","BEORE GETALLPAYEES")
-
-                                viewModel.getAllPayees()
-                                Log.d("DEBUG", "Within When: ${ viewModel.transactionUiState2.payeesList }")
-                            }
-                        }
-
-                        TransactionCode.TRANSFER.displayName -> {
-                            coroutineScope.launch {
-                                viewModel.getAllAccounts()
-                            }
-                        }
-                    }
-                }) {
-
-                OutlinedTextField(
-                    modifier = Modifier
-                        .padding(0.dp, 8.dp)
-                        .clickable(enabled = true) { payeeExpanded = true }
-                        .menuAnchor(),
-                    value = currentPayee.payeeName,
-                    readOnly = true,
-                    onValueChange = { },
-                    label = {
+            // Transaction Payee
+            Row(
+                modifier = Modifier
+                    .padding(0.dp, 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Transaction Payee/To Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = payeeExpanded,
+                    onExpandedChange = {
+                        payeeExpanded = !payeeExpanded
                         when (transactionDetails.transCode) {
-                            TransactionCode.WITHDRAWAL.displayName -> {
-                                Text(text = "Payee")
-                            }
+                            TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
 
-                            TransactionCode.DEPOSIT.displayName -> {
-                                Text(text = "From")
+                                coroutineScope.launch {
+                                    Log.d("DEBUG","BEORE GETALLPAYEES")
+
+                                    viewModel.getAllPayees()
+                                    Log.d("DEBUG", "Within When: ${ viewModel.transactionUiState2.payeesList }")
+                                }
                             }
 
                             TransactionCode.TRANSFER.displayName -> {
-                                Text(text = "To Account")
+                                coroutineScope.launch {
+                                    viewModel.getAllAccounts()
+                                }
                             }
                         }
-                    },
-                    singleLine = true,
-                    keyboardActions = KeyboardActions(onDone = {
-                        focusManager.moveFocus(
-                            FocusDirection.Next
-                        )
-                    }),
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = payeeExpanded) },
-                )
+                    }) {
 
-                ExposedDropdownMenu(
-                    expanded = payeeExpanded,
-                    onDismissRequest = { payeeExpanded = false },
-                ) {
-                    when (transactionDetails.transCode) {
-                        TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
-                            Log.d("DEBUG", "TransactionEntryForm: Executes Other! ${viewModel.transactionUiState2.payeesList}")
-                            viewModel.transactionUiState2.payeesList.forEach { payee ->
-                                DropdownMenuItem(
-                                    text = { Text(payee.payeeName) },
-                                    onClick = {
-                                        currentPayee = payee
-                                        onValueChange(transactionDetails.copy(toAccountId = "-1"))
-                                        onValueChange(transactionDetails.copy(payeeId = currentPayee.payeeId.toString()))
-                                        Log.d("DEBUG", "TransactionEntryForm: $transactionDetails")
-                                        payeeExpanded = false
-                                    }
-                                )
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .clickable(enabled = true) { payeeExpanded = true }
+                            .menuAnchor()
+                            .width(240.dp),
+                        value = currentPayee.payeeName,
+                        readOnly = true,
+                        onValueChange = { },
+                        label = {
+                            when (transactionDetails.transCode) {
+                                TransactionCode.WITHDRAWAL.displayName -> {
+                                    Text(text = "Payee")
+                                }
+
+                                TransactionCode.DEPOSIT.displayName -> {
+                                    Text(text = "From")
+                                }
+
+                                TransactionCode.TRANSFER.displayName -> {
+                                    Text(text = "To Account")
+                                }
                             }
-                        }
-                        TransactionCode.TRANSFER.displayName -> {
-                            viewModel.transactionUiState.accountsList.forEach { account ->
-                                Log.d("DEBUG", "TransactionEntryForm: Executes! $account")
-                                DropdownMenuItem(
-                                    text = { Text(account.accountName) },
-                                    onClick = {
-                                        onValueChange(transactionDetails.copy(payeeId = "-1"))
-                                        onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
-                                        currentToAccount = account
-                                        payeeExpanded = false
-                                    }
-                                )
+                        },
+                        singleLine = true,
+                        keyboardActions = KeyboardActions(onDone = {
+                            focusManager.moveFocus(
+                                FocusDirection.Next
+                            )
+                        }),
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = payeeExpanded) },
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = payeeExpanded,
+                        onDismissRequest = { payeeExpanded = false },
+                    ) {
+                        when (transactionDetails.transCode) {
+                            TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
+                                Log.d("DEBUG", "TransactionEntryForm: Executes Other! ${viewModel.transactionUiState2.payeesList}")
+                                viewModel.transactionUiState2.payeesList.forEach { payee ->
+                                    DropdownMenuItem(
+                                        text = { Text(payee.payeeName) },
+                                        onClick = {
+                                            currentPayee = payee
+                                            onValueChange(transactionDetails.copy(toAccountId = "-1"))
+                                            onValueChange(transactionDetails.copy(payeeId = currentPayee.payeeId.toString()))
+                                            Log.d("DEBUG", "TransactionEntryForm: $transactionDetails")
+                                            payeeExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                            TransactionCode.TRANSFER.displayName -> {
+                                viewModel.transactionUiState.accountsList.forEach { account ->
+                                    Log.d("DEBUG", "TransactionEntryForm: Executes! $account")
+                                    DropdownMenuItem(
+                                        text = { Text(account.accountName) },
+                                        onClick = {
+                                            onValueChange(transactionDetails.copy(payeeId = "-1"))
+                                            onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
+                                            currentToAccount = account
+                                            payeeExpanded = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
+                }
+                IconButton(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .width(40.dp)
+                        .padding(10.dp, 10.dp, 0.dp, 0.dp),
+                    onClick = {
+                        openNewPayeeDialog = true
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Add"
+                    )
                 }
             }
 
@@ -441,7 +477,7 @@ fun TransactionEntryForm(
                             }
                         }
                         .menuAnchor(),
-                    value = currentCategory.categName,
+                    value =  removeTrPrefix(currentCategory.categName),
                     readOnly = true,
                     onValueChange = { onValueChange(transactionDetails.copy(categoryId = it)) },
                     label = { Text("Transaction Category *") },
@@ -458,9 +494,9 @@ fun TransactionEntryForm(
                     expanded = categoryExpanded,
                     onDismissRequest = { categoryExpanded = false },
                 ) {
-                    transactionUiState1.categoriesList.forEach { category ->
+                    transactionUiState.categoriesList.forEach { category ->
                         DropdownMenuItem(
-                            text = { Text(category.categName) },
+                            text = { Text( removeTrPrefix(category.categName)) },
                             onClick = {
                                 currentCategory = category
                                 onValueChange(transactionDetails.copy(categoryId = category.categId.toString()))
@@ -495,6 +531,18 @@ fun TransactionEntryForm(
         }
     }
 
+
+    if (openNewPayeeDialog) {
+        PayeeEntryDialog(
+            onDismissRequest = { openNewPayeeDialog = false },
+            viewModel = viewModel,
+            onConfirmClick = {
+                coroutineScope.launch {
+                    viewModel.savePayee()
+                }
+            }
+        )
+    }
 
     if (openTransactionDateDialog) {
         val datePickerState = rememberDatePickerState()
@@ -532,5 +580,181 @@ fun TransactionEntryForm(
         ) {
             DatePicker(state = datePickerState)
         }
+    }
+}
+
+
+@SuppressLint("UnrememberedMutableState")
+@Composable
+fun PayeeEntryDialog(
+    modifier: Modifier = Modifier,
+    title: String = "Add Payee",
+    selectedPayee: PayeeDetails = PayeeDetails(payeeName = ""),
+    onConfirmClick: () -> Unit,
+    onDismissRequest: () -> Unit,
+    viewModel: TransactionEntryViewModel,
+    edit: Boolean = false
+) {
+    val focusManager = LocalFocusManager.current
+    var payeeSelected by remember { mutableStateOf(selectedPayee) }
+
+    viewModel.updatePayeeState(
+        viewModel.payeeUiState.payeeDetails.copy(
+            payeeName = payeeSelected.payeeName,
+            payeeId = payeeSelected.payeeId,
+            categId = payeeSelected.categId,
+            number = payeeSelected.number,
+            website = payeeSelected.website,
+            notes = payeeSelected.notes,
+            active = payeeSelected.active
+        )
+    )
+    Dialog(
+        onDismissRequest = { onDismissRequest() }
+    )
+    {
+        // Draw a rectangle shape with rounded corners inside the dialog
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(535.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp, 0.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                OutlinedTextField(
+                    modifier = Modifier.padding(0.dp, 8.dp),
+                    value = payeeSelected.payeeName,
+                    onValueChange = {
+                        payeeSelected.payeeName = it
+                        viewModel.updatePayeeState(
+                            viewModel.payeeUiState.payeeDetails.copy(
+                                payeeName = it
+                            )
+                        )
+                    },
+                    label = { Text("Payee Name *") },
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    })
+                )
+                Row(
+                    modifier = Modifier.padding(0.dp, 8.dp),
+                ) {
+                    Checkbox(
+                        checked = payeeSelected.active.toBoolean(),
+                        onCheckedChange = {
+                            payeeSelected.active = it.toString()
+                            viewModel.updatePayeeState(
+                                viewModel.payeeUiState.payeeDetails.copy(
+                                    active = (it).toString()
+                                )
+                            )
+                        },
+                    )
+                    Text(
+                        text = "Hidden",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                }
+                // We're obviously not including last used category -_-
+                OutlinedTextField(
+                    modifier = Modifier.padding(0.dp, 8.dp),
+                    value = payeeSelected.number,
+                    onValueChange = {
+                        payeeSelected.number = it
+                        viewModel.updatePayeeState(
+                            viewModel.payeeUiState.payeeDetails.copy(
+                                number = it
+                            )
+                        )
+                    },
+                    label = { Text("Reference Number") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    })
+                )
+                OutlinedTextField(
+                    modifier = Modifier.padding(0.dp, 8.dp),
+                    value = payeeSelected.website,
+                    onValueChange = {
+                        payeeSelected.website = it
+                        viewModel.updatePayeeState(
+                            viewModel.payeeUiState.payeeDetails.copy(
+                                website = it
+                            )
+                        )
+                    },
+                    label = { Text("Website") },
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    })
+                )
+                OutlinedTextField(
+                    modifier = Modifier.padding(0.dp, 8.dp),
+                    value = payeeSelected.notes,
+                    onValueChange = {
+                        payeeSelected.notes = it
+                        viewModel.updatePayeeState(
+                            viewModel.payeeUiState.payeeDetails.copy(
+                                notes = it
+                            )
+                        )
+                    },
+                    label = { Text("Notes") },
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    })
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    TextButton(
+                        onClick = { onDismissRequest() },
+                        modifier = Modifier.padding(8.dp),
+                    ) {
+                        Text("Dismiss")
+                    }
+                    TextButton(
+                        onClick = {
+                            onConfirmClick()
+                            onDismissRequest()
+                        },
+                        modifier = Modifier.padding(8.dp),
+                        enabled = viewModel.payeeUiState.isEntryValid
+                    ) {
+                        Text("Confirm")
+                    }
+                }
+            }
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.screen.report
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,8 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -33,17 +32,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
+import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.common.AnimatedCircle
+import com.example.expensetracker.ui.common.DonutChart
+import com.example.expensetracker.ui.common.DonutChartData
+import com.example.expensetracker.ui.common.DonutChartDataCollection
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
 import com.example.expensetracker.ui.common.ExpenseTopBar
+import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 
@@ -120,15 +122,38 @@ fun ReportByPayee(
             .padding(24.dp, 12.dp),
 
         ) {
-        AnimatedCircle(
-            proportions = byPayeeData.second.map { it.toFloat() },
-            colors = viewModel.generateDistinctColors(byPayeeData.second.size),
+        DonutChart(
             modifier = Modifier
                 .height(300.dp)
+                .width(268.dp)
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally)
-                .fillMaxWidth()
-        )
+                .fillMaxWidth(),
+            data = DonutChartDataCollection(
+                byPayeeData.second.mapIndexed { index, amount ->
+                    DonutChartData(
+                        amount.toFloat(),
+                        viewModel.generateDistinctColors(byPayeeData.second.size)[index],
+                        byPayeeData.first[index].payeeName
+                    )
+                }
+            )
+        ) { selected ->
+            AnimatedContent(targetState = selected, label = "") {
+                if (it != null) {
+                    Column(modifier = Modifier.width(100.dp)) {
+                        Text(
+                            text = it.title ?: "",
+                            textAlign = TextAlign.Center
+                        )
+                        FormattedCurrency(
+                            value = (it.amount ?: 0).toDouble(),
+                            currency = CurrencyFormat() //FIX THIS
+                        )
+                    }
+                }
+            }
+        }
         Text(
             text = "Expense",
             modifier = Modifier
@@ -153,15 +178,38 @@ fun ReportByCategory(
             .padding(24.dp, 12.dp),
 
         ) {
-        AnimatedCircle(
-            proportions = byCategoryData.second.map { it.toFloat() },
-            colors = viewModel.generateDistinctColors(byCategoryData.second.size),
+        DonutChart(
             modifier = Modifier
                 .height(300.dp)
+                .width(268.dp)
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally)
-                .fillMaxWidth()
-        )
+                .fillMaxWidth(),
+            data = DonutChartDataCollection(
+                byCategoryData.second.mapIndexed { index, amount ->
+                    DonutChartData(
+                        amount.toFloat(),
+                        viewModel.generateDistinctColors(byCategoryData.second.size)[index],
+                        byCategoryData.first[index].categName
+                    )
+                }
+            )
+        ) { selected ->
+            AnimatedContent(targetState = selected, label = "") {
+                if (it != null) {
+                    Column(modifier = Modifier.width(100.dp)) {
+                        Text(
+                            text = it.title ?: "",
+                            textAlign = TextAlign.Center
+                        )
+                        FormattedCurrency(
+                            value = (it.amount ?: 0).toDouble(),
+                            currency = CurrencyFormat() //FIX THIS
+                        )
+                    }
+                }
+            }
+        }
         Text(
             text = "Expense",
             modifier = Modifier

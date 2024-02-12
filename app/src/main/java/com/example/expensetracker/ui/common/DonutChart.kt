@@ -1,7 +1,6 @@
 package com.example.expensetracker.ui.common
 
-import android.graphics.Typeface
-import androidx.compose.animation.core.CubicBezierEasing
+import android.util.Log
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.TweenSpec
@@ -13,11 +12,11 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,17 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -80,18 +73,38 @@ fun DonutChart(
     modifier: Modifier = Modifier,
     chartSize: Dp = 350.dp,
     data: DonutChartDataCollection,
-    gapPercentage: Float = 0.01f,
+    gapPercentage: Float = 0.001f,
     selectionView: @Composable (selectedItem: DonutChartData?) -> Unit = {},
 ) {
-    var selectedIndex by remember { mutableStateOf(-1) }
+    var selectedIndex by remember { mutableIntStateOf(-1) }
     val animationTargetState = (0..data.items.size).map {
         remember { mutableStateOf(DonutChartState()) }
     }
+    val transitionState = remember {
+        MutableTransitionState(DonutChartProgress.START)
+            .apply { targetState = DonutChartProgress.END }
+    }
+    val transition = updateTransition(transitionState)
     val animValues = (0..data.items.size).map {
         animateDpAsState(
             targetValue = animationTargetState[it].value.stroke,
             animationSpec = TweenSpec(700)
         )
+    }
+    val animationProgress by transition.animateFloat(
+        transitionSpec = {
+            tween(
+                delayMillis = 500,
+                durationMillis = 900,
+                easing = LinearOutSlowInEasing
+            )
+        }, label = ""
+    ) { progress ->
+        if (progress == DonutChartProgress.START) {
+            0f
+        } else {
+            1f
+        }
     }
     val anglesList: MutableList<DrawingAngles> = remember { mutableListOf() }
     val gapAngle = data.calculateGapAngle(gapPercentage)
@@ -114,22 +127,17 @@ fun DonutChart(
                                 tapOffset = tapOffset,
                                 anglesList = anglesList,
                                 currentSelectedIndex = selectedIndex,
-                                currentStrokeValues = animationTargetState.map { it.value.stroke.toPx() },
                                 onItemSelected = { index ->
                                     selectedIndex = index
-                                    animationTargetState[index].value = DonutChartState(
-                                        DonutChartState.State.Selected
-                                    )
                                 },
-                                onItemDeselected = { index ->
-                                    animationTargetState[index].value = DonutChartState(
-                                        DonutChartState.State.Unselected
-                                    )
+                                onItemDeselected = {
+                                    selectedIndex = -1
                                 },
                                 onNoItemSelected = {
                                     selectedIndex = -1
-                                }
-                            )
+                                },
+                                currentStrokeValues = animValues.map { it.value.toPx() },
+                                )
                         }
                     )
                 },
@@ -141,25 +149,25 @@ fun DonutChart(
                 data.items.forEachIndexed { ind, item ->
                     val sweepAngle = data.findSweepAngle(ind, gapPercentage)
                     anglesList.add(DrawingAngles(lastAngle, sweepAngle))
-                    val strokeWidth = animValues[ind].value.toPx()
+                    val animatedSweep = sweepAngle * animationProgress
                     drawArc(
                         color = item.color,
                         startAngle = lastAngle,
-                        sweepAngle = sweepAngle,
+                        sweepAngle = animatedSweep,
                         useCenter = false,
                         topLeft = Offset(defaultStrokeWidth / 2, defaultStrokeWidth / 2),
-                        style = Stroke(strokeWidth, cap = StrokeCap.Butt),
-                        size = Size(size.width - defaultStrokeWidth,
-                            size.height - defaultStrokeWidth)
+                        style = Stroke(STROKE_SIZE_UNSELECTED.toPx(), cap = StrokeCap.Butt),
+                        size = Size(size.width - defaultStrokeWidth, size.height - defaultStrokeWidth)
                     )
                     lastAngle += sweepAngle + gapAngle
-
                 }
             }
         )
         selectionView(if (selectedIndex >= 0) data.items[selectedIndex] else null)
     }
 }
+
+
 
 private fun handleCanvasTap(
     center: Offset,
@@ -171,6 +179,7 @@ private fun handleCanvasTap(
     onItemDeselected: (Int) -> Unit = {},
     onNoItemSelected: () -> Unit = {},
 ) {
+    Log.d("TAG", "AnglesList: $anglesList")
     val normalized = tapOffset.findNormalizedPointFromTouch(center)
     val touchAngle =
         calculateTouchAngleAccordingToCanvas(center, normalized)
@@ -283,3 +292,5 @@ private fun DonutChartDataCollection.findSweepAngle(
     val gapAngle = this.calculateGapAngle(gapPercentage)
     return ((((amount + gap) / totalWithGap) * TOTAL_ANGLE)) - gapAngle
 }
+
+private enum class DonutChartProgress { START, END }

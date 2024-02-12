@@ -20,7 +20,7 @@ class AccountDetailViewModel(
     private val accountsRepository: AccountsRepository,
     private val transactionsRepository: TransactionsRepository,
 ): ViewModel() {
-    var accountId: Int = -1;
+    var accountId: Int = -1
 
     var accountDetailAccountUiState: StateFlow<AccountDetailAccountUiState> =
         accountsRepository.getAccountStream(accountId)
@@ -29,7 +29,7 @@ class AccountDetailViewModel(
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(AccountDetailViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = AccountDetailAccountUiState()
             )
 
@@ -47,19 +47,19 @@ class AccountDetailViewModel(
                 initialValue = AccountDetailTransactionUiState()
             )
 
-    suspend fun getAccount() {
+    fun getAccount() {
         accountDetailAccountUiState = accountsRepository.getAccountStream(accountId)
             .map { account ->
                 AccountDetailAccountUiState(account ?: Account())
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(AccountDetailViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = AccountDetailAccountUiState()
             )
     }
 
-    suspend fun getTransactions() {
+    fun getTransactions() {
         accountDetailTransactionUiState =
             transactionsRepository.getTransactionsFromAccount(accountId)
                 //.onEach { Log.d("DEBUG", ": flow emitted $it") }
@@ -82,7 +82,7 @@ class AccountDetailViewModel(
         private const val TIMEOUT_MILLIS = 5_000L
     }
 
-    private suspend fun calculateBalance(account: Account): Double {
+    private fun calculateBalance(account: Account): Double {
         var balance = account.initialBalance ?: 0.0
         var reconciledBalance = 0.0
 
@@ -161,6 +161,22 @@ class AccountDetailViewModel(
         addInboundTransfersThread.join()
 
         return balance
+    }
+
+    suspend fun deleteTransaction(transaction: Transaction) : Boolean {
+        return try {
+            transactionsRepository.deleteTransaction(transaction)
+            Log.d("TAG", "deleteTransaction: pass ")
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.d("TAG", "deleteTransaction: fail")
+            false
+        }
+    }
+
+    fun editTransaction() {
+        TODO("Not yet implemented")
     }
 }
 

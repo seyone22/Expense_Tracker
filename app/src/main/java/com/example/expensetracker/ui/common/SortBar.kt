@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
@@ -41,6 +42,7 @@ fun SortBar(
                     expanded = true
                 },
                 contentPadding = PaddingValues(8.dp),
+                modifier = Modifier.padding(8.dp, 4.dp, 0.dp, 4.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -74,6 +76,7 @@ fun SortBar(
 }
 
 val menuItems = listOf(
+    "All",
     "Current Month",
     "Current Month to Date",
     "Last Month",

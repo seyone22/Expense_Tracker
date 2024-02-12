@@ -9,11 +9,8 @@ import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.Transaction
-import com.example.expensetracker.model.TransactionWithDetails
-import com.example.expensetracker.ui.screen.accounts.Totals
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlin.math.log
 import kotlin.random.Random
 
 /**

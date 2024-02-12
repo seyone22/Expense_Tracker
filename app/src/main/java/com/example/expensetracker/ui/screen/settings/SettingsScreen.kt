@@ -4,10 +4,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,7 +53,7 @@ fun SettingsScreen(
                      navigationIcon = {
                          IconButton(onClick = { navigateBack() }) {
                              Icon(
-                                 imageVector = Icons.Filled.ArrowBack,
+                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                  contentDescription = null
                              )
                          }
@@ -88,8 +90,20 @@ fun SettingsScreen(
                 modifier = Modifier.clickable { navigateToScreen("SettingsDetail/Appearance") }
             )
             ListItem(
+                headlineContent = { Text(text = "Fetch Data") },
+                supportingContent = { Text(text = "Update Exchange Rates, ") },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Outlined.Update,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                modifier = Modifier.clickable { navigateToScreen("SettingsDetail/Data") }
+            )
+            ListItem(
                 headlineContent = { Text(text = "About") },
-                supportingContent = { Text(text = "Expense Tracker v0.1.0-alpha") },
+                supportingContent = { Text(text = "${R.string.app_name} ${R.string.app_version}") },
                 leadingContent = {
                     Icon(
                         imageVector = Icons.Outlined.Info,
@@ -97,7 +111,9 @@ fun SettingsScreen(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 },
-                modifier = Modifier.clickable { navigateToScreen("SettingsDetail/About") }
+                modifier = Modifier.clickable {
+                    navigateToScreen("SettingsDetail/About")
+                }
             )
         }
     }
