@@ -1,10 +1,10 @@
 package com.example.expensetracker.ui.screen.settings
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Info
@@ -53,7 +53,7 @@ fun SettingsScreen(
                      navigationIcon = {
                          IconButton(onClick = { navigateBack() }) {
                              Icon(
-                                 imageVector = Icons.Filled.ArrowBack,
+                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                  contentDescription = null
                              )
                          }
@@ -103,7 +103,7 @@ fun SettingsScreen(
             )
             ListItem(
                 headlineContent = { Text(text = "About") },
-                supportingContent = { Text(text = "Expense Tracker v0.1.0-alpha") },
+                supportingContent = { Text(text = "${R.string.app_name} ${R.string.app_version}") },
                 leadingContent = {
                     Icon(
                         imageVector = Icons.Outlined.Info,
