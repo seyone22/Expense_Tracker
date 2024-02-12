@@ -32,7 +32,7 @@ Expense Tracker currently offers the following features:
 
 ### APK Installation
 
-1. Download the APK file from the [latest release](#).
+1. Download the APK file from the [latest release](https://github.com/seyone22/Expense_Tracker/releases/tag/v0.1.2-alpha).
 2. Transfer the APK file to your Android device.
 3. Open the APK file on your device and follow the installation prompts.
 
@@ -58,7 +58,7 @@ Expense Tracker is built using the following technologies and libraries:
 
 ## Versioning
 
-Expense Tracker follows semantic versioning for version management. For the available versions, see the [tags on this repository](https://github.com/yourusername/expense-tracker/tags).
+Expense Tracker follows semantic versioning for version management. For the available versions, see the [tags on this repository](https://github.com/seyone22/expense-tracker/tags).
 
 ## Author
 
