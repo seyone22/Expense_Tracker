@@ -8,14 +8,12 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.example.expensetracker.data.AppContainer
 import com.example.expensetracker.data.AppDataContainer
 import com.example.expensetracker.data.MMEXDatabase
-import dagger.hilt.android.HiltAndroidApp
 
 private const val BASECURRENCYIDT_PREFERENCE_NAME = "baseCurrencyId"
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = BASECURRENCYIDT_PREFERENCE_NAME
 )
 
-@HiltAndroidApp
 class ExpenseApplication : Application() {
     lateinit var container: AppContainer
     override fun onCreate() {

@@ -3,8 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
 
-    id("com.google.dagger.hilt.android")
-
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.21"
 }
 
@@ -105,14 +103,6 @@ dependencies {
 
 // AndroidX Preferences DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-
-// Google Dagger Hilt
-    implementation("com.google.dagger:hilt-android:2.48.1")
-    ksp("com.google.dagger:hilt-android-compiler:2.48.1")
-    implementation("androidx.hilt:hilt-work:1.2.0")
-    ksp("androidx.hilt:hilt-compiler:1.2.0")
-    implementation("androidx.work:work-runtime-ktx:2.9.0")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
 // AndroidX Lifecycle ViewModel Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
