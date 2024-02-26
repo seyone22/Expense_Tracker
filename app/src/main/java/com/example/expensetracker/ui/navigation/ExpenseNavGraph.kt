@@ -2,6 +2,8 @@ package com.example.expensetracker.ui.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -37,15 +39,33 @@ import com.example.expensetracker.ui.screen.settings.SettingsDetailScreen
 import com.example.expensetracker.ui.screen.settings.SettingsScreen
 import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionsScreen
+import com.example.expensetracker.ui.utils.DevicePosture
+import com.example.expensetracker.ui.utils.ExpenseNavigationType
 
 /**
  * Provides Navigation graph for the application.
  */
+
 @Composable
 fun ExpenseNavHost(
     navController: NavHostController,
+    windowSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier,
 ) {
+    val navigationType: ExpenseNavigationType = when (windowSizeClass) {
+        WindowWidthSizeClass.Compact -> ExpenseNavigationType.BOTTOM_NAVIGATION
+        WindowWidthSizeClass.Medium -> ExpenseNavigationType.NAVIGATION_RAIL
+        WindowWidthSizeClass.Expanded -> {
+            // Need to fix this!!
+            if(false) {
+                ExpenseNavigationType.NAVIGATION_RAIL
+            } else {
+                ExpenseNavigationType.PERMANENT_NAVIGATION_DRAWER
+            }
+        }
+        else -> ExpenseNavigationType.BOTTOM_NAVIGATION
+    }
+
     NavHost(
         modifier = modifier,
         navController = navController,
@@ -56,7 +76,8 @@ fun ExpenseNavHost(
         // Routes to main Navbar destinations
         composable(route = AccountsDestination.route) {
             AccountScreen(
-                navigateToScreen = { screen -> navController.navigate(screen) }
+                navigateToScreen = { screen -> navController.navigate(screen) },
+                navigationType = navigationType
             )
         }
         composable(route = EntitiesDestination.route) {
@@ -85,11 +106,12 @@ fun ExpenseNavHost(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() },
                 navigateToScreen = { screen -> navController.navigate(screen) },
-                )
+            )
         }
         composable(
-            route = AccountDetailDestination.route+"/{accountId}",
-            arguments = listOf(navArgument("accountId") { type = NavType.StringType })) {
+            route = AccountDetailDestination.route + "/{accountId}",
+            arguments = listOf(navArgument("accountId") { type = NavType.StringType })
+        ) {
             AccountDetailScreen(
                 navController = navController,
                 backStackEntry = it.arguments?.getString("accountId") ?: "-1"
@@ -125,10 +147,11 @@ fun ExpenseNavHost(
             SettingsScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 navigateBack = { navController.popBackStack() },
-                )
+            )
         }
-        composable(route = SettingsDetailDestination.route+"/{setting}",
-            arguments = listOf(navArgument("setting") { type = NavType.StringType })) {
+        composable(route = SettingsDetailDestination.route + "/{setting}",
+            arguments = listOf(navArgument("setting") { type = NavType.StringType })
+        ) {
             SettingsDetailScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 navigateBack = { navController.popBackStack() },
