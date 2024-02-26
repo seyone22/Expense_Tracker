@@ -3,6 +3,7 @@ package com.example.expensetracker
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,15 +26,9 @@ import com.example.expensetracker.ui.common.dialogs.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.dialogs.PayeeEntryDialog
 import com.example.expensetracker.ui.navigation.ExpenseNavHost
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
-import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
-import com.example.expensetracker.ui.screen.operations.entity.category.CategoryEntryDestination
 import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
-import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyEntryDestination
 import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrencyDetails
-import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryDestination
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
-import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
-import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import com.example.expensetracker.ui.utils.ExpenseNavigationType
 import kotlinx.coroutines.launch
@@ -71,8 +66,9 @@ fun ExpenseApp(
                 ExpenseTopBar(
                     selectedActivity = navBackStackEntry?.destination?.id ?: 0,
                     navBarAction = { showNewDialog = true },
-                    navigateToSettings = { navController.navigate(SettingsDestination.route) }
-                )
+                    navigateToSettings = { navController.navigate(SettingsDestination.route) },
+                    type = navigationType,
+                    )
             },
             bottomBar = {
                 if (navigationType == ExpenseNavigationType.BOTTOM_NAVIGATION) {
@@ -85,7 +81,9 @@ fun ExpenseApp(
             },
 
             floatingActionButton = {
-                ExpenseFAB(navigateToScreen = { screen -> navController.navigate(screen) })
+                if (navigationType == ExpenseNavigationType.BOTTOM_NAVIGATION) {
+                    ExpenseFAB(navigateToScreen = { screen -> navController.navigate(screen) })
+                }
             }
         ) { innerPadding ->
             ExpenseNavHost(

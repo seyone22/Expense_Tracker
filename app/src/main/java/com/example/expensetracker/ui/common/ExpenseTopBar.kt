@@ -13,17 +13,19 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringArrayResource
 import com.example.expensetracker.R
+import com.example.expensetracker.ui.utils.ExpenseNavigationType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseTopBar(
     selectedActivity: Int,
     navBarAction: () -> Unit,
-    hasNavBarAction : Boolean = true,
+    type: ExpenseNavigationType,
+    hasNavBarAction: Boolean = true,
     navigateToSettings: () -> Unit
-    ) {
+) {
     //Title string for header elements, view codes in NavigationDestinations
-    val titleString : String
+    val titleString: String
     if (selectedActivity in 0..4) {
         titleString = stringArrayResource(id = R.array.activities)[selectedActivity]
     } else {
@@ -39,13 +41,15 @@ fun ExpenseTopBar(
             Text(titleString)
         },
         navigationIcon = {
-            IconButton(onClick = {
-                navigateToSettings()
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.Settings,
-                    contentDescription = "Settings"
-                )
+            if (type == ExpenseNavigationType.BOTTOM_NAVIGATION) {
+                IconButton(onClick = {
+                    navigateToSettings()
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Settings"
+                    )
+                }
             }
         },
         actions = {
