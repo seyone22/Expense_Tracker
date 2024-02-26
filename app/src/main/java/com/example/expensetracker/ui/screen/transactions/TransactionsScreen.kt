@@ -1,26 +1,13 @@
 package com.example.expensetracker.ui.screen.transactions
 
-import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -42,9 +29,6 @@ import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionWithDetails
 import com.example.expensetracker.model.toTransaction
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.common.ExpenseFAB
-import com.example.expensetracker.ui.common.ExpenseNavBar
-import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.SortBar
 import com.example.expensetracker.ui.common.TransactionEditDialog
@@ -52,8 +36,6 @@ import com.example.expensetracker.ui.common.TransactionType
 import com.example.expensetracker.ui.common.getAbbreviatedMonthName
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
-import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -80,82 +62,7 @@ fun TransactionsScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            if (isSelected) {
-                TopAppBar(
-                    title = { Text(text = TransactionsDestination.route) },
-                    navigationIcon = {
-                        IconButton(onClick = { isSelected = !isSelected }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = "Close"
-                            )
-                        }
-                    },
-                    actions = {
-                        Row {
-                            IconButton(onClick = {
-                                isSelected = !isSelected
-                                openEditDialog.value = !openEditDialog.value
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Edit,
-                                    contentDescription = "Edit"
-                                )
-                            }
-                            IconButton(
-                                onClick = {
-                                    isSelected = !isSelected
-                                    coroutineScope.launch {
-                                        viewModel.deleteTransaction(
-                                            selectedTransaction
-                                        )
-                                    }
-                                }
-
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Delete"
-                                )
-                            }
-                            IconButton(onClick = {
-                                isSelected = !isSelected
-                                Toast.makeText(context, "Unimplemented", Toast.LENGTH_SHORT).show()
-                            }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Share,
-                                    contentDescription = "Share"
-                                )
-                            }
-                        }
-                    }
-                )
-            } else {
-                ExpenseTopBar(
-                    selectedActivity = TransactionsDestination.routeId,
-                    navBarAction = { navigateToScreen(AccountEntryDestination.route) },
-                    navigateToSettings = { navigateToScreen(SettingsDestination.route) }
-                )
-            }
-        },
-        bottomBar = {
-            ExpenseNavBar(
-                selectedActivity = TransactionsDestination.routeId,
-                navigateToScreen = navigateToScreen
-            )
-        },
-        floatingActionButton = {
-            ExpenseFAB(navigateToScreen = navigateToScreen)
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier.padding(innerPadding)
-        ) {
-
+        Column() {
             TransactionList(
                 transactions = transactionsUiState.transactions,
                 longClicked = { selected ->
@@ -165,7 +72,6 @@ fun TransactionsScreen(
                 viewModel = viewModel
             )
         }
-    }
 
     if (openEditDialog.value) {
         TransactionEditDialog(

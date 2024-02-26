@@ -17,9 +17,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
 
 @HiltAndroidApp
 class ExpenseApplication : Application() {
-
     lateinit var container: AppContainer
-
     override fun onCreate() {
         super.onCreate()
 

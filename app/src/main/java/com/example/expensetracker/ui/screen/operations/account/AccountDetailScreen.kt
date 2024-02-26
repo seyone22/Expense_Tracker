@@ -92,170 +92,102 @@ fun AccountDetailScreen(
         viewModel.getAccount()
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            if (isSelected) {
-                TopAppBar(
-                    title = { Text(text = TransactionsDestination.route) },
-                    navigationIcon = {
-                        IconButton(onClick = { isSelected = !isSelected }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = "Close"
-                            )
-                        }
-                    },
-                    actions = {
-                        Row {
-                            IconButton(onClick = {
-                                isSelected = !isSelected
-                                openEditDialog.value = !openEditDialog.value
-                                openEditType.value = EntryFields.TRANSACTION
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Edit,
-                                    contentDescription = "Edit"
-                                )
-                            }
-                            IconButton(
-                                onClick = {
-                                    isSelected = !isSelected
-                                    coroutineScope.launch {
-                                        viewModel.deleteTransaction(
-                                            selectedTransaction
-                                        )
-                                    }
-                                }
-
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Delete"
-                                )
-                            }
-                            IconButton(onClick = {
-                                isSelected = !isSelected
-                                Toast.makeText(context, "Unimplemented", Toast.LENGTH_SHORT).show()
-                            }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Share,
-                                    contentDescription = "Share"
-                                )
-                            }
-                        }
-                    }
-                )
-            } else {
-                ExpenseTopBar(
-                    selectedActivity = AccountsDestination.routeId,
-                    navBarAction = { navController.navigate(AccountEntryDestination.route) },
-                    navigateToSettings = { navController.navigate(SettingsDestination.route) }
-                )
-            }
-        }
+    Column(
+        modifier = modifier
+            .padding(0.dp, 100.dp)
     ) {
-        Column(
+        Card(
             modifier = modifier
-                .padding(it)
-                .padding(0.dp, 100.dp)
+                .fillMaxWidth()
+                .padding(24.dp, 0.dp)
         ) {
-            Card(
+            Row(
                 modifier = modifier
-                    .fillMaxWidth()
-                    .padding(24.dp, 0.dp)
+                    .padding(16.dp, 8.dp, 0.dp, 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                Row(
-                    modifier = modifier
-                        .padding(16.dp, 8.dp, 0.dp, 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                Column(
+                    modifier = Modifier.width(300.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.width(300.dp)
-                    ) {
-                            Column {
-                                Text(
-                                    text = accountDetailAccountUiState.account.accountName,
-                                    style = MaterialTheme.typography.headlineSmall
-                                )
-                                Text(
-                                    text = accountDetailAccountUiState.account.accountType + " Account",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                            }
-                        HorizontalDivider()
+                    Column {
                         Text(
-                            text = "Account Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
-                                accountDetailAccountUiState.balance
-                            )).toString(),
+                            text = accountDetailAccountUiState.account.accountName,
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                        Text(
+                            text = accountDetailAccountUiState.account.accountType + " Account",
                             style = MaterialTheme.typography.titleMedium
                         )
-                        Text(
-                            text = "Reconciled Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
-                                accountDetailAccountUiState.balance
-                            )).toString(),
-                            style = MaterialTheme.typography.titleSmall
-                        )
                     }
-                    IconButton(onClick = {
-                        openEditDialog.value = !openEditDialog.value
-                        openEditType.value = EntryFields.ACCOUNT
-                    }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Edit,
-                            contentDescription = null,
-                            Modifier.size(24.dp, 24.dp)
-                        )
-                    }
+                    HorizontalDivider()
+                    Text(
+                        text = "Account Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
+                            accountDetailAccountUiState.balance
+                        )).toString(),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Reconciled Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
+                            accountDetailAccountUiState.balance
+                        )).toString(),
+                        style = MaterialTheme.typography.titleSmall
+                    )
                 }
-            }
-            if (accountDetailTransactionUiState.transactions.isNotEmpty()) {
-                Column {
-                    TransactionList(
-                        transactions = accountDetailTransactionUiState.transactions,
-                        modifier = modifier,
-                        longClicked = { selected ->
-                            isSelected = !isSelected
-                            selectedTransaction = selected
-                        },
+                IconButton(onClick = {
+                    openEditDialog.value = !openEditDialog.value
+                    openEditType.value = EntryFields.ACCOUNT
+                }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = null,
+                        Modifier.size(24.dp, 24.dp)
                     )
                 }
             }
-
-            if (openEditDialog.value and (openEditType.value == EntryFields.TRANSACTION)) {
-                TransactionEditDialog(
-                    onConfirmClick = {
-                        coroutineScope.launch {
-                            viewModel.editTransaction()
-                        }
+        }
+        if (accountDetailTransactionUiState.transactions.isNotEmpty()) {
+            Column {
+                TransactionList(
+                    transactions = accountDetailTransactionUiState.transactions,
+                    modifier = modifier,
+                    longClicked = { selected ->
+                        isSelected = !isSelected
+                        selectedTransaction = selected
                     },
-                    onDismissRequest = { openEditDialog.value = !openEditDialog.value },
-                    edit = true,
-                    title = "Edit Transaction",
-                    selectedTransaction = selectedTransaction
-                )
-            }
-            if (openEditDialog.value and (openEditType.value == EntryFields.ACCOUNT)) {
-                AccountEditDialog(
-                    onConfirmClick = {
-                        coroutineScope.launch {
-                            viewModel.editTransaction()
-                        }
-                    },
-                    onDismissRequest = { openEditDialog.value = !openEditDialog.value },
-                    viewModel = viewModel,
-                    edit = true,
-                    title = "Edit Account",
-                    selectedAccount = accountDetailAccountUiState.account
                 )
             }
         }
+
+        if (openEditDialog.value and (openEditType.value == EntryFields.TRANSACTION)) {
+            TransactionEditDialog(
+                onConfirmClick = {
+                    coroutineScope.launch {
+                        viewModel.editTransaction()
+                    }
+                },
+                onDismissRequest = { openEditDialog.value = !openEditDialog.value },
+                edit = true,
+                title = "Edit Transaction",
+                selectedTransaction = selectedTransaction
+            )
+        }
+        if (openEditDialog.value and (openEditType.value == EntryFields.ACCOUNT)) {
+            AccountEditDialog(
+                onConfirmClick = {
+                    coroutineScope.launch {
+                        viewModel.editTransaction()
+                    }
+                },
+                onDismissRequest = { openEditDialog.value = !openEditDialog.value },
+                viewModel = viewModel,
+                edit = true,
+                title = "Edit Account",
+                selectedAccount = accountDetailAccountUiState.account
+            )
+        }
     }
 }
-
-
 
 @SuppressLint("UnrememberedMutableState")
 @Composable

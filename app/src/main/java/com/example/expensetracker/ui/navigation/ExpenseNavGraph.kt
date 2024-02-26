@@ -2,7 +2,8 @@ package com.example.expensetracker.ui.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -11,14 +12,14 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.expensetracker.ui.screen.operations.account.AccountDetailDestination
-import com.example.expensetracker.ui.screen.operations.account.AccountDetailScreen
 import com.example.expensetracker.ui.screen.accounts.AccountScreen
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
 import com.example.expensetracker.ui.screen.entities.EntityScreen
 import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
 import com.example.expensetracker.ui.screen.onboarding.OnboardingScreen
+import com.example.expensetracker.ui.screen.operations.account.AccountDetailDestination
+import com.example.expensetracker.ui.screen.operations.account.AccountDetailScreen
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryScreen
 import com.example.expensetracker.ui.screen.operations.entity.category.CategoryEntryDestination
@@ -31,15 +32,14 @@ import com.example.expensetracker.ui.screen.operations.transaction.TransactionEn
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryScreen
 import com.example.expensetracker.ui.screen.report.BudgetScreen
 import com.example.expensetracker.ui.screen.report.BudgetsDestination
-import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.report.ReportScreen
+import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDetailDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDetailScreen
 import com.example.expensetracker.ui.screen.settings.SettingsScreen
 import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionsScreen
-import com.example.expensetracker.ui.utils.DevicePosture
 import com.example.expensetracker.ui.utils.ExpenseNavigationType
 
 /**
@@ -51,33 +51,20 @@ fun ExpenseNavHost(
     navController: NavHostController,
     windowSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier,
+    innerPadding : PaddingValues
 ) {
-    val navigationType: ExpenseNavigationType = when (windowSizeClass) {
-        WindowWidthSizeClass.Compact -> ExpenseNavigationType.BOTTOM_NAVIGATION
-        WindowWidthSizeClass.Medium -> ExpenseNavigationType.NAVIGATION_RAIL
-        WindowWidthSizeClass.Expanded -> {
-            // Need to fix this!!
-            if(false) {
-                ExpenseNavigationType.NAVIGATION_RAIL
-            } else {
-                ExpenseNavigationType.PERMANENT_NAVIGATION_DRAWER
-            }
-        }
-        else -> ExpenseNavigationType.BOTTOM_NAVIGATION
-    }
-
     NavHost(
-        modifier = modifier,
+        modifier = modifier.padding(innerPadding),
         navController = navController,
         startDestination = AccountsDestination.route,
         enterTransition = { EnterTransition.None },
-        exitTransition = { ExitTransition.None }
+        exitTransition = { ExitTransition.None },
     ) {
         // Routes to main Navbar destinations
         composable(route = AccountsDestination.route) {
             AccountScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
-                navigationType = navigationType
+                navigationType = ExpenseNavigationType.BOTTOM_NAVIGATION
             )
         }
         composable(route = EntitiesDestination.route) {

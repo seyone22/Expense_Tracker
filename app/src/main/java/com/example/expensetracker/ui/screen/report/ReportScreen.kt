@@ -20,7 +20,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,12 +41,8 @@ import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.DonutChart
 import com.example.expensetracker.ui.common.DonutChartData
 import com.example.expensetracker.ui.common.DonutChartDataCollection
-import com.example.expensetracker.ui.common.ExpenseFAB
-import com.example.expensetracker.ui.common.ExpenseNavBar
-import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.settings.SettingsDestination
 
 object ReportsDestination : NavigationDestination {
     override val route = "Reports"
@@ -62,47 +57,25 @@ fun ReportScreen(
     navigateToScreen: (screen: String) -> Unit,
     viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            ExpenseTopBar(
-                selectedActivity = ReportsDestination.routeId,
-                navBarAction = { },
-                navigateToSettings = { navigateToScreen(SettingsDestination.route) }
+    LazyColumn() {
+        item {
+            Text(
+                text = "Transactions by Payees",
+                modifier = Modifier
+                    .padding(16.dp),
+                textAlign = TextAlign.Center,
             )
-        },
-        bottomBar = {
-            ExpenseNavBar(
-                selectedActivity = ReportsDestination.routeId,
-                navigateToScreen = navigateToScreen
-            )
-        },
-        floatingActionButton = {
-            ExpenseFAB(navigateToScreen = navigateToScreen)
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            Modifier.padding(innerPadding)
-        ) {
-            item {
-                Text(
-                    text = "Transactions by Payees",
-                    modifier = Modifier
-                        .padding(16.dp),
-                    textAlign = TextAlign.Center,
-                )
-                TextButtonWithMenu()
-                ReportByPayee(viewModel)
+            TextButtonWithMenu()
+            ReportByPayee(viewModel)
 
-                Text(
-                    text = "Transactions by Categories",
-                    modifier = Modifier
-                        .padding(16.dp),
-                    textAlign = TextAlign.Center,
-                )
-                TextButtonWithMenu()
-                ReportByCategory(viewModel)
-            }
+            Text(
+                text = "Transactions by Categories",
+                modifier = Modifier
+                    .padding(16.dp),
+                textAlign = TextAlign.Center,
+            )
+            TextButtonWithMenu()
+            ReportByCategory(viewModel)
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.example.expensetracker.ui.screen.entities
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -23,30 +21,20 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -74,21 +62,15 @@ import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.DeleteConfirmationDialog
-import com.example.expensetracker.ui.common.ExpenseFAB
-import com.example.expensetracker.ui.common.ExpenseNavBar
-import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.operations.entity.category.CategoryDetails
 import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
-import com.example.expensetracker.ui.screen.settings.SettingsDestination
-import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -127,145 +109,69 @@ fun EntityScreen(
 
     val pagerState = rememberPagerState(pageCount = { 3 })
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            if (isSelected) {
-                TopAppBar(
-                    title = { Text(text = EntitiesDestination.route) },
-                    navigationIcon = {
-                        IconButton(onClick = { isSelected = !isSelected }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = "Close"
-                            )
-                        }
+    Column() {
+        PrimaryTabRow(
+            selectedTabIndex = state,
+            containerColor = MaterialTheme.colorScheme.background,
+
+            ) {
+            titles.forEachIndexed { index, title ->
+                Tab(
+                    selected = state == index,
+                    onClick = {
+                        state = index
+                        coroutineScope.launch { pagerState.animateScrollToPage(index) }
                     },
-                    actions = {
-                        Row {
-                            IconButton(onClick = {
-                                isSelected = !isSelected
-                                openEditDialog.value = !openEditDialog.value
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Edit,
-                                    contentDescription = "Edit"
-                                )
-                            }
-                            IconButton(
-                                onClick = {
-                                    isSelected = !isSelected
-                                    coroutineScope.launch {
-                                        viewModel.deleteCurrency(
-                                            selectedCurrency
-                                        )
-                                    }
-                                }
-
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Delete"
-                                )
-                            }
-                            IconButton(onClick = {
-                                isSelected = !isSelected
-                                Toast.makeText(context, "Unimplemented", Toast.LENGTH_SHORT).show()
-                            }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Share,
-                                    contentDescription = "Share"
-                                )
-                            }
-                        }
+                    text = {
+                        Text(
+                            text = title,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 )
-            } else {
-                ExpenseTopBar(
-                    selectedActivity = EntitiesDestination.routeId,
-                    navBarAction = { showNewDialog = true },
-                    navigateToSettings = { navigateToScreen(SettingsDestination.route) }
-                )
-            }
-        },
-        bottomBar = {
-            ExpenseNavBar(
-                selectedActivity = EntitiesDestination.routeId,
-                navigateToScreen = navigateToScreen
-            )
-        },
-        floatingActionButton = {
-            ExpenseFAB(navigateToScreen = navigateToScreen)
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = modifier.padding(innerPadding)
-        ) {
-            PrimaryTabRow(
-                selectedTabIndex = state,
-                containerColor = MaterialTheme.colorScheme.background,
 
-                ) {
-                titles.forEachIndexed { index, title ->
-                    Tab(
-                        selected = state == index,
-                        onClick = {
-                            state = index
-                            coroutineScope.launch { pagerState.animateScrollToPage(index) }
+            }
+        }
+        HorizontalPager(state = pagerState, verticalAlignment = Alignment.Top) { page ->
+            when (page) {
+                0 -> {
+                    CategoryList(
+                        list = entityUiState.categoriesList,
+                        viewModel = viewModel,
+                        coroutineScope = coroutineScope,
+                        longClicked = { selected ->
+                            isSelected = !isSelected
+                            selectedCategory = selected
                         },
-                        text = {
-                            Text(
-                                text = title,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
                     )
-
                 }
-            }
-            HorizontalPager(state = pagerState, verticalAlignment = Alignment.Top) { page ->
-                when (page) {
-                    0 -> {
-                        CategoryList(
-                            list = entityUiState.categoriesList,
-                            viewModel = viewModel,
-                            coroutineScope = coroutineScope,
-                            longClicked = { selected ->
-                                isSelected = !isSelected
-                                selectedCategory = selected
-                            },
-                        )
-                    }
 
-                    1 -> {
-                        PayeeList(
-                            list = entityUiState.payeesList,
-                            viewModel = viewModel,
-                            coroutineScope = coroutineScope,
-                            longClicked = { selected ->
-                                isSelected = !isSelected
-                                selectedPayee = selected
-                            },
-                        )
-                    }
+                1 -> {
+                    PayeeList(
+                        list = entityUiState.payeesList,
+                        viewModel = viewModel,
+                        coroutineScope = coroutineScope,
+                        longClicked = { selected ->
+                            isSelected = !isSelected
+                            selectedPayee = selected
+                        },
+                    )
+                }
 
-                    2 -> {
-                        CurrenciesList(
-                            list = entityUiState.currenciesList,
-                            viewModel = viewModel,
-                            coroutineScope = coroutineScope,
-                            longClicked = { selected ->
-                                isSelected = !isSelected
-                                selectedCurrency = selected
-                            },
-                        )
-                    }
+                2 -> {
+                    CurrenciesList(
+                        list = entityUiState.currenciesList,
+                        viewModel = viewModel,
+                        coroutineScope = coroutineScope,
+                        longClicked = { selected ->
+                            isSelected = !isSelected
+                            selectedCurrency = selected
+                        },
+                    )
                 }
             }
         }
-
     }
 
     if (showNewDialog) {
