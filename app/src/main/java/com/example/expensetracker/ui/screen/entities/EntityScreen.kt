@@ -85,6 +85,7 @@ object EntitiesDestination : NavigationDestination {
 fun EntityScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
+    setTopBarAction : (Int) -> Unit,
     viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -106,7 +107,6 @@ fun EntityScreen(
     val openEditDialog = remember { mutableStateOf(false) }
     val openDeleteAlertDialog = remember { mutableStateOf(false) }
 
-
     val pagerState = rememberPagerState(pageCount = { 3 })
 
     Column() {
@@ -120,6 +120,7 @@ fun EntityScreen(
                     selected = state == index,
                     onClick = {
                         state = index
+                        setTopBarAction(state)
                         coroutineScope.launch { pagerState.animateScrollToPage(index) }
                     },
                     text = {

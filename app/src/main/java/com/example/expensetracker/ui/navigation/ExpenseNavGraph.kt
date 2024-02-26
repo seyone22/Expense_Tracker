@@ -51,6 +51,7 @@ fun ExpenseNavHost(
     navController: NavHostController,
     windowSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier,
+    setTopBarAction : (Int) -> Unit,
     innerPadding : PaddingValues
 ) {
     NavHost(
@@ -70,6 +71,7 @@ fun ExpenseNavHost(
         composable(route = EntitiesDestination.route) {
             EntityScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
+                setTopBarAction = setTopBarAction
             )
         }
         composable(route = TransactionsDestination.route) {
