@@ -1,10 +1,12 @@
 package com.example.expensetracker.ui.screen.accounts
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material3.CardDefaults
@@ -19,6 +22,8 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,7 +34,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.model.Account
@@ -41,6 +48,8 @@ import com.example.expensetracker.ui.common.DonutChartData
 import com.example.expensetracker.ui.common.DonutChartDataCollection
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.operations.account.AccountDetailAccountUiState
+import com.example.expensetracker.ui.screen.operations.account.AccountUiState
 import com.example.expensetracker.ui.utils.ExpenseNavigationType
 
 object AccountsDestination : NavigationDestination {
@@ -55,90 +64,129 @@ fun AccountScreen(
         .padding(16.dp, 12.dp),
     navigateToScreen: (screen: String) -> Unit,
     viewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    navigationType: ExpenseNavigationType,
+    windowSizeClass: WindowWidthSizeClass,
     setTopBarAction: (Int) -> Unit
 ) {
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
 
-    LazyColumn() {
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-            ) {
-                // Code block to get the current currency's detail.
-                val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
-                var baseCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
-                // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
-                LaunchedEffect(baseCurrencyId) {
-                    baseCurrencyInfo =
-                        viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
+    // Code block to get the current currency's detail.
+    val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
+    var baseCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
+    // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
+    LaunchedEffect(baseCurrencyId) {
+        baseCurrencyInfo =
+            viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
 
-                    setTopBarAction(9)
-                }
-                DonutChart(
-                    data = DonutChartDataCollection(
-                        listOf(
-                            DonutChartData(
-                                totals.income.toFloat(),
-                                MaterialTheme.colorScheme.primary,
-                                "Income"
-                            ),
-                            DonutChartData(
-                                totals.expenses.toFloat(),
-                                MaterialTheme.colorScheme.error,
-                                "Expense"
-                            )
-                        )
-                    )
-                ) { selected ->
-                    AnimatedContent(targetState = selected, label = "") {
-                        if (it != null) {
-                            Column(modifier = Modifier.width(100.dp)) {
-                                Text(
-                                    text = it.title ?: "",
-                                    textAlign = TextAlign.Center
-                                )
-                                FormattedCurrency(
-                                    value = (it.amount ?: 0).toDouble(),
-                                    currency = baseCurrencyInfo
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+        setTopBarAction(9)
+    }
+    if (windowSizeClass == WindowWidthSizeClass.Compact) {
+        LazyColumn() {
+            items(count = 1) {
+                Summary(totals = totals, baseCurrencyInfo = baseCurrencyInfo)
 
-            Column(
-                modifier = modifier,
-            ) {
-                Text(
-                    text = "Summary of Accounts",
-                    style = MaterialTheme.typography.titleLarge
+                AccountData(
+                    modifier = modifier,
+                    viewModel = viewModel,
+                    accountsUiState = accountsUiState,
+                    navigateToScreen = navigateToScreen
                 )
-            }
 
-            enumValues<AccountTypes>().forEach { accountType ->
-                if (viewModel.countInType(
-                        accountType,
-                        accountsUiState.accountList
-                    ) != 0
-                ) {
-                    val displayName: String = accountType.displayName
-                    AccountList(
-                        modifier = modifier,
-                        category = displayName,
-                        accountList = accountsUiState.accountList,
-                        viewModel = viewModel,
-                        navigateToScreen = navigateToScreen,
+            }
+        }
+    } else {
+        LazyRow() {
+            items(count = 1) {
+                Summary(totals = totals, baseCurrencyInfo = baseCurrencyInfo)
+
+                AccountData(
+                    modifier = modifier.width(350.dp),
+                    viewModel = viewModel,
+                    accountsUiState = accountsUiState,
+                    navigateToScreen = navigateToScreen
+                )
+
+            }
+        }
+    }
+}
+
+
+@Composable
+fun Summary(totals: Totals, baseCurrencyInfo: CurrencyFormat) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+    ) {
+        DonutChart(
+            data = DonutChartDataCollection(
+                listOf(
+                    DonutChartData(
+                        totals.income.toFloat(),
+                        MaterialTheme.colorScheme.primary,
+                        "Income"
+                    ),
+                    DonutChartData(
+                        totals.expenses.toFloat(),
+                        MaterialTheme.colorScheme.error,
+                        "Expense"
                     )
+                )
+            )
+        ) { selected ->
+            AnimatedContent(targetState = selected, label = "") {
+                if (it != null) {
+                    Column(modifier = Modifier.width(100.dp)) {
+                        Text(
+                            text = it.title ?: "",
+                            textAlign = TextAlign.Center
+                        )
+                        FormattedCurrency(
+                            value = (it.amount ?: 0).toDouble(),
+                            currency = baseCurrencyInfo
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+@Composable
+fun AccountData(
+    modifier: Modifier,
+    viewModel: AccountViewModel,
+    accountsUiState : AccountsUiState,
+    navigateToScreen: (screen: String) -> Unit
+) {
+    Column(
+        modifier = modifier,
+    ) {
+        Text(
+            text = "Summary of Accounts",
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        enumValues<AccountTypes>().forEach { accountType ->
+            if (viewModel.countInType(
+                    accountType,
+                    accountsUiState.accountList
+                ) != 0
+            ) {
+                val displayName: String = accountType.displayName
+                AccountList(
+                    modifier = modifier,
+                    category = displayName,
+                    accountList = accountsUiState.accountList,
+                    viewModel = viewModel,
+                    navigateToScreen = navigateToScreen,
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun AccountList(
@@ -150,7 +198,7 @@ fun AccountList(
 ) {
     val data by viewModel.data.collectAsState()
     Column(
-        modifier = modifier,
+        modifier = modifier
     ) {
         Text(
             text = category,
@@ -171,7 +219,6 @@ fun AccountList(
             }
         }
     }
-
 }
 
 @Composable

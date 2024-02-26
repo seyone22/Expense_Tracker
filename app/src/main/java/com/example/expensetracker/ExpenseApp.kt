@@ -76,6 +76,7 @@ fun ExpenseApp(
     var showNewDialog by remember { mutableStateOf(false) }
 
     var isSelected by remember { mutableStateOf(false) }
+    // TODO : Not getting populated here
     var selectedObject: Any? = null
 
     val viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -240,6 +241,8 @@ fun ExpenseApp(
         if (showDeleteDialog.value) {
             when (topBarOperation) {
                 0 -> {
+                    Log.d("TAG", "EntityScreen: SET! $selectedObject")
+
                     DeleteConfirmationDialog({ showDeleteDialog.value = false }, {
                         coroutineScope.launch {
                             viewModel.deleteCategory(selectedObject as Category)

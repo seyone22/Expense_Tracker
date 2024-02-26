@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.entities
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -110,6 +111,7 @@ fun EntityScreen(
                         longClicked = { selected ->
                             setIsItemSelected(true)
                             setSelectedObject(selected)
+                            Log.d("TAG", "EntityScreen: SET!")
                         },
                     )
                 }
