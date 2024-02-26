@@ -1,5 +1,6 @@
 package com.example.expensetracker
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -26,6 +27,7 @@ import com.example.expensetracker.ui.common.dialogs.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.dialogs.PayeeEntryDialog
 import com.example.expensetracker.ui.navigation.ExpenseNavHost
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
+import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
@@ -64,11 +66,11 @@ fun ExpenseApp(
 
             topBar = {
                 ExpenseTopBar(
-                    selectedActivity = navBackStackEntry?.destination?.id ?: 0,
+                    selectedActivity = navBackStackEntry?.destination?.route,
                     navBarAction = { showNewDialog = true },
                     navigateToSettings = { navController.navigate(SettingsDestination.route) },
                     type = navigationType,
-                    )
+                )
             },
             bottomBar = {
                 if (navigationType == ExpenseNavigationType.BOTTOM_NAVIGATION) {
@@ -86,11 +88,17 @@ fun ExpenseApp(
                 }
             }
         ) { innerPadding ->
+            val paddingValues =
+                if ((navBackStackEntry?.destination?.route != AccountEntryDestination.route) and (navBackStackEntry?.destination?.route != SettingsDestination.route) and (navBackStackEntry?.destination?.route != "SettingsDetail/{setting}"))
+                    innerPadding
+                else
+                    PaddingValues()
+
             ExpenseNavHost(
                 navController = navController,
                 windowSizeClass = windowSizeClass,
                 setTopBarAction = { action: Int -> topBarOperation = action },
-                innerPadding = innerPadding
+                innerPadding = paddingValues
             )
         }
     }
@@ -130,6 +138,11 @@ fun ExpenseApp(
                         }
                     }
                 )
+            }
+
+            9 -> {
+                navController.navigate(AccountEntryDestination.route)
+                showNewDialog = false
             }
         }
     }

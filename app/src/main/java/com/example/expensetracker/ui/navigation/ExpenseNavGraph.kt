@@ -65,7 +65,8 @@ fun ExpenseNavHost(
         composable(route = AccountsDestination.route) {
             AccountScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
-                navigationType = ExpenseNavigationType.BOTTOM_NAVIGATION
+                navigationType = ExpenseNavigationType.BOTTOM_NAVIGATION,
+                setTopBarAction = setTopBarAction
             )
         }
         composable(route = EntitiesDestination.route) {

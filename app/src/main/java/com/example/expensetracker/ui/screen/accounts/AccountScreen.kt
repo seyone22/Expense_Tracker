@@ -55,7 +55,8 @@ fun AccountScreen(
         .padding(16.dp, 12.dp),
     navigateToScreen: (screen: String) -> Unit,
     viewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    navigationType: ExpenseNavigationType
+    navigationType: ExpenseNavigationType,
+    setTopBarAction: (Int) -> Unit
 ) {
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
@@ -74,6 +75,8 @@ fun AccountScreen(
                 LaunchedEffect(baseCurrencyId) {
                     baseCurrencyInfo =
                         viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
+
+                    setTopBarAction(9)
                 }
                 DonutChart(
                     data = DonutChartDataCollection(
