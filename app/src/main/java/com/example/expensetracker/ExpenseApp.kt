@@ -45,11 +45,13 @@ import com.example.expensetracker.ui.common.dialogs.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.dialogs.PayeeEntryDialog
 import com.example.expensetracker.ui.navigation.ExpenseNavHost
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
+import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
@@ -60,7 +62,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ExpenseApp(
     navController: NavHostController = rememberNavController(),
-    windowSizeClass: WindowWidthSizeClass
+    windowSizeClass: WindowWidthSizeClass,
+    isUsed : Boolean
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -73,15 +76,18 @@ fun ExpenseApp(
     var showNewDialog by remember { mutableStateOf(false) }
 
     var isSelected by remember { mutableStateOf(false) }
-    var selectedObject : Any? = null
+    var selectedObject: Any? = null
 
-    CompositionLocalProvider {
-        val viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory)
-        val transactionViewModel: TransactionsViewModel =
-            viewModel(factory = AppViewModelProvider.Factory)
+    val viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val transactionViewModel: TransactionsViewModel =
+        viewModel(factory = AppViewModelProvider.Factory)
 
-        val context = LocalContext.current
+    val context = LocalContext.current
 
+    if(isUsed) {
+        // TODO: FIX THE ONBOARDING
+        Toast.makeText(context, "Onboarding not completed", Toast.LENGTH_LONG).show()
+    } else {
         Row(
         ) {
             if ((navigationType == ExpenseNavigationType.NAVIGATION_RAIL) or (navigationType == ExpenseNavigationType.PERMANENT_NAVIGATION_DRAWER)) {
@@ -171,7 +177,7 @@ fun ExpenseApp(
                 }
             ) { innerPadding ->
                 val paddingValues =
-                    if ((navBackStackEntry?.destination?.route != AccountEntryDestination.route) and (navBackStackEntry?.destination?.route != SettingsDestination.route) and (navBackStackEntry?.destination?.route != "SettingsDetail/{setting}"))
+                    if ((navBackStackEntry?.destination?.route != AccountEntryDestination.route) and (navBackStackEntry?.destination?.route != SettingsDestination.route) and (navBackStackEntry?.destination?.route != "SettingsDetail/{setting}") and (navBackStackEntry?.destination?.route != TransactionEntryDestination.route))
                         innerPadding
                     else
                         PaddingValues()
@@ -181,7 +187,7 @@ fun ExpenseApp(
                     windowSizeClass = windowSizeClass,
                     setTopBarAction = { action: Int -> topBarOperation = action },
                     setIsItemSelected = { boolean: Boolean -> isSelected = boolean },
-                    setSelectedObject = { item : Any -> selectedObject = item },
+                    setSelectedObject = { item: Any -> selectedObject = item },
                     innerPadding = paddingValues
                 )
             }
@@ -236,7 +242,7 @@ fun ExpenseApp(
                 0 -> {
                     DeleteConfirmationDialog({ showDeleteDialog.value = false }, {
                         coroutineScope.launch {
-                            viewModel.deleteCategory(viewModel.selectedCategory)
+                            viewModel.deleteCategory(selectedObject as Category)
                         }
                     }, "Are you sure you want to delete this category, big boi?")
                 }
@@ -244,7 +250,7 @@ fun ExpenseApp(
                 1 -> {
                     DeleteConfirmationDialog({ showDeleteDialog.value = false }, {
                         coroutineScope.launch {
-                            viewModel.deletePayee(viewModel.selectedPayee)
+                            viewModel.deletePayee(selectedObject as Payee)
                         }
                     }, "Are you sure you want to delete this payee, big boi?")
                 }
@@ -252,9 +258,17 @@ fun ExpenseApp(
                 2 -> {
                     DeleteConfirmationDialog({ showDeleteDialog.value = false }, {
                         coroutineScope.launch {
-                            viewModel.deleteCurrency(viewModel.selectedCurrency)
+                            viewModel.deleteCurrency(selectedObject as CurrencyFormat)
                         }
                     }, "Are you sure you want to delete this currency, big boi?")
+                }
+
+                8 -> {
+                    DeleteConfirmationDialog({ showDeleteDialog.value = false }, {
+                        coroutineScope.launch {
+                            transactionViewModel.deleteTransaction(selectedObject as Transaction)
+                        }
+                    }, "Are you sure you want to delete this transaction, big boi?")
                 }
             }
         }
@@ -304,7 +318,7 @@ fun ExpenseApp(
                 }
 
                 8 -> {
-                    Log.d("TAG", "TransactionsScreen: ${transactionViewModel.hashCode() }")
+                    Log.d("TAG", "TransactionsScreen: ${transactionViewModel.hashCode()}")
 
                     TransactionEditDialog(
                         selectedTransaction = (selectedObject as Transaction),

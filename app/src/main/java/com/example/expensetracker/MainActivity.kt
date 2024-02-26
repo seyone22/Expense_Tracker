@@ -28,13 +28,16 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface( modifier = Modifier.fillMaxSize() )
                 {
-                    ExpenseApp(windowSizeClass = windowSize.widthSizeClass)
+                    ExpenseApp(
+                        windowSizeClass = windowSize.widthSizeClass,
+                        isUsed = isUsed()
+                    )
                 }
             }
         }
     }
 
-    private suspend fun isUsed() : Boolean {
+    private fun isUsed() : Boolean {
         val metadataDao = MMEXDatabase.getDatabase(this).metadataDao()
         var isUsed = false
 
