@@ -1,6 +1,10 @@
 package com.example.expensetracker.ui.screen.transactions
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
@@ -28,6 +32,8 @@ class TransactionsViewModel(
     private val accountsRepository: AccountsRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository
 ) : ViewModel() {
+    var selectedTransaction by mutableStateOf(Transaction())
+
     var transactionsUiState: StateFlow<AccountDetailTransactionUiState> =
         transactionsRepository.getAllTransactionsStream()
             //.onEach { Log.d("DEBUG", ": flow emitted $it") }

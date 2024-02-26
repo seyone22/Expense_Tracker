@@ -52,6 +52,8 @@ fun ExpenseNavHost(
     windowSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier,
     setTopBarAction : (Int) -> Unit,
+    setIsItemSelected : (Boolean) -> Unit,
+    setSelectedObject : (Any) -> Unit,
     innerPadding : PaddingValues
 ) {
     NavHost(
@@ -72,13 +74,18 @@ fun ExpenseNavHost(
         composable(route = EntitiesDestination.route) {
             EntityScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
-                setTopBarAction = setTopBarAction
+                setTopBarAction = setTopBarAction,
+                setIsItemSelected = setIsItemSelected,
+                setSelectedObject = setSelectedObject
             )
         }
         composable(route = TransactionsDestination.route) {
             TransactionsScreen(
-                navigateToScreen = { screen -> navController.navigate(screen) }
-            )
+                navigateToScreen = { screen -> navController.navigate(screen) },
+                setIsItemSelected = setIsItemSelected,
+                setSelectedObject = setSelectedObject,
+                setTopBarAction = setTopBarAction,
+                )
         }
         composable(route = ReportsDestination.route) {
             ReportScreen(

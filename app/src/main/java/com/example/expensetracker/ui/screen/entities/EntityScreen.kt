@@ -63,16 +63,17 @@ fun EntityScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
     setTopBarAction : (Int) -> Unit,
+    setIsItemSelected : (Boolean) -> Unit,
+    setSelectedObject : (Any) -> Unit,
     viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     var state by remember { mutableIntStateOf(0) }
+    setTopBarAction(state)
+
     val titles = listOf("Categories", "Payees", "Currencies")
-
     val entityUiState: EntitiesUiState by viewModel.entitiesUiState.collectAsState(EntitiesUiState())
-
-    var isSelected by remember { mutableStateOf(false) }
 
     val pagerState = rememberPagerState(pageCount = { 3 })
 
@@ -80,7 +81,6 @@ fun EntityScreen(
         PrimaryTabRow(
             selectedTabIndex = state,
             containerColor = MaterialTheme.colorScheme.background,
-
             ) {
             titles.forEachIndexed { index, title ->
                 Tab(
@@ -108,8 +108,8 @@ fun EntityScreen(
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
                         longClicked = { selected ->
-                            isSelected = !isSelected
-                            viewModel.selectedCategory = selected
+                            setIsItemSelected(true)
+                            setSelectedObject(selected)
                         },
                     )
                 }
@@ -120,8 +120,8 @@ fun EntityScreen(
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
                         longClicked = { selected ->
-                            isSelected = !isSelected
-                            viewModel.selectedPayee = selected
+                            setIsItemSelected(true)
+                            setSelectedObject(selected)
                         },
                     )
                 }
@@ -132,8 +132,8 @@ fun EntityScreen(
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
                         longClicked = { selected ->
-                            isSelected = !isSelected
-                            viewModel.selectedCurrency = selected
+                            setIsItemSelected(true)
+                            setSelectedObject(selected)
                         },
                     )
                 }

@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.transactions
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -31,12 +32,10 @@ import com.example.expensetracker.model.toTransaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.SortBar
-import com.example.expensetracker.ui.common.TransactionEditDialog
 import com.example.expensetracker.ui.common.TransactionType
 import com.example.expensetracker.ui.common.getAbbreviatedMonthName
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -51,39 +50,25 @@ object TransactionsDestination : NavigationDestination {
 fun TransactionsScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
+    setTopBarAction : (Int) -> Unit,
+    setIsItemSelected: (Boolean) -> Unit,
+    setSelectedObject : (Any) -> Unit,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     ) {
     val transactionsUiState by viewModel.transactionsUiState.collectAsState()
-    var isSelected by remember { mutableStateOf(false) }
-    var selectedTransaction by remember { mutableStateOf(Transaction()) }
-
-    val openEditDialog = remember { mutableStateOf(false) }
+    setTopBarAction(8)
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-        Column() {
-            TransactionList(
-                transactions = transactionsUiState.transactions,
-                longClicked = { selected ->
-                    isSelected = !isSelected
-                    selectedTransaction = selected
-                },
-                viewModel = viewModel
-            )
-        }
-
-    if (openEditDialog.value) {
-        TransactionEditDialog(
-            onConfirmClick = {
-                coroutineScope.launch {
-                    viewModel.editTransaction()
-                }
+    Column() {
+        TransactionList(
+            transactions = transactionsUiState.transactions,
+            longClicked = { selected ->
+                setIsItemSelected(true)
+                setSelectedObject(selected)
             },
-            onDismissRequest = { openEditDialog.value = !openEditDialog.value },
-            edit = true,
-            title = "Edit Transaction",
-            selectedTransaction = selectedTransaction
+            viewModel = viewModel
         )
     }
 }
@@ -158,15 +143,26 @@ fun TransactionList(
                     FormattedCurrency(
                         value = filteredTransactions[it].transAmount,
                         currency = currencyFormat,
-                        type = if(filteredTransactions[it].transCode == "Deposit") { TransactionType.CREDIT } else { TransactionType.DEBIT }
+                        type = if (filteredTransactions[it].transCode == "Deposit") {
+                            TransactionType.CREDIT
+                        } else {
+                            TransactionType.DEBIT
+                        }
                     )
                 },
                 leadingContent = {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = getAbbreviatedMonthName(filteredTransactions[it].transDate!!.substring(5,7).toInt()))
-                        Text(text = filteredTransactions[it].transDate!!.substring(8,10))
+                        Text(
+                            text = getAbbreviatedMonthName(
+                                filteredTransactions[it].transDate!!.substring(
+                                    5,
+                                    7
+                                ).toInt()
+                            )
+                        )
+                        Text(text = filteredTransactions[it].transDate!!.substring(8, 10))
                     }
                 },
                 modifier = Modifier.combinedClickable(
