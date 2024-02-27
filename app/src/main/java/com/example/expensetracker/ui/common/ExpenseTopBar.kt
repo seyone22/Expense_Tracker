@@ -28,7 +28,7 @@ fun ExpenseTopBar(
     navigateToSettings: () -> Unit
 ) {
     //Title string for header elements, view codes in NavigationDestinations
-    val titleString: String = selectedActivity ?: "Expenses"
+    val titleString: String = (selectedActivity ?: "Expenses").split(("/")).first()
 
     if((selectedActivity != AccountEntryDestination.route) and (selectedActivity != SettingsDestination.route) and (selectedActivity != "SettingsDetail/{setting}") and (selectedActivity != TransactionEntryDestination.route)) {
         CenterAlignedTopAppBar(
