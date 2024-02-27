@@ -120,4 +120,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
     implementation("androidx.window:window:1.2.0")
+
+    implementation("com.github.tehras:charts:0.2.4-alpha")
+
+    // For `compose`. Creates a `ChartStyle` based on an M3 Material Theme.
+    implementation("com.patrykandpatrick.vico:compose-m3:1.14.0")
 }
