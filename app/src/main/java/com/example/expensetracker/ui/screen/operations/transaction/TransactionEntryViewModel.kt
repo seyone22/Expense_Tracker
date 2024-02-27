@@ -25,6 +25,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.util.Locale
 
 class TransactionEntryViewModel(
     private val transactionsRepository: TransactionsRepository,
@@ -156,7 +159,7 @@ data class TransactionDetails(
     val transactionNumber: String = "0",
     val notes: String = "",
     val categoryId: String = "",
-    val transDate: String = "",
+    val transDate: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Instant.now().toEpochMilli()).toString(),
     val lastUpdatedTime: String = "",
     val deletedTime: String = "",
     val followUpId: String = "0",

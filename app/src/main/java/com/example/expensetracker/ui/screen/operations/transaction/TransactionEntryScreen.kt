@@ -69,6 +69,8 @@ import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 
@@ -569,7 +571,7 @@ fun TransactionEntryForm(
     }
 
     if (openTransactionDateDialog) {
-        val datePickerState = rememberDatePickerState()
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = Instant.now().toEpochMilli())
         val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
         DatePickerDialog(
             onDismissRequest = {
@@ -578,6 +580,7 @@ fun TransactionEntryForm(
                 // onDismissRequest.
                 openTransactionDateDialog = false
             },
+
             confirmButton = {
                 TextButton(
                     onClick = {
