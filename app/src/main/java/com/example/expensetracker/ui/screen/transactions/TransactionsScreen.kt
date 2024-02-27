@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
+import com.example.expensetracker.SelectedObjects
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionWithDetails
@@ -52,7 +53,7 @@ fun TransactionsScreen(
     navigateToScreen: (screen: String) -> Unit,
     setTopBarAction : (Int) -> Unit,
     setIsItemSelected: (Boolean) -> Unit,
-    setSelectedObject : (Any) -> Unit,
+    setSelectedObject : (SelectedObjects) -> Unit,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     ) {
@@ -66,7 +67,9 @@ fun TransactionsScreen(
             transactions = transactionsUiState.transactions,
             longClicked = { selected ->
                 setIsItemSelected(true)
-                setSelectedObject(selected)
+                val selObj = SelectedObjects(transaction = selected)
+                Log.d("TAG", "TransactionsScreen: $selObj")
+                setSelectedObject(selObj)
             },
             viewModel = viewModel
         )

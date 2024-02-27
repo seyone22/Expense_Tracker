@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.navigation
 
+import android.util.Log
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.expensetracker.SelectedObjects
 import com.example.expensetracker.ui.screen.accounts.AccountScreen
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
@@ -53,7 +55,7 @@ fun ExpenseNavHost(
     modifier: Modifier = Modifier,
     setTopBarAction : (Int) -> Unit,
     setIsItemSelected : (Boolean) -> Unit,
-    setSelectedObject : (Any) -> Unit,
+    setSelectedObject : (SelectedObjects) -> Unit,
     innerPadding : PaddingValues
 ) {
     NavHost(
@@ -83,7 +85,10 @@ fun ExpenseNavHost(
             TransactionsScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 setIsItemSelected = setIsItemSelected,
-                setSelectedObject = setSelectedObject,
+                setSelectedObject = { selObj ->
+                    setSelectedObject(selObj)
+                    Log.d("TAG", "ExpenseNavHost: $selObj")
+                                    },
                 setTopBarAction = setTopBarAction,
                 )
         }

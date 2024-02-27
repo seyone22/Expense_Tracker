@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
+import com.example.expensetracker.SelectedObjects
 import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
@@ -65,7 +66,7 @@ fun EntityScreen(
     navigateToScreen: (screen: String) -> Unit,
     setTopBarAction : (Int) -> Unit,
     setIsItemSelected : (Boolean) -> Unit,
-    setSelectedObject : (Any) -> Unit,
+    setSelectedObject : (SelectedObjects) -> Unit,
     viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -110,7 +111,7 @@ fun EntityScreen(
                         coroutineScope = coroutineScope,
                         longClicked = { selected ->
                             setIsItemSelected(true)
-                            setSelectedObject(selected)
+                            setSelectedObject(SelectedObjects(category = selected))
                             Log.d("TAG", "EntityScreen: SET!")
                         },
                     )
@@ -123,7 +124,7 @@ fun EntityScreen(
                         coroutineScope = coroutineScope,
                         longClicked = { selected ->
                             setIsItemSelected(true)
-                            setSelectedObject(selected)
+                            setSelectedObject(SelectedObjects(payee = selected))
                         },
                     )
                 }
@@ -135,7 +136,7 @@ fun EntityScreen(
                         coroutineScope = coroutineScope,
                         longClicked = { selected ->
                             setIsItemSelected(true)
-                            setSelectedObject(selected)
+                            setSelectedObject(SelectedObjects(currency = selected))
                         },
                     )
                 }

@@ -77,7 +77,7 @@ fun ExpenseApp(
 
     var isSelected by remember { mutableStateOf(false) }
     // TODO : Not getting populated here
-    var selectedObject: Any? = null
+    var selectedObject by remember {  mutableStateOf(SelectedObjects()) }
 
     val viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val transactionViewModel: TransactionsViewModel =
@@ -188,7 +188,9 @@ fun ExpenseApp(
                     windowSizeClass = windowSizeClass,
                     setTopBarAction = { action: Int -> topBarOperation = action },
                     setIsItemSelected = { boolean: Boolean -> isSelected = boolean },
-                    setSelectedObject = { item: Any -> selectedObject = item },
+                    setSelectedObject = { item ->
+                        selectedObject = item
+                                        },
                     innerPadding = paddingValues
                 )
             }
@@ -203,7 +205,6 @@ fun ExpenseApp(
                         onConfirmClick = {
                             coroutineScope.launch {
                                 viewModel.saveCategory()
-
                             }
                         }
                     )
@@ -241,11 +242,9 @@ fun ExpenseApp(
         if (showDeleteDialog.value) {
             when (topBarOperation) {
                 0 -> {
-                    Log.d("TAG", "EntityScreen: SET! $selectedObject")
-
                     DeleteConfirmationDialog({ showDeleteDialog.value = false }, {
                         coroutineScope.launch {
-                            viewModel.deleteCategory(selectedObject as Category)
+                            viewModel.deleteCategory(selectedObject.category)
                         }
                     }, "Are you sure you want to delete this category, big boi?")
                 }
@@ -253,7 +252,7 @@ fun ExpenseApp(
                 1 -> {
                     DeleteConfirmationDialog({ showDeleteDialog.value = false }, {
                         coroutineScope.launch {
-                            viewModel.deletePayee(selectedObject as Payee)
+                            viewModel.deletePayee(selectedObject.payee)
                         }
                     }, "Are you sure you want to delete this payee, big boi?")
                 }
@@ -261,15 +260,16 @@ fun ExpenseApp(
                 2 -> {
                     DeleteConfirmationDialog({ showDeleteDialog.value = false }, {
                         coroutineScope.launch {
-                            viewModel.deleteCurrency(selectedObject as CurrencyFormat)
+                            viewModel.deleteCurrency(selectedObject.currency)
                         }
                     }, "Are you sure you want to delete this currency, big boi?")
                 }
 
                 8 -> {
+                    Log.d("TAG", "ExpenseApp: $selectedObject")
                     DeleteConfirmationDialog({ showDeleteDialog.value = false }, {
                         coroutineScope.launch {
-                            transactionViewModel.deleteTransaction(selectedObject as Transaction)
+                            transactionViewModel.deleteTransaction(selectedObject.transaction)
                         }
                     }, "Are you sure you want to delete this transaction, big boi?")
                 }
@@ -288,7 +288,7 @@ fun ExpenseApp(
                         onDismissRequest = { showEditDialog.value = !showEditDialog.value },
                         edit = true,
                         title = "Edit Category",
-                        selectedCategory = (selectedObject as Category).toCategoryDetails()
+                        selectedCategory = (selectedObject.category).toCategoryDetails()
                     )
                 }
 
@@ -302,7 +302,7 @@ fun ExpenseApp(
                         onDismissRequest = { showEditDialog.value = !showEditDialog.value },
                         edit = true,
                         title = "Edit Payee",
-                        selectedPayee = (selectedObject as Payee).toPayeeDetails()
+                        selectedPayee = (selectedObject.payee).toPayeeDetails()
                     )
                 }
 
@@ -316,7 +316,7 @@ fun ExpenseApp(
                         onDismissRequest = { showEditDialog.value = !showEditDialog.value },
                         edit = true,
                         title = "Edit Currency",
-                        selectedCurrency = (selectedObject as CurrencyFormat).toCurrencyDetails()
+                        selectedCurrency = (selectedObject.currency).toCurrencyDetails()
                     )
                 }
 
@@ -324,7 +324,7 @@ fun ExpenseApp(
                     Log.d("TAG", "TransactionsScreen: ${transactionViewModel.hashCode()}")
 
                     TransactionEditDialog(
-                        selectedTransaction = (selectedObject as Transaction),
+                        selectedTransaction = (selectedObject.transaction),
                         onConfirmClick = {
                             coroutineScope.launch {
                                 transactionViewModel.editTransaction()
@@ -353,3 +353,10 @@ fun getNavigationType(windowSizeClass: WindowWidthSizeClass): ExpenseNavigationT
         else -> ExpenseNavigationType.BOTTOM_NAVIGATION
     }
 }
+
+data class SelectedObjects(
+    val transaction : Transaction = Transaction(),
+    val payee : Payee = Payee(),
+    val category : Category = Category(),
+    val currency : CurrencyFormat = CurrencyFormat()
+)
