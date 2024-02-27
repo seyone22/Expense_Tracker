@@ -199,7 +199,7 @@ fun TransactionEntryForm(
                 ),
                 value = transactionDetails.transDate,
                 onValueChange = { onValueChange(transactionDetails.copy(transDate = it)) },
-                label = { Text("Date of Transaction") },
+                label = { Text("Date of Transaction *") },
                 readOnly = true,
                 singleLine = true,
                 keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
@@ -246,7 +246,7 @@ fun TransactionEntryForm(
             OutlinedTextField(
                 value = transactionDetails.transAmount,
                 onValueChange = { onValueChange(transactionDetails.copy(transAmount = it)) },
-                label = { Text("Amount") },
+                label = { Text("Amount *") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
             )
@@ -309,11 +309,11 @@ fun TransactionEntryForm(
                     label = {
                         when (transactionDetails.transCode) {
                             TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
-                                Text(text = "Account")
+                                Text(text = "Account *")
                             }
 
                             TransactionCode.TRANSFER.displayName -> {
-                                Text(text = "From Account")
+                                Text(text = "From Account *")
                             }
                         }
                     },
@@ -400,15 +400,15 @@ fun TransactionEntryForm(
                         label = {
                             when (transactionDetails.transCode) {
                                 TransactionCode.WITHDRAWAL.displayName -> {
-                                    Text(text = "Payee")
+                                    Text(text = "Payee *")
                                 }
 
                                 TransactionCode.DEPOSIT.displayName -> {
-                                    Text(text = "From")
+                                    Text(text = "From *")
                                 }
 
                                 TransactionCode.TRANSFER.displayName -> {
-                                    Text(text = "To Account")
+                                    Text(text = "To Account *")
                                 }
                             }
                         },
