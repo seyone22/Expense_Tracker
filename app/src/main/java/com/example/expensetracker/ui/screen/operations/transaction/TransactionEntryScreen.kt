@@ -358,10 +358,13 @@ fun TransactionEntryForm(
                             TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
 
                                 coroutineScope.launch {
-                                    Log.d("DEBUG","BEORE GETALLPAYEES")
+                                    Log.d("DEBUG", "BEORE GETALLPAYEES")
 
                                     viewModel.getAllPayees()
-                                    Log.d("DEBUG", "Within When: ${ viewModel.transactionUiState2.payeesList }")
+                                    Log.d(
+                                        "DEBUG",
+                                        "Within When: ${viewModel.transactionUiState2.payeesList}"
+                                    )
                                 }
                             }
 
@@ -378,7 +381,20 @@ fun TransactionEntryForm(
                             .clickable(enabled = true) { payeeExpanded = true }
                             .menuAnchor()
                             .width(240.dp),
-                        value = currentPayee.payeeName,
+                        value =
+                        when (transactionDetails.transCode) {
+                            TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
+                                currentPayee.payeeName
+                            }
+
+                            TransactionCode.TRANSFER.displayName -> {
+                                currentToAccount.accountName
+                            }
+
+                            else -> {
+                                ""
+                            }
+                        },
                         readOnly = true,
                         onValueChange = { },
                         label = {
@@ -411,7 +427,10 @@ fun TransactionEntryForm(
                     ) {
                         when (transactionDetails.transCode) {
                             TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
-                                Log.d("DEBUG", "TransactionEntryForm: Executes Other! ${viewModel.transactionUiState2.payeesList}")
+                                Log.d(
+                                    "DEBUG",
+                                    "TransactionEntryForm: Executes Other! ${viewModel.transactionUiState2.payeesList}"
+                                )
                                 viewModel.transactionUiState2.payeesList.forEach { payee ->
                                     DropdownMenuItem(
                                         text = { Text(payee.payeeName) },
@@ -419,12 +438,16 @@ fun TransactionEntryForm(
                                             currentPayee = payee
                                             onValueChange(transactionDetails.copy(toAccountId = "-1"))
                                             onValueChange(transactionDetails.copy(payeeId = currentPayee.payeeId.toString()))
-                                            Log.d("DEBUG", "TransactionEntryForm: $transactionDetails")
+                                            Log.d(
+                                                "DEBUG",
+                                                "TransactionEntryForm: $transactionDetails"
+                                            )
                                             payeeExpanded = false
                                         }
                                     )
                                 }
                             }
+
                             TransactionCode.TRANSFER.displayName -> {
                                 viewModel.transactionUiState.accountsList.forEach { account ->
                                     Log.d("DEBUG", "TransactionEntryForm: Executes! $account")
@@ -449,7 +472,8 @@ fun TransactionEntryForm(
                         .padding(10.dp, 10.dp, 0.dp, 0.dp),
                     onClick = {
                         openNewPayeeDialog = true
-                }) {
+                    },
+                    enabled = (transactionDetails.transCode != TransactionCode.TRANSFER.displayName)) {
                     Icon(
                         imageVector = Icons.Filled.Add,
                         contentDescription = "Add"
@@ -477,7 +501,7 @@ fun TransactionEntryForm(
                             }
                         }
                         .menuAnchor(),
-                    value =  removeTrPrefix(currentCategory.categName),
+                    value = removeTrPrefix(currentCategory.categName),
                     readOnly = true,
                     onValueChange = { onValueChange(transactionDetails.copy(categoryId = it)) },
                     label = { Text("Transaction Category *") },
@@ -496,7 +520,7 @@ fun TransactionEntryForm(
                 ) {
                     transactionUiState.categoriesList.forEach { category ->
                         DropdownMenuItem(
-                            text = { Text( removeTrPrefix(category.categName)) },
+                            text = { Text(removeTrPrefix(category.categName)) },
                             onClick = {
                                 currentCategory = category
                                 onValueChange(transactionDetails.copy(categoryId = category.categId.toString()))
