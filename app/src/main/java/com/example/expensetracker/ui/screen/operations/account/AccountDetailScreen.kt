@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.operations.account
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,11 +35,13 @@ import com.example.expensetracker.R
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.EntryFields
+import com.example.expensetracker.ui.common.TAG
 import com.example.expensetracker.ui.common.TransactionEditDialog
 import com.example.expensetracker.ui.common.dialogs.EditAccountDialog
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionList
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 object AccountDetailDestination : NavigationDestination {
     override val route = "AccountDetails"
@@ -129,6 +132,8 @@ fun DetailedAccountCard(
     setOpenEditDialog: (Boolean) -> Unit,
     setOpenEditDialogType: (EntryFields) -> Unit,
 ) {
+    Log.d(TAG, "DetailedAccountCard: $accountDetailAccountUiState")
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -155,9 +160,8 @@ fun DetailedAccountCard(
                 }
                 HorizontalDivider()
                 Text(
-                    text = "Account Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
-                        accountDetailAccountUiState.balance
-                    )).toString(),
+                    text = "Account Balance : " +
+                            (accountDetailAccountUiState.account.initialBalance?.plus(accountDetailAccountUiState.balance)).toString(),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(

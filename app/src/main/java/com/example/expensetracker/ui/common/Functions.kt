@@ -35,6 +35,8 @@ import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
 
+
+const val TAG = "TESTING"
 @Composable
 fun FormattedCurrency(
     modifier: Modifier = Modifier,

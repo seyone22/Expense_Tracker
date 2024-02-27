@@ -53,16 +53,6 @@ class AccountViewModel(
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = "-1"
             )
-    val isUsed =
-        metadataRepository.getMetadataByNameStream("ISUSED")
-            .map { info ->
-                info?.infoValue ?: "FALSE"
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = 0
-            )
 
     val accountsUiState: StateFlow<AccountsUiState> =
         accountsRepository.getAllAccountsStream()

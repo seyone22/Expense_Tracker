@@ -13,6 +13,9 @@ import com.example.expensetracker.model.TransactionWithDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectIndexed
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -25,7 +28,10 @@ class AccountDetailViewModel(
     var accountDetailAccountUiState: StateFlow<AccountDetailAccountUiState> =
         accountsRepository.getAccountStream(accountId)
             .map { account ->
-                AccountDetailAccountUiState(account ?: Account())
+                AccountDetailAccountUiState(
+                    account = account ?: Account(),
+                    balance = transactionsRepository.getBalanceByAccountId().first().find { it.accountId == account?.accountId }?.balance ?: 3.3
+                )
             }
             .stateIn(
                 scope = viewModelScope,
@@ -50,7 +56,10 @@ class AccountDetailViewModel(
     fun getAccount() {
         accountDetailAccountUiState = accountsRepository.getAccountStream(accountId)
             .map { account ->
-                AccountDetailAccountUiState(account ?: Account())
+                AccountDetailAccountUiState(
+                    account = account ?: Account(),
+                    balance = transactionsRepository.getBalanceByAccountId().first().find { it.accountId == account?.accountId }?.balance ?: -69.420
+                )
             }
             .stateIn(
                 scope = viewModelScope,
