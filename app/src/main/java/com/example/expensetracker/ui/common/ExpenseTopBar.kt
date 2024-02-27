@@ -13,6 +13,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringArrayResource
 import com.example.expensetracker.R
+import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
@@ -30,7 +31,7 @@ fun ExpenseTopBar(
     //Title string for header elements, view codes in NavigationDestinations
     val titleString: String = (selectedActivity ?: "Expenses").split(("/")).first()
 
-    if((selectedActivity != AccountEntryDestination.route) and (selectedActivity != SettingsDestination.route) and (selectedActivity != "SettingsDetail/{setting}") and (selectedActivity != TransactionEntryDestination.route)) {
+    if((selectedActivity != AccountEntryDestination.route) and (selectedActivity != SettingsDestination.route) and (selectedActivity != "SettingsDetail/{setting}") and (selectedActivity != TransactionEntryDestination.route) and (selectedActivity != OnboardingDestination.route)) {
         CenterAlignedTopAppBar(
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background,

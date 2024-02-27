@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
+import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
 import com.example.expensetracker.ui.screen.report.BudgetsDestination
 import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
@@ -60,7 +61,7 @@ fun ExpenseNavBar(
     type: ExpenseNavigationType = ExpenseNavigationType.BOTTOM_NAVIGATION
 
 ) {
-    if (currentActivity != SettingsDestination.route) {
+    if ((currentActivity != SettingsDestination.route) and (currentActivity != OnboardingDestination.route)) {
         if (type == ExpenseNavigationType.BOTTOM_NAVIGATION) {
             NavigationBar(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer
