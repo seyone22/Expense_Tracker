@@ -10,6 +10,7 @@ import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
+import com.example.expensetracker.ui.screen.onboarding.OnboardingViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +37,17 @@ class AccountViewModel(
 
     // Flow for total
     private val totalFlow: Flow<Double> = transactionsRepository.getTotalBalance()
+
+    val isUsed =
+        metadataRepository.getMetadataByNameStream("ISUSED")
+            .map { info ->
+                info?.infoValue?.toString() ?: "FALSE"
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(AccountViewModel.TIMEOUT_MILLIS),
+                initialValue = ""
+            )
 
     // Combine the flows and calculate the totals
     val totals: Flow<Totals> =

@@ -48,6 +48,7 @@ import com.example.expensetracker.ui.common.DonutChartData
 import com.example.expensetracker.ui.common.DonutChartDataCollection
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountDetailAccountUiState
 import com.example.expensetracker.ui.screen.operations.account.AccountUiState
 import com.example.expensetracker.ui.utils.ExpenseNavigationType
@@ -67,6 +68,8 @@ fun AccountScreen(
     windowSizeClass: WindowWidthSizeClass,
     setTopBarAction: (Int) -> Unit
 ) {
+    val isUsed by viewModel.isUsed.collectAsState()
+
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
 
@@ -80,6 +83,11 @@ fun AccountScreen(
 
         setTopBarAction(9)
     }
+
+    if (isUsed == "FALSE") {
+        navigateToScreen(OnboardingDestination.route)
+    }
+
     if (windowSizeClass == WindowWidthSizeClass.Compact) {
         LazyColumn() {
             items(count = 1) {

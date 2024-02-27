@@ -53,17 +53,12 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     ) {
-    val isUsed by viewModel.isUsed.collectAsState()
 
-    if (isUsed.toBoolean()) {
-        navigateToScreen(AccountsDestination.route)
-    } else {
-        OnboardingSheet(
-            modifier = modifier,
-            viewModel = viewModel,
-            navigateToScreen = navigateToScreen
-        )
-    }
+    OnboardingSheet(
+        modifier = modifier,
+        viewModel = viewModel,
+        navigateToScreen = navigateToScreen
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
