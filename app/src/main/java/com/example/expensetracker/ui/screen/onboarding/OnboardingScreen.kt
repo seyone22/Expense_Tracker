@@ -35,6 +35,7 @@ import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import kotlinx.coroutines.launch
 
 object OnboardingDestination : NavigationDestination {
@@ -52,12 +53,13 @@ fun OnboardingScreen(
     viewModel: OnboardingViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     ) {
-    Scaffold(
+    val isUsed by viewModel.isUsed.collectAsState()
 
-    )
-    {
+    if (isUsed.toBoolean()) {
+        navigateToScreen(AccountsDestination.route)
+    } else {
         OnboardingSheet(
-            modifier = modifier.padding(it),
+            modifier = modifier,
             viewModel = viewModel,
             navigateToScreen = navigateToScreen
         )

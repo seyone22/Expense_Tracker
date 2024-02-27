@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -45,15 +44,12 @@ import com.example.expensetracker.ui.common.dialogs.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.dialogs.PayeeEntryDialog
 import com.example.expensetracker.ui.navigation.ExpenseNavHost
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
-import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
-import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
-import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
 import com.example.expensetracker.ui.utils.ExpenseNavigationType
 import kotlinx.coroutines.launch
@@ -63,7 +59,6 @@ import kotlinx.coroutines.launch
 fun ExpenseApp(
     navController: NavHostController = rememberNavController(),
     windowSizeClass: WindowWidthSizeClass,
-    isUsed : Boolean
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -76,7 +71,6 @@ fun ExpenseApp(
     var showNewDialog by remember { mutableStateOf(false) }
 
     var isSelected by remember { mutableStateOf(false) }
-    // TODO : Not getting populated here
     var selectedObject by remember {  mutableStateOf(SelectedObjects()) }
 
     val viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -85,10 +79,6 @@ fun ExpenseApp(
 
     val context = LocalContext.current
 
-    if(isUsed) {
-        // TODO: FIX THE ONBOARDING
-        Toast.makeText(context, "Onboarding not completed", Toast.LENGTH_LONG).show()
-    } else {
         Row(
         ) {
             if ((navigationType == ExpenseNavigationType.NAVIGATION_RAIL) or (navigationType == ExpenseNavigationType.PERMANENT_NAVIGATION_DRAWER)) {
@@ -335,7 +325,7 @@ fun ExpenseApp(
             }
         }
     }
-}
+
 
 fun getNavigationType(windowSizeClass: WindowWidthSizeClass): ExpenseNavigationType {
     return when (windowSizeClass) {

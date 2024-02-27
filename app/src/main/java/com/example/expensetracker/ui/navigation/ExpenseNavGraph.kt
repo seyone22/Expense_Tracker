@@ -61,7 +61,7 @@ fun ExpenseNavHost(
     NavHost(
         modifier = modifier.padding(innerPadding),
         navController = navController,
-        startDestination = AccountsDestination.route,
+        startDestination = OnboardingDestination.route,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None },
     ) {

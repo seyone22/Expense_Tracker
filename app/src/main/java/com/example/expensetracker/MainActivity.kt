@@ -30,22 +30,9 @@ class MainActivity : ComponentActivity() {
                 {
                     ExpenseApp(
                         windowSizeClass = windowSize.widthSizeClass,
-                        isUsed = isUsed()
                     )
                 }
             }
         }
-    }
-
-    private fun isUsed() : Boolean {
-        val metadataDao = MMEXDatabase.getDatabase(this).metadataDao()
-        var isUsed = false
-
-        lifecycleScope.launch {
-            metadataDao.getMetadataByName("ISUSED").collect { metadata ->
-                isUsed = metadata?.infoValue == "TRUE"
-            }
-        }
-        return isUsed
     }
 }
