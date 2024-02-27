@@ -1,23 +1,13 @@
 package com.example.expensetracker.ui.screen.operations.account
 
-import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,10 +15,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,24 +27,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.expensetracker.R
-import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.EntryFields
-import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.common.TransactionEditDialog
+import com.example.expensetracker.ui.common.dialogs.EditAccountDialog
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.accounts.AccountsDestination
-import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionList
-import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
 import kotlinx.coroutines.launch
 
 object AccountDetailDestination : NavigationDestination {
@@ -96,68 +76,21 @@ fun AccountDetailScreen(
         modifier = modifier
             .padding(0.dp, 100.dp)
     ) {
-        Card(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(24.dp, 0.dp)
-        ) {
-            Row(
-                modifier = modifier
-                    .padding(16.dp, 8.dp, 0.dp, 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(
-                    modifier = Modifier.width(300.dp)
-                ) {
-                    Column {
-                        Text(
-                            text = accountDetailAccountUiState.account.accountName,
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                        Text(
-                            text = accountDetailAccountUiState.account.accountType + " Account",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                    HorizontalDivider()
-                    Text(
-                        text = "Account Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
-                            accountDetailAccountUiState.balance
-                        )).toString(),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Reconciled Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
-                            accountDetailAccountUiState.balance
-                        )).toString(),
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                }
-                IconButton(onClick = {
-                    openEditDialog.value = !openEditDialog.value
-                    openEditType.value = EntryFields.ACCOUNT
-                }) {
-                    Icon(
-                        imageVector = Icons.Outlined.Edit,
-                        contentDescription = null,
-                        Modifier.size(24.dp, 24.dp)
-                    )
-                }
-            }
-        }
-        if (accountDetailTransactionUiState.transactions.isNotEmpty()) {
-            Column {
-                TransactionList(
-                    transactions = accountDetailTransactionUiState.transactions,
-                    modifier = modifier,
-                    longClicked = { selected ->
-                        isSelected = !isSelected
-                        selectedTransaction = selected
-                    },
-                )
-            }
-        }
+        DetailedAccountCard(
+            modifier = modifier,
+            accountDetailAccountUiState = accountDetailAccountUiState,
+            setOpenEditDialog = { it -> openEditDialog.value = it },
+            setOpenEditDialogType = { it -> openEditType.value = it }
+        )
+
+        TransactionList(
+            transactions = accountDetailTransactionUiState.transactions,
+            modifier = modifier,
+            longClicked = { selected ->
+                isSelected = !isSelected
+                selectedTransaction = selected
+            },
+        )
 
         if (openEditDialog.value and (openEditType.value == EntryFields.TRANSACTION)) {
             TransactionEditDialog(
@@ -173,7 +106,7 @@ fun AccountDetailScreen(
             )
         }
         if (openEditDialog.value and (openEditType.value == EntryFields.ACCOUNT)) {
-            AccountEditDialog(
+            EditAccountDialog(
                 onConfirmClick = {
                     coroutineScope.launch {
                         viewModel.editTransaction()
@@ -189,80 +122,61 @@ fun AccountDetailScreen(
     }
 }
 
-@SuppressLint("UnrememberedMutableState")
 @Composable
-fun AccountEditDialog(
-    modifier: Modifier = Modifier,
-    title: String,
-    selectedAccount: Account,
-    onConfirmClick: () -> Unit,
-    onDismissRequest: () -> Unit,
-    viewModel: ViewModel,
-    edit: Boolean = false
+fun DetailedAccountCard(
+    modifier: Modifier,
+    accountDetailAccountUiState: AccountDetailAccountUiState,
+    setOpenEditDialog: (Boolean) -> Unit,
+    setOpenEditDialogType: (EntryFields) -> Unit,
 ) {
-    val focusManager = LocalFocusManager.current
-    val accountSelected by remember { mutableStateOf(selectedAccount.toAccountDetails()) }
-
-    /*    viewModel.updateCurrencyState(
-            viewModel.currencyUiState.currencyDetails.copy(
-                currencyName = selectedCurrency.currencyName
-            )
-        )*/
-    Dialog(
-        onDismissRequest = { onDismissRequest() }
-    )
-    {
-        Card(
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(24.dp, 0.dp)
+    ) {
+        Row(
             modifier = modifier
-                .fillMaxWidth()
-                .height(1000.dp)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
+                .padding(16.dp, 8.dp, 0.dp, 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp, 0.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(300.dp)
             ) {
-                LazyColumn() {
-                    item {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-
-                        AccountEntryForm(
-                            accountDetails = accountSelected
-                        )
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            TextButton(
-                                onClick = { onDismissRequest() },
-                                modifier = Modifier.padding(8.dp),
-                            ) {
-                                Text("Dismiss")
-                            }
-                            TextButton(
-                                onClick = {
-                                    onConfirmClick()
-                                    onDismissRequest()
-                                },
-                                modifier = Modifier.padding(8.dp),
-                                enabled = true
-                            ) {
-                                Text("Confirm")
-                            }
-                        }
-                    }
+                Column {
+                    Text(
+                        text = accountDetailAccountUiState.account.accountName,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Text(
+                        text = accountDetailAccountUiState.account.accountType + " Account",
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
+                HorizontalDivider()
+                Text(
+                    text = "Account Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
+                        accountDetailAccountUiState.balance
+                    )).toString(),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "Reconciled Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
+                        accountDetailAccountUiState.balance
+                    )).toString(),
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+            IconButton(onClick = {
+                setOpenEditDialog(true)
+                setOpenEditDialogType(EntryFields.ACCOUNT)
+            }) {
+                Icon(
+                    imageVector = Icons.Outlined.Edit,
+                    contentDescription = null,
+                    Modifier.size(24.dp, 24.dp)
+                )
             }
         }
     }
 }
-

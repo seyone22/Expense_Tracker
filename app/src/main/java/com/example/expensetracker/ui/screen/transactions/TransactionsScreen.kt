@@ -122,62 +122,68 @@ fun TransactionList(
         }
     )
 
-    LazyColumn(
-        modifier = modifier
-    ) {
-        items(count = filteredTransactions.size) {
-            ListItem(
-                headlineContent = {
-                    Text(text = filteredTransactions[it].payeeName)
-                },
-                supportingContent = {
-                    Text(text = removeTrPrefix(filteredTransactions[it].categName))
-                },
-                trailingContent = {
-                    var currencyFormat by remember { mutableStateOf(CurrencyFormat()) }
-
-                    LaunchedEffect(filteredTransactions[it].accountId) {
-                        val currencyFormatFunction =
-                            viewModel.getAccountFromId(filteredTransactions[it].accountId)
-                                ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
-                        currencyFormat = currencyFormatFunction!!
-                    }
-
-                    FormattedCurrency(
-                        value = filteredTransactions[it].transAmount,
-                        currency = currencyFormat,
-                        type = if (filteredTransactions[it].transCode == "Deposit") {
-                            TransactionType.CREDIT
-                        } else {
-                            TransactionType.DEBIT
-                        }
-                    )
-                },
-                leadingContent = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = getAbbreviatedMonthName(
-                                filteredTransactions[it].transDate!!.substring(
-                                    5,
-                                    7
-                                ).toInt()
-                            )
-                        )
-                        Text(text = filteredTransactions[it].transDate!!.substring(8, 10))
-                    }
-                },
-                modifier = Modifier.combinedClickable(
-                    onClick = {},
-                    onLongClick = {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        longClicked(filteredTransactions[it].toTransaction())
+    if (filteredTransactions.size != 0) {
+        LazyColumn(
+            modifier = modifier
+        ) {
+            items(count = filteredTransactions.size) {
+                ListItem(
+                    headlineContent = {
+                        Text(text = filteredTransactions[it].payeeName)
                     },
-                    onLongClickLabel = "  "
+                    supportingContent = {
+                        Text(text = removeTrPrefix(filteredTransactions[it].categName))
+                    },
+                    trailingContent = {
+                        var currencyFormat by remember { mutableStateOf(CurrencyFormat()) }
+
+                        LaunchedEffect(filteredTransactions[it].accountId) {
+                            val currencyFormatFunction =
+                                viewModel.getAccountFromId(filteredTransactions[it].accountId)
+                                    ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
+                            currencyFormat = currencyFormatFunction!!
+                        }
+
+                        FormattedCurrency(
+                            value = filteredTransactions[it].transAmount,
+                            currency = currencyFormat,
+                            type = if (filteredTransactions[it].transCode == "Deposit") {
+                                TransactionType.CREDIT
+                            } else {
+                                TransactionType.DEBIT
+                            }
+                        )
+                    },
+                    leadingContent = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = getAbbreviatedMonthName(
+                                    filteredTransactions[it].transDate!!.substring(
+                                        5,
+                                        7
+                                    ).toInt()
+                                )
+                            )
+                            Text(text = filteredTransactions[it].transDate!!.substring(8, 10))
+                        }
+                    },
+                    modifier = Modifier.combinedClickable(
+                        onClick = {},
+                        onLongClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            longClicked(filteredTransactions[it].toTransaction())
+                        },
+                        onLongClickLabel = "  "
+                    )
                 )
-            )
-            HorizontalDivider()
+                HorizontalDivider()
+            }
+        }
+    } else {
+        Column {
+            Text(text = "Nothing to show here!")
         }
     }
 }
