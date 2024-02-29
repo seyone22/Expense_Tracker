@@ -1,14 +1,16 @@
 package com.example.expensetracker.ui.common
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
+import androidx.compose.material.icons.automirrored.filled.TextSnippet
 import androidx.compose.material.icons.automirrored.outlined.CompareArrows
 import androidx.compose.material.icons.automirrored.outlined.TextSnippet
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Balance
 import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Balance
@@ -23,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.expensetracker.ui.navigation.NavigationDestination
@@ -39,19 +40,41 @@ import com.example.expensetracker.ui.utils.ExpenseNavigationType
 data class ActivityIconPair(
     val name: String,
     val destination: NavigationDestination,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val iconSelected: ImageVector
 )
 
 val activitiesAndIcons = listOf(
-    ActivityIconPair(name = "Accounts", AccountsDestination, Icons.Outlined.AccountBalanceWallet),
-    ActivityIconPair(name = "Entities", EntitiesDestination, Icons.Outlined.AccountBalance),
-    ActivityIconPair(name = "Budgets", BudgetsDestination, Icons.Outlined.Balance),
+    ActivityIconPair(
+        name = "Accounts",
+        AccountsDestination,
+        Icons.Outlined.AccountBalanceWallet,
+        Icons.Filled.AccountBalanceWallet
+    ),
+    ActivityIconPair(
+        name = "Entities",
+        EntitiesDestination,
+        Icons.Outlined.AccountBalance,
+        Icons.Filled.AccountBalance
+    ),
+    ActivityIconPair(
+        name = "Budgets",
+        BudgetsDestination,
+        Icons.Outlined.Balance,
+        Icons.Filled.Balance
+    ),
     ActivityIconPair(
         name = "Entries",
         TransactionsDestination,
-        Icons.AutoMirrored.Outlined.CompareArrows
+        Icons.AutoMirrored.Outlined.CompareArrows,
+        Icons.AutoMirrored.Filled.CompareArrows
     ),
-    ActivityIconPair(name = "Reports", ReportsDestination, Icons.AutoMirrored.Outlined.TextSnippet),
+    ActivityIconPair(
+        name = "Reports",
+        ReportsDestination,
+        Icons.AutoMirrored.Outlined.TextSnippet,
+        Icons.AutoMirrored.Filled.TextSnippet
+    ),
 )
 
 @Composable
@@ -68,7 +91,16 @@ fun ExpenseNavBar(
             ) {
                 activitiesAndIcons.forEachIndexed { _, pair ->
                     NavigationBarItem(
-                        icon = { Icon(pair.icon, contentDescription = pair.destination.route) },
+                        icon = {
+                            Icon(
+                                imageVector = if (currentActivity == pair.name) {
+                                    pair.iconSelected
+                                } else {
+                                    pair.icon
+                                },
+                                contentDescription = pair.destination.route,
+                            )
+                        },
                         label = { Text(pair.destination.route) },
                         selected = currentActivity == pair.name,
                         onClick = {
@@ -90,7 +122,16 @@ fun ExpenseNavBar(
                             selected = currentActivity == pair.name,
                             label = { Text(pair.destination.route) },
                             onClick = { navigateToScreen(pair.destination.route) },
-                            icon = { Icon(pair.icon, contentDescription = pair.destination.route) },
+                            icon = {
+                                Icon(
+                                    imageVector = if (currentActivity == pair.name) {
+                                        pair.iconSelected
+                                    } else {
+                                        pair.icon
+                                    },
+                                    contentDescription = pair.destination.route,
+                                )
+                            },
                             alwaysShowLabel = false
                         )
                     }
