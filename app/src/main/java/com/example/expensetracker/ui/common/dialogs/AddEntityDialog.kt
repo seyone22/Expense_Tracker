@@ -52,7 +52,7 @@ fun CategoryEntryDialog(
     edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
-    var categorySelected by remember { mutableStateOf(selectedCategory) }
+    val categorySelected by remember { mutableStateOf(selectedCategory) }
 
     viewModel.updateCategoryState(
         viewModel.categoryUiState.categoryDetails.copy(

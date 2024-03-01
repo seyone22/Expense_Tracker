@@ -38,7 +38,6 @@ class TransactionEntryViewModel(
     ViewModel() {
     var transactionUiState by mutableStateOf(TransactionUiState())
         private set
-
     var transactionUiState2 by mutableStateOf(TransactionUiState())
         private set
 

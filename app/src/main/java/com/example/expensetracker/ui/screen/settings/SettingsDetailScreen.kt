@@ -36,6 +36,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -368,6 +369,7 @@ fun AppearanceSettingsList(
 
         // Edit Theme Dialog
         if (editTheme) {
+            var selectedTheme by remember { mutableIntStateOf(2) }
 
             Dialog(
                 onDismissRequest = { editTheme = !editTheme },
@@ -387,18 +389,23 @@ fun AppearanceSettingsList(
                     ) {
                         Text(
                             text = "Theme",
-                            modifier = Modifier.padding(8.dp)
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(0.dp, 8.dp)
                         )
-                        Row {
-                            RadioButton(selected = false, onClick = { /*TODO*/ })
+                        Row(
+
+                        ) {
+                            RadioButton(enabled = false, selected =  (selectedTheme == 0) , onClick = {
+                                selectedTheme = 0
+                            })
                             Text(text = "Light")
                         }
                         Row {
-                            RadioButton(selected = false, onClick = { /*TODO*/ })
+                            RadioButton(enabled = false,  selected = (selectedTheme == 1), onClick = { selectedTheme = 1 })
                             Text(text = "Dark")
                         }
                         Row {
-                            RadioButton(selected = true, onClick = { /*TODO*/ })
+                            RadioButton(enabled = false, selected = (selectedTheme == 2), onClick = { selectedTheme = 2 })
                             Text(text = "System Default")
                         }
                     }

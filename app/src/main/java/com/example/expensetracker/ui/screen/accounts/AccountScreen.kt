@@ -64,6 +64,7 @@ fun AccountScreen(
 ) {
     val isUsed by viewModel.isUsed.collectAsState()
 
+
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
 

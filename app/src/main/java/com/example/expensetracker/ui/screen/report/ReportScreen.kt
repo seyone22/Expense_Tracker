@@ -6,17 +6,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,32 +49,37 @@ object ReportsDestination : NavigationDestination {
     override val routeId = 4
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
     viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    LazyColumn() {
-        item {
-            Text(
-                text = "Transactions by Payees",
-                modifier = Modifier
-                    .padding(16.dp),
-                textAlign = TextAlign.Center,
-            )
-            TextButtonWithMenu()
-            ReportByPayee(viewModel)
-
-            Text(
-                text = "Transactions by Categories",
-                modifier = Modifier
-                    .padding(16.dp),
-                textAlign = TextAlign.Center,
-            )
-            TextButtonWithMenu()
-            ReportByCategory(viewModel)
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 320.dp),
+        modifier = modifier.fillMaxSize()
+    ) {
+        items(count = 2) {
+            Column {
+                Text(
+                    text = "Transactions by Payees",
+                    modifier = Modifier
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center,
+                )
+                TextButtonWithMenu()
+                ReportByPayee(viewModel)
+            }
+            Column {
+                Text(
+                    text = "Transactions by Categories",
+                    modifier = Modifier
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center,
+                )
+                TextButtonWithMenu()
+                ReportByCategory(viewModel)
+            }
         }
     }
 }

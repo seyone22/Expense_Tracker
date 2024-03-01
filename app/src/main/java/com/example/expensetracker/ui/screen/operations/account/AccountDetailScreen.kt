@@ -36,9 +36,11 @@ import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.EntryFields
 import com.example.expensetracker.ui.common.TAG
-import com.example.expensetracker.ui.common.TransactionEditDialog
 import com.example.expensetracker.ui.common.dialogs.EditAccountDialog
+import com.example.expensetracker.ui.common.dialogs.EditTransactionDialog
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
+import com.example.expensetracker.ui.screen.operations.transaction.toTransactionDetails
 import com.example.expensetracker.ui.screen.transactions.TransactionList
 import kotlinx.coroutines.launch
 import kotlin.math.log
@@ -63,7 +65,7 @@ fun AccountDetailScreen(
     val accountDetailTransactionUiState by viewModel.accountDetailTransactionUiState.collectAsState()
 
     var isSelected by remember { mutableStateOf(false) }
-    var selectedTransaction by remember { mutableStateOf(Transaction()) }
+    var selectedTransaction by remember { mutableStateOf(TransactionDetails()) }
     val openEditDialog = remember { mutableStateOf(false) }
     val openEditType = remember { mutableStateOf(EntryFields.ACCOUNT) }
 
@@ -91,12 +93,12 @@ fun AccountDetailScreen(
             modifier = modifier,
             longClicked = { selected ->
                 isSelected = !isSelected
-                selectedTransaction = selected
+                selectedTransaction = selected.toTransactionDetails()
             },
         )
 
         if (openEditDialog.value and (openEditType.value == EntryFields.TRANSACTION)) {
-            TransactionEditDialog(
+            EditTransactionDialog(
                 onConfirmClick = {
                     coroutineScope.launch {
                         viewModel.editTransaction()

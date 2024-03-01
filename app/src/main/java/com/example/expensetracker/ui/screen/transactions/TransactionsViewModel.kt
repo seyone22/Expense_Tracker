@@ -14,7 +14,10 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.screen.operations.account.AccountDetailTransactionUiState
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionUiState
+import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +35,7 @@ class TransactionsViewModel(
     private val accountsRepository: AccountsRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository
 ) : ViewModel() {
-    var selectedTransaction by mutableStateOf(Transaction())
+    var transactionUiState by mutableStateOf(TransactionUiState())
 
     var transactionsUiState: StateFlow<AccountDetailTransactionUiState> =
         transactionsRepository.getAllTransactionsStream()
@@ -68,7 +71,38 @@ class TransactionsViewModel(
         }
     }
 
-    fun editTransaction() {
-        TODO("Not yet implemented")
+    suspend fun editTransaction(transactionDetails: TransactionDetails) : Boolean {
+        Log.d("TAG", "TESTING: ${transactionDetails.toTransaction()}")
+        return try {
+            transactionsRepository.updateTransaction(transactionDetails.toTransaction())
+            Log.d("TAG", "editTransaction: pass ")
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.d("TAG", "editTransaction: fail")
+            false
+        }
+    }
+
+    private fun validateInput(uiState: TransactionDetails = transactionUiState.transactionDetails): Boolean {
+        Log.d("DEBUG", "validateInput: Validation Begins!")
+        Log.d("DEBUG", uiState.transactionNumber)
+        return with(uiState) {
+            transAmount.isNotBlank() && transDate.isNotBlank()&& accountId.isNotBlank() && categoryId.isNotBlank()
+        }
+    }
+
+    suspend fun saveTransaction() {
+        if (validateInput()) {
+            transactionsRepository.insertTransaction(transactionUiState.transactionDetails.toTransaction())
+        }
+    }
+
+    fun updateUiState(transactionDetails: TransactionDetails) {
+        transactionUiState =
+            TransactionUiState(
+                transactionDetails = transactionDetails,
+                isEntryValid = validateInput(transactionDetails),
+            )
     }
 }

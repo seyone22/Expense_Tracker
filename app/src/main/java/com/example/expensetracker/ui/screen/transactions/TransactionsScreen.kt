@@ -122,7 +122,7 @@ fun TransactionList(
         }
     )
 
-    if (filteredTransactions.size != 0) {
+    if (filteredTransactions.isNotEmpty()) {
         LazyColumn(
             modifier = modifier
         ) {
