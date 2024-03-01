@@ -59,6 +59,7 @@ fun EditTransactionDialog(
             transAmount = transactionSelected.transAmount,
             transCode = transactionSelected.transCode,
             toAccountId = transactionSelected.toAccountId,
+            payeeId = transactionSelected.payeeId,
             accountId = transactionSelected.accountId,
             categoryId = transactionSelected.categoryId,
             transactionNumber = transactionSelected.transactionNumber,

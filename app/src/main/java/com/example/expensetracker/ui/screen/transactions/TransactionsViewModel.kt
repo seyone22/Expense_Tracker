@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -39,7 +40,7 @@ class TransactionsViewModel(
 
     var transactionsUiState: StateFlow<AccountDetailTransactionUiState> =
         transactionsRepository.getAllTransactionsStream()
-            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
+            .onEach { Log.d("DEBUG", ": flow emitted $it") }
             .map { transactions ->
                 AccountDetailTransactionUiState(
                     transactions = transactions
