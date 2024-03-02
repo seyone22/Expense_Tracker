@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -131,15 +132,20 @@ fun TransactionEntryScreen(
         }
 
     ) { padding ->
-        TransactionEntryForm(
-            transactionDetails = viewModel.transactionUiState.transactionDetails,
-            onValueChange = viewModel::updateUiState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(padding),
-            viewModel = viewModel,
-            coroutineScope = coroutineScope
-        )
+        LazyColumn() {
+            item {
+                TransactionEntryForm(
+                    transactionDetails = viewModel.transactionUiState.transactionDetails,
+                    onValueChange = viewModel::updateUiState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(padding),
+                    viewModel = viewModel,
+                    coroutineScope = coroutineScope,
+                    edit = false
+                )
+            }
+        }
     }
 }
 
@@ -151,7 +157,8 @@ fun TransactionEntryForm(
     transactionDetails: TransactionDetails,
     onValueChange: (TransactionDetails) -> Unit = {},
     viewModel: TransactionEntryViewModel,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    edit : Boolean
 ) {
     var statusExpanded by remember { mutableStateOf(false) }
     var typeExpanded by remember { mutableStateOf(false) }
@@ -173,11 +180,13 @@ fun TransactionEntryForm(
     var currentCategory by remember { mutableStateOf(Category()) }
     var currentToAccount by remember { mutableStateOf(Account()) }
 
-    coroutineScope.launch {
-        currentAccount = viewModel.getAccount(transactionDetails.accountId.toInt())
-        currentPayee = viewModel.getPayee(transactionDetails.payeeId.toInt())
-        currentCategory = viewModel.getCategory(transactionDetails.categoryId.toInt())
-        currentToAccount = viewModel.getAccount(transactionDetails.toAccountId.toInt())
+    if (edit) {
+        coroutineScope.launch {
+            currentAccount = viewModel.getAccount(transactionDetails.accountId.toInt())
+            currentPayee = viewModel.getPayee(transactionDetails.payeeId.toInt())
+            currentCategory = viewModel.getCategory(transactionDetails.categoryId.toInt())
+            currentToAccount = viewModel.getAccount(transactionDetails.toAccountId.toInt())
+        }
     }
 
     Column(

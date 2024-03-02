@@ -93,7 +93,8 @@ fun EditTransactionDialog(
                         transactionDetails = transactionSelected,
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
-                        onValueChange = { transactionSelected = it }
+                        onValueChange = { transactionSelected = it },
+                        edit = true
                     )
 
                     Row(

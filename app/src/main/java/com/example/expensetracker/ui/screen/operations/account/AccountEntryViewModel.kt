@@ -77,7 +77,7 @@ data class AccountDetails(
     val accountName: String = "",
     val accountType: String = AccountTypes.CHECKING.displayName, //Default value to populate dropdowns
     val accountNum: String? = "",
-    val status: String = "",
+    val status: String = "Open",
     val notes: String? = "",
     val heldAt: String? = "",
     val website: String? = "",

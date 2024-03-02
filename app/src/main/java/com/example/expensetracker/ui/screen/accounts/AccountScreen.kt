@@ -1,19 +1,18 @@
 package com.example.expensetracker.ui.screen.accounts
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material3.Card
@@ -32,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
@@ -40,12 +38,14 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.common.DonutChart
-import com.example.expensetracker.ui.common.DonutChartData
-import com.example.expensetracker.ui.common.DonutChartDataCollection
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
+import com.github.tehras.charts.piechart.PieChart
+import com.github.tehras.charts.piechart.PieChartData
+import com.github.tehras.charts.piechart.animation.simpleChartAnimation
+import com.github.tehras.charts.piechart.renderer.SimpleSliceDrawer
+import java.text.Format
 
 object AccountsDestination : NavigationDestination {
     override val route = "Accounts"
@@ -55,83 +55,69 @@ object AccountsDestination : NavigationDestination {
 
 @Composable
 fun AccountScreen(
-    modifier: Modifier = Modifier
-        .padding(16.dp, 12.dp),
+    modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
     viewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory),
     windowSizeClass: WindowWidthSizeClass,
     setTopBarAction: (Int) -> Unit
 ) {
-    val isUsed by viewModel.isUsed.collectAsState()
-
-
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
+    val data by viewModel.accountBalances.collectAsState()
 
     // Code block to get the current currency's detail.
     val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
     var baseCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
+
     // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
     LaunchedEffect(baseCurrencyId) {
         baseCurrencyInfo =
             viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
-
         setTopBarAction(9)
     }
 
-    if (isUsed == "FALSE") {
+    if (viewModel.isUsed.collectAsState().value == "FALSE") {
         navigateToScreen(OnboardingDestination.route)
     }
 
-    if (windowSizeClass == WindowWidthSizeClass.Compact) {
-        LazyColumn() {
-            items(count = 1) {
-                Column {
-                    Summary(totals = totals, baseCurrencyInfo = baseCurrencyInfo)
-                    
-                    NetWorth(totals = totals)
-                }
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 320.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp, 0.dp)
+    ) {
+        item() {
+            Column {
+                NetWorth(totals = totals, accountBalances = data, baseCurrencyInfo = baseCurrencyInfo)
 
-                AccountData(
-                    modifier = modifier,
-                    viewModel = viewModel,
-                    accountsUiState = accountsUiState,
-                    navigateToScreen = navigateToScreen
-                )
-
+                Summary(totals = totals, baseCurrencyInfo = baseCurrencyInfo)
             }
         }
-    } else {
-        LazyRow() {
-            items(count = 1) {
-                Summary(totals = totals, baseCurrencyInfo = baseCurrencyInfo)
-
-                AccountData(
-                    modifier = modifier.width(350.dp),
-                    viewModel = viewModel,
-                    accountsUiState = accountsUiState,
-                    navigateToScreen = navigateToScreen
-                )
-
-            }
+        item() {
+            AccountData(
+                modifier = modifier,
+                viewModel = viewModel,
+                accountsUiState = accountsUiState,
+                navigateToScreen = navigateToScreen,
+                data = data
+            )
         }
     }
 }
 
 @Composable
-fun NetWorth(totals: Totals) {
+fun NetWorth(
+    totals: Totals,
+    accountBalances: AccountsUiStateOne,
+    baseCurrencyInfo: CurrencyFormat
+) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .height(200.dp)
     ) {
-        Text(text = "Total Net Worth")
 
-        Text(text = "Reconciled: ${totals.income - totals.expenses}")
-        Text(text = "Assets:")
-        Text(text = "Stock:")
-
-        Text(text = "Balance:")
-
+        FormattedCurrency(value = accountBalances.grandTotal, currency = baseCurrencyInfo)
     }
 }
 
@@ -140,38 +126,24 @@ fun Summary(totals: Totals, baseCurrencyInfo: CurrencyFormat) {
     Card(
     ) {
         Text(text = "Income vs Expenses : Current Month")
-        Box(modifier = Modifier.padding(24.dp)) {
-            DonutChart(
-                data = DonutChartDataCollection(
-                    listOf(
-                        DonutChartData(
-                            totals.income.toFloat(),
-                            MaterialTheme.colorScheme.primary,
-                            "Income"
-                        ),
-                        DonutChartData(
-                            totals.expenses.toFloat(),
-                            MaterialTheme.colorScheme.error,
-                            "Expense"
-                        )
-                    )
-                )
-            ) { selected ->
-                AnimatedContent(targetState = selected, label = "") {
-                    if (it != null) {
-                        Column(modifier = Modifier.width(100.dp)) {
-                            Text(
-                                text = it.title,
-                                textAlign = TextAlign.Center
-                            )
-                            FormattedCurrency(
-                                value = (it.amount).toDouble(),
-                                currency = baseCurrencyInfo
-                            )
-                        }
-                    }
-                }
-            }
+        Box(modifier = Modifier
+            .padding(24.dp)
+            .height(240.dp)
+            .fillMaxWidth()
+        ) {
+            PieChart(
+                pieChartData = PieChartData(listOf(PieChartData.Slice(
+                    totals.income.toFloat(),
+                    MaterialTheme.colorScheme.primary
+                ), PieChartData.Slice(
+                    totals.expenses.toFloat(),
+                    MaterialTheme.colorScheme.error,
+                ))),
+            // Optional properties.
+            modifier = Modifier.fillMaxSize(),
+            animation = simpleChartAnimation(),
+            sliceDrawer = SimpleSliceDrawer()
+            )
         }
     }
 }
@@ -181,7 +153,8 @@ fun AccountData(
     modifier: Modifier,
     viewModel: AccountViewModel,
     accountsUiState: AccountsUiState,
-    navigateToScreen: (screen: String) -> Unit
+    navigateToScreen: (screen: String) -> Unit,
+    data : AccountsUiStateOne
 ) {
     Column(
         modifier = modifier,
@@ -204,6 +177,7 @@ fun AccountData(
                     accountList = accountsUiState.accountList,
                     viewModel = viewModel,
                     navigateToScreen = navigateToScreen,
+                    data = data
                 )
             }
         }
@@ -218,8 +192,8 @@ fun AccountList(
     accountList: List<Pair<Account, Double>>,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
+    data : AccountsUiStateOne
 ) {
-    val data by viewModel.data.collectAsState()
     Column(
         modifier = modifier
     ) {
@@ -314,11 +288,11 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 FormattedCurrency(
-                    value = accountWithBalance.first.initialBalance?.plus(balance)!!,
+                    value = balance,
                     currency = accountCurrencyInfo
                 )
                 FormattedCurrency(
-                    value = accountWithBalance.first.initialBalance?.plus(balance)!!,
+                    value = balance,
                     currency = accountCurrencyInfo
                 )
             }
