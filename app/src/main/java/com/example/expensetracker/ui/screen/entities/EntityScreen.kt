@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -70,7 +71,7 @@ fun EntityScreen(
 
     val pagerState = rememberPagerState(pageCount = { 3 })
 
-    Column() {
+    Column(modifier = modifier.fillMaxSize()) {
         PrimaryTabRow(
             selectedTabIndex = state,
             containerColor = MaterialTheme.colorScheme.background,
