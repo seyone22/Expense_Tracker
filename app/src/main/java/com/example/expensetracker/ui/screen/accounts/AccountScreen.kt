@@ -1,16 +1,20 @@
 package com.example.expensetracker.ui.screen.accounts
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
@@ -31,6 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
@@ -45,7 +51,6 @@ import com.github.tehras.charts.piechart.PieChart
 import com.github.tehras.charts.piechart.PieChartData
 import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 import com.github.tehras.charts.piechart.renderer.SimpleSliceDrawer
-import java.text.Format
 
 object AccountsDestination : NavigationDestination {
     override val route = "Accounts"
@@ -88,7 +93,11 @@ fun AccountScreen(
     ) {
         item() {
             Column {
-                NetWorth(totals = totals, accountBalances = data, baseCurrencyInfo = baseCurrencyInfo)
+                NetWorth(
+                    totals = totals,
+                    accountBalances = data,
+                    baseCurrencyInfo = baseCurrencyInfo
+                )
 
                 Summary(totals = totals, baseCurrencyInfo = baseCurrencyInfo)
             }
@@ -111,13 +120,63 @@ fun NetWorth(
     accountBalances: AccountsUiStateOne,
     baseCurrencyInfo: CurrencyFormat
 ) {
-    Card(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)
+            .height(224.dp)
+            .padding(0.dp, 24.dp, 0.dp, 0.dp)
     ) {
+        FormattedCurrency(
+            value = accountBalances.grandTotal,
+            currency = baseCurrencyInfo,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally),
+            style = MaterialTheme.typography.displayMedium
+        )
+        Text(
+            text = "Net Worth",
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+                .padding(0.dp, 0.dp, 0.dp, 24.dp),
+            fontStyle = FontStyle.Italic,
+            style = MaterialTheme.typography.labelLarge,
+            color = Color.Gray)
 
-        FormattedCurrency(value = accountBalances.grandTotal, currency = baseCurrencyInfo)
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+                .padding(0.dp, 0.dp, 0.dp, 24.dp),
+        ) {
+            Card(
+                modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 0.dp)
+                    .width(165.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = "Net Income")
+                    FormattedCurrency(
+                        value = totals.income,
+                        currency = baseCurrencyInfo,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    )
+                }
+            }
+            Card(
+                modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 0.dp)
+                    .width(165.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = "Expenditure")
+                    FormattedCurrency(
+                        value = totals.expenses,
+                        currency = baseCurrencyInfo,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -125,26 +184,53 @@ fun NetWorth(
 fun Summary(totals: Totals, baseCurrencyInfo: CurrencyFormat) {
     Card(
     ) {
-        Text(text = "Income vs Expenses : Current Month")
-        Box(modifier = Modifier
-            .padding(24.dp)
-            .height(240.dp)
-            .fillMaxWidth()
+        Box(
+            modifier = Modifier
+                .padding(24.dp)
+                .height(240.dp)
+                .fillMaxWidth()
         ) {
+            // Add legend items
+            Column{
+                LegendItem("Income", MaterialTheme.colorScheme.primary)
+                LegendItem("Expense", MaterialTheme.colorScheme.error)
+            }
             PieChart(
-                pieChartData = PieChartData(listOf(PieChartData.Slice(
-                    totals.income.toFloat(),
-                    MaterialTheme.colorScheme.primary
-                ), PieChartData.Slice(
-                    totals.expenses.toFloat(),
-                    MaterialTheme.colorScheme.error,
-                ))),
-            // Optional properties.
-            modifier = Modifier.fillMaxSize(),
-            animation = simpleChartAnimation(),
-            sliceDrawer = SimpleSliceDrawer()
+                pieChartData = PieChartData(
+                    listOf(
+                        PieChartData.Slice(
+                            totals.income.toFloat(),
+                            MaterialTheme.colorScheme.primary
+                        ), PieChartData.Slice(
+                            totals.expenses.toFloat(),
+                            MaterialTheme.colorScheme.error,
+                        )
+                    )
+                ),
+                // Optional properties.
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset(36.dp),
+                animation = simpleChartAnimation(),
+                sliceDrawer = SimpleSliceDrawer()
             )
         }
+    }
+}
+
+@Composable
+fun LegendItem(label: String, color: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = label)
     }
 }
 
@@ -154,7 +240,7 @@ fun AccountData(
     viewModel: AccountViewModel,
     accountsUiState: AccountsUiState,
     navigateToScreen: (screen: String) -> Unit,
-    data : AccountsUiStateOne
+    data: AccountsUiStateOne
 ) {
     Column(
         modifier = modifier,
@@ -192,7 +278,7 @@ fun AccountList(
     accountList: List<Pair<Account, Double>>,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
-    data : AccountsUiStateOne
+    data: AccountsUiStateOne
 ) {
     Column(
         modifier = modifier

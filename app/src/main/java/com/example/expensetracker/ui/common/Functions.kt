@@ -15,24 +15,32 @@ const val TAG = "TESTING"
 @Composable
 fun FormattedCurrency(
     modifier: Modifier = Modifier,
-    value : Double,
-    currency : CurrencyFormat,
+    style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.titleMedium,
+    value: Double,
+    currency: CurrencyFormat,
     type: TransactionType = TransactionType.NEUTRAL
 ) {
-    if (currency.pfx_symbol != "") {
-        Text(
-            style = MaterialTheme.typography.titleMedium,
-            text = "${currency.pfx_symbol}${DecimalFormat("#.##").format(value)}",
-            color = if(type == TransactionType.DEBIT) { MaterialTheme.colorScheme.error } else  { MaterialTheme.colorScheme.onBackground }
-        )
+    val formattedValue = DecimalFormat("#,###.##").format(value) // Add comma separators
+    val textColor = if (type == TransactionType.DEBIT) {
+        MaterialTheme.colorScheme.error
     } else {
-        Text(
-            style = MaterialTheme.typography.titleMedium,
-            text = "${DecimalFormat("#.##").format(value)}${currency.sfx_symbol}",
-            color = if(type == TransactionType.DEBIT) { MaterialTheme.colorScheme.error } else  { MaterialTheme.colorScheme.onBackground }
-        )
+        MaterialTheme.colorScheme.onBackground
     }
+
+    val displayText = if (currency.pfx_symbol.isNotEmpty()) {
+        "${currency.pfx_symbol}$formattedValue"
+    } else {
+        "$formattedValue${currency.sfx_symbol}"
+    }
+
+    Text(
+        style = style,
+        text = displayText,
+        color = textColor,
+        modifier = modifier
+    )
 }
+
 
 fun removeTrPrefix(input: String): String {
     val prefix = "_tr_"

@@ -23,14 +23,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,15 +39,8 @@ import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.FormattedCurrency
-import com.example.expensetracker.ui.common.dialogs.CategoryEntryDialog
-import com.example.expensetracker.ui.common.dialogs.CurrencyEntryDialog
-import com.example.expensetracker.ui.common.dialogs.PayeeEntryDialog
-import com.example.expensetracker.ui.common.dialogs.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
-import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrencyDetails
-import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
