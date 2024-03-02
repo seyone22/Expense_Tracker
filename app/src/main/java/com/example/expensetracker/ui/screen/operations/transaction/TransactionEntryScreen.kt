@@ -176,6 +176,13 @@ fun TransactionEntryForm(
     var currentCategory by remember { mutableStateOf(Category()) }
     var currentToAccount by remember { mutableStateOf(Account()) }
 
+    coroutineScope.launch {
+        currentAccount = viewModel.getAccount(transactionDetails.accountId.toInt())
+        currentPayee = viewModel.getPayee(transactionDetails.payeeId.toInt())
+        currentCategory = viewModel.getCategory(transactionDetails.categoryId.toInt())
+        currentToAccount = viewModel.getAccount(transactionDetails.toAccountId.toInt())
+    }
+
     Column(
         modifier = modifier
             .focusGroup()

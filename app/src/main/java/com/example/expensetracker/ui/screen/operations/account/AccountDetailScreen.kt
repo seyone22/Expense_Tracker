@@ -39,10 +39,12 @@ import androidx.navigation.NavController
 import com.example.expensetracker.R
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.EntryFields
+import com.example.expensetracker.ui.common.dialogs.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.dialogs.EditAccountDialog
 import com.example.expensetracker.ui.common.dialogs.EditTransactionDialog
 import com.example.expensetracker.ui.common.menuItems
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.toTransactionDetails
 import com.example.expensetracker.ui.screen.transactions.TransactionList
@@ -131,6 +133,18 @@ fun AccountDetailScreen(
             edit = true,
             title = "Edit Account",
             selectedAccount = accountDetailAccountUiState.account
+        )
+    }
+    if (openDeleteDialog.value) {
+        DeleteConfirmationDialog(
+            onDismissRequest = { openDeleteDialog.value = false },
+            confirmButtonAction = {
+                coroutineScope.launch {
+                    viewModel.deleteAccount(accountDetailAccountUiState.account, accountDetailTransactionUiState.transactions)
+                    navController.navigate(AccountsDestination.route)
+                }
+            },
+            bodyText = "Are you sure you want to delete this account? All associated transactions will also be deleted."
         )
     }
 }

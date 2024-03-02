@@ -22,6 +22,8 @@ import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeUiState
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayee
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -134,6 +136,16 @@ class TransactionEntryViewModel(
             PayeeUiState(payeeDetails = payeeDetails, isEntryValid = validatePayeeInput(payeeDetails))
     }
 
+    //Get Account, Payee, Category
+    suspend fun getAccount(accountId : Int) : Account {
+        return accountsRepository.getAccountStream(accountId).first() ?: Account()
+    }
+    suspend fun getPayee(payeeId : Int) : Payee {
+        return payeesRepository.getPayeeStream(payeeId).first() ?: Payee()
+    }
+    suspend fun getCategory(categoryId : Int) : Category {
+        return categoriesRepository.getCategoriesStream(categoryId).first() ?: Category()
+    }
 
 }
 

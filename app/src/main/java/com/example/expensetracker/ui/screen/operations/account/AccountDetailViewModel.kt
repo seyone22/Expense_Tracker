@@ -10,6 +10,7 @@ import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.model.TransactionWithDetails
+import com.example.expensetracker.model.toTransaction
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
@@ -201,6 +202,19 @@ class AccountDetailViewModel(
     suspend fun editAccount(accountDetails : AccountDetails) : Boolean {
         return try {
             accountsRepository.updateAccount(accountDetails.toAccount())
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun deleteAccount(account: Account, transactions: List<TransactionWithDetails>) : Boolean {
+        return try {
+            accountsRepository.deleteAccount(account)
+            transactions.forEach {
+                transactionsRepository.deleteTransaction(it.toTransaction())
+            }
             true
         } catch (e: Exception) {
             e.printStackTrace()
