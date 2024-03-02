@@ -61,7 +61,7 @@ data class TransactionWithDetails(
     val followUpId: Int?,
     val toTransAmount: Double?,
     val color: Int,
-    val payeeName: String,  // Include payeeName from PAYEE_V1
+    val payeeName: String?,  // Include payeeName from PAYEE_V1, NULL when Transfer
     val categName: String  // Include categoryName from CATEGORY_V1
 )
 

@@ -3,7 +3,6 @@ package com.example.expensetracker.ui.screen.transactions
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,15 +17,11 @@ import com.example.expensetracker.ui.screen.operations.transaction.TransactionDe
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionUiState
 import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 /**
  * ViewModel to retrieve all items in the Room database.
@@ -40,8 +35,8 @@ class TransactionsViewModel(
 
     var transactionsUiState: StateFlow<AccountDetailTransactionUiState> =
         transactionsRepository.getAllTransactionsStream()
-            .onEach { Log.d("DEBUG", ": flow emitted $it") }
             .map { transactions ->
+                Log.d("TAG", ": $transactions")
                 AccountDetailTransactionUiState(
                     transactions = transactions
                 )
@@ -63,31 +58,24 @@ class TransactionsViewModel(
     suspend fun deleteTransaction(transaction: Transaction) : Boolean {
         return try {
             transactionsRepository.deleteTransaction(transaction)
-            Log.d("TAG", "deleteTransaction: pass ")
             true
         } catch (e: Exception) {
             e.printStackTrace()
-            Log.d("TAG", "deleteTransaction: fail")
             false
         }
     }
 
     suspend fun editTransaction(transactionDetails: TransactionDetails) : Boolean {
-        Log.d("TAG", "TESTING: ${transactionDetails.toTransaction()}")
         return try {
             transactionsRepository.updateTransaction(transactionDetails.toTransaction())
-            Log.d("TAG", "editTransaction: pass ")
             true
         } catch (e: Exception) {
             e.printStackTrace()
-            Log.d("TAG", "editTransaction: fail")
             false
         }
     }
 
     private fun validateInput(uiState: TransactionDetails = transactionUiState.transactionDetails): Boolean {
-        Log.d("DEBUG", "validateInput: Validation Begins!")
-        Log.d("DEBUG", uiState.transactionNumber)
         return with(uiState) {
             transAmount.isNotBlank() && transDate.isNotBlank()&& accountId.isNotBlank() && categoryId.isNotBlank()
         }

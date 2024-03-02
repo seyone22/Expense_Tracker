@@ -129,7 +129,7 @@ fun TransactionList(
             items(count = filteredTransactions.size) {
                 ListItem(
                     headlineContent = {
-                        Text(text = filteredTransactions[it].payeeName)
+                        Text(text = filteredTransactions[it].payeeName ?: filteredTransactions[it].toAccountId.toString())
                     },
                     supportingContent = {
                         Text(text = removeTrPrefix(filteredTransactions[it].categName))
