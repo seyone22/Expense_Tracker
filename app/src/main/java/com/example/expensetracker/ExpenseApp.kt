@@ -50,9 +50,7 @@ import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrenc
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
-import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
 import com.example.expensetracker.ui.screen.operations.transaction.toTransactionDetails
-import com.example.expensetracker.ui.screen.operations.transaction.toTransactionUiState
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
 import com.example.expensetracker.ui.utils.ExpenseNavigationType

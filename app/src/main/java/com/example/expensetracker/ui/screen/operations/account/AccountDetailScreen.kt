@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screen.operations.account
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,9 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -42,14 +39,12 @@ import com.example.expensetracker.ui.common.EntryFields
 import com.example.expensetracker.ui.common.dialogs.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.dialogs.EditAccountDialog
 import com.example.expensetracker.ui.common.dialogs.EditTransactionDialog
-import com.example.expensetracker.ui.common.menuItems
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.toTransactionDetails
 import com.example.expensetracker.ui.screen.transactions.TransactionList
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 object AccountDetailDestination : NavigationDestination {
     override val route = "AccountDetails"

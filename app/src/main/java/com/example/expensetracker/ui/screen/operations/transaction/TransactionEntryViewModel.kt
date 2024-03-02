@@ -22,7 +22,6 @@ import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeUiState
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayee
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn

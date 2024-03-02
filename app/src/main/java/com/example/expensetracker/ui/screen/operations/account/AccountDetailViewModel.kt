@@ -16,8 +16,6 @@ import com.example.expensetracker.ui.screen.operations.transaction.TransactionEn
 import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectIndexed
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn

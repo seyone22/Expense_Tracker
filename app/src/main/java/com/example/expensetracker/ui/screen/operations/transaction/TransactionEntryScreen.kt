@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -64,13 +63,11 @@ import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.Instant
-import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
 
