@@ -2,7 +2,6 @@ package com.example.expensetracker.ui.common.dialogs
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,12 +25,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryForm
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
-import com.example.expensetracker.ui.screen.operations.transaction.toTransactionDetails
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -96,7 +93,7 @@ fun EditTransactionDialog(
                         transactionDetails = transactionSelected,
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
-                        onValueChange = { it -> transactionSelected = it }
+                        onValueChange = { transactionSelected = it }
                     )
 
                     Row(
