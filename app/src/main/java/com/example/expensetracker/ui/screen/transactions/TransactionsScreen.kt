@@ -147,7 +147,7 @@ fun TransactionList(
                         FormattedCurrency(
                             value = filteredTransactions[it].transAmount,
                             currency = currencyFormat,
-                            type = if (filteredTransactions[it].transCode == "Deposit") {
+                            type = if ((filteredTransactions[it].transCode == "Deposit") or (filteredTransactions[it].toAccountId != -1)) {
                                 TransactionType.CREDIT
                             } else {
                                 TransactionType.DEBIT

@@ -41,12 +41,12 @@ interface TransactionDao {
             "    CATEGORY_V1.categName AS categName " +
             "FROM " +
             "    CHECKINGACCOUNT_V1 " +
-            "INNER JOIN " +
+            "LEFT OUTER JOIN " +
             "    PAYEE_V1 ON CHECKINGACCOUNT_V1.payeeId = PAYEE_V1.payeeId " +
             "INNER JOIN " +
             "    CATEGORY_V1 ON CHECKINGACCOUNT_V1.categoryId = CATEGORY_V1.categId " +
             "WHERE " +
-            "    CHECKINGACCOUNT_V1.accountId = :accountId")
+            "    CHECKINGACCOUNT_V1.accountId = :accountId OR CHECKINGACCOUNT_V1.toAccountId = :accountId")
     fun getAllTransactionsByAccount(accountId: Int): Flow<List<TransactionWithDetails>>
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE toAccountId = :toAccountId")
