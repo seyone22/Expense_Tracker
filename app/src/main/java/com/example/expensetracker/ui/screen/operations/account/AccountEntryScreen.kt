@@ -154,7 +154,7 @@ fun AccountEntryBody(
 fun AccountEntryForm(
     modifier: Modifier = Modifier,
     accountDetails: AccountDetails,
-    onValueChange: (AccountDetails) -> Unit = {},
+    onValueChange: (AccountDetails) -> Unit,
 ) {
     var accountTypeExpanded by remember { mutableStateOf(false) }
     var baseCurrencyExpanded by remember { mutableStateOf(false) }
@@ -163,10 +163,9 @@ fun AccountEntryForm(
     var openStatementDateDialog by remember { mutableStateOf(false) }
 
     val viewModel: AccountEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val focusManager = LocalFocusManager.current
 
     val currencyList by viewModel.currencyList.collectAsState()
-
-    val focusManager = LocalFocusManager.current
 
     Column(
         modifier = modifier

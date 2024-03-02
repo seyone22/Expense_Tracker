@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.screen.operations.account
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,8 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -32,12 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.expensetracker.R
-import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.EntryFields
-import com.example.expensetracker.ui.common.TAG
 import com.example.expensetracker.ui.common.dialogs.EditAccountDialog
 import com.example.expensetracker.ui.common.dialogs.EditTransactionDialog
+import com.example.expensetracker.ui.common.menuItems
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.toTransactionDetails
@@ -68,6 +72,8 @@ fun AccountDetailScreen(
     var selectedTransaction by remember { mutableStateOf(TransactionDetails()) }
     val openEditDialog = remember { mutableStateOf(false) }
     val openEditType = remember { mutableStateOf(EntryFields.ACCOUNT) }
+    val openDeleteDialog = remember { mutableStateOf(false) }
+    val openDeleteDialogType = remember { mutableStateOf(EntryFields.ACCOUNT) }
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -85,7 +91,9 @@ fun AccountDetailScreen(
             modifier = modifier,
             accountDetailAccountUiState = accountDetailAccountUiState,
             setOpenEditDialog = { it -> openEditDialog.value = it },
-            setOpenEditDialogType = { it -> openEditType.value = it }
+            setOpenEditDialogType = { it -> openEditType.value = it },
+            setOpenDeleteDialog = { it -> openDeleteDialog.value = it },
+            setOpenDeleteDialogType = { it -> openDeleteDialogType.value = it }
         )
 
         TransactionList(
@@ -96,34 +104,34 @@ fun AccountDetailScreen(
                 selectedTransaction = selected.toTransactionDetails()
             },
         )
+    }
 
-        if (openEditDialog.value and (openEditType.value == EntryFields.TRANSACTION)) {
-            EditTransactionDialog(
-                onConfirmClick = {
-                    coroutineScope.launch {
-                        viewModel.editTransaction()
-                    }
-                },
-                onDismissRequest = { openEditDialog.value = !openEditDialog.value },
-                edit = true,
-                title = "Edit Transaction",
-                selectedTransaction = selectedTransaction
-            )
-        }
-        if (openEditDialog.value and (openEditType.value == EntryFields.ACCOUNT)) {
-            EditAccountDialog(
-                onConfirmClick = {
-                    coroutineScope.launch {
-                        viewModel.editTransaction()
-                    }
-                },
-                onDismissRequest = { openEditDialog.value = !openEditDialog.value },
-                viewModel = viewModel,
-                edit = true,
-                title = "Edit Account",
-                selectedAccount = accountDetailAccountUiState.account
-            )
-        }
+    if (openEditDialog.value and (openEditType.value == EntryFields.TRANSACTION)) {
+        EditTransactionDialog(
+            onConfirmClick = {
+                coroutineScope.launch {
+                    viewModel.editTransaction(selectedTransaction)
+                }
+            },
+            onDismissRequest = { openEditDialog.value = !openEditDialog.value },
+            edit = true,
+            title = "Edit Transaction",
+            selectedTransaction = selectedTransaction
+        )
+    }
+    if (openEditDialog.value and (openEditType.value == EntryFields.ACCOUNT)) {
+        EditAccountDialog(
+            onConfirmClick = {
+                coroutineScope.launch {
+                    viewModel.editAccount(it)
+                }
+            },
+            onDismissRequest = { openEditDialog.value = !openEditDialog.value },
+            viewModel = viewModel,
+            edit = true,
+            title = "Edit Account",
+            selectedAccount = accountDetailAccountUiState.account
+        )
     }
 }
 
@@ -133,8 +141,10 @@ fun DetailedAccountCard(
     accountDetailAccountUiState: AccountDetailAccountUiState,
     setOpenEditDialog: (Boolean) -> Unit,
     setOpenEditDialogType: (EntryFields) -> Unit,
+    setOpenDeleteDialog: (Boolean) -> Unit,
+    setOpenDeleteDialogType: (EntryFields) -> Unit,
 ) {
-    Log.d(TAG, "DetailedAccountCard: $accountDetailAccountUiState")
+    var expanded by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier
@@ -163,7 +173,9 @@ fun DetailedAccountCard(
                 HorizontalDivider()
                 Text(
                     text = "Account Balance : " +
-                            (accountDetailAccountUiState.account.initialBalance?.plus(accountDetailAccountUiState.balance)).toString(),
+                            (accountDetailAccountUiState.account.initialBalance?.plus(
+                                accountDetailAccountUiState.balance
+                            )).toString(),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
@@ -173,14 +185,34 @@ fun DetailedAccountCard(
                     style = MaterialTheme.typography.titleSmall
                 )
             }
-            IconButton(onClick = {
-                setOpenEditDialog(true)
-                setOpenEditDialogType(EntryFields.ACCOUNT)
-            }) {
+            IconButton(onClick = { expanded = true }) {
                 Icon(
-                    imageVector = Icons.Outlined.Edit,
+                    imageVector = Icons.Default.MoreVert,
                     contentDescription = null,
                     Modifier.size(24.dp, 24.dp)
+                )
+            }
+            // DropdownMenu
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.background)
+            ) {
+                DropdownMenuItem(
+                    onClick = {
+                        setOpenEditDialog(true)
+                        setOpenEditDialogType(EntryFields.ACCOUNT)
+                        expanded = !expanded
+                    },
+                    text = { Text(text = "Edit") }
+                )
+                DropdownMenuItem(
+                    onClick = {
+                        setOpenDeleteDialog(true)
+                        setOpenDeleteDialogType(EntryFields.ACCOUNT)
+                        expanded = !expanded
+                    },
+                    text = { Text(text = "Delete") }
                 )
             }
         }

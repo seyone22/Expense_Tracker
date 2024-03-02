@@ -10,7 +10,9 @@ import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.model.TransactionWithDetails
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
+import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectIndexed
@@ -184,8 +186,26 @@ class AccountDetailViewModel(
         }
     }
 
-    fun editTransaction() {
-        TODO("Not yet implemented")
+    suspend fun editTransaction(transactionDetails: TransactionDetails) : Boolean {
+        return try {
+            transactionsRepository.updateTransaction(transactionDetails.toTransaction())
+            Log.d("TAG", "editTransaction: pass ")
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.d("TAG", "editTransaction: fail")
+            false
+        }
+    }
+
+    suspend fun editAccount(accountDetails : AccountDetails) : Boolean {
+        return try {
+            accountsRepository.updateAccount(accountDetails.toAccount())
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 }
 

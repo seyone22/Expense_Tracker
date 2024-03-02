@@ -317,14 +317,11 @@ fun ExpenseApp(
             }
 
             8 -> {
-                Log.d("TAG", "TransactionsScreen: ${transactionViewModel.hashCode()}")
-
                 EditTransactionDialog(
                     selectedTransaction = (selectedObject.transaction.toTransactionDetails()),
                     onConfirmClick = {
                         coroutineScope.launch {
                             transactionViewModel.transactionUiState = transactionEntryViewModel.transactionUiState
-
                             transactionViewModel.editTransaction(transactionViewModel.transactionUiState.transactionDetails)
                         }
                     },
