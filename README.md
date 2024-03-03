@@ -58,7 +58,7 @@ Expense Tracker is built using the following technologies and libraries:
 
 ## Versioning
 
-Expense Tracker follows semantic versioning for version management. For the available versions, see the [tags on this repository](https://github.com/seyone22/expense-tracker/tags).
+Expense Tracker follows semantic versioning for version management. For the available versions, see the [tags on this repository](https://github.com/seyone22/expense_tracker/tags).
 
 ## Author
 
