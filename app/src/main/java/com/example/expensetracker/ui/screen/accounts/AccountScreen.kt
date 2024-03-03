@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
@@ -89,7 +90,7 @@ fun AccountScreen(
         columns = GridCells.Adaptive(minSize = 320.dp),
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp, 0.dp)
+            .padding(24.dp, 0.dp),
     ) {
         item() {
             Column {
@@ -102,7 +103,8 @@ fun AccountScreen(
                 Summary(totals = totals, baseCurrencyInfo = baseCurrencyInfo)
             }
         }
-        item() {
+        item(
+        ) {
             AccountData(
                 modifier = modifier,
                 viewModel = viewModel,
@@ -243,11 +245,11 @@ fun AccountData(
     data: AccountsUiStateOne
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(0.dp,24.dp,0.dp,0.dp),
     ) {
         Text(
             text = "Summary of Accounts",
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge,
         )
 
         enumValues<AccountTypes>().forEach { accountType ->
@@ -256,10 +258,9 @@ fun AccountData(
                     accountsUiState.accountList
                 ) != 0
             ) {
-                val displayName: String = accountType.displayName
                 AccountList(
                     modifier = modifier,
-                    category = displayName,
+                    category = accountType.displayName,
                     accountList = accountsUiState.accountList,
                     viewModel = viewModel,
                     navigateToScreen = navigateToScreen,
@@ -281,11 +282,13 @@ fun AccountList(
     data: AccountsUiStateOne
 ) {
     Column(
-        modifier = modifier
+        modifier = modifier.padding(0.dp,8.dp,0.dp,0.dp)
     ) {
         Text(
-            text = category,
-            style = MaterialTheme.typography.titleMedium
+            text = "$category Accounts",
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.Gray,
+            fontWeight = FontWeight.Bold
         )
 
         accountList.forEach { accountPair ->
