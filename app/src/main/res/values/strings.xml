@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Expense Tracker</string>
-    <string name="app_version">v0.2.0-alpha</string>
-    <string name="release_date">12/02/2024</string>
-    <string name="release_time">13:00</string>
+    <string name="app_version">v0.3.0-alpha</string>
+    <string name="release_date">03/04/2024</string>
+    <string name="release_time">00:00</string>
 
 
     <string-array name="activities">
