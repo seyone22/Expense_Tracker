@@ -1,5 +1,6 @@
 package com.example.expensetracker.data.account
 
+import com.example.expensetracker.data.transaction.TransactionDao
 import com.example.expensetracker.model.Account
 import kotlinx.coroutines.flow.Flow
 
@@ -8,6 +9,7 @@ class OfflineAccountsRepository(private val accountDao: AccountDao) : AccountsRe
     override fun getAllActiveAccountsStream(): Flow<List<Account>> = accountDao.getAllActiveAccounts()
     override fun getAccountStream(accountId: Int): Flow<Account?> = accountDao.getAccount(accountId)
     override fun getAccountsFromTypeStream(accountType: String): Flow<List<Account>> = accountDao.getAllAccountsByType(accountType)
+    override fun getAccountBalance(accountId: Int): Flow<TransactionDao.BalanceResult> = accountDao.getAccountBalance(accountId)
 
     override suspend fun insertAccount(account: Account) = accountDao.insert(account)
     override suspend fun deleteAccount(account: Account) = accountDao.delete(account)

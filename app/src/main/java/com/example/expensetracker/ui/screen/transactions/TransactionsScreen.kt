@@ -1,26 +1,14 @@
 package com.example.expensetracker.ui.screen.transactions
 
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,24 +25,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
+import com.example.expensetracker.SelectedObjects
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionWithDetails
 import com.example.expensetracker.model.toTransaction
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.common.ExpenseFAB
-import com.example.expensetracker.ui.common.ExpenseNavBar
-import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.SortBar
-import com.example.expensetracker.ui.common.TransactionEditDialog
 import com.example.expensetracker.ui.common.TransactionType
 import com.example.expensetracker.ui.common.getAbbreviatedMonthName
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
-import com.example.expensetracker.ui.screen.settings.SettingsDestination
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -69,115 +51,27 @@ object TransactionsDestination : NavigationDestination {
 fun TransactionsScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
+    setTopBarAction : (Int) -> Unit,
+    setIsItemSelected: (Boolean) -> Unit,
+    setSelectedObject : (SelectedObjects) -> Unit,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 
     ) {
     val transactionsUiState by viewModel.transactionsUiState.collectAsState()
-    var isSelected by remember { mutableStateOf(false) }
-    var selectedTransaction by remember { mutableStateOf(Transaction()) }
-
-    val openEditDialog = remember { mutableStateOf(false) }
+    setTopBarAction(8)
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            if (isSelected) {
-                TopAppBar(
-                    title = { Text(text = TransactionsDestination.route) },
-                    navigationIcon = {
-                        IconButton(onClick = { isSelected = !isSelected }) {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = "Close"
-                            )
-                        }
-                    },
-                    actions = {
-                        Row {
-                            IconButton(onClick = {
-                                isSelected = !isSelected
-                                openEditDialog.value = !openEditDialog.value
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Edit,
-                                    contentDescription = "Edit"
-                                )
-                            }
-                            IconButton(
-                                onClick = {
-                                    isSelected = !isSelected
-                                    coroutineScope.launch {
-                                        viewModel.deleteTransaction(
-                                            selectedTransaction
-                                        )
-                                    }
-                                }
-
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Delete"
-                                )
-                            }
-                            IconButton(onClick = {
-                                isSelected = !isSelected
-                                Toast.makeText(context, "Unimplemented", Toast.LENGTH_SHORT).show()
-                            }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Share,
-                                    contentDescription = "Share"
-                                )
-                            }
-                        }
-                    }
-                )
-            } else {
-                ExpenseTopBar(
-                    selectedActivity = TransactionsDestination.routeId,
-                    navBarAction = { navigateToScreen(AccountEntryDestination.route) },
-                    navigateToSettings = { navigateToScreen(SettingsDestination.route) }
-                )
-            }
-        },
-        bottomBar = {
-            ExpenseNavBar(
-                selectedActivity = TransactionsDestination.routeId,
-                navigateToScreen = navigateToScreen
-            )
-        },
-        floatingActionButton = {
-            ExpenseFAB(navigateToScreen = navigateToScreen)
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier.padding(innerPadding)
-        ) {
-
-            TransactionList(
-                transactions = transactionsUiState.transactions,
-                longClicked = { selected ->
-                    isSelected = !isSelected
-                    selectedTransaction = selected
-                },
-                viewModel = viewModel
-            )
-        }
-    }
-
-    if (openEditDialog.value) {
-        TransactionEditDialog(
-            onConfirmClick = {
-                coroutineScope.launch {
-                    viewModel.editTransaction()
-                }
+    Column() {
+        TransactionList(
+            transactions = transactionsUiState.transactions,
+            longClicked = { selected ->
+                setIsItemSelected(true)
+                val selObj = SelectedObjects(transaction = selected)
+                Log.d("TAG", "TransactionsScreen: $selObj")
+                setSelectedObject(selObj)
             },
-            onDismissRequest = { openEditDialog.value = !openEditDialog.value },
-            edit = true,
-            title = "Edit Transaction",
-            selectedTransaction = selectedTransaction
+            viewModel = viewModel
         )
     }
 }
@@ -228,51 +122,68 @@ fun TransactionList(
         }
     )
 
-    LazyColumn(
-        modifier = modifier
-    ) {
-        items(count = filteredTransactions.size) {
-            ListItem(
-                headlineContent = {
-                    Text(text = filteredTransactions[it].payeeName)
-                },
-                supportingContent = {
-                    Text(text = removeTrPrefix(filteredTransactions[it].categName))
-                },
-                trailingContent = {
-                    var currencyFormat by remember { mutableStateOf(CurrencyFormat()) }
-
-                    LaunchedEffect(filteredTransactions[it].accountId) {
-                        val currencyFormatFunction =
-                            viewModel.getAccountFromId(filteredTransactions[it].accountId)
-                                ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
-                        currencyFormat = currencyFormatFunction!!
-                    }
-
-                    FormattedCurrency(
-                        value = filteredTransactions[it].transAmount,
-                        currency = currencyFormat,
-                        type = if(filteredTransactions[it].transCode == "Deposit") { TransactionType.CREDIT } else { TransactionType.DEBIT }
-                    )
-                },
-                leadingContent = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = getAbbreviatedMonthName(filteredTransactions[it].transDate!!.substring(5,7).toInt()))
-                        Text(text = filteredTransactions[it].transDate!!.substring(8,10))
-                    }
-                },
-                modifier = Modifier.combinedClickable(
-                    onClick = {},
-                    onLongClick = {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        longClicked(filteredTransactions[it].toTransaction())
+    if (filteredTransactions.isNotEmpty()) {
+        LazyColumn(
+            modifier = modifier
+        ) {
+            items(count = filteredTransactions.size) {
+                ListItem(
+                    headlineContent = {
+                        Text(text = filteredTransactions[it].payeeName ?: "Transfer")
                     },
-                    onLongClickLabel = "  "
+                    supportingContent = {
+                        Text(text = removeTrPrefix(filteredTransactions[it].categName))
+                    },
+                    trailingContent = {
+                        var currencyFormat by remember { mutableStateOf(CurrencyFormat()) }
+
+                        LaunchedEffect(filteredTransactions[it].accountId) {
+                            val currencyFormatFunction =
+                                viewModel.getAccountFromId(filteredTransactions[it].accountId)
+                                    ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
+                            currencyFormat = currencyFormatFunction!!
+                        }
+
+                        FormattedCurrency(
+                            value = filteredTransactions[it].transAmount,
+                            currency = currencyFormat,
+                            type = if ((filteredTransactions[it].transCode == "Deposit") or (filteredTransactions[it].toAccountId != -1)) {
+                                TransactionType.CREDIT
+                            } else {
+                                TransactionType.DEBIT
+                            }
+                        )
+                    },
+                    leadingContent = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = getAbbreviatedMonthName(
+                                    filteredTransactions[it].transDate!!.substring(
+                                        5,
+                                        7
+                                    ).toInt()
+                                )
+                            )
+                            Text(text = filteredTransactions[it].transDate!!.substring(8, 10))
+                        }
+                    },
+                    modifier = Modifier.combinedClickable(
+                        onClick = {},
+                        onLongClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            longClicked(filteredTransactions[it].toTransaction())
+                        },
+                        onLongClickLabel = "  "
+                    )
                 )
-            )
-            HorizontalDivider()
+                HorizontalDivider()
+            }
+        }
+    } else {
+        Column {
+            Text(text = "Nothing to show here!")
         }
     }
 }

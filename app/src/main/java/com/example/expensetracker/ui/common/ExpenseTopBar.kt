@@ -13,50 +13,55 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringArrayResource
 import com.example.expensetracker.R
+import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
+import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
+import com.example.expensetracker.ui.screen.settings.SettingsDestination
+import com.example.expensetracker.ui.utils.ExpenseNavigationType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseTopBar(
-    selectedActivity: Int,
+    selectedActivity: String?,
     navBarAction: () -> Unit,
-    hasNavBarAction : Boolean = true,
+    type: ExpenseNavigationType,
+    hasNavBarAction: Boolean = true,
     navigateToSettings: () -> Unit
-    ) {
+) {
     //Title string for header elements, view codes in NavigationDestinations
-    val titleString : String
-    if (selectedActivity in 0..4) {
-        titleString = stringArrayResource(id = R.array.activities)[selectedActivity]
-    } else {
-        titleString = "Settings"
-    }
+    val titleString: String = (selectedActivity ?: "Expenses").split(("/")).first()
 
-    CenterAlignedTopAppBar(
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-        ),
-        title = {
-            Text(titleString)
-        },
-        navigationIcon = {
-            IconButton(onClick = {
-                navigateToSettings()
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.Settings,
-                    contentDescription = "Settings"
-                )
-            }
-        },
-        actions = {
-            if (hasNavBarAction) {
-                IconButton(onClick = { navBarAction() }) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add Item"
-                    )
+    if((selectedActivity != AccountEntryDestination.route) and (selectedActivity != SettingsDestination.route) and (selectedActivity != "SettingsDetail/{setting}") and (selectedActivity != TransactionEntryDestination.route) and (selectedActivity != OnboardingDestination.route)) {
+        CenterAlignedTopAppBar(
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                titleContentColor = MaterialTheme.colorScheme.onSurface,
+            ),
+            title = {
+                Text(titleString)
+            },
+            navigationIcon = {
+                if (type == ExpenseNavigationType.BOTTOM_NAVIGATION) {
+                    IconButton(onClick = {
+                        navigateToSettings()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
+                }
+            },
+            actions = {
+                if (hasNavBarAction) {
+                    IconButton(onClick = { navBarAction() }) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Add Item"
+                        )
+                    }
                 }
             }
-        }
-    )
+        )
+    }
 }

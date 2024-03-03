@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.common
+package com.example.expensetracker.ui.common.dialogs
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text

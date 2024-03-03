@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.accounts
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
@@ -10,6 +11,7 @@ import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
+import com.example.expensetracker.ui.screen.onboarding.OnboardingViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +39,17 @@ class AccountViewModel(
     // Flow for total
     private val totalFlow: Flow<Double> = transactionsRepository.getTotalBalance()
 
+    val isUsed =
+        metadataRepository.getMetadataByNameStream("ISUSED")
+            .map { info ->
+                info?.infoValue?.toString() ?: "FALSE"
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(AccountViewModel.TIMEOUT_MILLIS),
+                initialValue = ""
+            )
+
     // Combine the flows and calculate the totals
     val totals: Flow<Totals> =
         combine(expensesFlow, incomeFlow, totalFlow) { expenses, income, total ->
@@ -52,16 +65,6 @@ class AccountViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = "-1"
-            )
-    val isUsed =
-        metadataRepository.getMetadataByNameStream("ISUSED")
-            .map { info ->
-                info?.infoValue ?: "FALSE"
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = 0
             )
 
     val accountsUiState: StateFlow<AccountsUiState> =
@@ -82,7 +85,40 @@ class AccountViewModel(
     val data: StateFlow<AccountsUiStateOne> =
         transactionsRepository.getBalanceByAccountId()
             .map { pairs ->
-                AccountsUiStateOne(pairs)
+                var totalBalance = 0.0
+                var balanceAndInitialBalance : List<TransactionDao.BalanceResult>
+                for (balanceResult in pairs) {
+                    totalBalance += balanceResult.balance
+                    accountsRepository.getAccountStream(balanceResult.accountId).firstOrNull()
+
+
+                }
+                AccountsUiStateOne(pairs, totalBalance)
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = AccountsUiStateOne()
+            )
+
+
+    val accountBalances: StateFlow<AccountsUiStateOne> =
+        accountsRepository.getAllActiveAccountsStream()
+            .map { accountList ->
+                val balanceData : MutableList<TransactionDao.BalanceResult> = mutableListOf()
+                var totalBalance = 0.0
+
+                accountList.forEach {
+                    val accountBalance = accountsRepository.getAccountBalance(it.accountId).firstOrNull()?.balance
+                    val balance = it.initialBalance?.plus(accountBalance ?: 0.0)
+
+                    balanceData.add(TransactionDao.BalanceResult(it.accountId, balance ?: 0.0))
+                    if (balance != null) {
+                        totalBalance += balance
+                    }
+                    Log.d("TAG", ": ${accountsRepository.getAccountBalance(it.accountId).firstOrNull()?.balance} - ${it.accountId} - ${it.initialBalance}")
+                }
+                AccountsUiStateOne(balanceData, totalBalance)
             }
             .stateIn(
                 scope = viewModelScope,

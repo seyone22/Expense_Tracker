@@ -5,7 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
+import com.example.expensetracker.data.MMEXDatabase
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.data.metadata.MetadataRepository
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -119,7 +122,6 @@ class OnboardingViewModel(
             uiState.usernameMetadata.infoValue.isNotBlank() && uiState.baseCurrencyMetadata.infoValue != "-1"
         }
     }
-
 }
 
 data class CurrencyList(

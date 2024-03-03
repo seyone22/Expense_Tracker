@@ -10,9 +10,13 @@ import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.model.TransactionWithDetails
+import com.example.expensetracker.model.toTransaction
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
+import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -25,7 +29,10 @@ class AccountDetailViewModel(
     var accountDetailAccountUiState: StateFlow<AccountDetailAccountUiState> =
         accountsRepository.getAccountStream(accountId)
             .map { account ->
-                AccountDetailAccountUiState(account ?: Account())
+                AccountDetailAccountUiState(
+                    account = account ?: Account(),
+                    balance = transactionsRepository.getBalanceByAccountId().first().find { it.accountId == account?.accountId }?.balance ?: 3.3
+                )
             }
             .stateIn(
                 scope = viewModelScope,
@@ -50,7 +57,10 @@ class AccountDetailViewModel(
     fun getAccount() {
         accountDetailAccountUiState = accountsRepository.getAccountStream(accountId)
             .map { account ->
-                AccountDetailAccountUiState(account ?: Account())
+                AccountDetailAccountUiState(
+                    account = account ?: Account(),
+                    balance = transactionsRepository.getBalanceByAccountId().first().find { it.accountId == account?.accountId }?.balance ?: -69.420
+                )
             }
             .stateIn(
                 scope = viewModelScope,
@@ -175,8 +185,39 @@ class AccountDetailViewModel(
         }
     }
 
-    fun editTransaction() {
-        TODO("Not yet implemented")
+    suspend fun editTransaction(transactionDetails: TransactionDetails) : Boolean {
+        return try {
+            transactionsRepository.updateTransaction(transactionDetails.toTransaction())
+            Log.d("TAG", "editTransaction: pass ")
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.d("TAG", "editTransaction: fail")
+            false
+        }
+    }
+
+    suspend fun editAccount(accountDetails : AccountDetails) : Boolean {
+        return try {
+            accountsRepository.updateAccount(accountDetails.toAccount())
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun deleteAccount(account: Account, transactions: List<TransactionWithDetails>) : Boolean {
+        return try {
+            accountsRepository.deleteAccount(account)
+            transactions.forEach {
+                transactionsRepository.deleteTransaction(it.toTransaction())
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 }
 

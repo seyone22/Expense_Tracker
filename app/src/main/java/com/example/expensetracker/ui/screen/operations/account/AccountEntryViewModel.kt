@@ -10,12 +10,14 @@ import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
-import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.util.Locale
 
 class AccountEntryViewModel(
     private val accountsRepository: AccountsRepository,
@@ -75,14 +77,14 @@ data class AccountDetails(
     val accountName: String = "",
     val accountType: String = AccountTypes.CHECKING.displayName, //Default value to populate dropdowns
     val accountNum: String? = "",
-    val status: String = "",
+    val status: String = "Open",
     val notes: String? = "",
     val heldAt: String? = "",
     val website: String? = "",
     val contactInfo: String? = "",
     val accessInfo: String? = "",
     val initialBalance: String? = "0.0", // Changed the type to String
-    val initialDate: String? = "",
+    val initialDate: String? = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Instant.now().toEpochMilli()).toString(),
     val favoriteAccount: String = "",
     val currencyId: String = "0", // Changed the type to String
     val statementLocked: String? = "", // Changed the type to String

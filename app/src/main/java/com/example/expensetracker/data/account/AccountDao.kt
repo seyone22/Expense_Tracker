@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.example.expensetracker.data.transaction.TransactionDao
 import com.example.expensetracker.model.Account
 import kotlinx.coroutines.flow.Flow
 
@@ -26,4 +27,17 @@ interface AccountDao {
     fun getAllActiveAccounts(): Flow<List<Account>>
     @Query("SELECT * FROM ACCOUNTLIST_V1 WHERE accountType = :accountType")
     fun getAllAccountsByType(accountType: String): Flow<List<Account>>
+
+    @Query("SELECT " +
+            "    accountId, " +
+            "    SUM(CASE " +
+            "        WHEN transCode = 'Deposit' AND accountId = :accountId THEN transAmount" +
+            "        WHEN transCode = 'Withdrawal' AND accountId = :accountId THEN -transAmount" +
+            "        WHEN transCode = 'Transfer' AND accountId = :accountId THEN -transAmount " +
+            "        WHEN transCode = 'Transfer' AND toAccountId = :accountId THEN transAmount " +
+            "        ELSE 0 " +
+            "    END) AS balance " +
+            "FROM CHECKINGACCOUNT_V1 " +
+            "GROUP BY accountId")
+    fun getAccountBalance(accountId: Int): Flow<TransactionDao.BalanceResult>
 }

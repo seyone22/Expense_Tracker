@@ -36,6 +36,7 @@ class EntityViewModel(
     private val currencyFormatsRepository: CurrencyFormatsRepository,
 ) : ViewModel() {
 
+    // Flows for each type of entity
     private val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
     private val currencyFormatsFlow: Flow<List<CurrencyFormat>> = currencyFormatsRepository.getAllCurrencyFormatsStream()
     private val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllActivePayeesStream()
@@ -45,6 +46,7 @@ class EntityViewModel(
         EntitiesUiState(categories, payees, currencies)
     }
 
+    // StateFlow for entities
     val d: StateFlow<EntitiesUiState> =
         categoriesRepository.getAllCategoriesStream()
             .map { categories ->
@@ -62,19 +64,23 @@ class EntityViewModel(
         private const val TIMEOUT_MILLIS = 5_000L
     }
 
+    // Category state and operations
     var categoryUiState by mutableStateOf(CategoryUiState())
         private set
+    var selectedCategory by mutableStateOf(Category())
 
     suspend fun saveCategory() {
         if(validateCategoryInput()) {
             categoriesRepository.insertCategory(categoryUiState.categoryDetails.toCategory())
         }
     }
+
     suspend fun editCategory() {
         if(validateCategoryInput()) {
             categoriesRepository.updateCategory(categoryUiState.categoryDetails.toCategory())
         }
     }
+
     suspend fun deleteCategory(category : Category) {
         categoriesRepository.deleteCategory(category)
     }
@@ -84,48 +90,61 @@ class EntityViewModel(
             categName.isNotBlank()
         }
     }
+
     fun updateCategoryState(categoryDetails: CategoryDetails) {
         categoryUiState =
             CategoryUiState(categoryDetails = categoryDetails, isEntryValid = validateCategoryInput(categoryDetails))
     }
+
+    // Payee state and operations
     var payeeUiState by mutableStateOf(PayeeUiState())
         private set
+    var selectedPayee by mutableStateOf(Payee())
+
     suspend fun savePayee() {
         if(validatePayeeInput()) {
             payeesRepository.insertPayee(payeeUiState.payeeDetails.toPayee())
         }
     }
+
     suspend fun editPayee() {
         if(validatePayeeInput()) {
             payeesRepository.updatePayee(payeeUiState.payeeDetails.toPayee())
         }
     }
+
     suspend fun deletePayee(payee : Payee) {
         payeesRepository.deletePayee(payee)
     }
-
 
     private fun validatePayeeInput(uiState: PayeeDetails = payeeUiState.payeeDetails): Boolean {
         return with(uiState) {
             payeeName.isNotBlank()
         }
     }
+
     fun updatePayeeState(payeeDetails: PayeeDetails) {
         payeeUiState =
             PayeeUiState(payeeDetails = payeeDetails, isEntryValid = validatePayeeInput(payeeDetails))
     }
+
+    // Currency state and operations
     var currencyUiState by mutableStateOf(CurrencyUiState())
         private set
+    var selectedCurrency by mutableStateOf(CurrencyFormat())
+
     suspend fun saveCurrency() {
         if(validateCurrencyInput()) {
             currencyFormatsRepository.insertCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
         }
     }
+
     suspend fun editCurrency() {
         if(validateCurrencyInput()) {
             currencyFormatsRepository.updateCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
         }
     }
+
     suspend fun deleteCurrency(currency : CurrencyFormat) {
         currencyFormatsRepository.deleteCurrencyFormat(currency)
     }
@@ -135,15 +154,15 @@ class EntityViewModel(
             currencyName.isNotBlank()
         }
     }
+
     fun updateCurrencyState(currencyDetails: CurrencyDetails) {
         currencyUiState =
             CurrencyUiState(currencyDetails = currencyDetails, isEntryValid = validateCurrencyInput(currencyDetails))
     }
-
 }
 
 /**
- * Ui State for HomeScreen
+ * Ui State for EntitiesScreen
  */
 data class EntitiesUiState(
     val categoriesList: List<Category> = listOf(),
@@ -151,6 +170,7 @@ data class EntitiesUiState(
     val currenciesList: List<CurrencyFormat> = listOf(),
 )
 
+// Enum for entity types
 enum class Entity(val displayName : String, val pluralDisplayName : String) {
     CATEGORY("Category", "Categories"),
     PAYEE("Payee", "Payees"),

@@ -1,25 +1,31 @@
 package com.example.expensetracker.ui.screen.accounts
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,7 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
@@ -37,16 +45,13 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.common.DonutChart
-import com.example.expensetracker.ui.common.DonutChartData
-import com.example.expensetracker.ui.common.DonutChartDataCollection
-import com.example.expensetracker.ui.common.ExpenseFAB
-import com.example.expensetracker.ui.common.ExpenseNavBar
-import com.example.expensetracker.ui.common.ExpenseTopBar
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
-import com.example.expensetracker.ui.screen.settings.SettingsDestination
+import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
+import com.github.tehras.charts.piechart.PieChart
+import com.github.tehras.charts.piechart.PieChartData
+import com.github.tehras.charts.piechart.animation.simpleChartAnimation
+import com.github.tehras.charts.piechart.renderer.SimpleSliceDrawer
 
 object AccountsDestination : NavigationDestination {
     override val route = "Accounts"
@@ -56,122 +61,216 @@ object AccountsDestination : NavigationDestination {
 
 @Composable
 fun AccountScreen(
-    modifier: Modifier = Modifier
-        .padding(16.dp, 12.dp),
+    modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
     viewModel: AccountViewModel = viewModel(factory = AppViewModelProvider.Factory),
-
-    ) {
+    windowSizeClass: WindowWidthSizeClass,
+    setTopBarAction: (Int) -> Unit
+) {
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
-    val isUsed by viewModel.isUsed.collectAsState()
+    val data by viewModel.accountBalances.collectAsState()
 
-    when (isUsed) {
-        "FALSE" -> {
-            navigateToScreen("Onboarding")
+    // Code block to get the current currency's detail.
+    val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
+    var baseCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
+
+    // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
+    LaunchedEffect(baseCurrencyId) {
+        baseCurrencyInfo =
+            viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
+        setTopBarAction(9)
+    }
+
+    if (viewModel.isUsed.collectAsState().value == "FALSE") {
+        navigateToScreen(OnboardingDestination.route)
+    }
+
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 320.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp, 0.dp),
+    ) {
+        item() {
+            Column {
+                NetWorth(
+                    totals = totals,
+                    accountBalances = data,
+                    baseCurrencyInfo = baseCurrencyInfo
+                )
+
+                Summary(totals = totals, baseCurrencyInfo = baseCurrencyInfo)
+            }
         }
+        item(
+        ) {
+            AccountData(
+                modifier = modifier,
+                viewModel = viewModel,
+                accountsUiState = accountsUiState,
+                navigateToScreen = navigateToScreen,
+                data = data
+            )
+        }
+    }
+}
 
-        "TRUE" -> {
-            Scaffold(
-                containerColor = MaterialTheme.colorScheme.background,
-                topBar = {
-                    ExpenseTopBar(
-                        selectedActivity = AccountsDestination.routeId,
-                        navBarAction = { navigateToScreen(AccountEntryDestination.route) },
-                        navigateToSettings = { navigateToScreen(SettingsDestination.route) }
-                    )
-                },
-                bottomBar = {
-                    ExpenseNavBar(
-                        selectedActivity = AccountsDestination.routeId,
-                        navigateToScreen = navigateToScreen
-                    )
-                },
-                floatingActionButton = {
-                    ExpenseFAB(navigateToScreen = navigateToScreen)
-                }
-            ) { innerPadding ->
-                LazyColumn(
-                    Modifier.padding(innerPadding)
+@Composable
+fun NetWorth(
+    totals: Totals,
+    accountBalances: AccountsUiStateOne,
+    baseCurrencyInfo: CurrencyFormat
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(224.dp)
+            .padding(0.dp, 24.dp, 0.dp, 0.dp)
+    ) {
+        FormattedCurrency(
+            value = accountBalances.grandTotal,
+            currency = baseCurrencyInfo,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally),
+            style = MaterialTheme.typography.displayMedium
+        )
+        Text(
+            text = "Net Worth",
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+                .padding(0.dp, 0.dp, 0.dp, 24.dp),
+            fontStyle = FontStyle.Italic,
+            style = MaterialTheme.typography.labelLarge,
+            color = Color.Gray)
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+                .padding(0.dp, 0.dp, 0.dp, 24.dp),
+        ) {
+            Card(
+                modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 0.dp)
+                    .width(165.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight()
-                        ) {
-                            // Code block to get the current currency's detail.
-                            val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
-                            var baseCurrencyInfo by remember { mutableStateOf(CurrencyFormat()) }
-                            // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
-                            LaunchedEffect(baseCurrencyId) {
-                                baseCurrencyInfo =
-                                    viewModel.getBaseCurrencyInfo(baseCurrencyId = baseCurrencyId.toInt())
-                            }
-                            DonutChart(
-                                data = DonutChartDataCollection(
-                                    listOf(
-                                        DonutChartData(
-                                            totals.income.toFloat(),
-                                            MaterialTheme.colorScheme.primary,
-                                            "Income"
-                                        ),
-                                        DonutChartData(
-                                            totals.expenses.toFloat(),
-                                            MaterialTheme.colorScheme.error,
-                                            "Expense"
-                                        )
-                                    )
-                                )
-                            ) { selected ->
-                                AnimatedContent(targetState = selected, label = "") {
-                                    if (it != null) {
-                                        Column(modifier = Modifier.width(100.dp)) {
-                                            Text(
-                                                text = it.title ?: "",
-                                                textAlign = TextAlign.Center
-                                            )
-                                            FormattedCurrency(
-                                                value = (it.amount ?: 0).toDouble(),
-                                                currency = baseCurrencyInfo
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Column(
-                            modifier = modifier,
-                        ) {
-                            Text(
-                                text = "Summary of Accounts",
-                                style = MaterialTheme.typography.titleLarge
-                            )
-                        }
-
-                        enumValues<AccountTypes>().forEach { accountType ->
-                            if (viewModel.countInType(
-                                    accountType,
-                                    accountsUiState.accountList
-                                ) != 0
-                            ) {
-                                val displayName: String = accountType.displayName
-                                AccountList(
-                                    modifier = modifier,
-                                    category = displayName,
-                                    accountList = accountsUiState.accountList,
-                                    viewModel = viewModel,
-                                    navigateToScreen = navigateToScreen,
-                                )
-                            }
-                        }
-                    }
+                    Text(text = "Net Income")
+                    FormattedCurrency(
+                        value = totals.income,
+                        currency = baseCurrencyInfo,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    )
+                }
+            }
+            Card(
+                modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 0.dp)
+                    .width(165.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = "Expenditure")
+                    FormattedCurrency(
+                        value = totals.expenses,
+                        currency = baseCurrencyInfo,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    )
                 }
             }
         }
     }
 }
+
+@Composable
+fun Summary(totals: Totals, baseCurrencyInfo: CurrencyFormat) {
+    Card(
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(24.dp)
+                .height(240.dp)
+                .fillMaxWidth()
+        ) {
+            // Add legend items
+            Column{
+                LegendItem("Income", MaterialTheme.colorScheme.primary)
+                LegendItem("Expense", MaterialTheme.colorScheme.error)
+            }
+            PieChart(
+                pieChartData = PieChartData(
+                    listOf(
+                        PieChartData.Slice(
+                            totals.income.toFloat(),
+                            MaterialTheme.colorScheme.primary
+                        ), PieChartData.Slice(
+                            totals.expenses.toFloat(),
+                            MaterialTheme.colorScheme.error,
+                        )
+                    )
+                ),
+                // Optional properties.
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset(36.dp),
+                animation = simpleChartAnimation(),
+                sliceDrawer = SimpleSliceDrawer()
+            )
+        }
+    }
+}
+
+@Composable
+fun LegendItem(label: String, color: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 4.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .background(color)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = label)
+    }
+}
+
+@Composable
+fun AccountData(
+    modifier: Modifier,
+    viewModel: AccountViewModel,
+    accountsUiState: AccountsUiState,
+    navigateToScreen: (screen: String) -> Unit,
+    data: AccountsUiStateOne
+) {
+    Column(
+        modifier = modifier.padding(0.dp,24.dp,0.dp,0.dp),
+    ) {
+        Text(
+            text = "Summary of Accounts",
+            style = MaterialTheme.typography.titleLarge,
+        )
+
+        enumValues<AccountTypes>().forEach { accountType ->
+            if (viewModel.countInType(
+                    accountType,
+                    accountsUiState.accountList
+                ) != 0
+            ) {
+                AccountList(
+                    modifier = modifier,
+                    category = accountType.displayName,
+                    accountList = accountsUiState.accountList,
+                    viewModel = viewModel,
+                    navigateToScreen = navigateToScreen,
+                    data = data
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun AccountList(
@@ -180,14 +279,16 @@ fun AccountList(
     accountList: List<Pair<Account, Double>>,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
+    data: AccountsUiStateOne
 ) {
-    val data by viewModel.data.collectAsState()
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(0.dp,8.dp,0.dp,0.dp)
     ) {
         Text(
-            text = category,
-            style = MaterialTheme.typography.titleMedium
+            text = "$category Accounts",
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.Gray,
+            fontWeight = FontWeight.Bold
         )
 
         accountList.forEach { accountPair ->
@@ -204,7 +305,6 @@ fun AccountList(
             }
         }
     }
-
 }
 
 @Composable
@@ -277,11 +377,11 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 FormattedCurrency(
-                    value = accountWithBalance.first.initialBalance?.plus(balance)!!,
+                    value = balance,
                     currency = accountCurrencyInfo
                 )
                 FormattedCurrency(
-                    value = accountWithBalance.first.initialBalance?.plus(balance)!!,
+                    value = balance,
                     currency = accountCurrencyInfo
                 )
             }
