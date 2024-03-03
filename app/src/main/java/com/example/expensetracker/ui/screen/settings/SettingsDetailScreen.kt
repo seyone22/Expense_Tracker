@@ -43,6 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -338,7 +339,15 @@ fun AboutList() {
     Column {
         ListItem(
             headlineContent = { Text(text = "Version") },
-            supportingContent = { Text(text = "${R.string.app_version} (${R.string.release_date} | ${R.string.release_time})") },
+            supportingContent = {
+                Text(
+                    text = "${stringResource(id = R.string.app_version)} (${
+                        stringResource(
+                            id = R.string.release_date
+                        )
+                    } | ${stringResource(id = R.string.release_time)})"
+                )
+            },
             modifier = Modifier.clickable { }
         )
     }
@@ -395,17 +404,26 @@ fun AppearanceSettingsList(
                         Row(
 
                         ) {
-                            RadioButton(enabled = false, selected =  (selectedTheme == 0) , onClick = {
-                                selectedTheme = 0
-                            })
+                            RadioButton(
+                                enabled = false,
+                                selected = (selectedTheme == 0),
+                                onClick = {
+                                    selectedTheme = 0
+                                })
                             Text(text = "Light")
                         }
                         Row {
-                            RadioButton(enabled = false,  selected = (selectedTheme == 1), onClick = { selectedTheme = 1 })
+                            RadioButton(
+                                enabled = false,
+                                selected = (selectedTheme == 1),
+                                onClick = { selectedTheme = 1 })
                             Text(text = "Dark")
                         }
                         Row {
-                            RadioButton(enabled = false, selected = (selectedTheme == 2), onClick = { selectedTheme = 2 })
+                            RadioButton(
+                                enabled = false,
+                                selected = (selectedTheme == 2),
+                                onClick = { selectedTheme = 2 })
                             Text(text = "System Default")
                         }
                     }
@@ -428,7 +446,7 @@ fun DataSettingsList(
             headlineContent = { Text(text = "Update Currency Formats") },
             supportingContent = { Text(text = "Exchange rates are updated monthly") },
             modifier = Modifier.clickable {
-                Log.d("TAG",metadata.toString())
+                Log.d("TAG", metadata.toString())
                 viewModel.getMonthlyRates(
                     baseCurrencyId = metadata.find { it -> it!!.infoName == "BASECURRENCYID" }!!.infoValue.toInt()
                 )

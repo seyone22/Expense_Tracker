@@ -21,6 +21,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.ui.AppViewModelProvider
@@ -37,29 +38,29 @@ object SettingsDestination : NavigationDestination {
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
-    navigateBack : ()  -> Unit,
+    navigateBack: () -> Unit,
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-                 TopAppBar(
-                     colors = TopAppBarDefaults.topAppBarColors(
-                         containerColor = MaterialTheme.colorScheme.background,
-                         titleContentColor = MaterialTheme.colorScheme.onSurface,
-                     ),
-                     title = { Text(text = "Settings") },
-                     navigationIcon = {
-                         IconButton(onClick = { navigateBack() }) {
-                             Icon(
-                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                 contentDescription = null
-                             )
-                         }
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                title = { Text(text = "Settings") },
+                navigationIcon = {
+                    IconButton(onClick = { navigateBack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
 
-                     }
-                 )
+                }
+            )
         },
     ) { innerPadding ->
         Column(
@@ -103,7 +104,15 @@ fun SettingsScreen(
             )
             ListItem(
                 headlineContent = { Text(text = "About") },
-                supportingContent = { Text(text = "${R.string.app_name} ${R.string.app_version}") },
+                supportingContent = {
+                    Text(
+                        text = "${stringResource(id = R.string.app_name)} ${
+                            stringResource(
+                                id = R.string.app_version
+                            )
+                        }"
+                    )
+                },
                 leadingContent = {
                     Icon(
                         imageVector = Icons.Outlined.Info,
