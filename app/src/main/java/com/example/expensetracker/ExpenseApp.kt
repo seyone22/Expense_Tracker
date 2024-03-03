@@ -167,7 +167,7 @@ fun ExpenseApp(
 
             floatingActionButton = {
                 if (navigationType == ExpenseNavigationType.BOTTOM_NAVIGATION) {
-                    ExpenseFAB(navigateToScreen = { screen -> navController.navigate(screen) })
+                    navBackStackEntry?.destination?.route?.let { ExpenseFAB(navigateToScreen = { screen -> navController.navigate(screen) }, currentActivity = it) }
                 }
             }
         ) { innerPadding ->

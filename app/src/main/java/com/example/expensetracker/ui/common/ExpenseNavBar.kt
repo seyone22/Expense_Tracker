@@ -30,8 +30,6 @@ import androidx.compose.ui.unit.dp
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
-import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
-import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.screen.report.BudgetsDestination
 import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
@@ -85,7 +83,7 @@ fun ExpenseNavBar(
     type: ExpenseNavigationType = ExpenseNavigationType.BOTTOM_NAVIGATION
 
 ) {
-    if ((currentActivity != SettingsDestination.route) and (currentActivity != OnboardingDestination.route) and (currentActivity != TransactionEntryDestination.route)) {
+    if ((currentActivity == AccountsDestination.route) or (currentActivity == EntitiesDestination.route) or (currentActivity == BudgetsDestination.route) or (currentActivity == TransactionsDestination.route) or (currentActivity == ReportsDestination.route)) {
         if (type == ExpenseNavigationType.BOTTOM_NAVIGATION) {
             NavigationBar(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -116,7 +114,9 @@ fun ExpenseNavBar(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    ExpenseFAB(navigateToScreen = { screen -> navigateToScreen(screen) })
+                    if (currentActivity != null) {
+                        ExpenseFAB(navigateToScreen = { screen -> navigateToScreen(screen) }, currentActivity = currentActivity)
+                    }
                     Spacer(modifier = Modifier.height(200.dp))
                     activitiesAndIcons.forEachIndexed { _, pair ->
                         NavigationRailItem(
