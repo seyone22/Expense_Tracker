@@ -14,7 +14,7 @@ import com.example.expensetracker.ui.screen.operations.entity.category.CategoryE
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyEntryViewModel
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
-import com.example.expensetracker.ui.screen.report.BudgetViewModel
+import com.example.expensetracker.ui.screen.budget.BudgetViewModel
 import com.example.expensetracker.ui.screen.report.ReportViewModel
 import com.example.expensetracker.ui.screen.settings.SettingsViewModel
 import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel

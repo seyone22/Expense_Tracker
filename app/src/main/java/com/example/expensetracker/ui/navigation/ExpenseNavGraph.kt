@@ -32,8 +32,8 @@ import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryDe
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryScreen
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryScreen
-import com.example.expensetracker.ui.screen.report.BudgetScreen
-import com.example.expensetracker.ui.screen.report.BudgetsDestination
+import com.example.expensetracker.ui.screen.budget.BudgetScreen
+import com.example.expensetracker.ui.screen.budget.BudgetsDestination
 import com.example.expensetracker.ui.screen.report.ReportScreen
 import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
@@ -42,7 +42,6 @@ import com.example.expensetracker.ui.screen.settings.SettingsDetailScreen
 import com.example.expensetracker.ui.screen.settings.SettingsScreen
 import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionsScreen
-import com.example.expensetracker.ui.utils.ExpenseNavigationType
 
 /**
  * Provides Navigation graph for the application.
