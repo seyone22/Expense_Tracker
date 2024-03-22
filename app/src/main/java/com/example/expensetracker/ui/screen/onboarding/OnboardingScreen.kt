@@ -16,7 +16,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,12 +33,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.data.prepopulate
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.accounts.AccountsDestination
 import kotlinx.coroutines.launch
 
 object OnboardingDestination : NavigationDestination {
