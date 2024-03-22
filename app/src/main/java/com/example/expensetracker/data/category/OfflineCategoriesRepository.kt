@@ -14,4 +14,6 @@ class OfflineCategoriesRepository(private val categoryDao: CategoryDao) : Catego
 
     override fun getAllParentCategories(): Flow<List<Category>> = categoryDao.getAllParentCategories()
     override fun getAllSubCategories(): Flow<List<Category>> = categoryDao.getAllSubCategories()
+
+    override suspend fun insertIfNotExists(category: Category) = categoryDao.insertIfNotExists(category)
 }

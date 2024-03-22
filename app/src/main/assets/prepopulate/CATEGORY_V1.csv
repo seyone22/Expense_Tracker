@@ -1,0 +1,57 @@
+1,_tr_Bills,1,-1
+2,_tr_Telephone,1,1
+3,_tr_Electricity,1,1
+4,_tr_Gas,1,1
+5,_tr_Internet,1,1
+6,_tr_Rent,1,1
+7,_tr_Cable TV,1,1
+8,_tr_Water,1,1
+9,_tr_Food,1,-1
+10,_tr_Groceries,1,9
+11,_tr_Dining out,1,9
+12,_tr_Leisure,1,-1
+13,_tr_Movies,1,12
+14,_tr_Video Rental,1,12
+15,_tr_Magazines,1,12
+16,_tr_Automobile,1,-1
+17,_tr_Maintenance,1,16
+18,_tr_Gas,1,16
+19,_tr_Parking,1,16
+20,_tr_Registration,1,16
+21,_tr_Education,1,-1
+22,_tr_Books,1,21
+23,_tr_Tuition,1,21
+24,_tr_Others,1,21
+25,_tr_Homeneeds,1,-1
+26,_tr_Clothing,1,25
+27,_tr_Furnishing,1,25
+28,_tr_Others,1,25
+29,_tr_Healthcare,1,-1
+30,_tr_Health,1,29
+31,_tr_Dental,1,29
+32,_tr_Eyecare,1,29
+33,_tr_Physician,1,29
+34,_tr_Prescriptions,1,29
+35,_tr_Insurance,1,-1
+36,_tr_Auto,1,35
+37,_tr_Life,1,35
+38,_tr_Home,1,35
+39,_tr_Health,1,35
+40,_tr_Vacation,1,-1
+41,_tr_Travel,1,40
+42,_tr_Lodging,1,40
+43,_tr_Sightseeing,1,40
+44,_tr_Taxes,1,-1
+45,_tr_Income Tax,1,44
+46,_tr_House Tax,1,44
+47,_tr_Water Tax,1,44
+48,_tr_Others,1,44
+49,_tr_Miscellaneous,1,-1
+50,_tr_Gifts,1,-1
+51,_tr_Income,1,-1
+52,_tr_Salary,1,51
+53,_tr_Reimbursement/Refunds,1,51
+54,_tr_Investment Income,1,51
+55,_tr_Other Income,1,-1
+56,_tr_Other Expenses,1,-1
+57,_tr_Transfer,1,-1

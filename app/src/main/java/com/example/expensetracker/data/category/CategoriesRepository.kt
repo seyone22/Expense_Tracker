@@ -14,4 +14,7 @@ interface CategoriesRepository {
 
     fun getAllParentCategories() : Flow<List<Category>>
     fun getAllSubCategories() : Flow<List<Category>>
+
+
+    suspend fun insertIfNotExists(category: Category)
 }

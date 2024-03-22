@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.expensetracker.ExpenseApplication
 import com.example.expensetracker.ui.screen.accounts.AccountViewModel
+import com.example.expensetracker.ui.screen.budget.BudgetViewModel
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.onboarding.OnboardingViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountDetailViewModel
@@ -14,7 +15,6 @@ import com.example.expensetracker.ui.screen.operations.entity.category.CategoryE
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyEntryViewModel
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
-import com.example.expensetracker.ui.screen.budget.BudgetViewModel
 import com.example.expensetracker.ui.screen.report.ReportViewModel
 import com.example.expensetracker.ui.screen.settings.SettingsViewModel
 import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
@@ -93,7 +93,8 @@ object AppViewModelProvider {
         initializer {
             OnboardingViewModel(
                 expenseApplication().container.metadataRepository,
-                expenseApplication().container.currenciesRepository
+                expenseApplication().container.currenciesRepository,
+                expenseApplication().container.categoriesRepository
             )
         }
     }

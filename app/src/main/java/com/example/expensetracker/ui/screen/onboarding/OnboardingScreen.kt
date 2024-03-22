@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.onboarding
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,10 +29,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
+import com.example.expensetracker.data.prepopulate
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.ui.AppViewModelProvider
@@ -66,18 +70,21 @@ fun OnboardingScreen(
 fun OnboardingSheet(
     modifier: Modifier,
     viewModel: OnboardingViewModel,
-    navigateToScreen: (screen: String) -> Unit
+    navigateToScreen: (screen: String) -> Unit,
+    context: Context = LocalContext.current
 ) {
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
 
     var username by remember { mutableStateOf("") }
-
     val currencyList by viewModel.currencyList.collectAsState()
-
     var currentCurrency by remember { mutableStateOf(CurrencyFormat()) }
-
     var baseCurrencyExpanded by remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(Unit) {
+        viewModel.prepopulateDB(context)
+    }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
