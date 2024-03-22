@@ -10,11 +10,11 @@ import com.example.expensetracker.data.category.CategoriesRepository
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.payee.PayeesRepository
 import com.example.expensetracker.model.Category
+import com.example.expensetracker.model.CategoryDetails
+import com.example.expensetracker.model.CategoryUiState
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
-import com.example.expensetracker.ui.screen.operations.entity.category.CategoryDetails
-import com.example.expensetracker.ui.screen.operations.entity.category.CategoryUiState
-import com.example.expensetracker.ui.screen.operations.entity.category.toCategory
+import com.example.expensetracker.model.toCategory
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyUiState
 import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrency
@@ -47,20 +47,6 @@ class EntityViewModel(
     val entitiesUiState: Flow<EntitiesUiState> = combine(categoriesFlow, currencyFormatsFlow, payeesFlow) { categories, currencies, payees ->
         EntitiesUiState(categories, payees, currencies)
     }
-
-    // StateFlow for entities
-    val d: StateFlow<EntitiesUiState> =
-        categoriesRepository.getAllCategoriesStream()
-            .map { categories ->
-                EntitiesUiState(
-                    categoriesList = categories
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = EntitiesUiState()
-            )
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
@@ -164,7 +150,6 @@ class EntityViewModel(
 
     suspend fun getNameOfCategory(categId: Int) : Category {
         val x = categoriesRepository.getCategoriesStream(categId)
-
         return x.first() ?:  Category()
     }
 }

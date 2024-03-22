@@ -33,9 +33,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.expensetracker.model.CategoryDetails
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
-import com.example.expensetracker.ui.screen.operations.entity.category.CategoryDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 
