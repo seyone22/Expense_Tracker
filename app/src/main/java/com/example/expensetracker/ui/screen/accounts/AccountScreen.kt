@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.outlined.ArrowDownward
+import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -152,14 +154,19 @@ fun NetWorth(
                 modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 0.dp)
                     .width(165.dp)
             ) {
-                Column(
+                Row(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(text = "Net Income")
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowDownward,
+                        contentDescription = null,
+                        tint = Color(0xff50b381),
+                        modifier = Modifier.size(36.dp, 36.dp)
+                    )
                     FormattedCurrency(
                         value = totals.income,
                         currency = baseCurrencyInfo,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        modifier = Modifier.align(Alignment.CenterVertically),
                     )
                 }
             }
@@ -167,14 +174,19 @@ fun NetWorth(
                 modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 0.dp)
                     .width(165.dp)
             ) {
-                Column(
+                Row(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(text = "Expenditure")
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowUpward,
+                        contentDescription = null,
+                        tint = Color(0xfff75e51),
+                        modifier = Modifier.size(36.dp, 36.dp)
+                    )
                     FormattedCurrency(
                         value = totals.expenses,
                         currency = baseCurrencyInfo,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        modifier = Modifier.align(Alignment.CenterVertically),
                     )
                 }
             }
