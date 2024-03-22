@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -99,9 +100,15 @@ fun EntityScreen(
                 )
             }
         }
-        HorizontalPager(state = pagerState, verticalAlignment = Alignment.Top) { page ->
+        HorizontalPager(
+            state = pagerState,
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.fillMaxHeight()
+
+        ) { page ->
             when (page) {
                 0 -> {
+                    state = pagerState.currentPage
                     CategoryList(
                         list = entityUiState.categoriesList,
                         viewModel = viewModel,
@@ -109,12 +116,12 @@ fun EntityScreen(
                         longClicked = { selected ->
                             setIsItemSelected(true)
                             setSelectedObject(SelectedObjects(category = selected))
-                            Log.d("TAG", "EntityScreen: SET!")
                         },
                     )
                 }
 
                 1 -> {
+                    state = pagerState.currentPage
                     PayeeList(
                         list = entityUiState.payeesList,
                         viewModel = viewModel,
@@ -127,6 +134,7 @@ fun EntityScreen(
                 }
 
                 2 -> {
+                    state = pagerState.currentPage
                     CurrenciesList(
                         list = entityUiState.currenciesList,
                         viewModel = viewModel,
@@ -207,7 +215,7 @@ fun PayeeList(
 ) {
     val haptics = LocalHapticFeedback.current
 
-    LazyColumn {
+    LazyColumn() {
         items(list, key = { it.payeeId }) {
             ListItem(
                 headlineContent = { Text(it.payeeName) },
@@ -243,7 +251,7 @@ fun CurrenciesList(
 ) {
     val haptics = LocalHapticFeedback.current
 
-    LazyColumn {
+    LazyColumn() {
         items(list, key = { it.currencyId }) {
             ListItem(
                 headlineContent = {
