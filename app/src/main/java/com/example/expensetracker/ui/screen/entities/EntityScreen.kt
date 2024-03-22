@@ -110,7 +110,8 @@ fun EntityScreen(
                 0 -> {
                     state = pagerState.currentPage
                     CategoryList(
-                        list = entityUiState.categoriesList,
+                        listParent = entityUiState.categoriesParent,
+                        listSub = entityUiState.categoriesSub,
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
                         longClicked = { selected ->
@@ -155,49 +156,59 @@ fun EntityScreen(
 @Composable
 fun CategoryList(
     modifier: Modifier = Modifier,
-    list: List<Category>,
+    listParent: List<Category>,
+    listSub: List<Category>,
     viewModel: EntityViewModel,
     longClicked: (Category) -> Unit,
     coroutineScope: CoroutineScope
 ) {
     val haptics = LocalHapticFeedback.current
-    val groupedList = (list.groupBy { it.parentId })
+    val groupedList = (listSub.groupBy { it.parentId })
 
     LazyColumn() {
         item {
-            groupedList.forEach { group ->
-                var groupCategory by remember { mutableStateOf(Category()) }
-                coroutineScope.launch {
-                    groupCategory = viewModel.getNameOfCategory(group.key)
-                }
-                Text(
-                    text = if (group.key != -1) {
-                        removeTrPrefix(groupCategory.categName)
-                    } else {
-                        "Uncategorized"
-                    },
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(16.dp, 8.dp, 0.dp, 0.dp)
-                )
-                //HorizontalDivider()
-                group.value.forEach {
-                    ListItem(
-                        headlineContent = { Text(removeTrPrefix(it.categName)) },
-                        leadingContent = {
-                            Icon(
-                                Icons.Filled.Bookmark,
-                                contentDescription = null,
-                            )
-                        },
-                        modifier = Modifier.combinedClickable(
-                            onClick = {},
-                            onLongClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                longClicked(it)
-                            },
-                            onLongClickLabel = "  "
+            listParent.forEach { parent ->
+                ListItem(
+                    headlineContent = { Text(removeTrPrefix(parent.categName)) },
+                    leadingContent = {
+                        Icon(
+                            Icons.Filled.Bookmark,
+                            contentDescription = null,
                         )
+                    },
+                    modifier = Modifier.combinedClickable(
+                        onClick = {},
+                        onLongClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            longClicked(parent)
+                        },
+                        onLongClickLabel = "  "
                     )
+                )
+
+                groupedList.forEach { group ->
+                    if(group.key == parent.categId) {
+                        group.value.forEach {
+                            ListItem(
+                                headlineContent = { Text(removeTrPrefix(it.categName)) },
+                                leadingContent = {
+                                    Icon(
+                                        Icons.Filled.Bookmark,
+                                        contentDescription = null,
+                                    )
+                                },
+                                modifier = Modifier.combinedClickable(
+                                    onClick = {},
+                                    onLongClick = {
+                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        longClicked(it)
+                                    },
+                                    onLongClickLabel = "  "
+                                )
+                                    .padding(24.dp,0.dp,0.dp,0.dp)
+                            )
+                        }
+                    }
                 }
             }
         }

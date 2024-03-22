@@ -39,13 +39,16 @@ class EntityViewModel(
 ) : ViewModel() {
 
     // Flows for each type of entity
+    private val categoriesParentFlow: Flow<List<Category>> = categoriesRepository.getAllParentCategories()
+    private val categoriesSubFlow: Flow<List<Category>> = categoriesRepository.getAllSubCategories()
+
     private val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
     private val currencyFormatsFlow: Flow<List<CurrencyFormat>> = currencyFormatsRepository.getAllCurrencyFormatsStream()
     private val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllActivePayeesStream()
 
     // Combine the flows and calculate the totals
-    val entitiesUiState: Flow<EntitiesUiState> = combine(categoriesFlow, currencyFormatsFlow, payeesFlow) { categories, currencies, payees ->
-        EntitiesUiState(categories, payees, currencies)
+    val entitiesUiState: Flow<EntitiesUiState> = combine(categoriesParentFlow, categoriesSubFlow, currencyFormatsFlow, payeesFlow) { categoriesParent, categoriesSub, currencies, payees ->
+        EntitiesUiState(categoriesParent, categoriesSub, payees, currencies)
     }
 
     companion object {
@@ -158,7 +161,8 @@ class EntityViewModel(
  * Ui State for EntitiesScreen
  */
 data class EntitiesUiState(
-    val categoriesList: List<Category> = listOf(),
+    val categoriesParent: List<Category> = listOf(),
+    val categoriesSub: List<Category> = listOf(),
     val payeesList: List<Payee> = listOf(),
     val currenciesList: List<CurrencyFormat> = listOf(),
 )
