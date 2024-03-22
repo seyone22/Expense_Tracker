@@ -1,27 +1,22 @@
 package com.example.expensetracker.ui.screen.onboarding
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.data.MMEXDatabase
+import com.example.expensetracker.data.category.CategoriesRepository
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
-import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.data.metadata.MetadataRepository
-import com.example.expensetracker.model.Account
-import com.example.expensetracker.model.AccountTypes
+import com.example.expensetracker.data.prepopulate
 import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.ui.screen.operations.account.AccountDetails
-import com.example.expensetracker.ui.screen.operations.account.AccountUiState
-import com.example.expensetracker.ui.screen.operations.account.toAccountDetails
+import com.example.expensetracker.model.Metadata
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -30,7 +25,8 @@ import java.time.format.DateTimeFormatter
  */
 class OnboardingViewModel(
     private val metadataRepository: MetadataRepository,
-    private val currencyFormatsRepository: CurrencyFormatsRepository
+    private val currencyFormatsRepository: CurrencyFormatsRepository,
+    private val categoriesRepository: CategoriesRepository
 ) : ViewModel() {
     var metadataUiState by mutableStateOf(MetadataUiState())
         private set
@@ -121,6 +117,10 @@ class OnboardingViewModel(
         return with(uiState) {
             uiState.usernameMetadata.infoValue.isNotBlank() && uiState.baseCurrencyMetadata.infoValue != "-1"
         }
+    }
+
+    suspend fun prepopulateDB(context : Context) {
+        prepopulate(context, categoriesRepository, currencyFormatsRepository)
     }
 }
 

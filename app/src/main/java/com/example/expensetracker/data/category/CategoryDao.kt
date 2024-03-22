@@ -29,4 +29,7 @@ interface CategoryDao {
     fun getAllParentCategories(): Flow<List<Category>>
     @Query("SELECT * FROM CATEGORY_V1 WHERE parentId != -1 ORDER BY categName ASC")
     fun getAllSubCategories(): Flow<List<Category>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfNotExists(category: Category)
 }
