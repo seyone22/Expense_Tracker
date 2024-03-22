@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -268,11 +270,14 @@ fun CurrenciesList(
                 headlineContent = {
                     FormattedCurrency(
                         value = it.baseConvRate,
-                        currency = CurrencyFormat()
+                        currency = CurrencyFormat(),
                     )
                 },
                 overlineContent = { Text(removeTrPrefix(it.currencyName)) },
-                leadingContent = { Text(it.currency_symbol) },
+                leadingContent = { Text(
+                    text = it.currency_symbol,
+                    modifier = Modifier.requiredWidth(48.dp)
+                ) },
                 modifier = Modifier.combinedClickable(
                     onClick = {},
                     onLongClick = {
