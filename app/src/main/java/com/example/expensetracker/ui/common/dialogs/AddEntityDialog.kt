@@ -152,7 +152,7 @@ fun PayeeEntryDialog(
     edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
-    var payeeSelected by remember { mutableStateOf(selectedPayee) }
+    val payeeSelected by remember { mutableStateOf(selectedPayee) }
 
     viewModel.updatePayeeState(
         viewModel.payeeUiState.payeeDetails.copy(
@@ -207,26 +207,6 @@ fun PayeeEntryDialog(
                         )
                     })
                 )
-                Row(
-                    modifier = Modifier.padding(0.dp, 8.dp),
-                ) {
-                    Checkbox(
-                        checked = payeeSelected.active.toBoolean(),
-                        onCheckedChange = {
-                            payeeSelected.active = it.toString()
-                            viewModel.updatePayeeState(
-                                viewModel.payeeUiState.payeeDetails.copy(
-                                    active = (it).toString()
-                                )
-                            )
-                        },
-                    )
-                    Text(
-                        text = "Hidden",
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                }
                 // We're obviously not including last used category -_-
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
@@ -286,6 +266,27 @@ fun PayeeEntryDialog(
                         )
                     })
                 )
+                Row(
+                    modifier = Modifier.padding(0.dp, 8.dp)
+                        .fillMaxWidth(),
+                ) {
+                    Checkbox(
+                        checked = payeeSelected.active.toBoolean(),
+                        onCheckedChange = {
+                            payeeSelected.active = it.toString()
+                            viewModel.updatePayeeState(
+                                viewModel.payeeUiState.payeeDetails.copy(
+                                    active = (it).toString()
+                                )
+                            )
+                        },
+                    )
+                    Text(
+                        text = "Hidden",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                }
 
                 Row(
                     modifier = Modifier
@@ -327,7 +328,7 @@ fun CurrencyEntryDialog(
     edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
-    var currencySelected by remember { mutableStateOf(selectedCurrency) }
+    val currencySelected by remember { mutableStateOf(selectedCurrency) }
 
     viewModel.updateCurrencyState(
         viewModel.currencyUiState.currencyDetails.copy(
