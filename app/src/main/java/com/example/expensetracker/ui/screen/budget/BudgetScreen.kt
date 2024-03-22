@@ -1,4 +1,4 @@
-package com.example.expensetracker.ui.screen.report
+package com.example.expensetracker.ui.screen.budget
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable

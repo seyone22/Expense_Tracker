@@ -33,6 +33,7 @@ import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.Transaction
+import com.example.expensetracker.model.toCategoryDetails
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
@@ -45,7 +46,6 @@ import com.example.expensetracker.ui.common.dialogs.PayeeEntryDialog
 import com.example.expensetracker.ui.navigation.ExpenseNavHost
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
-import com.example.expensetracker.ui.screen.operations.entity.category.toCategoryDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination

@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -34,9 +33,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.expensetracker.model.CategoryDetails
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
-import com.example.expensetracker.ui.screen.operations.entity.category.CategoryDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 
@@ -152,7 +151,7 @@ fun PayeeEntryDialog(
     edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
-    var payeeSelected by remember { mutableStateOf(selectedPayee) }
+    val payeeSelected by remember { mutableStateOf(selectedPayee) }
 
     viewModel.updatePayeeState(
         viewModel.payeeUiState.payeeDetails.copy(
@@ -207,26 +206,6 @@ fun PayeeEntryDialog(
                         )
                     })
                 )
-                Row(
-                    modifier = Modifier.padding(0.dp, 8.dp),
-                ) {
-                    Checkbox(
-                        checked = payeeSelected.active.toBoolean(),
-                        onCheckedChange = {
-                            payeeSelected.active = it.toString()
-                            viewModel.updatePayeeState(
-                                viewModel.payeeUiState.payeeDetails.copy(
-                                    active = (it).toString()
-                                )
-                            )
-                        },
-                    )
-                    Text(
-                        text = "Hidden",
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                }
                 // We're obviously not including last used category -_-
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
@@ -286,6 +265,27 @@ fun PayeeEntryDialog(
                         )
                     })
                 )
+                Row(
+                    modifier = Modifier.padding(0.dp, 8.dp)
+                        .fillMaxWidth(),
+                ) {
+                    Checkbox(
+                        checked = payeeSelected.active.toBoolean(),
+                        onCheckedChange = {
+                            payeeSelected.active = it.toString()
+                            viewModel.updatePayeeState(
+                                viewModel.payeeUiState.payeeDetails.copy(
+                                    active = (it).toString()
+                                )
+                            )
+                        },
+                    )
+                    Text(
+                        text = "Hidden",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    )
+                }
 
                 Row(
                     modifier = Modifier
@@ -327,7 +327,7 @@ fun CurrencyEntryDialog(
     edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
-    var currencySelected by remember { mutableStateOf(selectedCurrency) }
+    val currencySelected by remember { mutableStateOf(selectedCurrency) }
 
     viewModel.updateCurrencyState(
         viewModel.currencyUiState.currencyDetails.copy(

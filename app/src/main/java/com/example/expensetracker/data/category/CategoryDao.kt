@@ -24,6 +24,9 @@ interface CategoryDao {
     fun getAllCategories(): Flow<List<Category>>
     @Query("SELECT * FROM CATEGORY_V1 WHERE active = 1 ORDER BY categName ASC")
     fun getAllActiveCategories(): Flow<List<Category>>
-    @Query("SELECT * FROM CATEGORY_V1 WHERE categId = :categId")
-    fun getAllCategoriesByCategory(categId: Int): Flow<List<Category>>
+
+    @Query("SELECT * FROM CATEGORY_V1 WHERE parentId = -1 ORDER BY categName ASC")
+    fun getAllParentCategories(): Flow<List<Category>>
+    @Query("SELECT * FROM CATEGORY_V1 WHERE parentId != -1 ORDER BY categName ASC")
+    fun getAllSubCategories(): Flow<List<Category>>
 }

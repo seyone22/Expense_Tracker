@@ -29,6 +29,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
+import com.example.expensetracker.model.CategoryDetails
+import com.example.expensetracker.model.CategoryUiState
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
@@ -43,11 +45,11 @@ object CategoryEntryDestination : NavigationDestination {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryEntryScreen(
+    modifier: Modifier = Modifier,
     navigateBack: () -> Unit = {},
     onNavigateUp: () -> Unit = {},
     canNavigateBack: Boolean = true,
     viewModel: CategoryEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -79,12 +81,10 @@ fun CategoryEntryScreen(
                     Button(
                         onClick = {
                         coroutineScope.launch {
-                            viewModel.saveCategory()
                             navigateBack()
                         }
                         },
                         modifier = modifier.padding(0.dp,0.dp,8.dp,0.dp),
-                        enabled = viewModel.categoryUiState.isEntryValid
                     ) {
                         Text(text = "Create")
                     }
@@ -95,8 +95,6 @@ fun CategoryEntryScreen(
 
     ) { padding ->
         CategoryEntryBody(
-            categoryUiState = viewModel.categoryUiState,
-            onCategoryValueChange = viewModel::updateUiState,
             modifier = modifier.padding(padding)
         )
     }

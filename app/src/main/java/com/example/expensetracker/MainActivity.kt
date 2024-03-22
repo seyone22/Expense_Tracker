@@ -9,10 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.lifecycleScope
-import com.example.expensetracker.data.MMEXDatabase
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
-import kotlinx.coroutines.launch
 
 @ExperimentalMaterial3WindowSizeClassApi
 class MainActivity : ComponentActivity() {

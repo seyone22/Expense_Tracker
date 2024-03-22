@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.entities
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,11 +10,11 @@ import com.example.expensetracker.data.category.CategoriesRepository
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.payee.PayeesRepository
 import com.example.expensetracker.model.Category
+import com.example.expensetracker.model.CategoryDetails
+import com.example.expensetracker.model.CategoryUiState
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
-import com.example.expensetracker.ui.screen.operations.entity.category.CategoryDetails
-import com.example.expensetracker.ui.screen.operations.entity.category.CategoryUiState
-import com.example.expensetracker.ui.screen.operations.entity.category.toCategory
+import com.example.expensetracker.model.toCategory
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyUiState
 import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrency
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -37,28 +39,17 @@ class EntityViewModel(
 ) : ViewModel() {
 
     // Flows for each type of entity
+    private val categoriesParentFlow: Flow<List<Category>> = categoriesRepository.getAllParentCategories()
+    private val categoriesSubFlow: Flow<List<Category>> = categoriesRepository.getAllSubCategories()
+
     private val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
     private val currencyFormatsFlow: Flow<List<CurrencyFormat>> = currencyFormatsRepository.getAllCurrencyFormatsStream()
     private val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllActivePayeesStream()
 
     // Combine the flows and calculate the totals
-    val entitiesUiState: Flow<EntitiesUiState> = combine(categoriesFlow, currencyFormatsFlow, payeesFlow) { categories, currencies, payees ->
-        EntitiesUiState(categories, payees, currencies)
+    val entitiesUiState: Flow<EntitiesUiState> = combine(categoriesParentFlow, categoriesSubFlow, currencyFormatsFlow, payeesFlow) { categoriesParent, categoriesSub, currencies, payees ->
+        EntitiesUiState(categoriesParent, categoriesSub, payees, currencies)
     }
-
-    // StateFlow for entities
-    val d: StateFlow<EntitiesUiState> =
-        categoriesRepository.getAllCategoriesStream()
-            .map { categories ->
-                EntitiesUiState(
-                    categoriesList = categories
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = EntitiesUiState()
-            )
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
@@ -159,13 +150,19 @@ class EntityViewModel(
         currencyUiState =
             CurrencyUiState(currencyDetails = currencyDetails, isEntryValid = validateCurrencyInput(currencyDetails))
     }
+
+    suspend fun getNameOfCategory(categId: Int) : Category {
+        val x = categoriesRepository.getCategoriesStream(categId)
+        return x.first() ?:  Category()
+    }
 }
 
 /**
  * Ui State for EntitiesScreen
  */
 data class EntitiesUiState(
-    val categoriesList: List<Category> = listOf(),
+    val categoriesParent: List<Category> = listOf(),
+    val categoriesSub: List<Category> = listOf(),
     val payeesList: List<Payee> = listOf(),
     val currenciesList: List<CurrencyFormat> = listOf(),
 )
