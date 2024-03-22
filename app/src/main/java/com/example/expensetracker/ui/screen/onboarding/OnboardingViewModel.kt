@@ -38,27 +38,27 @@ class OnboardingViewModel(
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(OnboardingViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = 0
             )
     val isUsed =
         metadataRepository.getMetadataByNameStream("ISUSED")
             .map { info ->
-                info?.infoValue?.toString() ?: "FALSE"
+                info?.infoValue ?: "FALSE"
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(OnboardingViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = ""
             )
     val userName =
         metadataRepository.getMetadataByNameStream("USERNAME")
             .map { info ->
-                info?.infoValue?.toString() ?: ""
+                info?.infoValue ?: ""
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(OnboardingViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = ""
             )
 
@@ -71,7 +71,7 @@ class OnboardingViewModel(
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(OnboardingViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = CurrencyList()
             )
 
