@@ -42,10 +42,10 @@ class ReportViewModel(
         payeesRepository.getAllActivePayeesStream()
 
     // Combine the flows and get the chart data
-    val byPayeeData: Flow<Pair<List<Payee>, List<Double>>> =
+    val byPayeeData: Flow<Pair<List<String>, List<Double>>> =
         combine(payeesFlow, transactionsIncomeFlow) { payees, transactions ->
             // Separate payees and total amounts into two lists
-            val payeeList = payees.toList()
+            val payeeList = payees.map { it.payeeName }
 
             // Calculate the total sum of all payees' total amounts
             val totalSum = payees.sumOf { payee ->
