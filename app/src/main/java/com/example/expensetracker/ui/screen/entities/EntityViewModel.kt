@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.entities
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -158,6 +160,12 @@ class EntityViewModel(
     fun updateCurrencyState(currencyDetails: CurrencyDetails) {
         currencyUiState =
             CurrencyUiState(currencyDetails = currencyDetails, isEntryValid = validateCurrencyInput(currencyDetails))
+    }
+
+    suspend fun getNameOfCategory(categId: Int) : Category {
+        val x = categoriesRepository.getCategoriesStream(categId)
+
+        return x.first() ?:  Category()
     }
 }
 

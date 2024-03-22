@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -32,6 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.SelectedObjects
@@ -43,6 +47,7 @@ import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 object EntitiesDestination : NavigationDestination {
@@ -56,9 +61,9 @@ object EntitiesDestination : NavigationDestination {
 fun EntityScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
-    setTopBarAction : (Int) -> Unit,
-    setIsItemSelected : (Boolean) -> Unit,
-    setSelectedObject : (SelectedObjects) -> Unit,
+    setTopBarAction: (Int) -> Unit,
+    setIsItemSelected: (Boolean) -> Unit,
+    setSelectedObject: (SelectedObjects) -> Unit,
     viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -75,7 +80,7 @@ fun EntityScreen(
         PrimaryTabRow(
             selectedTabIndex = state,
             containerColor = MaterialTheme.colorScheme.background,
-            ) {
+        ) {
             titles.forEachIndexed { index, title ->
                 Tab(
                     selected = state == index,
@@ -148,34 +153,45 @@ fun CategoryList(
     coroutineScope: CoroutineScope
 ) {
     val haptics = LocalHapticFeedback.current
+    val groupedList = (list.groupBy { it.parentId })
 
     LazyColumn() {
-        items(list, { item -> item.categId }) {
-            ListItem(
-                headlineContent = { Text(removeTrPrefix(it.categName)) },
-                overlineContent = {
-                    if (it.parentId != -1) {
-                        Text(it.parentId.toString())
+        item {
+            groupedList.forEach { group ->
+                var groupCategory by remember { mutableStateOf(Category()) }
+                coroutineScope.launch {
+                    groupCategory = viewModel.getNameOfCategory(group.key)
+                }
+                Text(
+                    text = if (group.key != -1) {
+                        removeTrPrefix(groupCategory.categName)
                     } else {
-                        Text("")
-                    }
-                },
-                leadingContent = {
-                    Icon(
-                        Icons.Filled.Bookmark,
-                        contentDescription = "Localized description",
-                    )
-                },
-                modifier = Modifier.combinedClickable(
-                    onClick = {},
-                    onLongClick = {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        longClicked(it)
+                        "Uncategorized"
                     },
-                    onLongClickLabel = "  "
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(16.dp, 8.dp, 0.dp, 0.dp)
                 )
-            )
-            HorizontalDivider()
+                //HorizontalDivider()
+                group.value.forEach {
+                    ListItem(
+                        headlineContent = { Text(removeTrPrefix(it.categName)) },
+                        leadingContent = {
+                            Icon(
+                                Icons.Filled.Bookmark,
+                                contentDescription = null,
+                            )
+                        },
+                        modifier = Modifier.combinedClickable(
+                            onClick = {},
+                            onLongClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                longClicked(it)
+                            },
+                            onLongClickLabel = "  "
+                        )
+                    )
+                }
+            }
         }
     }
 }
