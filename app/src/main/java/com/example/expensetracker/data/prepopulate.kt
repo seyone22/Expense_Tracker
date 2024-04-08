@@ -79,7 +79,6 @@ fun readCsvCurrency(context: Context): List<CurrencyFormat> {
         )
         list.add(entity)
     }
-
     return list
 }
 

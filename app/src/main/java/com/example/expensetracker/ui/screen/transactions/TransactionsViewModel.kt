@@ -13,6 +13,7 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.ui.screen.operations.account.AccountDetailTransactionUiState
+import com.example.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionUiState
@@ -47,15 +48,15 @@ class TransactionsViewModel(
                 initialValue = AccountDetailTransactionUiState()
             )
 
-    suspend fun getAccountFromId(accountId: Int) : Account? {
+    suspend fun getAccountFromId(accountId: Int): Account? {
         return accountsRepository.getAccountStream(accountId).firstOrNull()
     }
 
-    suspend fun getCurrencyFormatById(currencyId: Int) : CurrencyFormat? {
+    suspend fun getCurrencyFormatById(currencyId: Int): CurrencyFormat? {
         return currencyFormatsRepository.getCurrencyFormatStream(currencyId).firstOrNull()
     }
 
-    suspend fun deleteTransaction(transaction: Transaction) : Boolean {
+    suspend fun deleteTransaction(transaction: Transaction): Boolean {
         return try {
             transactionsRepository.deleteTransaction(transaction)
             true
@@ -65,7 +66,7 @@ class TransactionsViewModel(
         }
     }
 
-    suspend fun editTransaction(transactionDetails: TransactionDetails) : Boolean {
+    suspend fun editTransaction(transactionDetails: TransactionDetails): Boolean {
         return try {
             transactionsRepository.updateTransaction(transactionDetails.toTransaction())
             true
@@ -77,20 +78,15 @@ class TransactionsViewModel(
 
     private fun validateInput(uiState: TransactionDetails = transactionUiState.transactionDetails): Boolean {
         return with(uiState) {
-            transAmount.isNotBlank() && transDate.isNotBlank()&& accountId.isNotBlank() && categoryId.isNotBlank()
+            transAmount.isNotBlank() && transDate.isNotBlank() && accountId.isNotBlank() && categoryId.isNotBlank()
         }
     }
 
-    suspend fun saveTransaction() {
-        if (validateInput()) {
-            transactionsRepository.insertTransaction(transactionUiState.transactionDetails.toTransaction())
-        }
-    }
-
-    fun updateUiState(transactionDetails: TransactionDetails) {
+    fun updateUiState(transactionDetails: TransactionDetails, billsDepositsDetails: BillsDepositsDetails) {
         transactionUiState =
             TransactionUiState(
                 transactionDetails = transactionDetails,
+                billsDepositsDetails = billsDepositsDetails,
                 isEntryValid = validateInput(transactionDetails),
             )
     }

@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.ui.AppViewModelProvider
+import com.example.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryForm
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
@@ -62,7 +63,8 @@ fun EditTransactionDialog(
             transactionNumber = transactionSelected.transactionNumber,
             notes = transactionSelected.notes,
             color = transactionSelected.color
-        )
+        ),
+        billsDepositsDetails = BillsDepositsDetails()
     )
 
     Dialog(
@@ -93,7 +95,7 @@ fun EditTransactionDialog(
                         transactionDetails = transactionSelected,
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
-                        onValueChange = { transactionSelected = it },
+                        onValueChange = { transactionDetails, _ -> transactionSelected = transactionDetails },
                         edit = true
                     )
 

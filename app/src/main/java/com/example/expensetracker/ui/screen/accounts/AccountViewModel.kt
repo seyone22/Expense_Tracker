@@ -11,7 +11,6 @@ import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
 import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.ui.screen.onboarding.OnboardingViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,11 +41,11 @@ class AccountViewModel(
     val isUsed =
         metadataRepository.getMetadataByNameStream("ISUSED")
             .map { info ->
-                info?.infoValue?.toString() ?: "FALSE"
+                info?.infoValue ?: "FALSE"
             }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(AccountViewModel.TIMEOUT_MILLIS),
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = ""
             )
 
@@ -82,7 +81,7 @@ class AccountViewModel(
                 initialValue = AccountsUiState()
             )
 
-    val data: StateFlow<AccountsUiStateOne> =
+    val data: StateFlow<Balances> =
         transactionsRepository.getBalanceByAccountId()
             .map { pairs ->
                 var totalBalance = 0.0
@@ -93,16 +92,16 @@ class AccountViewModel(
 
 
                 }
-                AccountsUiStateOne(pairs, totalBalance)
+                Balances(pairs, totalBalance)
             }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = AccountsUiStateOne()
+                initialValue = Balances()
             )
 
 
-    val accountBalances: StateFlow<AccountsUiStateOne> =
+    val accountBalances: StateFlow<Balances> =
         accountsRepository.getAllActiveAccountsStream()
             .map { accountList ->
                 val balanceData : MutableList<TransactionDao.BalanceResult> = mutableListOf()
@@ -118,12 +117,12 @@ class AccountViewModel(
                     }
                     Log.d("TAG", ": ${accountsRepository.getAccountBalance(it.accountId).firstOrNull()?.balance} - ${it.accountId} - ${it.initialBalance}")
                 }
-                AccountsUiStateOne(balanceData, totalBalance)
+                Balances(balanceData, totalBalance)
             }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = AccountsUiStateOne()
+                initialValue = Balances()
             )
 
     //TODO : FIX
@@ -156,7 +155,7 @@ data class AccountsUiState(
     val grandTotal: Double = 0.0
 )
 
-data class AccountsUiStateOne(
+data class Balances(
     val balancesList: List<TransactionDao.BalanceResult> = emptyList(),
     val grandTotal: Double = 0.0
 )
@@ -166,4 +165,3 @@ data class Totals(
     val income: Double = 0.0,
     val total: Double = 0.0
 )
-

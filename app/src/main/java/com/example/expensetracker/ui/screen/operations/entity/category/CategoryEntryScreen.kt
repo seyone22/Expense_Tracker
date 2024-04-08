@@ -49,7 +49,6 @@ fun CategoryEntryScreen(
     navigateBack: () -> Unit = {},
     onNavigateUp: () -> Unit = {},
     canNavigateBack: Boolean = true,
-    viewModel: CategoryEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
 
