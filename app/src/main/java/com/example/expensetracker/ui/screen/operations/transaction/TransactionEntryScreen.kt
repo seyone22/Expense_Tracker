@@ -50,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -59,6 +60,7 @@ import com.example.expensetracker.R
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.Payee
+import com.example.expensetracker.model.RepeatFrequency
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.AppViewModelProvider
@@ -88,6 +90,7 @@ fun TransactionEntryScreen(
     viewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var recurring by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -117,14 +120,18 @@ fun TransactionEntryScreen(
                     Button(
                         onClick = {
                             coroutineScope.launch {
-                                viewModel.saveTransaction()
+                                if (!recurring) {
+                                    viewModel.saveTransaction()
+                                } else {
+                                    viewModel.saveRecurringTransaction()
+                                }
                                 navigateBack()
                             }
                         },
-                        enabled = viewModel.transactionUiState.isEntryValid,
+                        enabled = if(!recurring) { viewModel.transactionUiState.isEntryValid } else { viewModel.transactionUiState.isRecurringEntryValid && viewModel.transactionUiState.isEntryValid },
                         modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp)
                     ) {
-                        Text(text = "Create")
+                        Text(text = if(recurring){"Create Rule"}else{"Create"})
                     }
                 }
             )
@@ -134,17 +141,249 @@ fun TransactionEntryScreen(
     ) { padding ->
         LazyColumn() {
             item {
-                TransactionEntryForm(
-                    transactionDetails = viewModel.transactionUiState.transactionDetails,
-                    onValueChange = viewModel::updateUiState,
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(padding),
-                    viewModel = viewModel,
-                    coroutineScope = coroutineScope,
-                    edit = false
+                ) {
+                    TransactionEntryForm(
+                        transactionDetails = viewModel.transactionUiState.transactionDetails,
+                        onValueChange = viewModel::updateUiState,
+                        viewModel = viewModel,
+                        coroutineScope = coroutineScope,
+                        edit = false
+                    )
+                    EditableTransactionForm(
+                        editableTransactionDetails = viewModel.transactionUiState.billsDepositsDetails,
+                        onValueChange = viewModel::updateUiState,
+                        viewModel = viewModel,
+                        setRecurring = { recurring = !recurring },
+                        coroutineScope = coroutineScope,
+                        edit = false
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditableTransactionForm(
+    modifier: Modifier = Modifier,
+    editableTransactionDetails: BillsDepositsDetails,
+    onValueChange: (TransactionDetails, BillsDepositsDetails) -> Unit,
+    setRecurring: () -> Unit,
+    viewModel: TransactionEntryViewModel,
+    coroutineScope: CoroutineScope,
+    focusManager : FocusManager = LocalFocusManager.current,
+    edit: Boolean
+) {
+    var showRecurringFields by remember { mutableStateOf(false) }
+    var openDateDueDialog by remember { mutableStateOf(false) }
+    var allowAutomaticExecute by remember { mutableStateOf(false) }
+    var promptUserConfirmation by remember { mutableStateOf(false) }
+
+    var statusExpanded by remember { mutableStateOf(false) }
+
+
+    Column(
+        modifier = modifier
+            .focusGroup()
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(
+            modifier = modifier
+                .padding(0.dp, 8.dp)
+                .width(310.dp),
+        ) {
+            TextButton(
+                onClick = {
+                    showRecurringFields = !showRecurringFields
+                    setRecurring()
+                          },
+            ) {
+                Text(
+                    text = "Recurring Transaction",
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
+        }
+
+        if (showRecurringFields) {
+            // Due date
+            OutlinedTextField(
+                modifier = modifier
+                    .padding(0.dp, 8.dp)
+                    .clickable(enabled = true) {
+                        openDateDueDialog = true
+                    },
+                enabled = false,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    //For Icons
+                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+                value = editableTransactionDetails.NEXTOCCURRENCEDATE,
+                onValueChange = {
+                    onValueChange(
+                        viewModel.transactionUiState.transactionDetails,
+                        editableTransactionDetails.copy(NEXTOCCURRENCEDATE = it)
+                    )
+                },
+                label = { Text("Date Due *") },
+                readOnly = true,
+                singleLine = true,
+                keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
+            )
+
+            // Repeat Frequency Dropdown
+            ExposedDropdownMenuBox(
+                expanded = statusExpanded,
+                onExpandedChange = { statusExpanded = !statusExpanded }) {
+                OutlinedTextField(
+                    modifier = modifier
+                        .padding(0.dp, 8.dp)
+                        .clickable(enabled = true) { statusExpanded = true }
+                        .menuAnchor(),
+                    value = editableTransactionDetails.REPEATS,
+                    readOnly = true,
+                    onValueChange = {
+                        onValueChange(
+                            viewModel.transactionUiState.transactionDetails,
+                            editableTransactionDetails.copy(REPEATS = it)
+                        )
+                    },
+                    label = { Text("Transaction Status *") },
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    }),
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusExpanded) },
+                )
+
+                // Payments left
+                ExposedDropdownMenu(
+                    expanded = statusExpanded,
+                    onDismissRequest = { statusExpanded = false },
+                ) {
+                    enumValues<RepeatFrequency>().forEach { repeatFrequency ->
+                        DropdownMenuItem(
+                            text = { Text(repeatFrequency.displayName) },
+                            onClick = {
+                                onValueChange(
+                                    viewModel.transactionUiState.transactionDetails,
+                                    editableTransactionDetails.copy(REPEATS = repeatFrequency.displayName)
+                                )
+                                statusExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+            // Automatic Execute
+            Row(
+                modifier = Modifier
+                    .padding(0.dp, 8.dp)
+                    .width(310.dp),
+            ) {
+                Checkbox(
+                    checked = allowAutomaticExecute,
+                    onCheckedChange = { allowAutomaticExecute = !allowAutomaticExecute },
+                    enabled = !promptUserConfirmation
+                )
+                Text(
+                    text = "Automatically execute the transaction on the due date",
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            }
+
+            // Notify me to confirm execution
+            Row(
+                modifier = Modifier
+                    .padding(0.dp, 8.dp)
+                    .width(310.dp),
+            ) {
+                Checkbox(
+                    checked = promptUserConfirmation,
+                    onCheckedChange = {
+                        promptUserConfirmation = !promptUserConfirmation
+                    },
+                    enabled = !allowAutomaticExecute
+                )
+                Text(
+                    text = "Notify me before executing",
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            }
+
+            OutlinedTextField(
+                value = editableTransactionDetails.NUMOCCURRENCES,
+                onValueChange = {
+                    onValueChange(
+                        viewModel.transactionUiState.transactionDetails,
+                        editableTransactionDetails.copy(NUMOCCURRENCES = it)
+                    )
+                },
+                label = { Text("Payments Left") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
+            )
+        }
+    }
+
+    if (openDateDueDialog) {
+        val datePickerState =
+            rememberDatePickerState(initialSelectedDateMillis = Instant.now().toEpochMilli())
+        val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
+        DatePickerDialog(
+            onDismissRequest = {
+                // Dismiss the dialog when the user clicks outside the dialog or on the back
+                // button. If you want to disable that functionality, simply use an empty
+                // onDismissRequest.
+                openDateDueDialog = false
+            },
+
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openDateDueDialog = false
+                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val date = Date(datePickerState.selectedDateMillis!!)
+
+                        onValueChange(
+                            viewModel.transactionUiState.transactionDetails,
+                            editableTransactionDetails.copy(NEXTOCCURRENCEDATE = dateFormat.format(date)),
+                        )
+                    },
+                    enabled = confirmEnabled.value
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        openDateDueDialog = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
         }
     }
 }
@@ -155,10 +394,11 @@ fun TransactionEntryScreen(
 fun TransactionEntryForm(
     modifier: Modifier = Modifier,
     transactionDetails: TransactionDetails,
-    onValueChange: (TransactionDetails) -> Unit = {},
+    onValueChange: (TransactionDetails, BillsDepositsDetails) -> Unit,
     viewModel: TransactionEntryViewModel,
     coroutineScope: CoroutineScope,
-    edit : Boolean
+    edit: Boolean,
+    focusManager : FocusManager = LocalFocusManager.current
 ) {
     var statusExpanded by remember { mutableStateOf(false) }
     var typeExpanded by remember { mutableStateOf(false) }
@@ -167,13 +407,10 @@ fun TransactionEntryForm(
     var categoryExpanded by remember { mutableStateOf(false) }
 
     var openNewPayeeDialog by remember { mutableStateOf(false) }
-
     var openTransactionDateDialog by remember { mutableStateOf(false) }
 
     //TODO: Refactor this to be more elegant
     val transactionUiState: TransactionUiState by viewModel.transactionUiState1.collectAsState()
-
-    val focusManager = LocalFocusManager.current
 
     var currentAccount by remember { mutableStateOf(Account()) }
     var currentPayee by remember { mutableStateOf(Payee()) }
@@ -212,7 +449,12 @@ fun TransactionEntryForm(
                 disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
             ),
             value = transactionDetails.transDate,
-            onValueChange = { onValueChange(transactionDetails.copy(transDate = it)) },
+            onValueChange = {
+                onValueChange(
+                    transactionDetails.copy(transDate = it),
+                    viewModel.transactionUiState.billsDepositsDetails
+                )
+            },
             label = { Text("Date of Transaction *") },
             readOnly = true,
             singleLine = true,
@@ -230,7 +472,12 @@ fun TransactionEntryForm(
                     .menuAnchor(),
                 value = transactionDetails.status,
                 readOnly = true,
-                onValueChange = { onValueChange(transactionDetails.copy(status = it)) },
+                onValueChange = {
+                    onValueChange(
+                        transactionDetails.copy(status = it),
+                        viewModel.transactionUiState.billsDepositsDetails
+                    )
+                },
                 label = { Text("Transaction Status *") },
                 singleLine = true,
                 keyboardActions = KeyboardActions(onDone = {
@@ -249,7 +496,10 @@ fun TransactionEntryForm(
                     DropdownMenuItem(
                         text = { Text(transactionStatus.displayName) },
                         onClick = {
-                            onValueChange(transactionDetails.copy(status = transactionStatus.displayName))
+                            onValueChange(
+                                transactionDetails.copy(status = transactionStatus.displayName),
+                                viewModel.transactionUiState.billsDepositsDetails
+                            )
                             statusExpanded = false
                         }
                     )
@@ -259,7 +509,12 @@ fun TransactionEntryForm(
 
         OutlinedTextField(
             value = transactionDetails.transAmount,
-            onValueChange = { onValueChange(transactionDetails.copy(transAmount = it)) },
+            onValueChange = {
+                onValueChange(
+                    transactionDetails.copy(transAmount = it),
+                    viewModel.transactionUiState.billsDepositsDetails
+                )
+            },
             label = { Text("Amount *") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -276,7 +531,12 @@ fun TransactionEntryForm(
                     .menuAnchor(),
                 value = transactionDetails.transCode,
                 readOnly = true,
-                onValueChange = { onValueChange(transactionDetails.copy(transCode = it)) },
+                onValueChange = {
+                    onValueChange(
+                        transactionDetails.copy(transCode = it),
+                        viewModel.transactionUiState.billsDepositsDetails
+                    )
+                },
                 label = { Text("Transaction Type *") },
                 singleLine = true,
                 keyboardActions = KeyboardActions(onDone = {
@@ -295,7 +555,10 @@ fun TransactionEntryForm(
                     DropdownMenuItem(
                         text = { Text(transCode.displayName) },
                         onClick = {
-                            onValueChange(transactionDetails.copy(transCode = transCode.displayName))
+                            onValueChange(
+                                transactionDetails.copy(transCode = transCode.displayName),
+                                viewModel.transactionUiState.billsDepositsDetails
+                            )
                             typeExpanded = false
                         }
                     )
@@ -319,7 +582,12 @@ fun TransactionEntryForm(
                     .menuAnchor(),
                 value = currentAccount.accountName,
                 readOnly = true,
-                onValueChange = { onValueChange(transactionDetails.copy(accountId = it)) },
+                onValueChange = {
+                    onValueChange(
+                        transactionDetails.copy(accountId = it),
+                        viewModel.transactionUiState.billsDepositsDetails
+                    )
+                },
                 label = {
                     when (transactionDetails.transCode) {
                         TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
@@ -348,7 +616,10 @@ fun TransactionEntryForm(
                     DropdownMenuItem(
                         text = { Text(account.accountName) },
                         onClick = {
-                            onValueChange(transactionDetails.copy(accountId = account.accountId.toString()))
+                            onValueChange(
+                                transactionDetails.copy(accountId = account.accountId.toString()),
+                                viewModel.transactionUiState.billsDepositsDetails
+                            )
                             currentAccount = account
                             accountExpanded = false
                         }
@@ -450,8 +721,14 @@ fun TransactionEntryForm(
                                     text = { Text(payee.payeeName) },
                                     onClick = {
                                         currentPayee = payee
-                                        onValueChange(transactionDetails.copy(toAccountId = "-1"))
-                                        onValueChange(transactionDetails.copy(payeeId = currentPayee.payeeId.toString()))
+                                        onValueChange(
+                                            transactionDetails.copy(toAccountId = "-1"),
+                                            viewModel.transactionUiState.billsDepositsDetails
+                                        )
+                                        onValueChange(
+                                            transactionDetails.copy(payeeId = currentPayee.payeeId.toString()),
+                                            viewModel.transactionUiState.billsDepositsDetails
+                                        )
                                         Log.d(
                                             "DEBUG",
                                             "TransactionEntryForm: $transactionDetails"
@@ -468,8 +745,14 @@ fun TransactionEntryForm(
                                 DropdownMenuItem(
                                     text = { Text(account.accountName) },
                                     onClick = {
-                                        onValueChange(transactionDetails.copy(payeeId = "-1"))
-                                        onValueChange(transactionDetails.copy(toAccountId = account.accountId.toString()))
+                                        onValueChange(
+                                            transactionDetails.copy(payeeId = "-1"),
+                                            viewModel.transactionUiState.billsDepositsDetails
+                                        )
+                                        onValueChange(
+                                            transactionDetails.copy(toAccountId = account.accountId.toString()),
+                                            viewModel.transactionUiState.billsDepositsDetails
+                                        )
                                         currentToAccount = account
                                         payeeExpanded = false
                                     }
@@ -518,7 +801,12 @@ fun TransactionEntryForm(
                     .menuAnchor(),
                 value = removeTrPrefix(currentCategory.categName),
                 readOnly = true,
-                onValueChange = { onValueChange(transactionDetails.copy(categoryId = it)) },
+                onValueChange = {
+                    onValueChange(
+                        transactionDetails.copy(categoryId = it),
+                        viewModel.transactionUiState.billsDepositsDetails
+                    )
+                },
                 label = { Text("Transaction Category *") },
                 singleLine = true,
                 keyboardActions = KeyboardActions(onDone = {
@@ -538,7 +826,10 @@ fun TransactionEntryForm(
                         text = { Text(removeTrPrefix(category.categName)) },
                         onClick = {
                             currentCategory = category
-                            onValueChange(transactionDetails.copy(categoryId = category.categId.toString()))
+                            onValueChange(
+                                transactionDetails.copy(categoryId = category.categId.toString()),
+                                viewModel.transactionUiState.billsDepositsDetails
+                            )
                             categoryExpanded = false
                         }
                     )
@@ -548,7 +839,12 @@ fun TransactionEntryForm(
 
         OutlinedTextField(
             value = transactionDetails.transactionNumber,
-            onValueChange = { onValueChange(transactionDetails.copy(transactionNumber = it)) },
+            onValueChange = {
+                onValueChange(
+                    transactionDetails.copy(transactionNumber = it),
+                    viewModel.transactionUiState.billsDepositsDetails
+                )
+            },
             label = { Text("Number") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true
@@ -556,13 +852,23 @@ fun TransactionEntryForm(
 
         OutlinedTextField(
             value = transactionDetails.notes,
-            onValueChange = { onValueChange(transactionDetails.copy(notes = it)) },
+            onValueChange = {
+                onValueChange(
+                    transactionDetails.copy(notes = it),
+                    viewModel.transactionUiState.billsDepositsDetails
+                )
+            },
             label = { Text("Notes") }
         )
 
         OutlinedTextField(
             value = transactionDetails.color,
-            onValueChange = { onValueChange(transactionDetails.copy(color = it)) },
+            onValueChange = {
+                onValueChange(
+                    transactionDetails.copy(color = it),
+                    viewModel.transactionUiState.billsDepositsDetails
+                )
+            },
             label = { Text("Color") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -601,7 +907,10 @@ fun TransactionEntryForm(
                         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                         val date = Date(datePickerState.selectedDateMillis!!)
 
-                        onValueChange(transactionDetails.copy(transDate = dateFormat.format(date)))
+                        onValueChange(
+                            transactionDetails.copy(transDate = dateFormat.format(date)),
+                            viewModel.transactionUiState.billsDepositsDetails
+                        )
                     },
                     enabled = confirmEnabled.value
                 ) {

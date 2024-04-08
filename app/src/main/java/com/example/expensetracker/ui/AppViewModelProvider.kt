@@ -11,7 +11,6 @@ import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.onboarding.OnboardingViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountDetailViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryViewModel
-import com.example.expensetracker.ui.screen.operations.entity.category.CategoryEntryViewModel
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyEntryViewModel
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
@@ -65,7 +64,8 @@ object AppViewModelProvider {
                 expenseApplication().container.transactionsRepository,
                 expenseApplication().container.accountsRepository,
                 expenseApplication().container.payeesRepository,
-                expenseApplication().container.categoriesRepository
+                expenseApplication().container.categoriesRepository,
+                expenseApplication().container.billsDepositsRepository
             )
         }
         initializer {
@@ -76,9 +76,6 @@ object AppViewModelProvider {
             )
         }
         // Initializers for Entity type Viewmodels
-        initializer {
-            CategoryEntryViewModel(expenseApplication().container.categoriesRepository)
-        }
         initializer {
             CurrencyEntryViewModel(expenseApplication().container.currenciesRepository)
         }

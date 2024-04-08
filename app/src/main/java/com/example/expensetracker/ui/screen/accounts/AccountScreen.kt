@@ -121,7 +121,7 @@ fun AccountScreen(
 @Composable
 fun NetWorth(
     totals: Totals,
-    accountBalances: AccountsUiStateOne,
+    accountBalances: Balances,
     baseCurrencyInfo: CurrencyFormat
 ) {
     Column(
@@ -139,19 +139,23 @@ fun NetWorth(
         )
         Text(
             text = "Net Worth",
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
                 .padding(0.dp, 0.dp, 0.dp, 24.dp),
             fontStyle = FontStyle.Italic,
             style = MaterialTheme.typography.labelLarge,
-            color = Color.Gray)
+            color = Color.Gray
+        )
 
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(0.dp, 0.dp, 0.dp, 24.dp),
         ) {
             Card(
-                modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 0.dp)
+                modifier = Modifier
+                    .padding(0.dp, 0.dp, 0.dp, 0.dp)
                     .width(165.dp)
             ) {
                 Row(
@@ -171,7 +175,8 @@ fun NetWorth(
                 }
             }
             Card(
-                modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 0.dp)
+                modifier = Modifier
+                    .padding(0.dp, 0.dp, 0.dp, 0.dp)
                     .width(165.dp)
             ) {
                 Row(
@@ -205,7 +210,7 @@ fun Summary(totals: Totals, baseCurrencyInfo: CurrencyFormat) {
                 .fillMaxWidth()
         ) {
             // Add legend items
-            Column{
+            Column {
                 LegendItem("Income", MaterialTheme.colorScheme.primary)
                 LegendItem("Expense", MaterialTheme.colorScheme.error)
             }
@@ -254,10 +259,10 @@ fun AccountData(
     viewModel: AccountViewModel,
     accountsUiState: AccountsUiState,
     navigateToScreen: (screen: String) -> Unit,
-    data: AccountsUiStateOne
+    data: Balances
 ) {
     Column(
-        modifier = modifier.padding(0.dp,24.dp,0.dp,0.dp),
+        modifier = modifier.padding(0.dp, 24.dp, 0.dp, 0.dp),
     ) {
         Text(
             text = "Summary of Accounts",
@@ -291,10 +296,10 @@ fun AccountList(
     accountList: List<Pair<Account, Double>>,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
-    data: AccountsUiStateOne
+    data: Balances
 ) {
     Column(
-        modifier = modifier.padding(0.dp,8.dp,0.dp,0.dp)
+        modifier = modifier.padding(0.dp, 8.dp, 0.dp, 0.dp)
     ) {
         Text(
             text = "$category Accounts",

@@ -63,13 +63,13 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.2")
 
 // AndroidX Compose
-    implementation(platform("androidx.compose:compose-bom:2023.10.01"))
+    implementation(platform("androidx.compose:compose-bom:2024.04.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
 
 // AndroidX Compose Material3
-    implementation("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.compose.material3:material3:1.2.1")
 
 // JUnit
     testImplementation("junit:junit:4.13.2")
@@ -77,7 +77,7 @@ dependencies {
 // AndroidX Test
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.01"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.04.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
 // AndroidX Compose Debug
@@ -85,16 +85,16 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
 // AndroidX Compose Material Icons Extended
-    implementation("androidx.compose.material:material-icons-extended:1.6.2")
+    implementation("androidx.compose.material:material-icons-extended:1.6.5")
 
 // AndroidX Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
 // AndroidX Compose Material3 Adaptive Navigation Suite
-    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.0.0-alpha04")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.0.0-alpha05")
 
 // AndroidX Compose Material3 Window Size Class Android
-    implementation("androidx.compose.material3:material3-window-size-class-android:1.2.0")
+    implementation("androidx.compose.material3:material3-window-size-class-android:1.2.1")
 
 // AndroidX Room
     implementation("androidx.room:room-runtime:2.6.1")

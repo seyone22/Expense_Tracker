@@ -3,6 +3,8 @@ package com.example.expensetracker.data
 import android.content.Context
 import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.account.OfflineAccountsRepository
+import com.example.expensetracker.data.billsDeposit.BillsDepositsRepository
+import com.example.expensetracker.data.billsDeposit.OfflineBillsDepositsRepository
 import com.example.expensetracker.data.category.CategoriesRepository
 import com.example.expensetracker.data.category.OfflineCategoriesRepository
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
@@ -21,14 +23,15 @@ interface AppContainer {
     val categoriesRepository : CategoriesRepository
     val currenciesRepository : CurrencyFormatsRepository
     val metadataRepository : MetadataRepository
+    val billsDepositsRepository : BillsDepositsRepository
 }
 
 /**
- * [AppContainer] implementation that provides instance of [OfflineItemsRepository]
+ * [AppContainer] implementation that provides instance of OfflineItemsRepository
  */
 class AppDataContainer(private val context: Context) : AppContainer {
     /**
-     * Implementation for [ItemsRepository]
+     * Implementation for ItemsRepository
      */
     override val accountsRepository: AccountsRepository by lazy {
         OfflineAccountsRepository(MMEXDatabase.getDatabase(context).accountDao())
@@ -47,5 +50,8 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
     override val metadataRepository: MetadataRepository by lazy {
         OfflineMetadataRepository(MMEXDatabase.getDatabase(context).metadataDao())
+    }
+    override val billsDepositsRepository: BillsDepositsRepository by lazy {
+        OfflineBillsDepositsRepository(MMEXDatabase.getDatabase(context).billsDepositsDao())
     }
 }
