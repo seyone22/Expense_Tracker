@@ -45,8 +45,8 @@ class ReportViewModel(
         payeesRepository.getAllActivePayeesStream()
 
 
-    suspend fun getExpensesFromCategory() : CartesianChartModelProducer {
-        val transactions = transactionsRepository.getAllTransactionsByCategory("31").first()
+    suspend fun getExpensesFromCategory(transCode: String) : CartesianChartModelProducer {
+        val transactions = transactionsRepository.getAllTransactionsByCategory(transCode).first()
 
         val transactionMap = transactions.groupBy { transaction ->
             LocalDate.parse(transaction.transDate).month.toString()

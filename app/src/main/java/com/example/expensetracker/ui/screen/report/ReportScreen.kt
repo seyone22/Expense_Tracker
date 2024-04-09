@@ -68,7 +68,6 @@ fun ReportScreen(
 fun ReportCard(
     viewModel: ReportViewModel
 ) {
-
     Card(
     ) {
         Box(
@@ -83,7 +82,7 @@ fun ReportCard(
             var modelProducer: CartesianChartModelProducer? by remember { mutableStateOf(null) }
 
             LaunchedEffect(Unit) {
-                modelProducer = viewModel.getExpensesFromCategory()
+                modelProducer = viewModel.getExpensesFromCategory("31")
             }
 
             ProvideVicoTheme(theme = rememberM3VicoTheme()) {
