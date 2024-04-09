@@ -48,6 +48,7 @@ import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayeeDetails
+import com.example.expensetracker.ui.screen.operations.report.ReportEntryDestination
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.toTransactionDetails
@@ -228,6 +229,10 @@ fun ExpenseApp(
 
             9 -> {
                 navController.navigate(AccountEntryDestination.route)
+                showNewDialog = false
+            }
+            12 -> {
+                navController.navigate(ReportEntryDestination.route)
                 showNewDialog = false
             }
         }

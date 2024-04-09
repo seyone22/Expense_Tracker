@@ -34,6 +34,8 @@ import com.example.expensetracker.ui.screen.operations.transaction.TransactionEn
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryScreen
 import com.example.expensetracker.ui.screen.budget.BudgetScreen
 import com.example.expensetracker.ui.screen.budget.BudgetsDestination
+import com.example.expensetracker.ui.screen.operations.report.ReportEntryDestination
+import com.example.expensetracker.ui.screen.operations.report.ReportEntryScreen
 import com.example.expensetracker.ui.screen.report.ReportScreen
 import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
@@ -94,7 +96,8 @@ fun ExpenseNavHost(
         composable(route = ReportsDestination.route) {
             ReportScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
-            )
+                setTopBarAction = setTopBarAction,
+                )
         }
         composable(route = BudgetsDestination.route) {
             BudgetScreen(
@@ -120,6 +123,12 @@ fun ExpenseNavHost(
         }
         composable(route = TransactionEntryDestination.route) {
             TransactionEntryScreen(
+                navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+        composable(route = ReportEntryDestination.route) {
+            ReportEntryScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }
             )

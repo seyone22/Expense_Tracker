@@ -42,6 +42,7 @@ fun ReportScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
     viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    setTopBarAction: (Int) -> Unit
 ) {
     var mp: CartesianChartModelProducer? by remember { mutableStateOf(null) }
     var mp2: CartesianChartModelProducer? by remember { mutableStateOf(null) }
@@ -49,8 +50,9 @@ fun ReportScreen(
     LaunchedEffect(Unit) {
         mp = viewModel.getExpensesFromCategory("31")
         mp2 = viewModel.getExpensesFromPayee("1")
-    }
 
+        setTopBarAction(12)
+    }
 
     LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(minSize = 320.dp)) {
         item {
