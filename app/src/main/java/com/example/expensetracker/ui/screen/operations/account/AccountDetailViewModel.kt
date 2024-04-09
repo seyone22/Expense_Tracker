@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
+import com.example.expensetracker.data.billsDeposit.BillsDepositsRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.Transaction
@@ -11,6 +12,7 @@ import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.model.TransactionWithDetails
 import com.example.expensetracker.model.toTransaction
+import com.example.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
@@ -23,6 +25,7 @@ import kotlinx.coroutines.flow.stateIn
 class AccountDetailViewModel(
     private val accountsRepository: AccountsRepository,
     private val transactionsRepository: TransactionsRepository,
+    //private val billsDepositsRepository: BillsDepositsRepository
 ): ViewModel() {
     var accountId: Int = -1
 
@@ -227,4 +230,5 @@ data class AccountDetailAccountUiState(
 )
 data class AccountDetailTransactionUiState(
     val transactions: List<TransactionWithDetails> = listOf(),
+    val billsDepositsDetails: List<BillsDepositsDetails> = listOf()
 )

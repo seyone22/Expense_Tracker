@@ -1,7 +1,11 @@
 package com.example.expensetracker.ui.screen.operations.transaction
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.os.Build
 import android.util.Log
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -64,7 +69,10 @@ import com.example.expensetracker.model.RepeatFrequency
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.ui.AppViewModelProvider
+import com.example.expensetracker.ui.common.askNotificationPermissions
 import com.example.expensetracker.ui.common.removeTrPrefix
+import com.example.expensetracker.ui.common.scheduleWorkByDayCount
+import com.example.expensetracker.ui.common.scheduleWorkByMonthCount
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import kotlinx.coroutines.CoroutineScope
@@ -80,6 +88,7 @@ object TransactionEntryDestination : NavigationDestination {
     override val routeId = 11
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionEntryScreen(
@@ -88,6 +97,7 @@ fun TransactionEntryScreen(
     onNavigateUp: () -> Unit = {},
     canNavigateBack: Boolean = true,
     viewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    context: Context = LocalContext.current
 ) {
     val coroutineScope = rememberCoroutineScope()
     var recurring by remember { mutableStateOf(false) }
@@ -123,7 +133,25 @@ fun TransactionEntryScreen(
                                 if (!recurring) {
                                     viewModel.saveTransaction()
                                 } else {
-                                    viewModel.saveRecurringTransaction()
+                                    val recurrenceDetails = viewModel.transactionUiState.billsDepositsDetails
+                                    // Get permissions
+                                    askNotificationPermissions(context)
+
+                                    val repeatsVal = RepeatFrequency.valueOf(recurrenceDetails.REPEATS.uppercase(Locale.ROOT))
+
+                                    try {
+                                        if (repeatsVal.dayCount > 0) {
+                                            scheduleWorkByMonthCount(context, recurrenceDetails)
+                                        } else if(repeatsVal.dayCount < 0)  {
+                                            scheduleWorkByDayCount(context, recurrenceDetails)
+                                        } else {
+                                            throw Exception("Unsupported timeframe!")
+                                        }
+                                        viewModel.saveRecurringTransaction()
+                                        Toast.makeText(context, "Successfully scheduled transaction!", Toast.LENGTH_SHORT).show()
+                                    } catch (e:Exception) {
+                                        Toast.makeText(context, "Error!\n$e", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                                 navigateBack()
                             }
