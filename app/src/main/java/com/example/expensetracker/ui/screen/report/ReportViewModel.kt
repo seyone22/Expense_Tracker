@@ -1,7 +1,6 @@
 package com.example.expensetracker.ui.screen.report
 
 import android.util.Log
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.example.expensetracker.data.category.CategoriesRepository
 import com.example.expensetracker.data.payee.PayeesRepository
@@ -9,9 +8,13 @@ import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.Transaction
+import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.model.ExtraStore
+import com.patrykandpatrick.vico.core.model.columnSeries
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlin.random.Random
+import kotlinx.coroutines.flow.first
+import java.time.LocalDate
+import java.util.Locale
 
 /**
  * ViewModel to retrieve all items in the Room database.
@@ -41,65 +44,50 @@ class ReportViewModel(
     private val payeesFlow: Flow<List<Payee>> =
         payeesRepository.getAllActivePayeesStream()
 
-    // Combine the flows and get the chart data
-    val byPayeeData: Flow<Pair<List<String>, List<Double>>> =
-        combine(payeesFlow, transactionsIncomeFlow) { payees, transactions ->
-            // Separate payees and total amounts into two lists
-            val payeeList = payees.map { it.payeeName }
 
-            // Calculate the total sum of all payees' total amounts
-            val totalSum = payees.sumOf { payee ->
-                transactions
-                    .filter { it.payeeId == payee.payeeId }
-                    .sumOf { it.transAmount }
-            }
+    suspend fun getExpensesFromCategory() : CartesianChartModelProducer {
+        val transactions = transactionsRepository.getAllTransactionsByCategory("31").first()
 
-            val totalAmountList = payees.map { payee ->
-                val totalAmount = transactions
-                    .filter { it.payeeId == payee.payeeId }
-                    .sumOf { it.transAmount }
-
-                // Calculate the fraction dynamically based on the total sum
-                val fraction = if (totalSum != 0.0) totalAmount / totalSum else 0.0
-
-                fraction
-            }
-            Pair(payeeList, totalAmountList)
+        val transactionMap = transactions.groupBy { transaction ->
+            LocalDate.parse(transaction.transDate).month.toString()
+        }.mapValues { (_, transactions) ->
+            transactions.sumOf { if (it.transCode == "Withdrawal") -it.transAmount else it.transAmount }
         }
 
-    // Combine the flows and get the chart data
-    val byCategoryData: Flow<Pair<List<Category>, List<Double>>> =
-        combine(categoriesFlow, transactionsIncomeFlow) { categories, transactions ->
-            // Separate categories and total amounts into two lists
-            val categoryList = categories.toList()
-            Log.d("TAG", ": $transactions")
-            // Calculate the total sum of all payees' total amounts
-            val totalSum = categories.sumOf { category ->
-                transactions
-                    .filter { it.categoryId == category.categId }
-                    .sumOf { it.transAmount }
-            }
+        Log.d("TAG", "getExpensesFromCategory: $transactionMap")
 
-            val totalAmountList = categories.map { category ->
-                val totalAmount = transactions
-                    .filter { it.categoryId == category.categId }
-                    .sumOf { it.transAmount }
 
-                // Calculate the fraction dynamically based on the total sum
-                val fraction = if (totalSum != 0.0) totalAmount / totalSum else 0.0
-                fraction
+
+        val xToDateMapKey = ExtraStore.Key<List<String>>()
+
+        val monthNumericalMap = mapOf(
+            "JANUARY" to 1f,
+            "FEBRUARY" to 2f,
+            "MARCH" to 3f,
+            "APRIL" to 4f,
+            "MAY" to 5f,
+            "JUNE" to 6f,
+            "JULY" to 7f,
+            "AUGUST" to 8f,
+            "SEPTEMBER" to 9f,
+            "OCTOBER" to 10f,
+            "NOVEMBER" to 11f,
+            "DECEMBER" to 12f
+        )
+
+        val xToDates = transactionMap.keys.associateBy { monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f }
+
+        val modelProducer = CartesianChartModelProducer.build()
+
+        modelProducer.tryRunTransaction {
+            columnSeries {
+                series(xToDates.keys, transactionMap.values)
             }
-            Pair(categoryList, totalAmountList)
+            updateExtras {
+                it[xToDateMapKey] = transactionMap.keys.toList()
+            }
         }
 
-    fun generateDistinctColors(numberOfColors: Int): List<Color> {
-        return List(numberOfColors) {
-            Color(
-                red = Random.nextFloat(),
-                green = Random.nextFloat(),
-                blue = Random.nextFloat(),
-                alpha = 1.0f
-            )
-        }
+        return modelProducer
     }
 }

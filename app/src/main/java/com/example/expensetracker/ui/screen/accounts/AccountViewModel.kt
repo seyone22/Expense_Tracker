@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.metadata.MetadataRepository
+import com.example.expensetracker.data.transaction.BalanceResult
 import com.example.expensetracker.data.transaction.TransactionDao
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
@@ -85,7 +86,7 @@ class AccountViewModel(
         transactionsRepository.getBalanceByAccountId()
             .map { pairs ->
                 var totalBalance = 0.0
-                var balanceAndInitialBalance : List<TransactionDao.BalanceResult>
+                var balanceAndInitialBalance : List<BalanceResult>
                 for (balanceResult in pairs) {
                     totalBalance += balanceResult.balance
                     accountsRepository.getAccountStream(balanceResult.accountId).firstOrNull()
@@ -104,14 +105,14 @@ class AccountViewModel(
     val accountBalances: StateFlow<Balances> =
         accountsRepository.getAllActiveAccountsStream()
             .map { accountList ->
-                val balanceData : MutableList<TransactionDao.BalanceResult> = mutableListOf()
+                val balanceData : MutableList<BalanceResult> = mutableListOf()
                 var totalBalance = 0.0
 
                 accountList.forEach {
                     val accountBalance = accountsRepository.getAccountBalance(it.accountId).firstOrNull()?.balance
                     val balance = it.initialBalance?.plus(accountBalance ?: 0.0)
 
-                    balanceData.add(TransactionDao.BalanceResult(it.accountId, balance ?: 0.0))
+                    balanceData.add(BalanceResult(it.accountId, balance ?: 0.0))
                     if (balance != null) {
                         totalBalance += balance
                     }
@@ -156,7 +157,7 @@ data class AccountsUiState(
 )
 
 data class Balances(
-    val balancesList: List<TransactionDao.BalanceResult> = emptyList(),
+    val balancesList: List<BalanceResult> = emptyList(),
     val grandTotal: Double = 0.0
 )
 

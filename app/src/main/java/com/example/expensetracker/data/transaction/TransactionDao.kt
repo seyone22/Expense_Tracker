@@ -9,6 +9,7 @@ import androidx.room.Update
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 @Dao
 interface TransactionDao {
@@ -55,6 +56,9 @@ interface TransactionDao {
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE transCode = :transCode")
     fun getAllTransactionsByCode(transCode: String): Flow<List<Transaction>>
 
+    @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE categoryId = :categoryId AND (transDate BETWEEN :startDate AND :endDate OR :startDate IS NULL OR :endDate IS NULL)")
+    fun getAllTransactionsByCategory(categoryId: String, startDate: String?, endDate: String?): Flow<List<Transaction>>
+
     @Query("SELECT " +
             "    accountId, " +
             "    SUM(balanceChange) AS balance " +
@@ -84,8 +88,30 @@ interface TransactionDao {
     @Query("SELECT SUM(transAmount) AS totalWithdrawal FROM CHECKINGACCOUNT_V1")
     fun getTotalBalance(): Flow<Double>
 
-    data class BalanceResult(
-        val accountId: Int,
-        val balance: Double
-    )
+
+}
+
+data class BalanceResult(
+    val accountId: Int,
+    val balance: Double
+)
+
+
+fun getTodayDateString(): String {
+    val currentDate = LocalDate.now()
+    return currentDate.toString()
+}
+
+fun getStartOfMonthDateString(): String {
+    val firstDayOfMonth = LocalDate.now().withDayOfMonth(1)
+    return firstDayOfMonth.toString()
+}
+
+fun getStartOfLastMonthDateString(): String {
+    val firstDayOfLastMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1)
+    return firstDayOfLastMonth.toString()
+}
+
+fun getArbitaryEndDateString() : String {
+    return "9999-12-31";
 }
