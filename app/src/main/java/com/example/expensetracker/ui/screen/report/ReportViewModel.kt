@@ -26,6 +26,21 @@ class ReportViewModel(
 ) : ViewModel() {
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
+
+        val monthNumericalMap = mapOf(
+            "JANUARY" to 1f,
+            "FEBRUARY" to 2f,
+            "MARCH" to 3f,
+            "APRIL" to 4f,
+            "MAY" to 5f,
+            "JUNE" to 6f,
+            "JULY" to 7f,
+            "AUGUST" to 8f,
+            "SEPTEMBER" to 9f,
+            "OCTOBER" to 10f,
+            "NOVEMBER" to 11f,
+            "DECEMBER" to 12f
+        )
     }
 
     // Flow for expenses
@@ -54,27 +69,33 @@ class ReportViewModel(
             transactions.sumOf { if (it.transCode == "Withdrawal") -it.transAmount else it.transAmount }
         }
 
-        Log.d("TAG", "getExpensesFromCategory: $transactionMap")
+        val xToDateMapKey = ExtraStore.Key<List<String>>()
+        val xToDates = transactionMap.keys.associateBy { monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f }
 
+        val modelProducer = CartesianChartModelProducer.build()
 
+        modelProducer.tryRunTransaction {
+            columnSeries {
+                series(xToDates.keys, transactionMap.values)
+            }
+            updateExtras {
+                it[xToDateMapKey] = transactionMap.keys.toList()
+            }
+        }
+
+        return modelProducer
+    }
+
+    suspend fun getExpensesFromPayee(payeeId: String): CartesianChartModelProducer {
+        val transactions = transactionsRepository.getAllTransactionsByPayee(payeeId).first()
+
+        val transactionMap = transactions.groupBy { transaction ->
+            LocalDate.parse(transaction.transDate).month.toString()
+        }.mapValues { (_, transactions) ->
+            transactions.sumOf { if (it.transCode == "Withdrawal") -it.transAmount else it.transAmount }
+        }
 
         val xToDateMapKey = ExtraStore.Key<List<String>>()
-
-        val monthNumericalMap = mapOf(
-            "JANUARY" to 1f,
-            "FEBRUARY" to 2f,
-            "MARCH" to 3f,
-            "APRIL" to 4f,
-            "MAY" to 5f,
-            "JUNE" to 6f,
-            "JULY" to 7f,
-            "AUGUST" to 8f,
-            "SEPTEMBER" to 9f,
-            "OCTOBER" to 10f,
-            "NOVEMBER" to 11f,
-            "DECEMBER" to 12f
-        )
-
         val xToDates = transactionMap.keys.associateBy { monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f }
 
         val modelProducer = CartesianChartModelProducer.build()

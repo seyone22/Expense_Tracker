@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,45 +62,56 @@ fun ReportScreen(
     navigateToScreen: (screen: String) -> Unit,
     viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    Column() {
-        ReportCard(viewModel)
+    var mp: CartesianChartModelProducer? by remember { mutableStateOf(null) }
+    var mp2: CartesianChartModelProducer? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(Unit) {
+        mp = viewModel.getExpensesFromCategory("31")
+        mp2 = viewModel.getExpensesFromPayee("1")
+    }
+
+
+    LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(minSize = 320.dp)) {
+        item {
+            mp?.let { ReportCard(modifier, it) }
+        }
+        item {
+            mp2?.let { ReportCard(modifier, it) }
+        }
     }
 }
 
 @Composable
 fun ReportCard(
-    viewModel: ReportViewModel
+    modifier: Modifier,
+    modelProducer: CartesianChartModelProducer
 ) {
+    val scrollState = rememberVicoScrollState()
+    val zoomState = rememberVicoZoomState()
+    
     Card(
+        modifier = modifier
+            .padding(24.dp)
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .padding(24.dp)
                 .height(240.dp)
                 .fillMaxWidth()
         ) {
-            val scrollState = rememberVicoScrollState()
-            val zoomState = rememberVicoZoomState()
-
-            var modelProducer: CartesianChartModelProducer? by remember { mutableStateOf(null) }
-
-            LaunchedEffect(Unit) {
-                modelProducer = viewModel.getExpensesFromCategory("31")
-            }
+            Text(text = "By Category - Dental")
 
             ProvideVicoTheme(theme = rememberM3VicoTheme()) {
-                modelProducer?.let { producer ->
-                    CartesianChartHost(
-                        chart = rememberCartesianChart(
-                            rememberColumnCartesianLayer(),
-                            startAxis = rememberStartAxis(),
-                            bottomAxis = rememberBottomAxis()
-                        ),
-                        modelProducer = producer,
-                        scrollState = scrollState,
-                        zoomState = zoomState
-                    )
-                }
+                CartesianChartHost(
+                    chart = rememberCartesianChart(
+                        rememberColumnCartesianLayer(),
+                        startAxis = rememberStartAxis(),
+                        bottomAxis = rememberBottomAxis()
+                    ),
+                    modelProducer = modelProducer,
+                    scrollState = scrollState,
+                    zoomState = zoomState
+                )
             }
         }
     }

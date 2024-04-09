@@ -11,6 +11,8 @@ interface TransactionsRepository {
     fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction>
     fun getAllTransactionsByCode(transCode: String): Flow<List<Transaction>>
     fun getAllTransactionsByCategory(transCode: String, startDate: String? = null, endDate: String? = null): Flow<List<Transaction>>
+    fun getAllTransactionsByPayee(payeeId: String, startDate: String? = null, endDate: String? = null) : Flow<List<Transaction>>
+
 
     fun getBalanceByAccountId() : Flow<List<BalanceResult>>
     fun getTotalBalanceByCode(transactionCode : String) : Flow<Double>
