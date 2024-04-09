@@ -108,7 +108,7 @@ interface TransactionDao {
                 "FROM CHECKINGACCOUNT_V1 " +
                 "JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId " +
                 "JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId " +
-                "WHERE transCode = :transCode AND CHECKINGACCOUNT_V1.status = :status"
+                "WHERE transCode = :transCode AND CHECKINGACCOUNT_V1.status LIKE :status"
     )
     fun getTotalBalanceByCode(transCode: String, status: String): Flow<Double>
 
@@ -120,7 +120,7 @@ interface TransactionDao {
         "FROM CHECKINGACCOUNT_V1 " +
         "JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId " +
         "JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId " +
-        "WHERE CHECKINGACCOUNT_V1.status = :status"
+        "WHERE CHECKINGACCOUNT_V1.status LIKE :status"
     )
     fun getTotalBalance(status: String): Flow<Double>
 }
