@@ -125,7 +125,7 @@ fun TransactionsScreen(
 
                 1 -> {
                     state = pagerState.currentPage
-/*                    ScheduledTransactionList(
+                    ScheduledTransactionList(
                         billsDeposits = transactionsUiState.billsDepositsDetails,
                         longClicked = { selected ->
                             setIsItemSelected(true)
@@ -134,7 +134,7 @@ fun TransactionsScreen(
                             setSelectedObject(selObj)
                         },
                         viewModel = viewModel
-                    )*/
+                    )
                 }
             }
         }

@@ -128,4 +128,7 @@ dependencies {
 
     // For `compose`. Creates a `ChartStyle` based on an M3 Material Theme.
     implementation("com.patrykandpatrick.vico:compose-m3:2.0.0-alpha.14")
+
+    // Workers
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 }

@@ -25,24 +25,25 @@ data class BillsDeposits(
     val COLOR: Int = -1
 )
 
-enum class RepeatFrequency(val displayName: String, val numeric : Int = 0) {
-    NONE("None", 0),
-    WEEKLY("Weekly", 1),
-    OTHER_WEEK("Every Other Week", 2),
-    MONTHLY("Monthly", 3),
-    OTHER_MONTH("Every Other Month", 4),
-    QUARTERLY("Quarterly", 5),
-    HALF_YEARLY("Every 6 Months", 6),
-    YEARLY("Yearly", 7),
-    FOUR_MONTHS("Every 4 months", 8),
-    FOUR_WEEKS("Every 4 weeks", 9),
-    DAILY("Daily", 10),
-    N_DAYS("In (n) Days", 11),
-    N_MONTHS("In (n) Months", 12),
-    MONTHLY_LAST("Monthly (last day)", 13),
-    MONTHLY_LAST_BUSINESS("Monthly (last business day)", 14)
+enum class RepeatFrequency(val displayName: String, val numeric : Int = 0, val dayCount: Int = 0) {
+    NONE("None", 0, 0),
+    WEEKLY("Weekly", 1, 7),
+    OTHER_WEEK("Every Other Week", 14),
+    MONTHLY("Monthly", 3, -1),
+    OTHER_MONTH("Every Other Month", -2),
+    QUARTERLY("Quarterly", 5, -3),
+    HALF_YEARLY("Every 6 Months", 6, -6),
+    YEARLY("Yearly", 7, -12),
+    FOUR_MONTHS("Every 4 months", 8, -4),
+    FOUR_WEEKS("Every 4 weeks", 9, 28),
+    DAILY("Daily", 10, 1),
+    N_DAYS("In (n) Days", 11, 0),
+    N_MONTHS("In (n) Months", 12, 0),
+    MONTHLY_LAST("Monthly (last day)", 13,0),
+    MONTHLY_LAST_BUSINESS("Monthly (last business day)", 14,0)
 }
 
 fun numericOf(displayName: String) : Int {
     return enumValues<RepeatFrequency>().find { it.displayName == displayName }?.numeric ?: -1
 }
+

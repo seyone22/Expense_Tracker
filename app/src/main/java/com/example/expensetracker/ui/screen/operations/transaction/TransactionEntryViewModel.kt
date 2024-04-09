@@ -125,6 +125,8 @@ class TransactionEntryViewModel(
             val x = transactionUiState.billsDepositsDetails.addTransactionDetails(transactionUiState.transactionDetails)
             x.REPEATS = numericOf(x.REPEATS).toString()
             billsDepositsRepository.insertBillsDeposit(x.toBillsDeposits())
+
+
         }
     }
 
