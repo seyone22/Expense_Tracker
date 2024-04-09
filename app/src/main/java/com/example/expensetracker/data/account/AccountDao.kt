@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.example.expensetracker.data.transaction.BalanceResult
 import com.example.expensetracker.data.transaction.TransactionDao
 import com.example.expensetracker.model.Account
 import kotlinx.coroutines.flow.Flow
@@ -39,5 +40,5 @@ interface AccountDao {
             "    END) AS balance " +
             "FROM CHECKINGACCOUNT_V1 " +
             "GROUP BY accountId")
-    fun getAccountBalance(accountId: Int): Flow<TransactionDao.BalanceResult>
+    fun getAccountBalance(accountId: Int): Flow<BalanceResult>
 }

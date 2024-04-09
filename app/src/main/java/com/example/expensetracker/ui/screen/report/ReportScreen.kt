@@ -10,6 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,6 +28,24 @@ import com.github.tehras.charts.piechart.PieChart
 import com.github.tehras.charts.piechart.PieChartData
 import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 import com.github.tehras.charts.piechart.renderer.SimpleSliceDrawer
+import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
+import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
+import com.patrykandpatrick.vico.compose.chart.CartesianChartHost
+import com.patrykandpatrick.vico.compose.chart.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.chart.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.chart.scroll.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.chart.zoom.rememberVicoZoomState
+import com.patrykandpatrick.vico.compose.m3.theme.rememberM3VicoTheme
+import com.patrykandpatrick.vico.compose.theme.ProvideVicoTheme
+import com.patrykandpatrick.vico.core.axis.AxisPosition
+import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
+import com.patrykandpatrick.vico.core.chart.layer.ColumnCartesianLayer.ColumnProvider.Companion.series
+import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.model.ExtraStore
+import com.patrykandpatrick.vico.core.model.columnSeries
+import java.time.LocalDate
+import java.time.Month
+import java.time.format.DateTimeFormatter
 
 object ReportsDestination : NavigationDestination {
     override val route = "Reports"
@@ -37,15 +60,15 @@ fun ReportScreen(
     viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     Column() {
-
+        ReportCard(viewModel)
     }
 }
 
 @Composable
 fun ReportCard(
-    totals: Totals,
-    baseCurrencyInfo: CurrencyFormat
+    viewModel: ReportViewModel
 ) {
+
     Card(
     ) {
         Box(
@@ -54,30 +77,29 @@ fun ReportCard(
                 .height(240.dp)
                 .fillMaxWidth()
         ) {
-            // Add legend items
-            Column{
-                LegendItem("Income", MaterialTheme.colorScheme.primary)
-                LegendItem("Expense", MaterialTheme.colorScheme.error)
+            val scrollState = rememberVicoScrollState()
+            val zoomState = rememberVicoZoomState()
+
+            var modelProducer: CartesianChartModelProducer? by remember { mutableStateOf(null) }
+
+            LaunchedEffect(Unit) {
+                modelProducer = viewModel.getExpensesFromCategory()
             }
-            PieChart(
-                pieChartData = PieChartData(
-                    listOf(
-                        PieChartData.Slice(
-                            totals.income.toFloat(),
-                            MaterialTheme.colorScheme.primary
-                        ), PieChartData.Slice(
-                            totals.expenses.toFloat(),
-                            MaterialTheme.colorScheme.error,
-                        )
+
+            ProvideVicoTheme(theme = rememberM3VicoTheme()) {
+                modelProducer?.let { producer ->
+                    CartesianChartHost(
+                        chart = rememberCartesianChart(
+                            rememberColumnCartesianLayer(),
+                            startAxis = rememberStartAxis(),
+                            bottomAxis = rememberBottomAxis()
+                        ),
+                        modelProducer = producer,
+                        scrollState = scrollState,
+                        zoomState = zoomState
                     )
-                ),
-                // Optional properties.
-                modifier = Modifier
-                    .fillMaxSize()
-                    .offset(36.dp),
-                animation = simpleChartAnimation(),
-                sliceDrawer = SimpleSliceDrawer()
-            )
+                }
+            }
         }
     }
 }

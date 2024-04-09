@@ -10,6 +10,7 @@ import com.example.expensetracker.data.category.CategoryDao
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatDao
 import com.example.expensetracker.data.metadata.MetadataDao
 import com.example.expensetracker.data.payee.PayeeDao
+import com.example.expensetracker.data.report.ReportDao
 import com.example.expensetracker.data.transaction.TransactionDao
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.BillsDeposits
@@ -18,9 +19,10 @@ import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.Metadata
+import com.example.expensetracker.model.Report
 
 @Database(
-    entities = [Account::class, Transaction::class, Payee::class, Category::class, CurrencyFormat::class, Metadata::class, BillsDeposits::class],
+    entities = [Account::class, Transaction::class, Payee::class, Category::class, CurrencyFormat::class, Metadata::class, BillsDeposits::class, Report::class],
     version = 1,
     exportSchema = true
 )
@@ -32,6 +34,7 @@ abstract class MMEXDatabase : RoomDatabase() {
     abstract fun currencyFormatDao(): CurrencyFormatDao
     abstract fun metadataDao(): MetadataDao
     abstract fun billsDepositsDao(): BillsDepositsDao
+    abstract fun reportDao(): ReportDao
 
     companion object {
         @Volatile
@@ -41,7 +44,7 @@ abstract class MMEXDatabase : RoomDatabase() {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, MMEXDatabase::class.java, "mmex_database")
                     //.createFromAsset("database/prepopulate_v1_1.db")
-                    //.fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration()
                     .build()
                     .also { Instance = it }
             }
