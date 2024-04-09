@@ -82,25 +82,6 @@ class AccountViewModel(
                 initialValue = AccountsUiState()
             )
 
-
-    val data: StateFlow<Balances> =
-        transactionsRepository.getBalanceByAccountId()
-            .map { pairs ->
-                var totalBalance = 0.0
-                var balanceAndInitialBalance : List<BalanceResult>
-                for (balanceResult in pairs) {
-                    totalBalance += balanceResult.balance
-                    accountsRepository.getAccountStream(balanceResult.accountId).first()
-                }
-                Balances(pairs, totalBalance)
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = Balances()
-            )
-
-
     val accountBalances: StateFlow<Balances> =
         accountsRepository.getAllActiveAccountsStream()
             .map { accountList ->

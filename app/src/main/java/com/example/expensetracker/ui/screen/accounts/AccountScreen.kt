@@ -71,7 +71,6 @@ fun AccountScreen(
 ) {
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
-    val data by viewModel.accountBalances.collectAsState()
 
     // Code block to get the current currency's detail.
     val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
