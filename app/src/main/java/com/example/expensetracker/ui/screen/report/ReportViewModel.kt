@@ -60,55 +60,63 @@ class ReportViewModel(
         payeesRepository.getAllActivePayeesStream()
 
 
-    suspend fun getExpensesFromCategory(transCode: String) : CartesianChartModelProducer {
+    suspend fun getExpensesFromCategory(transCode: String) : CartesianChartModelProducer? {
         val transactions = transactionsRepository.getAllTransactionsByCategory(transCode).first()
 
-        val transactionMap = transactions.groupBy { transaction ->
-            LocalDate.parse(transaction.transDate).month.toString()
-        }.mapValues { (_, transactions) ->
-            transactions.sumOf { if (it.transCode == "Withdrawal") -it.transAmount else it.transAmount }
-        }
-
-        val xToDateMapKey = ExtraStore.Key<List<String>>()
-        val xToDates = transactionMap.keys.associateBy { monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f }
-
-        val modelProducer = CartesianChartModelProducer.build()
-
-        modelProducer.tryRunTransaction {
-            columnSeries {
-                series(xToDates.keys, transactionMap.values)
+        if (transactions.isNotEmpty()) {
+            val transactionMap = transactions.groupBy { transaction ->
+                LocalDate.parse(transaction.transDate).month.toString()
+            }.mapValues { (_, transactions) ->
+                transactions.sumOf { if (it.transCode == "Withdrawal") -it.transAmount else it.transAmount }
             }
-            updateExtras {
-                it[xToDateMapKey] = transactionMap.keys.toList()
-            }
-        }
 
-        return modelProducer
+            val xToDateMapKey = ExtraStore.Key<List<String>>()
+            val xToDates = transactionMap.keys.associateBy { monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f }
+
+            val modelProducer = CartesianChartModelProducer.build()
+
+            modelProducer.tryRunTransaction {
+                columnSeries {
+                    series(xToDates.keys, transactionMap.values)
+                }
+                updateExtras {
+                    it[xToDateMapKey] = transactionMap.keys.toList()
+                }
+            }
+
+            return modelProducer
+        } else {
+            return null
+        }
     }
 
-    suspend fun getExpensesFromPayee(payeeId: String): CartesianChartModelProducer {
+    suspend fun getExpensesFromPayee(payeeId: String): CartesianChartModelProducer? {
         val transactions = transactionsRepository.getAllTransactionsByPayee(payeeId).first()
 
-        val transactionMap = transactions.groupBy { transaction ->
-            LocalDate.parse(transaction.transDate).month.toString()
-        }.mapValues { (_, transactions) ->
-            transactions.sumOf { if (it.transCode == "Withdrawal") -it.transAmount else it.transAmount }
-        }
-
-        val xToDateMapKey = ExtraStore.Key<List<String>>()
-        val xToDates = transactionMap.keys.associateBy { monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f }
-
-        val modelProducer = CartesianChartModelProducer.build()
-
-        modelProducer.tryRunTransaction {
-            columnSeries {
-                series(xToDates.keys, transactionMap.values)
+        if (transactions.isNotEmpty()) {
+            val transactionMap = transactions.groupBy { transaction ->
+                LocalDate.parse(transaction.transDate).month.toString()
+            }.mapValues { (_, transactions) ->
+                transactions.sumOf { if (it.transCode == "Withdrawal") -it.transAmount else it.transAmount }
             }
-            updateExtras {
-                it[xToDateMapKey] = transactionMap.keys.toList()
-            }
-        }
 
-        return modelProducer
+            val xToDateMapKey = ExtraStore.Key<List<String>>()
+            val xToDates = transactionMap.keys.associateBy { monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f }
+
+            val modelProducer = CartesianChartModelProducer.build()
+
+            modelProducer.tryRunTransaction {
+                columnSeries {
+                    series(xToDates.keys, transactionMap.values)
+                }
+                updateExtras {
+                    it[xToDateMapKey] = transactionMap.keys.toList()
+                }
+            }
+
+            return modelProducer
+        } else {
+            return null
+        }
     }
 }
