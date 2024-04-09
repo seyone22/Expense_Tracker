@@ -112,7 +112,6 @@ fun AccountScreen(
                 viewModel = viewModel,
                 accountsUiState = accountsUiState,
                 navigateToScreen = navigateToScreen,
-                data = data
             )
         }
     }
@@ -259,7 +258,6 @@ fun AccountData(
     viewModel: AccountViewModel,
     accountsUiState: AccountsUiState,
     navigateToScreen: (screen: String) -> Unit,
-    data: Balances
 ) {
     Column(
         modifier = modifier.padding(0.dp, 24.dp, 0.dp, 0.dp),
@@ -281,7 +279,6 @@ fun AccountData(
                     accountList = accountsUiState.accountList,
                     viewModel = viewModel,
                     navigateToScreen = navigateToScreen,
-                    data = data
                 )
             }
         }
@@ -296,7 +293,6 @@ fun AccountList(
     accountList: List<Pair<Account, Double>>,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
-    data: Balances
 ) {
     Column(
         modifier = modifier.padding(0.dp, 8.dp, 0.dp, 0.dp)
@@ -309,13 +305,9 @@ fun AccountList(
         )
 
         accountList.forEach { accountPair ->
-            val balance: Double =
-                data.balancesList.find { it.accountId == accountPair.first.accountId }?.balance
-                    ?: 0.0
             if (accountPair.first.accountType == category) {
                 AccountCard(
                     accountWithBalance = accountPair,
-                    balance = balance,
                     viewModel = viewModel,
                     navigateToScreen = navigateToScreen,
                 )
@@ -328,7 +320,6 @@ fun AccountList(
 fun AccountCard(
     accountWithBalance: Pair<Account, Double>,
     modifier: Modifier = Modifier,
-    balance: Double,
     viewModel: AccountViewModel,
     navigateToScreen: (screen: String) -> Unit,
 ) {
@@ -394,11 +385,11 @@ fun AccountCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 FormattedCurrency(
-                    value = balance,
+                    value = accountWithBalance.second,
                     currency = accountCurrencyInfo
                 )
                 FormattedCurrency(
-                    value = balance,
+                    value = accountWithBalance.second,
                     currency = accountCurrencyInfo
                 )
             }
