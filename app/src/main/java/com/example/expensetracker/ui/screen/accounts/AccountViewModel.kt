@@ -7,7 +7,6 @@ import com.example.expensetracker.data.account.AccountsRepository
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.metadata.MetadataRepository
 import com.example.expensetracker.data.transaction.BalanceResult
-import com.example.expensetracker.data.transaction.TransactionDao
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.AccountTypes
@@ -72,8 +71,8 @@ class AccountViewModel(
         accountsRepository.getAllAccountsStream()
             .map { accounts ->
                 val transformedList = accounts.map { account ->
-                    val balance = accountsRepository.getAccountBalance(account.accountId).first()
-                    Pair(account, balance.balance)
+                    val balance = accountsRepository.getAccountBalance(account.accountId).firstOrNull()?.balance
+                    Pair(account, balance ?: 0.0) // Default value for balance if it's null
                 }
                 AccountsUiState(transformedList)
             }
@@ -83,6 +82,7 @@ class AccountViewModel(
                 initialValue = AccountsUiState()
             )
 
+
     val data: StateFlow<Balances> =
         transactionsRepository.getBalanceByAccountId()
             .map { pairs ->
@@ -90,7 +90,7 @@ class AccountViewModel(
                 var balanceAndInitialBalance : List<BalanceResult>
                 for (balanceResult in pairs) {
                     totalBalance += balanceResult.balance
-                    accountsRepository.getAccountStream(balanceResult.accountId).firstOrNull()
+                    accountsRepository.getAccountStream(balanceResult.accountId).first()
                 }
                 Balances(pairs, totalBalance)
             }
@@ -115,7 +115,6 @@ class AccountViewModel(
                     if (balance != null) {
                         totalBalance += balance
                     }
-                    Log.d("TAG", ": ${accountsRepository.getAccountBalance(it.accountId).firstOrNull()?.balance} - ${it.accountId} - ${it.initialBalance}")
                 }
                 Balances(balanceData, totalBalance)
             }

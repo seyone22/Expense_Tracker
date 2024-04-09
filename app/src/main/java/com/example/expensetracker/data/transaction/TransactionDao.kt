@@ -59,6 +59,9 @@ interface TransactionDao {
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE categoryId = :categoryId AND (transDate BETWEEN :startDate AND :endDate OR :startDate IS NULL OR :endDate IS NULL)")
     fun getAllTransactionsByCategory(categoryId: String, startDate: String?, endDate: String?): Flow<List<Transaction>>
 
+    @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE payeeId = :payeeId AND (transDate BETWEEN :startDate AND :endDate OR :startDate IS NULL OR :endDate IS NULL)")
+    fun getAllTransactionsByPayee(payeeId: String, startDate: String?, endDate: String?): Flow<List<Transaction>>
+
     @Query("SELECT " +
             "    accountId, " +
             "    SUM(balanceChange) AS balance " +
@@ -87,8 +90,6 @@ interface TransactionDao {
     fun getTotalBalanceByCode(transCode : String): Flow<Double>
     @Query("SELECT SUM(transAmount) AS totalWithdrawal FROM CHECKINGACCOUNT_V1")
     fun getTotalBalance(): Flow<Double>
-
-
 }
 
 data class BalanceResult(
