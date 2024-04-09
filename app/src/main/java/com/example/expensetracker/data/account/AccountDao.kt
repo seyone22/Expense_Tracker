@@ -31,14 +31,25 @@ interface AccountDao {
 
     @Query("SELECT " +
             "    accountId, " +
-            "    SUM(CASE " +
-            "        WHEN transCode = 'Deposit' AND accountId = :accountId THEN transAmount" +
-            "        WHEN transCode = 'Withdrawal' AND accountId = :accountId THEN -transAmount" +
-            "        WHEN transCode = 'Transfer' AND accountId = :accountId THEN -transAmount " +
-            "        WHEN transCode = 'Transfer' AND toAccountId = :accountId THEN transAmount " +
-            "        ELSE 0 " +
-            "    END) AS balance " +
-            "FROM CHECKINGACCOUNT_V1 " +
-            "GROUP BY accountId")
+            "    SUM(balanceChange) AS balance " +
+            "FROM ( " +
+            "    SELECT " +
+            "        accountId, " +
+            "        SUM(CASE WHEN transCode = 'Deposit' THEN transAmount " +
+            "                 WHEN transCode = 'Withdrawal' OR transCode = 'Transfer' THEN -transAmount " +
+            "                 ELSE 0 END) AS balanceChange " +
+            "    FROM CHECKINGACCOUNT_V1 " +
+            "    GROUP BY accountId " +
+            " " +
+            "    UNION ALL " +
+            " " +
+            "    SELECT " +
+            "        toAccountId AS accountId, " +
+            "        SUM(transAmount) AS balanceChange " +
+            "    FROM CHECKINGACCOUNT_V1 " +
+            "    WHERE transCode = 'Transfer' " +
+            "    GROUP BY toAccountId " +
+            ") AS subquery " +
+            "WHERE accountId = :accountId GROUP BY accountId")
     fun getAccountBalance(accountId: Int): Flow<BalanceResult>
 }

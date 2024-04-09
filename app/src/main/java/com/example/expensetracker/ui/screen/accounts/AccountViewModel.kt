@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -69,12 +70,12 @@ class AccountViewModel(
 
     val accountsUiState: StateFlow<AccountsUiState> =
         accountsRepository.getAllAccountsStream()
-            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
             .map { accounts ->
                 val transformedList = accounts.map { account ->
-                    Pair(account, 0.0)
+                    val balance = accountsRepository.getAccountBalance(account.accountId).first()
+                    Pair(account, balance.balance)
                 }
-                AccountsUiState(transformedList, 0.0)
+                AccountsUiState(transformedList)
             }
             .stateIn(
                 scope = viewModelScope,
@@ -90,8 +91,6 @@ class AccountViewModel(
                 for (balanceResult in pairs) {
                     totalBalance += balanceResult.balance
                     accountsRepository.getAccountStream(balanceResult.accountId).firstOrNull()
-
-
                 }
                 Balances(pairs, totalBalance)
             }
