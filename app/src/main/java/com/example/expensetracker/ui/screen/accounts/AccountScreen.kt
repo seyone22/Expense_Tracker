@@ -98,7 +98,6 @@ fun AccountScreen(
             Column {
                 NetWorth(
                     totals = totals,
-                    accountBalances = data,
                     baseCurrencyInfo = baseCurrencyInfo
                 )
 
@@ -120,7 +119,6 @@ fun AccountScreen(
 @Composable
 fun NetWorth(
     totals: Totals,
-    accountBalances: Balances,
     baseCurrencyInfo: CurrencyFormat
 ) {
     Column(
@@ -130,7 +128,7 @@ fun NetWorth(
             .padding(0.dp, 24.dp, 0.dp, 0.dp)
     ) {
         FormattedCurrency(
-            value = accountBalances.grandTotal,
+            value = totals.total,
             currency = baseCurrencyInfo,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally),

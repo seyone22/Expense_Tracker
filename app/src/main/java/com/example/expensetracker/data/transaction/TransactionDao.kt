@@ -15,8 +15,10 @@ import java.time.LocalDate
 interface TransactionDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(transaction: Transaction)
+
     @Update
     suspend fun update(transaction: Transaction)
+
     @Delete
     suspend fun delete(transaction: Transaction)
 
@@ -24,30 +26,34 @@ interface TransactionDao {
     fun getTransaction(transId: Int): Flow<Transaction>
 
     // DOES NOT ACCOUNT FOR CUSTOM CATEGORIES
-    @Query("SELECT " +
-            "    CHECKINGACCOUNT_V1.*, " +
-            "    PAYEE_V1.payeeName AS payeeName, " +
-            "    CATEGORY_V1.categName AS categName " +
-            "FROM " +
-            "    CHECKINGACCOUNT_V1 " +
-            "LEFT OUTER JOIN " +
-            "    PAYEE_V1 ON CHECKINGACCOUNT_V1.payeeId = PAYEE_V1.payeeId " +
-            "LEFT OUTER JOIN " +
-            "    CATEGORY_V1 ON CHECKINGACCOUNT_V1.categoryId = CATEGORY_V1.categId ")
+    @Query(
+        "SELECT " +
+                "    CHECKINGACCOUNT_V1.*, " +
+                "    PAYEE_V1.payeeName AS payeeName, " +
+                "    CATEGORY_V1.categName AS categName " +
+                "FROM " +
+                "    CHECKINGACCOUNT_V1 " +
+                "LEFT OUTER JOIN " +
+                "    PAYEE_V1 ON CHECKINGACCOUNT_V1.payeeId = PAYEE_V1.payeeId " +
+                "LEFT OUTER JOIN " +
+                "    CATEGORY_V1 ON CHECKINGACCOUNT_V1.categoryId = CATEGORY_V1.categId "
+    )
     fun getAllTransactions(): Flow<List<TransactionWithDetails>>
 
-    @Query("SELECT " +
-            "    CHECKINGACCOUNT_V1.*, " +
-            "    PAYEE_V1.payeeName AS payeeName, " +
-            "    CATEGORY_V1.categName AS categName " +
-            "FROM " +
-            "    CHECKINGACCOUNT_V1 " +
-            "LEFT OUTER JOIN " +
-            "    PAYEE_V1 ON CHECKINGACCOUNT_V1.payeeId = PAYEE_V1.payeeId " +
-            "INNER JOIN " +
-            "    CATEGORY_V1 ON CHECKINGACCOUNT_V1.categoryId = CATEGORY_V1.categId " +
-            "WHERE " +
-            "    CHECKINGACCOUNT_V1.accountId = :accountId OR CHECKINGACCOUNT_V1.toAccountId = :accountId")
+    @Query(
+        "SELECT " +
+                "    CHECKINGACCOUNT_V1.*, " +
+                "    PAYEE_V1.payeeName AS payeeName, " +
+                "    CATEGORY_V1.categName AS categName " +
+                "FROM " +
+                "    CHECKINGACCOUNT_V1 " +
+                "LEFT OUTER JOIN " +
+                "    PAYEE_V1 ON CHECKINGACCOUNT_V1.payeeId = PAYEE_V1.payeeId " +
+                "INNER JOIN " +
+                "    CATEGORY_V1 ON CHECKINGACCOUNT_V1.categoryId = CATEGORY_V1.categId " +
+                "WHERE " +
+                "    CHECKINGACCOUNT_V1.accountId = :accountId OR CHECKINGACCOUNT_V1.toAccountId = :accountId"
+    )
     fun getAllTransactionsByAccount(accountId: Int): Flow<List<TransactionWithDetails>>
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE toAccountId = :toAccountId")
@@ -57,38 +63,64 @@ interface TransactionDao {
     fun getAllTransactionsByCode(transCode: String): Flow<List<Transaction>>
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE categoryId = :categoryId AND (transDate BETWEEN :startDate AND :endDate OR :startDate IS NULL OR :endDate IS NULL)")
-    fun getAllTransactionsByCategory(categoryId: String, startDate: String?, endDate: String?): Flow<List<Transaction>>
+    fun getAllTransactionsByCategory(
+        categoryId: String,
+        startDate: String?,
+        endDate: String?
+    ): Flow<List<Transaction>>
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE payeeId = :payeeId AND (transDate BETWEEN :startDate AND :endDate OR :startDate IS NULL OR :endDate IS NULL)")
-    fun getAllTransactionsByPayee(payeeId: String, startDate: String?, endDate: String?): Flow<List<Transaction>>
+    fun getAllTransactionsByPayee(
+        payeeId: String,
+        startDate: String?,
+        endDate: String?
+    ): Flow<List<Transaction>>
 
-    @Query("SELECT " +
-            "    accountId, " +
-            "    SUM(balanceChange) AS balance " +
-            "FROM ( " +
-            "    SELECT " +
-            "        accountId, " +
-            "        SUM(CASE WHEN transCode = 'Deposit' THEN transAmount " +
-            "                 WHEN transCode = 'Withdrawal' OR transCode = 'Transfer' THEN -transAmount " +
-            "                 ELSE 0 END) AS balanceChange " +
-            "    FROM CHECKINGACCOUNT_V1 " +
-            "    GROUP BY accountId " +
-            " " +
-            "    UNION ALL " +
-            " " +
-            "    SELECT " +
-            "        toAccountId AS accountId, " +
-            "        SUM(transAmount) AS balanceChange " +
-            "    FROM CHECKINGACCOUNT_V1 " +
-            "    WHERE transCode = 'Transfer' " +
-            "    GROUP BY toAccountId " +
-            ") AS subquery " +
-            "GROUP BY accountId")
+    @Query(
+        "SELECT " +
+                "    accountId, " +
+                "    SUM(balanceChange) AS balance " +
+                "FROM ( " +
+                "    SELECT " +
+                "        accountId, " +
+                "        SUM(CASE WHEN transCode = 'Deposit' THEN transAmount " +
+                "                 WHEN transCode = 'Withdrawal' OR transCode = 'Transfer' THEN -transAmount " +
+                "                 ELSE 0 END) AS balanceChange " +
+                "    FROM CHECKINGACCOUNT_V1 " +
+                "    GROUP BY accountId " +
+                " " +
+                "    UNION ALL " +
+                " " +
+                "    SELECT " +
+                "        toAccountId AS accountId, " +
+                "        SUM(transAmount) AS balanceChange " +
+                "    FROM CHECKINGACCOUNT_V1 " +
+                "    WHERE transCode = 'Transfer' " +
+                "    GROUP BY toAccountId " +
+                ") AS subquery " +
+                "GROUP BY accountId"
+    )
     fun getAllAccountBalances(): Flow<List<BalanceResult>>
 
-    @Query("SELECT SUM(transAmount) AS totalWithdrawal FROM CHECKINGACCOUNT_V1 WHERE transCode = :transCode")
-    fun getTotalBalanceByCode(transCode : String): Flow<Double>
-    @Query("SELECT SUM(transAmount) AS totalWithdrawal FROM CHECKINGACCOUNT_V1")
+    @Query(
+        "SELECT " +
+                "   SUM(transAmount * baseConvRate) AS totalWithdrawal " +
+                "FROM CHECKINGACCOUNT_V1 " +
+                "JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId " +
+                "JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId " +
+                "WHERE transCode = :transCode"
+    )
+    fun getTotalBalanceByCode(transCode: String): Flow<Double>
+
+    @Query(
+        "SELECT " +
+        "   SUM(CASE WHEN transCode = 'Deposit' THEN transAmount * baseConvRate " +
+        "       WHEN transCode = 'Withdrawal' OR transCode = 'Transfer' THEN -transAmount * baseConvRate " +
+        "       ELSE 0 END) AS totalWithdrawal " +
+        "FROM CHECKINGACCOUNT_V1 " +
+        "JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId " +
+        "JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId "
+    )
     fun getTotalBalance(): Flow<Double>
 }
 
@@ -113,6 +145,6 @@ fun getStartOfLastMonthDateString(): String {
     return firstDayOfLastMonth.toString()
 }
 
-fun getArbitaryEndDateString() : String {
+fun getArbitaryEndDateString(): String {
     return "9999-12-31";
 }
