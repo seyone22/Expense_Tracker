@@ -15,8 +15,8 @@ interface TransactionsRepository {
 
 
     fun getBalanceByAccountId() : Flow<List<BalanceResult>>
-    fun getTotalBalanceByCode(transactionCode : String) : Flow<Double>
-    fun getTotalBalance() : Flow<Double>
+    fun getTotalBalanceByCode(transactionCode : String, status: String = "Reconciled") : Flow<Double>
+    fun getTotalBalance(status: String = "Reconciled") : Flow<Double>
 
     suspend fun insertTransaction(transaction: Transaction)
     suspend fun deleteTransaction(transaction: Transaction)
