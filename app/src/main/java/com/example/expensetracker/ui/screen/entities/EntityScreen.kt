@@ -176,6 +176,7 @@ fun CategoryList(
                         Icon(
                             Icons.Filled.Bookmark,
                             contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     },
                     modifier = Modifier.combinedClickable(
@@ -197,6 +198,7 @@ fun CategoryList(
                                     Icon(
                                         Icons.Filled.Bookmark,
                                         contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                 },
                                 modifier = Modifier.combinedClickable(
