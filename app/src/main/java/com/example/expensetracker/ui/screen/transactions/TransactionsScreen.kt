@@ -28,9 +28,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
@@ -297,8 +299,14 @@ fun TransactionList(
                 }
             }
         } else {
-            Column {
-                Text(text = "Nothing to show here!")
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = "Nothing to show here!",
+                    fontStyle = FontStyle.Italic,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         }
     }
