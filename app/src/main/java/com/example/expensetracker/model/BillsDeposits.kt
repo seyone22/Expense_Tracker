@@ -25,7 +25,7 @@ data class BillsDeposits(
     val COLOR: Int = -1
 )
 
-enum class RepeatFrequency(val displayName: String, val numeric : Int = 0, val dayCount: Int = 0) {
+enum class RepeatFrequency(val displayName: String, val numeric: Int = 0, val dayCount: Int = 0) {
     NONE("None", 0, 0),
     WEEKLY("Weekly", 1, 7),
     OTHER_WEEK("Every Other Week", 14),
@@ -39,11 +39,56 @@ enum class RepeatFrequency(val displayName: String, val numeric : Int = 0, val d
     DAILY("Daily", 10, 1),
     N_DAYS("In (n) Days", 11, 0),
     N_MONTHS("In (n) Months", 12, 0),
-    MONTHLY_LAST("Monthly (last day)", 13,0),
-    MONTHLY_LAST_BUSINESS("Monthly (last business day)", 14,0)
+    MONTHLY_LAST("Monthly (last day)", 13, 0),
+    MONTHLY_LAST_BUSINESS("Monthly (last business day)", 14, 0)
 }
 
-fun numericOf(displayName: String) : Int {
+fun numericOf(displayName: String): Int {
     return enumValues<RepeatFrequency>().find { it.displayName == displayName }?.numeric ?: -1
+}
+
+
+data class BillsDepositWithDetails(
+    val BDID: Int,
+    val ACCOUNTID: Int,
+    val TOACCOUNTID: Int?,
+    val PAYEEID: Int,
+    val TRANSCODE: String,
+    val TRANSAMOUNT: Double,
+    val STATUS: String?,
+    val TRANSACTIONNUMBER: String?,
+    val NOTES: String?,
+    val CATEGID: Int?,
+    val TRANSDATE: String?,
+    val FOLLOWUPID: Int?,
+    val TOTRANSAMOUNT: Double?,
+    val REPEATS: Int?,
+    val NEXTOCCURRENCEDATE: String?,
+    val NUMOCCURRENCES: Int?,
+    val COLOR: Int,
+    val payeeName: String?,  // Include payeeName from PAYEE_V1, NULL when Transfer
+    val categName: String  // Include categoryName from CATEGORY_V1
+)
+
+fun BillsDepositWithDetails.toBillsDeposit(): BillsDeposits {
+    return BillsDeposits(
+        BDID = BDID,
+        ACCOUNTID = ACCOUNTID,
+        TOACCOUNTID = TOACCOUNTID,
+        PAYEEID = PAYEEID,
+        TRANSCODE = TRANSCODE,
+        TRANSAMOUNT = TRANSAMOUNT,
+        STATUS = STATUS,
+        TRANSACTIONNUMBER = TRANSACTIONNUMBER,
+        NOTES = NOTES,
+        CATEGID = CATEGID,
+        TRANSDATE = TRANSDATE,
+        FOLLOWUPID = FOLLOWUPID,
+        TOTRANSAMOUNT = TOTRANSAMOUNT,
+        REPEATS = REPEATS,
+        NEXTOCCURRENCEDATE = NEXTOCCURRENCEDATE,
+        NUMOCCURRENCES = NUMOCCURRENCES,
+        COLOR = COLOR
+    )
 }
 

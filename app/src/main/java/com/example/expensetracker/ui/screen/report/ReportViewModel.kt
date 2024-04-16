@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screen.report
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.expensetracker.data.category.CategoriesRepository
 import com.example.expensetracker.data.payee.PayeesRepository

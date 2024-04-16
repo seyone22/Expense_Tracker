@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.account.AccountsRepository
-import com.example.expensetracker.data.billsDeposit.BillsDepositsRepository
 import com.example.expensetracker.data.transaction.TransactionsRepository
 import com.example.expensetracker.model.Account
+import com.example.expensetracker.model.BillsDepositWithDetails
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
@@ -230,5 +230,5 @@ data class AccountDetailAccountUiState(
 )
 data class AccountDetailTransactionUiState(
     val transactions: List<TransactionWithDetails> = listOf(),
-    val billsDepositsDetails: List<BillsDepositsDetails> = listOf()
+    val billsDeposits: List<BillsDepositWithDetails> = listOf()
 )

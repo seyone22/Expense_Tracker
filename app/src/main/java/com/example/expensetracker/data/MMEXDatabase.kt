@@ -16,10 +16,10 @@ import com.example.expensetracker.model.Account
 import com.example.expensetracker.model.BillsDeposits
 import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Payee
-import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.Metadata
+import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.Report
+import com.example.expensetracker.model.Transaction
 
 @Database(
     entities = [Account::class, Transaction::class, Payee::class, Category::class, CurrencyFormat::class, Metadata::class, BillsDeposits::class, Report::class],

@@ -37,9 +37,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.SelectedObjects
+import com.example.expensetracker.model.BillsDepositWithDetails
+import com.example.expensetracker.model.BillsDeposits
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Transaction
 import com.example.expensetracker.model.TransactionWithDetails
+import com.example.expensetracker.model.toBillsDeposit
 import com.example.expensetracker.model.toTransaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.FormattedCurrency
@@ -128,10 +131,10 @@ fun TransactionsScreen(
                 1 -> {
                     state = pagerState.currentPage
                     ScheduledTransactionList(
-                        billsDeposits = transactionsUiState.billsDepositsDetails,
+                        billsDeposits = transactionsUiState.billsDeposits,
                         longClicked = { selected ->
                             setIsItemSelected(true)
-                            val selObj = SelectedObjects(transaction = selected)
+                            val selObj = SelectedObjects(billsDeposits = selected)
                             Log.d("TAG", "TransactionsScreen: $selObj")
                             setSelectedObject(selObj)
                         },
@@ -145,12 +148,15 @@ fun TransactionsScreen(
 
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScheduledTransactionList(
-    billsDeposits: List<BillsDepositsDetails>,
-    longClicked: (Transaction) -> Unit,
+    billsDeposits: List<BillsDepositWithDetails>,
+    longClicked: (BillsDeposits) -> Unit,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    Log.d("TAG", "ScheduledTransactionList: $billsDeposits")
+
     val haptics = LocalHapticFeedback.current
     var filteredTransactions by remember { mutableStateOf(billsDeposits) }
     // Use derivedStateOf to update filteredTransactions when transactions change
@@ -189,6 +195,77 @@ fun ScheduledTransactionList(
                 }
             }
         )
+
+        if (filteredTransactions.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+            ) {
+                items(count = filteredTransactions.size) {
+                    ListItem(
+                        headlineContent = {
+                            Text(text = filteredTransactions[it].payeeName ?: "Transfer")
+                        },
+                        supportingContent = {
+                            Text(text = removeTrPrefix(filteredTransactions[it].categName))
+                        },
+                        trailingContent = {
+                            var currencyFormat by remember { mutableStateOf(CurrencyFormat()) }
+
+                            LaunchedEffect(filteredTransactions[it].ACCOUNTID) {
+                                val currencyFormatFunction =
+                                    viewModel.getAccountFromId(filteredTransactions[it].ACCOUNTID)
+                                        ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
+                                currencyFormat = currencyFormatFunction!!
+                            }
+
+                            FormattedCurrency(
+                                value = filteredTransactions[it].TRANSAMOUNT,
+                                currency = currencyFormat,
+                                type = if ((filteredTransactions[it].TRANSCODE == "Deposit") or (filteredTransactions[it].TOACCOUNTID != -1)) {
+                                    TransactionType.CREDIT
+                                } else {
+                                    TransactionType.DEBIT
+                                }
+                            )
+                        },
+                        leadingContent = {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = getAbbreviatedMonthName(
+                                        filteredTransactions[it].TRANSDATE!!.substring(
+                                            5,
+                                            7
+                                        ).toInt()
+                                    )
+                                )
+                                Text(text = filteredTransactions[it].TRANSDATE!!.substring(8, 10))
+                            }
+                        },
+                        modifier = Modifier.combinedClickable(
+                            onClick = {},
+                            onLongClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                longClicked(filteredTransactions[it].toBillsDeposit())
+                            },
+                            onLongClickLabel = "  "
+                        )
+                    )
+                    HorizontalDivider()
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = "Nothing to show here!",
+                    fontStyle = FontStyle.Italic,
+                    color = Color.Gray,
+                    modifier = Modifier.align(Alignment.CenterHorizontally))
+            }
+        }
     }
 }
 
