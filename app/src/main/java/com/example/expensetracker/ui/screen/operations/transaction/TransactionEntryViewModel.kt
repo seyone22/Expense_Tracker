@@ -51,7 +51,13 @@ class TransactionEntryViewModel(
             //.onEach { Log.d("DEBUG", ": flow emitted $it") }
             .map { categories ->
                 TransactionUiState(
-                    categoriesList = categories
+                    categoriesList = categories.sortedBy { it ->
+                        if (it.parentId != -1) {
+                            it.parentId
+                        } else {
+                            it.categId
+                        }
+                    }
                 )
             }
             .stateIn(
@@ -122,7 +128,8 @@ class TransactionEntryViewModel(
 
     suspend fun saveRecurringTransaction() {
         if (validateInput()) {
-            val x = transactionUiState.billsDepositsDetails.addTransactionDetails(transactionUiState.transactionDetails)
+            val x =
+                transactionUiState.billsDepositsDetails.addTransactionDetails(transactionUiState.transactionDetails)
             x.REPEATS = numericOf(x.REPEATS).toString()
             billsDepositsRepository.insertBillsDeposit(x.toBillsDeposits())
 
@@ -328,23 +335,24 @@ fun BillsDeposits.toBillsDepositsDetails(): BillsDepositsDetails = BillsDeposits
     COLOR = COLOR.toString()
 )
 
-fun BillsDepositsDetails.addTransactionDetails(t : TransactionDetails): BillsDepositsDetails = BillsDepositsDetails(
-    BDID = BDID,
-    ACCOUNTID = t.accountId,
-    TOACCOUNTID = t.toAccountId,
-    PAYEEID = t.payeeId,
-    TRANSCODE = t.transCode, // Withdrawal, Deposit, Transfer
-    TRANSAMOUNT = t.transAmount,
-    STATUS = t.status, // None, Reconciled, Void, Follow up, Duplicate
-    TRANSACTIONNUMBER = t.transactionNumber,
-    NOTES = t.notes,
-    CATEGID = t.categoryId,
-    TRANSDATE = t.transDate,
-    FOLLOWUPID = t.followUpId,
-    TOTRANSAMOUNT = t.toTransAmount,
-    //Recurring Stuff
-    REPEATS = REPEATS,
-    NEXTOCCURRENCEDATE = NEXTOCCURRENCEDATE,
-    NUMOCCURRENCES = NUMOCCURRENCES,
-    COLOR = COLOR
-)
+fun BillsDepositsDetails.addTransactionDetails(t: TransactionDetails): BillsDepositsDetails =
+    BillsDepositsDetails(
+        BDID = BDID,
+        ACCOUNTID = t.accountId,
+        TOACCOUNTID = t.toAccountId,
+        PAYEEID = t.payeeId,
+        TRANSCODE = t.transCode, // Withdrawal, Deposit, Transfer
+        TRANSAMOUNT = t.transAmount,
+        STATUS = t.status, // None, Reconciled, Void, Follow up, Duplicate
+        TRANSACTIONNUMBER = t.transactionNumber,
+        NOTES = t.notes,
+        CATEGID = t.categoryId,
+        TRANSDATE = t.transDate,
+        FOLLOWUPID = t.followUpId,
+        TOTRANSAMOUNT = t.toTransAmount,
+        //Recurring Stuff
+        REPEATS = REPEATS,
+        NEXTOCCURRENCEDATE = NEXTOCCURRENCEDATE,
+        NUMOCCURRENCES = NUMOCCURRENCES,
+        COLOR = COLOR
+    )

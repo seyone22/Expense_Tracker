@@ -11,6 +11,7 @@ import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -851,7 +852,12 @@ fun TransactionEntryForm(
             ) {
                 transactionUiState.categoriesList.forEach { category ->
                     DropdownMenuItem(
-                        text = { Text(removeTrPrefix(category.categName)) },
+                        text = { Row {
+                            if (category.parentId != -1) {
+                                Spacer(modifier = Modifier.width(16.dp))
+                            }
+                            Text(removeTrPrefix(category.categName))
+                        } },
                         onClick = {
                             currentCategory = category
                             onValueChange(

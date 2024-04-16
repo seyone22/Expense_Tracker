@@ -5,14 +5,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.category.CategoriesRepository
 import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
 import com.example.expensetracker.data.payee.PayeesRepository
 import com.example.expensetracker.model.Category
 import com.example.expensetracker.model.CategoryDetails
 import com.example.expensetracker.model.CategoryUiState
 import com.example.expensetracker.model.CurrencyFormat
+import com.example.expensetracker.model.InfoEuroCurrencyHistoryResponse
 import com.example.expensetracker.model.Payee
 import com.example.expensetracker.model.toCategory
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
@@ -21,13 +22,13 @@ import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrenc
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeUiState
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayee
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * ViewModel to retrieve all items in the Room database.
@@ -39,15 +40,22 @@ class EntityViewModel(
 ) : ViewModel() {
 
     // Flows for each type of entity
-    private val categoriesParentFlow: Flow<List<Category>> = categoriesRepository.getAllParentCategories()
+    private val categoriesParentFlow: Flow<List<Category>> =
+        categoriesRepository.getAllParentCategories()
     private val categoriesSubFlow: Flow<List<Category>> = categoriesRepository.getAllSubCategories()
 
     private val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
-    private val currencyFormatsFlow: Flow<List<CurrencyFormat>> = currencyFormatsRepository.getAllCurrencyFormatsStream()
+    private val currencyFormatsFlow: Flow<List<CurrencyFormat>> =
+        currencyFormatsRepository.getAllCurrencyFormatsStream()
     private val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllActivePayeesStream()
 
     // Combine the flows and calculate the totals
-    val entitiesUiState: Flow<EntitiesUiState> = combine(categoriesParentFlow, categoriesSubFlow, currencyFormatsFlow, payeesFlow) { categoriesParent, categoriesSub, currencies, payees ->
+    val entitiesUiState: Flow<EntitiesUiState> = combine(
+        categoriesParentFlow,
+        categoriesSubFlow,
+        currencyFormatsFlow,
+        payeesFlow
+    ) { categoriesParent, categoriesSub, currencies, payees ->
         EntitiesUiState(categoriesParent, categoriesSub, payees, currencies)
     }
 
@@ -61,18 +69,18 @@ class EntityViewModel(
     var selectedCategory by mutableStateOf(Category())
 
     suspend fun saveCategory() {
-        if(validateCategoryInput()) {
+        if (validateCategoryInput()) {
             categoriesRepository.insertCategory(categoryUiState.categoryDetails.toCategory())
         }
     }
 
     suspend fun editCategory() {
-        if(validateCategoryInput()) {
+        if (validateCategoryInput()) {
             categoriesRepository.updateCategory(categoryUiState.categoryDetails.toCategory())
         }
     }
 
-    suspend fun deleteCategory(category : Category) {
+    suspend fun deleteCategory(category: Category) {
         categoriesRepository.deleteCategory(category)
     }
 
@@ -84,7 +92,10 @@ class EntityViewModel(
 
     fun updateCategoryState(categoryDetails: CategoryDetails) {
         categoryUiState =
-            CategoryUiState(categoryDetails = categoryDetails, isEntryValid = validateCategoryInput(categoryDetails))
+            CategoryUiState(
+                categoryDetails = categoryDetails,
+                isEntryValid = validateCategoryInput(categoryDetails)
+            )
     }
 
     // Payee state and operations
@@ -93,18 +104,18 @@ class EntityViewModel(
     var selectedPayee by mutableStateOf(Payee())
 
     suspend fun savePayee() {
-        if(validatePayeeInput()) {
+        if (validatePayeeInput()) {
             payeesRepository.insertPayee(payeeUiState.payeeDetails.toPayee())
         }
     }
 
     suspend fun editPayee() {
-        if(validatePayeeInput()) {
+        if (validatePayeeInput()) {
             payeesRepository.updatePayee(payeeUiState.payeeDetails.toPayee())
         }
     }
 
-    suspend fun deletePayee(payee : Payee) {
+    suspend fun deletePayee(payee: Payee) {
         payeesRepository.deletePayee(payee)
     }
 
@@ -116,7 +127,10 @@ class EntityViewModel(
 
     fun updatePayeeState(payeeDetails: PayeeDetails) {
         payeeUiState =
-            PayeeUiState(payeeDetails = payeeDetails, isEntryValid = validatePayeeInput(payeeDetails))
+            PayeeUiState(
+                payeeDetails = payeeDetails,
+                isEntryValid = validatePayeeInput(payeeDetails)
+            )
     }
 
     // Currency state and operations
@@ -125,18 +139,18 @@ class EntityViewModel(
     var selectedCurrency by mutableStateOf(CurrencyFormat())
 
     suspend fun saveCurrency() {
-        if(validateCurrencyInput()) {
+        if (validateCurrencyInput()) {
             currencyFormatsRepository.insertCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
         }
     }
 
     suspend fun editCurrency() {
-        if(validateCurrencyInput()) {
+        if (validateCurrencyInput()) {
             currencyFormatsRepository.updateCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
         }
     }
 
-    suspend fun deleteCurrency(currency : CurrencyFormat) {
+    suspend fun deleteCurrency(currency: CurrencyFormat) {
         currencyFormatsRepository.deleteCurrencyFormat(currency)
     }
 
@@ -148,12 +162,43 @@ class EntityViewModel(
 
     fun updateCurrencyState(currencyDetails: CurrencyDetails) {
         currencyUiState =
-            CurrencyUiState(currencyDetails = currencyDetails, isEntryValid = validateCurrencyInput(currencyDetails))
+            CurrencyUiState(
+                currencyDetails = currencyDetails,
+                isEntryValid = validateCurrencyInput(currencyDetails)
+            )
     }
 
-    suspend fun getNameOfCategory(categId: Int) : Category {
+    suspend fun getNameOfCategory(categId: Int): Category {
         val x = categoriesRepository.getCategoriesStream(categId)
-        return x.first() ?:  Category()
+        return x.first() ?: Category()
+    }
+
+
+    suspend fun makeChartModel(currencySymbol: String): Map<LocalDate, Float> {
+        val onlineData = getCurrencyHistory(currencySymbol)
+
+        return if (!onlineData.isNullOrEmpty()) {
+            val data: Map<LocalDate, Float> = onlineData
+                .associate {
+                    LocalDate.parse(it.dateStart, DateTimeFormatter.ofPattern("dd/MM/yyyy")) to it.amount.toFloat()
+                }
+            data
+        } else {
+            Log.d("ERROR", "makeChartModel: Empty or null online data")
+            mapOf()
+        }
+    }
+
+    private suspend fun getCurrencyHistory(currencySymbol: String): List<InfoEuroCurrencyHistoryResponse>? {
+        return try {
+            withContext(Dispatchers.IO) {
+                val response = InfoEuroApi.retrofitService.getCurrencyHistory("https://ec.europa.eu/budg/inforeuro/api/public/currencies/$currencySymbol")
+                response.body()
+            }
+        } catch (e: Exception) {
+            Log.e("ERROR", "Failed to fetch currency history: $e")
+            null
+        }
     }
 }
 
@@ -168,7 +213,7 @@ data class EntitiesUiState(
 )
 
 // Enum for entity types
-enum class Entity(val displayName : String, val pluralDisplayName : String) {
+enum class Entity(val displayName: String, val pluralDisplayName: String) {
     CATEGORY("Category", "Categories"),
     PAYEE("Payee", "Payees"),
     CURRENCY("Currency", "Currencies")

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -25,6 +24,7 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -38,7 +38,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.SelectedObjects
@@ -49,9 +48,27 @@ import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
+import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
+import com.patrykandpatrick.vico.compose.chart.CartesianChartHost
+import com.patrykandpatrick.vico.compose.chart.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.chart.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.chart.scroll.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.chart.zoom.rememberVicoZoomState
+import com.patrykandpatrick.vico.compose.m3.theme.rememberM3VicoTheme
+import com.patrykandpatrick.vico.compose.theme.ProvideVicoTheme
+import com.patrykandpatrick.vico.core.axis.AxisPosition
+import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
+import com.patrykandpatrick.vico.core.chart.layer.ColumnCartesianLayer.ColumnProvider.Companion.series
+import com.patrykandpatrick.vico.core.formatter.ValueFormatter
+import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.model.ExtraStore
+import com.patrykandpatrick.vico.core.model.columnSeries
+import com.patrykandpatrick.vico.core.model.lineSeries
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object EntitiesDestination : NavigationDestination {
     override val route = "Entities"
@@ -70,6 +87,9 @@ fun EntityScreen(
     viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val coroutineScope = rememberCoroutineScope()
+
+    var chartData: Map<LocalDate, Float> by remember { mutableStateOf( mapOf(LocalDate.parse("2022-01-01") to 2f) ) }
+    var finished: Boolean by remember { mutableStateOf(false) }
 
     var state by remember { mutableIntStateOf(0) }
     setTopBarAction(state)
@@ -138,15 +158,68 @@ fun EntityScreen(
 
                 2 -> {
                     state = pagerState.currentPage
-                    CurrenciesList(
-                        list = entityUiState.currenciesList,
-                        viewModel = viewModel,
-                        coroutineScope = coroutineScope,
-                        longClicked = { selected ->
-                            setIsItemSelected(true)
-                            setSelectedObject(SelectedObjects(currency = selected))
-                        },
-                    )
+
+                    Column {
+                        // TODO : DO the chart here.
+/*                        if(finished) {
+                            val scrollState = rememberVicoScrollState()
+                            val zoomState = rememberVicoZoomState()
+
+                            val xToDateMapKey = ExtraStore.Key<Map<Float, LocalDate>>()
+                            var xToDates: Map<Float, LocalDate> = mapOf()
+
+                            val dateTimeFormatter = DateTimeFormatter.ofPattern("MMM yyyy")
+                            var x: ValueFormatter
+                            val dataLoaded = remember { mutableStateOf(false) }
+
+                            val modelProducer = remember { CartesianChartModelProducer.build() }
+                            LaunchedEffect(Unit) {
+                                xToDates = chartData.keys.associateBy { it.toEpochDay().toFloat() }
+
+                                modelProducer.tryRunTransaction {
+                                    columnSeries { series(xToDates.keys, chartData.values) }
+                                }
+                                dataLoaded.value = true
+                            }
+
+                            if (dataLoaded.value) {
+                                ProvideVicoTheme(theme = rememberM3VicoTheme()) {
+                                    CartesianChartHost(
+                                        chart = rememberCartesianChart(
+                                            rememberColumnCartesianLayer(),
+                                            startAxis = rememberStartAxis(),
+                                            bottomAxis = rememberBottomAxis(
+                                                valueFormatter = AxisValueFormatter<AxisPosition.Horizontal.Bottom> { x, chartValues, _ ->
+                                                    (chartValues.model.extraStore[xToDateMapKey][x] ?: LocalDate.ofEpochDay(x.toLong()))
+                                                        .format(dateTimeFormatter)
+                                                }
+                                            )
+                                        ),
+                                        modelProducer = modelProducer,
+                                        scrollState = scrollState,
+                                        zoomState = zoomState
+                                    )
+                                }
+                            }
+                        }*/
+
+                        CurrenciesList(
+                            list = entityUiState.currenciesList,
+                            viewModel = viewModel,
+                            coroutineScope = coroutineScope,
+                            onClicked = {
+                                coroutineScope.launch {
+                                    chartData = viewModel.makeChartModel(it)
+                                    finished = true
+                                }
+                                Log.d("TAG", "EntityScreen: $chartData")
+                            },
+                            longClicked = { selected ->
+                                setIsItemSelected(true)
+                                setSelectedObject(SelectedObjects(currency = selected))
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -190,7 +263,7 @@ fun CategoryList(
                 )
 
                 groupedList.forEach { group ->
-                    if(group.key == parent.categId) {
+                    if (group.key == parent.categId) {
                         group.value.forEach {
                             ListItem(
                                 headlineContent = { Text(removeTrPrefix(it.categName)) },
@@ -201,15 +274,16 @@ fun CategoryList(
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                 },
-                                modifier = Modifier.combinedClickable(
-                                    onClick = {},
-                                    onLongClick = {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        longClicked(it)
-                                    },
-                                    onLongClickLabel = "  "
-                                )
-                                    .padding(24.dp,0.dp,0.dp,0.dp)
+                                modifier = Modifier
+                                    .combinedClickable(
+                                        onClick = {},
+                                        onLongClick = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            longClicked(it)
+                                        },
+                                        onLongClickLabel = "  "
+                                    )
+                                    .padding(24.dp, 0.dp, 0.dp, 0.dp)
                             )
                         }
                     }
@@ -262,6 +336,7 @@ fun CurrenciesList(
     list: List<CurrencyFormat>,
     coroutineScope: CoroutineScope,
     longClicked: (CurrencyFormat) -> Unit,
+    onClicked: (String) -> Unit,
     viewModel: EntityViewModel
 ) {
     val haptics = LocalHapticFeedback.current
@@ -276,12 +351,16 @@ fun CurrenciesList(
                     )
                 },
                 overlineContent = { Text(removeTrPrefix(it.currencyName)) },
-                leadingContent = { Text(
-                    text = it.currency_symbol,
-                    modifier = Modifier.requiredWidth(48.dp)
-                ) },
+                leadingContent = {
+                    Text(
+                        text = it.currency_symbol,
+                        modifier = Modifier.requiredWidth(48.dp)
+                    )
+                },
                 modifier = Modifier.combinedClickable(
-                    onClick = {},
+                    onClick = {
+                        onClicked(it.currency_symbol)
+                    },
                     onLongClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         longClicked(it)
