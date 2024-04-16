@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.accounts
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -94,6 +95,8 @@ fun AccountScreen(
     ) {
         item() {
             Column {
+                Log.d("TAG", "AccountScreen: $totals")
+
                 NetWorth(
                     totals = totals,
                     baseCurrencyInfo = baseCurrencyInfo
