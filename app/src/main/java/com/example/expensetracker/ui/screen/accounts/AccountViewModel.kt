@@ -27,13 +27,12 @@ class AccountViewModel(
     private val metadataRepository: MetadataRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository,
 ) : ViewModel() {
+    // THESE ONLY CHECK FOR RECONCILED TRANSACTIONS.
     // Flow for expenses
     private val expensesFlow: Flow<Double> =
         transactionsRepository.getTotalBalanceByCode("Withdrawal")
-
     // Flow for income
     private val incomeFlow: Flow<Double> = transactionsRepository.getTotalBalanceByCode("Deposit")
-
     // Flow for total
     private val totalFlow: Flow<Double> = transactionsRepository.getTotalBalance()
 
