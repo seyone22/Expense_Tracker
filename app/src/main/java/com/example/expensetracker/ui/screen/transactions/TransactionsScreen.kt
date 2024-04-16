@@ -135,7 +135,6 @@ fun TransactionsScreen(
                         longClicked = { selected ->
                             setIsItemSelected(true)
                             val selObj = SelectedObjects(billsDeposits = selected)
-                            Log.d("TAG", "TransactionsScreen: $selObj")
                             setSelectedObject(selObj)
                         },
                         viewModel = viewModel
@@ -155,8 +154,6 @@ fun ScheduledTransactionList(
     longClicked: (BillsDeposits) -> Unit,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    Log.d("TAG", "ScheduledTransactionList: $billsDeposits")
-
     val haptics = LocalHapticFeedback.current
     var filteredTransactions by remember { mutableStateOf(billsDeposits) }
     // Use derivedStateOf to update filteredTransactions when transactions change
