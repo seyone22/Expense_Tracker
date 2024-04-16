@@ -2,7 +2,6 @@ package com.example.expensetracker.data.billsDeposit
 
 import com.example.expensetracker.model.BillsDepositWithDetails
 import com.example.expensetracker.model.BillsDeposits
-import com.example.expensetracker.model.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
 
 class OfflineBillsDepositsRepository(private val billsDepositsDao : BillsDepositsDao) : BillsDepositsRepository {
