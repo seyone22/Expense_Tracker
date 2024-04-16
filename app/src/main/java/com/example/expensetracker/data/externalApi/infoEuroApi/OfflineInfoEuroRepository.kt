@@ -1,9 +1,9 @@
 package com.example.expensetracker.data.externalApi.infoEuroApi
 
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.InfoEuro
-import kotlinx.coroutines.flow.Flow
+import com.example.expensetracker.model.InfoEuroCurrencyListResponse
 
 class OfflineInfoEuroRepository(private val infoEuroRepository : InfoEuroRepository) : InfoEuroRepository {
-    override fun getMonthlyRates(): List<InfoEuro> = infoEuroRepository.getMonthlyRates()
+    override fun getMonthlyRates(): List<InfoEuroCurrencyListResponse> = infoEuroRepository.getMonthlyRates()
+    override fun getCurrencyHistory(currencyCode: String): List<InfoEuroCurrencyListResponse> = infoEuroRepository.getCurrencyHistory(currencyCode)
+
 }

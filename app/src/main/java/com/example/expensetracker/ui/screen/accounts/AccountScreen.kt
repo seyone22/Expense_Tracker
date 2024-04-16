@@ -26,6 +26,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -208,7 +209,7 @@ fun Summary(totals: Totals, baseCurrencyInfo: CurrencyFormat) {
             // Add legend items
             Column {
                 LegendItem("Income", MaterialTheme.colorScheme.primary)
-                LegendItem("Expense", MaterialTheme.colorScheme.error)
+                LegendItem("Expense", Color(0xfff75e51))
             }
             PieChart(
                 pieChartData = PieChartData(
@@ -328,10 +329,7 @@ fun AccountCard(
             viewModel.getBaseCurrencyInfo(baseCurrencyId = accountWithBalance.first.currencyId)
     }
 
-    ElevatedCard(
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        ),
+    OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(104.dp)
