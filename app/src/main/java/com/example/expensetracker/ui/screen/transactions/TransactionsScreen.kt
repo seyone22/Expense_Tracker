@@ -51,7 +51,6 @@ import com.example.expensetracker.ui.common.TransactionType
 import com.example.expensetracker.ui.common.getAbbreviatedMonthName
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.example.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

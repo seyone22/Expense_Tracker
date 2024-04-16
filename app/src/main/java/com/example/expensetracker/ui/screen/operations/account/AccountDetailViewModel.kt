@@ -12,7 +12,6 @@ import com.example.expensetracker.model.TransactionCode
 import com.example.expensetracker.model.TransactionStatus
 import com.example.expensetracker.model.TransactionWithDetails
 import com.example.expensetracker.model.toTransaction
-import com.example.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
