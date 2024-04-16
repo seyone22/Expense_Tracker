@@ -16,6 +16,8 @@ import androidx.navigation.navArgument
 import com.example.expensetracker.SelectedObjects
 import com.example.expensetracker.ui.screen.accounts.AccountScreen
 import com.example.expensetracker.ui.screen.accounts.AccountsDestination
+import com.example.expensetracker.ui.screen.budget.BudgetScreen
+import com.example.expensetracker.ui.screen.budget.BudgetsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
 import com.example.expensetracker.ui.screen.entities.EntityScreen
 import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
@@ -30,12 +32,10 @@ import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyE
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyEntryScreen
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryDestination
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryScreen
-import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
-import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryScreen
-import com.example.expensetracker.ui.screen.budget.BudgetScreen
-import com.example.expensetracker.ui.screen.budget.BudgetsDestination
 import com.example.expensetracker.ui.screen.operations.report.ReportEntryDestination
 import com.example.expensetracker.ui.screen.operations.report.ReportEntryScreen
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryScreen
 import com.example.expensetracker.ui.screen.report.ReportScreen
 import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination

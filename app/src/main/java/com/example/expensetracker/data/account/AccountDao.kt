@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.expensetracker.data.transaction.BalanceResult
-import com.example.expensetracker.data.transaction.TransactionDao
 import com.example.expensetracker.model.Account
 import kotlinx.coroutines.flow.Flow
 

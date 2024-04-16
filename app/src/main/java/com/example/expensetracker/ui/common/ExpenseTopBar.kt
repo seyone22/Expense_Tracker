@@ -11,8 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringArrayResource
-import com.example.expensetracker.R
 import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.example.expensetracker.ui.screen.operations.report.ReportEntryDestination

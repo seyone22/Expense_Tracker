@@ -24,7 +24,6 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,27 +47,9 @@ import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
-import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
-import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
-import com.patrykandpatrick.vico.compose.chart.CartesianChartHost
-import com.patrykandpatrick.vico.compose.chart.layer.rememberColumnCartesianLayer
-import com.patrykandpatrick.vico.compose.chart.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.chart.scroll.rememberVicoScrollState
-import com.patrykandpatrick.vico.compose.chart.zoom.rememberVicoZoomState
-import com.patrykandpatrick.vico.compose.m3.theme.rememberM3VicoTheme
-import com.patrykandpatrick.vico.compose.theme.ProvideVicoTheme
-import com.patrykandpatrick.vico.core.axis.AxisPosition
-import com.patrykandpatrick.vico.core.axis.formatter.AxisValueFormatter
-import com.patrykandpatrick.vico.core.chart.layer.ColumnCartesianLayer.ColumnProvider.Companion.series
-import com.patrykandpatrick.vico.core.formatter.ValueFormatter
-import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.model.ExtraStore
-import com.patrykandpatrick.vico.core.model.columnSeries
-import com.patrykandpatrick.vico.core.model.lineSeries
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 object EntitiesDestination : NavigationDestination {
     override val route = "Entities"
