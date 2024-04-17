@@ -132,4 +132,7 @@ dependencies {
 
     // Workers
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    // Biometrics
+    implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
 }
