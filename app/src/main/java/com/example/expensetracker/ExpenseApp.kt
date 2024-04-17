@@ -66,6 +66,7 @@ import kotlinx.coroutines.launch
 fun ExpenseApp(
     navController: NavHostController = rememberNavController(),
     windowSizeClass: WindowWidthSizeClass,
+    onToggleDarkTheme : () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -186,6 +187,7 @@ fun ExpenseApp(
                 navController = navController,
                 windowSizeClass = windowSizeClass,
                 setTopBarAction = { action: Int -> topBarOperation = action },
+                onToggleDarkTheme = onToggleDarkTheme,
                 setIsItemSelected = { boolean: Boolean -> isSelected = boolean },
                 setSelectedObject = { item ->
                     selectedObject = item
