@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@460a3ca55fc5d559238a0efc7fa9f7465df8585d # v3.3.0
+        uses: gradle/actions/wrapper-validation@v3
 
       - name: Setup Android SDK
         run: |
@@ -37,7 +37,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Show available actions
-        run: gradlew tasks
+        run: ./gradlew tasks
 
       - name: Build app and run unit tests
         run: ./gradlew detekt assembleStandardRelease testReleaseUnitTest
