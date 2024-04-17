@@ -9,6 +9,7 @@ import com.example.expensetracker.data.metadata.MetadataRepository
 import com.example.expensetracker.model.CurrencyFormat
 import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
+import com.example.expensetracker.ui.theme.DarkTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +44,17 @@ class SettingsViewModel(
     private val baseCurrencyIdFlow: Flow<Metadata?> =
         metadataRepository.getMetadataByNameStream("BASECURRENCYID")
 
+    private val requireUnlockFlow: Flow<Metadata?> =
+        metadataRepository.getMetadataByNameStream("REQUIREUNLOCK")
+
+    private val secureScreenFlow: Flow<Metadata?> =
+        metadataRepository.getMetadataByNameStream("SECURESCREEN")
+
+    val securityObject: Flow<SecurityObject> =
+        combine(requireUnlockFlow, secureScreenFlow) {r, s ->
+            SecurityObject(r?.infoValue.toBoolean(), s?.infoValue.toBoolean())
+        }
+
     // Combine the flows and calculate the totals
     val metadataList: Flow<List<Metadata?>> =
         combine(usernameFlow, baseCurrencyIdFlow) { username, basecurrencyid ->
@@ -66,10 +78,59 @@ class SettingsViewModel(
             .firstOrNull() ?: CurrencyFormat()
     }
 
+    suspend fun getCurrentTheme(): DarkTheme {
+        val x = metadataRepository.getMetadataByNameStream("THEME").firstOrNull() ?: return DarkTheme()
+        when(x.infoValue) {
+            "LIGHT" -> {
+                return DarkTheme(false, false)
+            }
+            "DARK" -> {
+                return DarkTheme(true, false)
+            }
+            "MIDNIGHHT" -> {
+                return DarkTheme(true, true)
+            }
+        }
+        return DarkTheme()
+    }
+
+    suspend fun setTheme(theme: Int) {
+        when(theme) {
+            0 -> {
+                metadataRepository.insertMetadata(com.example.expensetracker.model.Metadata(99,"THEME","LIGHT"))
+            }
+            1 -> {
+                metadataRepository.insertMetadata(com.example.expensetracker.model.Metadata(99,"THEME","DARK"))
+            }
+            2 -> {
+                metadataRepository.insertMetadata(com.example.expensetracker.model.Metadata(99,"THEME","SYSTEM"))
+            }
+            3 -> {
+                metadataRepository.insertMetadata(com.example.expensetracker.model.Metadata(99,"THEME","MIDNIGHT"))
+            }
+        }
+    }
+
     suspend fun changeUsername(newName: String) {
         metadataRepository.updateMetadata(
             Metadata(6, "USERNAME", newName)
         )
+    }
+
+    suspend fun getRequireUnlock() : Boolean {
+        return metadataRepository.getMetadataByNameStream("REQUIREUNLOCK").firstOrNull()?.infoValue.toString().toBoolean()
+    }
+
+    suspend fun setRequireUnlock(value: Boolean) {
+        metadataRepository.insertMetadata( com.example.expensetracker.model.Metadata(100, "REQUIREUNLOCK", value.toString()) )
+    }
+
+    suspend fun getSecureScreen() : Boolean {
+        return metadataRepository.getMetadataByNameStream("SECURESCREEN").firstOrNull()?.infoValue.toString().toBoolean()
+    }
+
+    suspend fun setSecureScreen(value: Boolean) {
+        metadataRepository.insertMetadata( com.example.expensetracker.model.Metadata(101, "SECURESCREEN", value.toString()) )
     }
 
     suspend fun changeCurrency(newCurrency: Int) {
@@ -126,42 +187,7 @@ class SettingsViewModel(
     }
 }
 
-// TODO : Recurring Transactions
-// TODO: Reports, Transaction Reports PRIORITY
-// TODO: Budget setup, Budgets
-// TODO: Stock Portfolio
-// TODO: Assets
-// TODO: Import/Export databases, transactions -> as format mmdb, csv, etc...
-// TODO: Handle Attachments
-
-// TODO : Multiple databases / switching databases
-
-/* Settings stuff
-    user name
-    language
-    date format
-    base currency
-    currency format
-    currency history
-    financial year start day
-    financial year start month
-    use original date when pasting transactions
-    use original date when duplicating transactions
-
-    view budgets as financial yars
-    view budgets with transfer transactions
-    view budget category report with summaries
-    override yearly budget with munthly budget
-    subtract monthly budgets from yearly budget in reporting
-    budget offset days
-    startday of month for repoirting
-    ignore future transactions
-
-    Defaults for new transaction dialog
-    backup options
-    deleted transactions retainment
-    csv delimiter
-*/
-
-// NEW FEATURES
-// TODO: automatic Interest handling for accounts
+data class SecurityObject(
+    var requireUnlock: Boolean = false,
+    var secureScreen: Boolean = false
+)

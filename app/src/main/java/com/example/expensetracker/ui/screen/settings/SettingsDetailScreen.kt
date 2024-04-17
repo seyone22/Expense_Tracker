@@ -2,7 +2,6 @@ package com.example.expensetracker.ui.screen.settings
 
 import android.util.Log
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -52,6 +51,8 @@ import com.example.expensetracker.model.Metadata
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.theme.LocalTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 object SettingsDetailDestination : NavigationDestination {
@@ -65,6 +66,7 @@ object SettingsDetailDestination : NavigationDestination {
 fun SettingsDetailScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
+    onToggleDarkTheme: () -> Unit,
     navigateBack: () -> Unit,
     backStackEntry: String,
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -106,6 +108,7 @@ fun SettingsDetailScreen(
                 "Appearance" -> {
                     AppearanceSettingsList(
                         metadata = metadataList,
+                        onToggleDarkTheme = onToggleDarkTheme,
                         viewModel = viewModel
                     )
                 }
@@ -117,6 +120,16 @@ fun SettingsDetailScreen(
                     )
                 }
 
+                "Security" -> {
+                    SecuritySettingsList(
+                        viewModel = viewModel
+                    )
+                }
+                "ImportExport" -> {
+                    ImportExportSettingsList(
+                        viewModel = viewModel
+                    )
+                }
                 "About" -> {
                     AboutList(
 
@@ -356,6 +369,7 @@ fun AboutList() {
 @Composable
 fun AppearanceSettingsList(
     metadata: List<Metadata?>,
+    onToggleDarkTheme: () -> Unit,
     viewModel: SettingsViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -366,8 +380,10 @@ fun AppearanceSettingsList(
         ListItem(
             headlineContent = { Text(text = "Theme") },
             supportingContent = {
-                if (isSystemInDarkTheme()) {
+                if (LocalTheme.current.isDark && !LocalTheme.current.isMidnight) {
                     Text(text = "Dark")
+                } else if (LocalTheme.current.isDark && LocalTheme.current.isMidnight) {
+                    Text(text = "Midnight")
                 } else {
                     Text(text = "Light")
                 }
@@ -404,26 +420,35 @@ fun AppearanceSettingsList(
 
                         ) {
                             RadioButton(
-                                enabled = false,
+                                enabled = true,
                                 selected = (selectedTheme == 0),
                                 onClick = {
                                     selectedTheme = 0
+                                    coroutineScope.launch { viewModel.setTheme(selectedTheme) }
+                                    onToggleDarkTheme()
                                 })
                             Text(text = "Light")
                         }
                         Row {
                             RadioButton(
-                                enabled = false,
+                                enabled = true,
                                 selected = (selectedTheme == 1),
                                 onClick = { selectedTheme = 1 })
                             Text(text = "Dark")
                         }
                         Row {
                             RadioButton(
-                                enabled = false,
+                                enabled = true,
                                 selected = (selectedTheme == 2),
                                 onClick = { selectedTheme = 2 })
                             Text(text = "System Default")
+                        }
+                        Row {
+                            RadioButton(
+                                enabled = true,
+                                selected = (selectedTheme == 3),
+                                onClick = { selectedTheme = 3 })
+                            Text(text = "Midnight")
                         }
                     }
                 }
@@ -441,14 +466,98 @@ fun DataSettingsList(
     val coroutineScope = rememberCoroutineScope()
 
     Column {
-        ListItem(
-            headlineContent = { Text(text = "Update Currency Formats") },
-            supportingContent = { Text(text = "Exchange rates are updated monthly") },
-            modifier = Modifier.clickable {
+        SettingsListItem(
+            settingName = "Update Currency Formats",
+            settingSubtext = "Exchange rates are updated monthly from the InfoEuro portal",
+            action = {
                 Log.d("TAG", metadata.toString())
                 viewModel.getMonthlyRates(
                     baseCurrencyId = metadata.find { it -> it!!.infoName == "BASECURRENCYID" }!!.infoValue.toInt()
                 )
+            }
+        )
+    }
+}
+
+@Composable
+fun SecuritySettingsList(
+    viewModel: SettingsViewModel,
+    scope: CoroutineScope = rememberCoroutineScope()
+) {
+    val securityObject by viewModel.securityObject.collectAsState(initial = SecurityObject())
+    Log.d("TAG", "INITIAL SecuritySettingsList: $securityObject")
+
+    val x:Boolean by remember { mutableStateOf(securityObject.requireUnlock) }
+
+    Column {
+        SettingsToggleListItem(
+            settingName = "Require Unlock",
+            toggle = x,
+            onToggleChange = { newValue ->
+                securityObject.requireUnlock = newValue
+                scope.launch {
+                    viewModel.setRequireUnlock(value = securityObject.requireUnlock)
+                }
+            }
+        )
+        SettingsListItem(
+            settingName = "Lock when idle",
+            settingSubtext = "",
+            action = {
+
+            }
+        )
+        SettingsToggleListItem(
+            settingName = "Secure screen",
+            settingSubtext = "Hides app contents when switching apps, and blocks screenshots",
+            toggle = securityObject.secureScreen,
+            onToggleChange = { newValue ->
+                securityObject.secureScreen = newValue
+                scope.launch {
+                    viewModel.setSecureScreen(value = securityObject.secureScreen)
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun ImportExportSettingsList(
+    viewModel: SettingsViewModel,
+    scope: CoroutineScope = rememberCoroutineScope()
+) {
+    val securityObject by viewModel.securityObject.collectAsState(initial = SecurityObject())
+    Log.d("TAG", "INITIAL SecuritySettingsList: $securityObject")
+
+    val x:Boolean by remember { mutableStateOf(securityObject.requireUnlock) }
+
+    Column {
+        SettingsToggleListItem(
+            settingName = "Require Unlock",
+            toggle = x,
+            onToggleChange = { newValue ->
+                securityObject.requireUnlock = newValue
+                scope.launch {
+                    viewModel.setRequireUnlock(value = securityObject.requireUnlock)
+                }
+            }
+        )
+        SettingsListItem(
+            settingName = "Lock when idle",
+            settingSubtext = "",
+            action = {
+
+            }
+        )
+        SettingsToggleListItem(
+            settingName = "Secure screen",
+            settingSubtext = "Hides app contents when switching apps, and blocks screenshots",
+            toggle = securityObject.secureScreen,
+            onToggleChange = { newValue ->
+                securityObject.secureScreen = newValue
+                scope.launch {
+                    viewModel.setSecureScreen(value = securityObject.secureScreen)
+                }
             }
         )
     }

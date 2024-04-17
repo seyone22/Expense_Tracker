@@ -6,20 +6,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Checklist
+import androidx.compose.material.icons.outlined.ImportExport
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
@@ -44,7 +53,7 @@ fun SettingsScreen(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
+            LargeTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -65,64 +74,109 @@ fun SettingsScreen(
         Column(
             Modifier.padding(innerPadding)
         ) {
-            ListItem(
-                headlineContent = { Text(text = "General") },
-                supportingContent = { Text(text = "Username, Base Currency") },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Outlined.Checklist,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
-                modifier = Modifier.clickable { navigateToScreen("SettingsDetail/General") }
+            SettingsListItem(
+                settingName = "General",
+                settingSubtext = "Username, Base Currency",
+                settingIcon = Icons.Outlined.Checklist,
+                action = { navigateToScreen("SettingsDetail/General") }
             )
-            ListItem(
-                headlineContent = { Text(text = "Appearance") },
-                supportingContent = { Text(text = "Theme, date & time formats") },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Outlined.Palette,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
-                modifier = Modifier.clickable { navigateToScreen("SettingsDetail/Appearance") }
+            SettingsListItem(
+                settingName = "Appearance",
+                settingSubtext = "Theme, date & time formats",
+                settingIcon = Icons.Outlined.Palette,
+                action = { navigateToScreen("SettingsDetail/Appearance") }
             )
-            ListItem(
-                headlineContent = { Text(text = "Fetch Data") },
-                supportingContent = { Text(text = "Update Exchange Rates, ") },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Outlined.Update,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
-                modifier = Modifier.clickable { navigateToScreen("SettingsDetail/Data") }
+            SettingsListItem(
+                settingName = "Fetch Data",
+                settingSubtext = "Update Exchange Rates",
+                settingIcon = Icons.Outlined.Palette,
+                action = { navigateToScreen("SettingsDetail/Data") }
             )
-            ListItem(
-                headlineContent = { Text(text = "About") },
-                supportingContent = {
-                    Text(
-                        text = "${stringResource(id = R.string.app_name)} ${
-                            stringResource(
-                                id = R.string.app_version
-                            )
-                        }"
+            SettingsListItem(
+                settingName = "Privacy and Security",
+                settingSubtext = "App lock, Secure Screen",
+                settingIcon = Icons.Outlined.Security,
+                action = { navigateToScreen("SettingsDetail/Security") }
+            )
+            SettingsListItem(
+                settingName = "Import & Export",
+                settingSubtext = "Manage your transaction data",
+                settingIcon = Icons.Outlined.ImportExport,
+                action = { navigateToScreen("SettingsDetail/ImportExport") }
+            )
+            SettingsListItem(
+                settingName = "About",
+                settingSubtext = "${stringResource(id = R.string.app_name)} ${
+                    stringResource(
+                        id = R.string.app_version
                     )
-                },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
-                modifier = Modifier.clickable {
-                    navigateToScreen("SettingsDetail/About")
-                }
+                }",
+                settingIcon = Icons.Outlined.Info,
+                action = { navigateToScreen("SettingsDetail/About") }
             )
         }
     }
+}
+
+@Composable
+fun SettingsListItem(
+    modifier: Modifier = Modifier,
+    settingName: String,
+    settingSubtext: String,
+    settingIcon: ImageVector? = null,
+    toggle: Boolean = false,
+    action: () -> Unit
+) {
+    ListItem(
+        modifier = modifier.clickable(onClick = action),
+        headlineContent = { Text(text = settingName) },
+        supportingContent = { Text(text = settingSubtext) },
+        leadingContent = {
+            if (settingIcon != null) {
+                Icon(
+                    imageVector = settingIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        },
+    )
+}
+
+@Composable
+fun SettingsToggleListItem(
+    modifier: Modifier = Modifier,
+    settingName: String,
+    settingSubtext: String? = null,
+    settingIcon: ImageVector? = null,
+    toggle: Boolean = false,
+    onToggleChange: (Boolean) -> Unit
+) {
+    var tx by remember { mutableStateOf(toggle) }
+    ListItem(
+        modifier = modifier.clickable(onClick = {
+            tx = !tx
+            onToggleChange(tx) }),
+        headlineContent = { Text(text = settingName) },
+        supportingContent = {
+            if (settingSubtext != null) {
+                Text(text = settingSubtext)
+            }
+        },
+        leadingContent = {
+            if (settingIcon != null) {
+                Icon(
+                    imageVector = settingIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        },
+        trailingContent = {
+            Switch(checked = tx, onCheckedChange = {
+                tx = !tx
+                onToggleChange(tx)
+            })
+        }
+    )
 }

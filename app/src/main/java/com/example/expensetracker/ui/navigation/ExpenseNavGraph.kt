@@ -1,6 +1,8 @@
 package com.example.expensetracker.ui.navigation
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.PaddingValues
@@ -49,12 +51,14 @@ import com.example.expensetracker.ui.screen.transactions.TransactionsScreen
  * Provides Navigation graph for the application.
  */
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun ExpenseNavHost(
     navController: NavHostController,
     windowSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier,
     setTopBarAction : (Int) -> Unit,
+    onToggleDarkTheme: () -> Unit,
     setIsItemSelected : (Boolean) -> Unit,
     setSelectedObject : (SelectedObjects) -> Unit,
     innerPadding : PaddingValues
@@ -165,7 +169,8 @@ fun ExpenseNavHost(
             SettingsDetailScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 navigateBack = { navController.popBackStack() },
-                backStackEntry = it.arguments?.getString("setting") ?: "-1"
+                backStackEntry = it.arguments?.getString("setting") ?: "-1",
+                onToggleDarkTheme = onToggleDarkTheme
             )
         }
 
