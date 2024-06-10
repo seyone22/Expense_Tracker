@@ -63,7 +63,8 @@ class AccountDetailViewModel(
                 AccountDetailAccountUiState(
                     account = account ?: Account(),
                     balance = transactionsRepository.getBalanceByAccountId().first()
-                        .find { it.accountId == account?.accountId }?.balance ?: 0.0 //If there are no transactions for this account
+                        .find { it.accountId == account?.accountId }?.balance
+                        ?: 0.0 //If there are no transactions for this account
                 )
             }
             .stateIn(
