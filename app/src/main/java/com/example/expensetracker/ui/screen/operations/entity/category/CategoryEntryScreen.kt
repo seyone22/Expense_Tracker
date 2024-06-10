@@ -28,8 +28,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.expensetracker.R
-import com.example.expensetracker.model.CategoryDetails
-import com.example.expensetracker.model.CategoryUiState
+import com.example.expensetracker.data.model.CategoryDetails
+import com.example.expensetracker.data.model.CategoryUiState
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import kotlinx.coroutines.launch
@@ -77,11 +77,11 @@ fun CategoryEntryScreen(
                 actions = {
                     Button(
                         onClick = {
-                        coroutineScope.launch {
-                            navigateBack()
-                        }
+                            coroutineScope.launch {
+                                navigateBack()
+                            }
                         },
-                        modifier = modifier.padding(0.dp,0.dp,8.dp,0.dp),
+                        modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp),
                     ) {
                         Text(text = "Create")
                     }

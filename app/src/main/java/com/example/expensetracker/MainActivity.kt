@@ -9,7 +9,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -25,7 +24,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.settings.SettingsViewModel
 import com.example.expensetracker.ui.theme.DarkTheme
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme

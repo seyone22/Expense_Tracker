@@ -1,7 +1,7 @@
 package com.example.expensetracker.data.externalApi.infoEuroApi
 
-import com.example.expensetracker.model.InfoEuroCurrencyHistoryResponse
-import com.example.expensetracker.model.InfoEuroCurrencyListResponse
+import com.example.expensetracker.data.model.InfoEuroCurrencyHistoryResponse
+import com.example.expensetracker.data.model.InfoEuroCurrencyListResponse
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -18,7 +18,8 @@ private const val BASE_URL =
 
 // Create a logging interceptor
 val loggingInterceptor = HttpLoggingInterceptor().apply {
-    level = HttpLoggingInterceptor.Level.NONE // Set logging level to show request and response bodies
+    level =
+        HttpLoggingInterceptor.Level.NONE // Set logging level to show request and response bodies
 }
 
 // Create an OkHttpClient with the logging interceptor
@@ -34,13 +35,14 @@ private val retrofit = Retrofit.Builder()
 
 interface InfoEuroApiService {
     @GET("/budg/inforeuro/api/public/monthly-rates")
-    suspend fun getMonthlyRates() : List<InfoEuroCurrencyListResponse>
+    suspend fun getMonthlyRates(): List<InfoEuroCurrencyListResponse>
+
     @GET
     suspend fun getCurrencyHistory(@Url url: String?): Response<List<InfoEuroCurrencyHistoryResponse>>
 }
 
 object InfoEuroApi {
-    val retrofitService : InfoEuroApiService by lazy {
+    val retrofitService: InfoEuroApiService by lazy {
         retrofit.create(InfoEuroApiService::class.java)
     }
 }

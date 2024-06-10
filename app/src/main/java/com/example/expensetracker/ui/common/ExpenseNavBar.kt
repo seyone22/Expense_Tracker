@@ -34,7 +34,7 @@ import com.example.expensetracker.ui.screen.entities.EntitiesDestination
 import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionsDestination
-import com.example.expensetracker.ui.utils.ExpenseNavigationType
+import com.example.expensetracker.utils.ExpenseNavigationType
 
 data class ActivityIconPair(
     val name: String,
@@ -81,7 +81,6 @@ fun ExpenseNavBar(
     currentActivity: String?,
     navigateToScreen: (screen: String) -> Unit,
     type: ExpenseNavigationType = ExpenseNavigationType.BOTTOM_NAVIGATION
-
 ) {
     if ((currentActivity == AccountsDestination.route) or (currentActivity == EntitiesDestination.route) or (currentActivity == BudgetsDestination.route) or (currentActivity == TransactionsDestination.route) or (currentActivity == ReportsDestination.route)) {
         if (type == ExpenseNavigationType.BOTTOM_NAVIGATION) {
@@ -115,7 +114,11 @@ fun ExpenseNavBar(
                 ) {
                     Spacer(modifier = Modifier.height(8.dp))
                     if (currentActivity != null) {
-                        ExpenseFAB(navigateToScreen = { screen -> navigateToScreen(screen) }, currentActivity = currentActivity)
+                        ExpenseFAB(
+                            navigateToScreen = { screen -> navigateToScreen(screen) },
+                            currentActivity = currentActivity,
+                            extended = false
+                        )
                     }
                     Spacer(modifier = Modifier.height(200.dp))
                     activitiesAndIcons.forEachIndexed { _, pair ->

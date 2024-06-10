@@ -3,15 +3,15 @@ package com.example.expensetracker.ui.screen.operations.account
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.data.account.AccountsRepository
-import com.example.expensetracker.data.transaction.TransactionsRepository
-import com.example.expensetracker.model.Account
-import com.example.expensetracker.model.BillsDepositWithDetails
-import com.example.expensetracker.model.Transaction
-import com.example.expensetracker.model.TransactionCode
-import com.example.expensetracker.model.TransactionStatus
-import com.example.expensetracker.model.TransactionWithDetails
-import com.example.expensetracker.model.toTransaction
+import com.example.expensetracker.data.model.Account
+import com.example.expensetracker.data.model.BillsDepositWithDetails
+import com.example.expensetracker.data.model.Transaction
+import com.example.expensetracker.data.model.TransactionCode
+import com.example.expensetracker.data.model.TransactionStatus
+import com.example.expensetracker.data.model.TransactionWithDetails
+import com.example.expensetracker.data.model.toTransaction
+import com.example.expensetracker.data.repository.account.AccountsRepository
+import com.example.expensetracker.data.repository.transaction.TransactionsRepository
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
@@ -25,7 +25,7 @@ class AccountDetailViewModel(
     private val accountsRepository: AccountsRepository,
     private val transactionsRepository: TransactionsRepository,
     //private val billsDepositsRepository: BillsDepositsRepository
-): ViewModel() {
+) : ViewModel() {
     var accountId: Int = -1
 
     var accountDetailAccountUiState: StateFlow<AccountDetailAccountUiState> =
@@ -33,7 +33,8 @@ class AccountDetailViewModel(
             .map { account ->
                 AccountDetailAccountUiState(
                     account = account ?: Account(),
-                    balance = transactionsRepository.getBalanceByAccountId().first().find { it.accountId == account?.accountId }?.balance ?: 3.3
+                    balance = transactionsRepository.getBalanceByAccountId().first()
+                        .find { it.accountId == account?.accountId }?.balance ?: 3.3
                 )
             }
             .stateIn(
@@ -61,7 +62,8 @@ class AccountDetailViewModel(
             .map { account ->
                 AccountDetailAccountUiState(
                     account = account ?: Account(),
-                    balance = transactionsRepository.getBalanceByAccountId().first().find { it.accountId == account?.accountId }?.balance ?: -69.420
+                    balance = transactionsRepository.getBalanceByAccountId().first()
+                        .find { it.accountId == account?.accountId }?.balance ?: 0.0 //If there are no transactions for this account
                 )
             }
             .stateIn(
@@ -69,6 +71,7 @@ class AccountDetailViewModel(
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = AccountDetailAccountUiState()
             )
+
     }
 
     fun getTransactions() {
@@ -103,43 +106,43 @@ class AccountDetailViewModel(
             var hi = transactionsRepository.getTransactionsFromAccount(account.accountId)
                 .map {
                     it.forEach() {
-                    when (it.status) {
-                        TransactionStatus.R.displayName -> {
-                            when (it.transCode) {
-                                TransactionCode.DEPOSIT.displayName -> {
-                                    balance += it.transAmount
-                                    reconciledBalance += it.transAmount
-                                }
+                        when (it.status) {
+                            TransactionStatus.R.displayName -> {
+                                when (it.transCode) {
+                                    TransactionCode.DEPOSIT.displayName -> {
+                                        balance += it.transAmount
+                                        reconciledBalance += it.transAmount
+                                    }
 
-                                TransactionCode.WITHDRAWAL.displayName -> {
-                                    balance -= it.transAmount
-                                    reconciledBalance -= it.transAmount
-                                }
+                                    TransactionCode.WITHDRAWAL.displayName -> {
+                                        balance -= it.transAmount
+                                        reconciledBalance -= it.transAmount
+                                    }
 
-                                TransactionCode.TRANSFER.displayName -> {
-                                    balance -= it.transAmount
-                                    reconciledBalance -= it.transAmount
+                                    TransactionCode.TRANSFER.displayName -> {
+                                        balance -= it.transAmount
+                                        reconciledBalance -= it.transAmount
+                                    }
                                 }
                             }
-                        }
 
-                        TransactionStatus.D.displayName, TransactionStatus.F.displayName, TransactionStatus.U.displayName, TransactionStatus.V.displayName -> {
-                            when (it.transCode) {
-                                TransactionCode.DEPOSIT.displayName -> {
-                                    balance += it.transAmount
-                                }
+                            TransactionStatus.D.displayName, TransactionStatus.F.displayName, TransactionStatus.U.displayName, TransactionStatus.V.displayName -> {
+                                when (it.transCode) {
+                                    TransactionCode.DEPOSIT.displayName -> {
+                                        balance += it.transAmount
+                                    }
 
-                                TransactionCode.WITHDRAWAL.displayName -> {
-                                    balance -= it.transAmount
-                                }
+                                    TransactionCode.WITHDRAWAL.displayName -> {
+                                        balance -= it.transAmount
+                                    }
 
-                                TransactionCode.TRANSFER.displayName -> {
-                                    balance -= it.transAmount
+                                    TransactionCode.TRANSFER.displayName -> {
+                                        balance -= it.transAmount
+                                    }
                                 }
                             }
                         }
                     }
-                }
                 }
         }
 
@@ -175,7 +178,7 @@ class AccountDetailViewModel(
         return balance
     }
 
-    suspend fun deleteTransaction(transaction: Transaction) : Boolean {
+    suspend fun deleteTransaction(transaction: Transaction): Boolean {
         return try {
             transactionsRepository.deleteTransaction(transaction)
             Log.d("TAG", "deleteTransaction: pass ")
@@ -187,7 +190,7 @@ class AccountDetailViewModel(
         }
     }
 
-    suspend fun editTransaction(transactionDetails: TransactionDetails) : Boolean {
+    suspend fun editTransaction(transactionDetails: TransactionDetails): Boolean {
         return try {
             transactionsRepository.updateTransaction(transactionDetails.toTransaction())
             Log.d("TAG", "editTransaction: pass ")
@@ -199,7 +202,7 @@ class AccountDetailViewModel(
         }
     }
 
-    suspend fun editAccount(accountDetails : AccountDetails) : Boolean {
+    suspend fun editAccount(accountDetails: AccountDetails): Boolean {
         return try {
             accountsRepository.updateAccount(accountDetails.toAccount())
             true
@@ -209,7 +212,10 @@ class AccountDetailViewModel(
         }
     }
 
-    suspend fun deleteAccount(account: Account, transactions: List<TransactionWithDetails>) : Boolean {
+    suspend fun deleteAccount(
+        account: Account,
+        transactions: List<TransactionWithDetails>
+    ): Boolean {
         return try {
             accountsRepository.deleteAccount(account)
             transactions.forEach {
@@ -227,6 +233,7 @@ data class AccountDetailAccountUiState(
     val account: Account = Account(),
     val balance: Double = 0.0
 )
+
 data class AccountDetailTransactionUiState(
     val transactions: List<TransactionWithDetails> = listOf(),
     val billsDeposits: List<BillsDepositWithDetails> = listOf()

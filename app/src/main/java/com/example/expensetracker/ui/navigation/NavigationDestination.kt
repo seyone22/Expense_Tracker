@@ -14,5 +14,5 @@ interface NavigationDestination {
      */
     val titleRes: Int
 
-    val routeId : Int
+    val routeId: Int
 }

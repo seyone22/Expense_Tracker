@@ -16,10 +16,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,12 +35,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.expensetracker.model.BillsDeposits
-import com.example.expensetracker.model.Category
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Payee
-import com.example.expensetracker.model.Transaction
-import com.example.expensetracker.model.toCategoryDetails
+import com.example.expensetracker.data.model.BillsDeposits
+import com.example.expensetracker.data.model.Category
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.Payee
+import com.example.expensetracker.data.model.Transaction
+import com.example.expensetracker.data.model.toCategoryDetails
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.ExpenseFAB
 import com.example.expensetracker.ui.common.ExpenseNavBar
@@ -55,9 +59,10 @@ import com.example.expensetracker.ui.screen.operations.report.ReportEntryDestina
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.toTransactionDetails
+import com.example.expensetracker.ui.screen.report.ReportsDestination
 import com.example.expensetracker.ui.screen.settings.SettingsDestination
 import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
-import com.example.expensetracker.ui.utils.ExpenseNavigationType
+import com.example.expensetracker.utils.ExpenseNavigationType
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -66,9 +71,12 @@ import kotlinx.coroutines.launch
 fun ExpenseApp(
     navController: NavHostController = rememberNavController(),
     windowSizeClass: WindowWidthSizeClass,
-    onToggleDarkTheme : () -> Unit
+    onToggleDarkTheme: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
+
+    // Auto scroll for FAB
+    var offset by remember { mutableStateOf(0f) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val navigationType: ExpenseNavigationType = getNavigationType(windowSizeClass)
@@ -87,7 +95,18 @@ fun ExpenseApp(
     val transactionEntryViewModel: TransactionEntryViewModel =
         viewModel(factory = AppViewModelProvider.Factory)
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     val context = LocalContext.current
+
+    if (navBackStackEntry?.destination?.route == ReportsDestination.route) {
+        LaunchedEffect(Unit) {
+            snackbarHostState.showSnackbar(
+                message = "Reports are hardcoded for now, stay tuned for customizable reports!",
+                duration = SnackbarDuration.Indefinite
+            )
+        }
+    }
 
     Row(
     ) {
@@ -100,6 +119,8 @@ fun ExpenseApp(
         }
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
+
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
 
             topBar = {
                 if (isSelected) {
@@ -156,6 +177,7 @@ fun ExpenseApp(
                     ExpenseTopBar(
                         selectedActivity = navBackStackEntry?.destination?.route,
                         navBarAction = { showNewDialog = true },
+                        navController = navController,
                         navigateToSettings = { navController.navigate(SettingsDestination.route) },
                         type = navigationType,
                     )
@@ -173,7 +195,13 @@ fun ExpenseApp(
 
             floatingActionButton = {
                 if (navigationType == ExpenseNavigationType.BOTTOM_NAVIGATION) {
-                    navBackStackEntry?.destination?.route?.let { ExpenseFAB(navigateToScreen = { screen -> navController.navigate(screen) }, currentActivity = it) }
+                    navBackStackEntry?.destination?.route?.let {
+                        ExpenseFAB(navigateToScreen = { screen ->
+                            navController.navigate(
+                                screen
+                            )
+                        }, currentActivity = it, extended = false)
+                    }
                 }
             }
         ) { innerPadding ->
@@ -236,6 +264,7 @@ fun ExpenseApp(
                 navController.navigate(AccountEntryDestination.route)
                 showNewDialog = false
             }
+
             12 -> {
                 navController.navigate(ReportEntryDestination.route)
                 showNewDialog = false
@@ -329,7 +358,8 @@ fun ExpenseApp(
                     selectedTransaction = (selectedObject.transaction.toTransactionDetails()),
                     onConfirmClick = {
                         coroutineScope.launch {
-                            transactionViewModel.transactionUiState = transactionEntryViewModel.transactionUiState
+                            transactionViewModel.transactionUiState =
+                                transactionEntryViewModel.transactionUiState
                             transactionViewModel.editTransaction(transactionViewModel.transactionUiState.transactionDetails)
                         }
                     },

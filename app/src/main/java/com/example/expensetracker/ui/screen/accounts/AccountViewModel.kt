@@ -2,14 +2,14 @@ package com.example.expensetracker.ui.screen.accounts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.data.account.AccountsRepository
-import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
-import com.example.expensetracker.data.metadata.MetadataRepository
-import com.example.expensetracker.data.transaction.BalanceResult
-import com.example.expensetracker.data.transaction.TransactionsRepository
-import com.example.expensetracker.model.Account
-import com.example.expensetracker.model.AccountTypes
-import com.example.expensetracker.model.CurrencyFormat
+import com.example.expensetracker.data.model.Account
+import com.example.expensetracker.data.model.AccountTypes
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.repository.account.AccountsRepository
+import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.repository.metadata.MetadataRepository
+import com.example.expensetracker.data.repository.transaction.BalanceResult
+import com.example.expensetracker.data.repository.transaction.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,8 +31,10 @@ class AccountViewModel(
     // Flow for expenses
     private val expensesFlow: Flow<Double> =
         transactionsRepository.getTotalBalanceByCode("Withdrawal")
+
     // Flow for income
     private val incomeFlow: Flow<Double> = transactionsRepository.getTotalBalanceByCode("Deposit")
+
     // Flow for total
     private val totalFlow: Flow<Double> = transactionsRepository.getTotalBalance()
 
@@ -68,7 +70,8 @@ class AccountViewModel(
         accountsRepository.getAllAccountsStream()
             .map { accounts ->
                 val transformedList = accounts.map { account ->
-                    val balance = accountsRepository.getAccountBalance(account.accountId).firstOrNull()?.balance
+                    val balance = accountsRepository.getAccountBalance(account.accountId)
+                        .firstOrNull()?.balance
                     Pair(account, balance ?: 0.0) // Default value for balance if it's null
                 }
                 AccountsUiState(transformedList)
@@ -82,11 +85,12 @@ class AccountViewModel(
     val accountBalances: StateFlow<Balances> =
         accountsRepository.getAllActiveAccountsStream()
             .map { accountList ->
-                val balanceData : MutableList<BalanceResult> = mutableListOf()
+                val balanceData: MutableList<BalanceResult> = mutableListOf()
                 var totalBalance = 0.0
 
                 accountList.forEach {
-                    val accountBalance = accountsRepository.getAccountBalance(it.accountId).firstOrNull()?.balance
+                    val accountBalance =
+                        accountsRepository.getAccountBalance(it.accountId).firstOrNull()?.balance
                     val balance = it.initialBalance?.plus(accountBalance ?: 0.0)
 
                     balanceData.add(BalanceResult(it.accountId, balance ?: 0.0))

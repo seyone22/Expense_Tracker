@@ -37,13 +37,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.SelectedObjects
-import com.example.expensetracker.model.BillsDepositWithDetails
-import com.example.expensetracker.model.BillsDeposits
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Transaction
-import com.example.expensetracker.model.TransactionWithDetails
-import com.example.expensetracker.model.toBillsDeposit
-import com.example.expensetracker.model.toTransaction
+import com.example.expensetracker.data.model.BillsDepositWithDetails
+import com.example.expensetracker.data.model.BillsDeposits
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.Transaction
+import com.example.expensetracker.data.model.TransactionWithDetails
+import com.example.expensetracker.data.model.toBillsDeposit
+import com.example.expensetracker.data.model.toTransaction
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.SortBar
@@ -66,11 +66,11 @@ object TransactionsDestination : NavigationDestination {
 fun TransactionsScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
-    setTopBarAction : (Int) -> Unit,
+    setTopBarAction: (Int) -> Unit,
     setIsItemSelected: (Boolean) -> Unit,
-    setSelectedObject : (SelectedObjects) -> Unit,
+    setSelectedObject: (SelectedObjects) -> Unit,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    ) {
+) {
     val transactionsUiState by viewModel.transactionsUiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
@@ -259,7 +259,8 @@ fun ScheduledTransactionList(
                     text = "Nothing to show here!",
                     fontStyle = FontStyle.Italic,
                     color = Color.Gray,
-                    modifier = Modifier.align(Alignment.CenterHorizontally))
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
         }
     }
@@ -379,7 +380,8 @@ fun TransactionList(
                     text = "Nothing to show here!",
                     fontStyle = FontStyle.Italic,
                     color = Color.Gray,
-                    modifier = Modifier.align(Alignment.CenterHorizontally))
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
         }
     }

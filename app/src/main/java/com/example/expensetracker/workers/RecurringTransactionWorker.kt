@@ -10,7 +10,8 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.expensetracker.R
 
-class RecurringTransactionWorker(private val context: Context, workerParams: WorkerParameters): Worker(context, workerParams) {
+class RecurringTransactionWorker(private val context: Context, workerParams: WorkerParameters) :
+    Worker(context, workerParams) {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun doWork(): Result {
         sendNotification()

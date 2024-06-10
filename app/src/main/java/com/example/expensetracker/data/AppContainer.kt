@@ -1,29 +1,29 @@
 package com.example.expensetracker.data
 
 import android.content.Context
-import com.example.expensetracker.data.account.AccountsRepository
-import com.example.expensetracker.data.account.OfflineAccountsRepository
-import com.example.expensetracker.data.billsDeposit.BillsDepositsRepository
-import com.example.expensetracker.data.billsDeposit.OfflineBillsDepositsRepository
-import com.example.expensetracker.data.category.CategoriesRepository
-import com.example.expensetracker.data.category.OfflineCategoriesRepository
-import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
-import com.example.expensetracker.data.currencyFormat.OfflineCurrencyFormatsRepository
-import com.example.expensetracker.data.metadata.MetadataRepository
-import com.example.expensetracker.data.metadata.OfflineMetadataRepository
-import com.example.expensetracker.data.payee.OfflinePayeesRepository
-import com.example.expensetracker.data.payee.PayeesRepository
-import com.example.expensetracker.data.transaction.OfflineTransactionsRepository
-import com.example.expensetracker.data.transaction.TransactionsRepository
+import com.example.expensetracker.data.repository.account.AccountsRepository
+import com.example.expensetracker.data.repository.account.OfflineAccountsRepository
+import com.example.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
+import com.example.expensetracker.data.repository.billsDeposit.OfflineBillsDepositsRepository
+import com.example.expensetracker.data.repository.category.CategoriesRepository
+import com.example.expensetracker.data.repository.category.OfflineCategoriesRepository
+import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.repository.currencyFormat.OfflineCurrencyFormatsRepository
+import com.example.expensetracker.data.repository.metadata.MetadataRepository
+import com.example.expensetracker.data.repository.metadata.OfflineMetadataRepository
+import com.example.expensetracker.data.repository.payee.OfflinePayeesRepository
+import com.example.expensetracker.data.repository.payee.PayeesRepository
+import com.example.expensetracker.data.repository.transaction.OfflineTransactionsRepository
+import com.example.expensetracker.data.repository.transaction.TransactionsRepository
 
 interface AppContainer {
     val accountsRepository: AccountsRepository
     val transactionsRepository: TransactionsRepository
     val payeesRepository: PayeesRepository
-    val categoriesRepository : CategoriesRepository
-    val currenciesRepository : CurrencyFormatsRepository
-    val metadataRepository : MetadataRepository
-    val billsDepositsRepository : BillsDepositsRepository
+    val categoriesRepository: CategoriesRepository
+    val currenciesRepository: CurrencyFormatsRepository
+    val metadataRepository: MetadataRepository
+    val billsDepositsRepository: BillsDepositsRepository
 }
 
 /**
