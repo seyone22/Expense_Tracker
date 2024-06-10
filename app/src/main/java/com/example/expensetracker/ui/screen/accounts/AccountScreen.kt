@@ -3,6 +3,9 @@ package com.example.expensetracker.ui.screen.accounts
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,9 +46,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.model.Account
-import com.example.expensetracker.model.AccountTypes
-import com.example.expensetracker.model.CurrencyFormat
+import com.example.expensetracker.data.model.Account
+import com.example.expensetracker.data.model.AccountTypes
+import com.example.expensetracker.data.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.navigation.NavigationDestination
@@ -69,6 +72,8 @@ fun AccountScreen(
     windowSizeClass: WindowWidthSizeClass,
     setTopBarAction: (Int) -> Unit
 ) {
+    var offset by remember { mutableStateOf(0f) }
+
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
 
@@ -91,7 +96,14 @@ fun AccountScreen(
         columns = GridCells.Adaptive(minSize = 320.dp),
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp, 0.dp),
+            .padding(24.dp, 0.dp)
+            .scrollable(
+                orientation = Orientation.Vertical,
+                state = rememberScrollableState { delta ->
+                    offset += delta
+                    delta
+                }
+            ),
     ) {
         item() {
             Column {
@@ -337,7 +349,7 @@ fun AccountCard(
             .padding(0.dp, 12.dp)
             .clickable {
                 val accountId = accountWithBalance.first.accountId
-                navigateToScreen("AccountDetails/$accountId")
+                navigateToScreen("Account Details/$accountId")
             }
     ) {
         Row(

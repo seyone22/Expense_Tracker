@@ -7,12 +7,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.data.category.CategoriesRepository
-import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
-import com.example.expensetracker.data.metadata.MetadataRepository
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.Metadata
 import com.example.expensetracker.data.prepopulate
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Metadata
+import com.example.expensetracker.data.repository.category.CategoriesRepository
+import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.repository.metadata.MetadataRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -119,7 +119,7 @@ class OnboardingViewModel(
         }
     }
 
-    suspend fun prepopulateDB(context : Context) {
+    suspend fun prepopulateDB(context: Context) {
         prepopulate(context, categoriesRepository, currencyFormatsRepository)
     }
 }

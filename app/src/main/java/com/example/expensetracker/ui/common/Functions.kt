@@ -16,8 +16,8 @@ import androidx.core.content.ContextCompat
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.RepeatFrequency
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.RepeatFrequency
 import com.example.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
 import com.example.expensetracker.workers.RecurringTransactionWorker
 import java.text.SimpleDateFormat
@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit
 
 
 const val TAG = "TESTING"
+
 @Composable
 fun FormattedCurrency(
     modifier: Modifier = Modifier,
@@ -108,11 +109,15 @@ fun askNotificationPermissions(context: Context) {
 
 
 fun scheduleWorkByDayCount(context: Context, recurrenceDetails: BillsDepositsDetails) {
-    val dayCount = RepeatFrequency.valueOf(recurrenceDetails.REPEATS.uppercase(Locale.ROOT)).dayCount
+    val dayCount =
+        RepeatFrequency.valueOf(recurrenceDetails.REPEATS.uppercase(Locale.ROOT)).dayCount
 
     // Parse the next occurrence date from the string
     val nextOccurrenceDate = Calendar.getInstance().apply {
-        time = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(recurrenceDetails.NEXTOCCURRENCEDATE)!!
+        time = SimpleDateFormat(
+            "yyyy-MM-dd",
+            Locale.getDefault()
+        ).parse(recurrenceDetails.NEXTOCCURRENCEDATE)!!
     }
 
     // Calculate the initial delay until the next occurrence date
@@ -136,11 +141,15 @@ fun scheduleWorkByDayCount(context: Context, recurrenceDetails: BillsDepositsDet
 }
 
 fun scheduleWorkByMonthCount(context: Context, recurrenceDetails: BillsDepositsDetails) {
-    val monthCount = RepeatFrequency.valueOf(recurrenceDetails.REPEATS.uppercase(Locale.ROOT)).dayCount
+    val monthCount =
+        RepeatFrequency.valueOf(recurrenceDetails.REPEATS.uppercase(Locale.ROOT)).dayCount
 
     // Parse the next occurrence date from the string
     val nextOccurrenceDate = Calendar.getInstance().apply {
-        time = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(recurrenceDetails.NEXTOCCURRENCEDATE)!!
+        time = SimpleDateFormat(
+            "yyyy-MM-dd",
+            Locale.getDefault()
+        ).parse(recurrenceDetails.NEXTOCCURRENCEDATE)!!
     }
 
     // Calculate the initial delay until the next occurrence date
@@ -151,7 +160,10 @@ fun scheduleWorkByMonthCount(context: Context, recurrenceDetails: BillsDepositsD
     val repeatInterval = TimeUnit.DAYS.toMillis(30L * monthCount)
 
     // Create a periodic work request with initial delay and repeat interval
-    val workRequest = PeriodicWorkRequestBuilder<RecurringTransactionWorker>(repeatInterval, TimeUnit.MILLISECONDS)
+    val workRequest = PeriodicWorkRequestBuilder<RecurringTransactionWorker>(
+        repeatInterval,
+        TimeUnit.MILLISECONDS
+    )
         .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
         .build()
 

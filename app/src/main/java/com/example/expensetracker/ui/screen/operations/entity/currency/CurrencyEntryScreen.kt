@@ -79,12 +79,12 @@ fun CurrencyEntryScreen(
                 actions = {
                     Button(
                         onClick = {
-                        coroutineScope.launch {
-                            viewModel.saveCurrency()
-                            navigateBack()
-                        }
+                            coroutineScope.launch {
+                                viewModel.saveCurrency()
+                                navigateBack()
+                            }
                         },
-                        modifier = modifier.padding(0.dp,0.dp,8.dp,0.dp),
+                        modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp),
                         enabled = viewModel.currencyUiState.isEntryValid
                     ) {
                         Text(text = "Create")
@@ -147,9 +147,6 @@ fun CurrencyEntryForm(
     }
 
 }
-
-
-
 
 
 @Preview(showBackground = true)

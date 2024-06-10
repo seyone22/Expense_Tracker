@@ -47,6 +47,7 @@ fun ReportScreen(
     var mp: CartesianChartModelProducer? by remember { mutableStateOf(null) }
     var mp2: CartesianChartModelProducer? by remember { mutableStateOf(null) }
 
+
     LaunchedEffect(Unit) {
         mp = viewModel.getExpensesFromCategory("31")
         mp2 = viewModel.getExpensesFromPayee("1")
@@ -71,7 +72,7 @@ fun ReportCard(
 ) {
     val scrollState = rememberVicoScrollState()
     val zoomState = rememberVicoZoomState()
-    
+
     Card(
         modifier = modifier
             .padding(24.dp)

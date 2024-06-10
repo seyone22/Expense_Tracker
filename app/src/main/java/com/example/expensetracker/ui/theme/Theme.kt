@@ -36,7 +36,7 @@ private val MidnightColorScheme = darkColorScheme(
     onBackground = Color.White,
     onSurface = Color.White,
 
-)
+    )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
@@ -53,6 +53,7 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 )
+
 data class DarkTheme(var isDark: Boolean = false, var isMidnight: Boolean = false)
 
 var LocalTheme = compositionLocalOf { DarkTheme() }

@@ -2,10 +2,10 @@ package com.example.expensetracker.data
 
 import android.content.Context
 import android.util.Log
-import com.example.expensetracker.data.category.CategoriesRepository
-import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
-import com.example.expensetracker.model.Category
-import com.example.expensetracker.model.CurrencyFormat
+import com.example.expensetracker.data.model.Category
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.repository.category.CategoriesRepository
+import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import java.io.BufferedReader
 import java.io.InputStreamReader
 

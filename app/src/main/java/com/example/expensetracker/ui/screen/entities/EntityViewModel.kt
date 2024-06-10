@@ -5,17 +5,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.expensetracker.data.category.CategoriesRepository
-import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
-import com.example.expensetracker.data.payee.PayeesRepository
-import com.example.expensetracker.model.Category
-import com.example.expensetracker.model.CategoryDetails
-import com.example.expensetracker.model.CategoryUiState
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.InfoEuroCurrencyHistoryResponse
-import com.example.expensetracker.model.Payee
-import com.example.expensetracker.model.toCategory
+import com.example.expensetracker.data.model.Category
+import com.example.expensetracker.data.model.CategoryDetails
+import com.example.expensetracker.data.model.CategoryUiState
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.InfoEuroCurrencyHistoryResponse
+import com.example.expensetracker.data.model.Payee
+import com.example.expensetracker.data.model.toCategory
+import com.example.expensetracker.data.repository.category.CategoriesRepository
+import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.repository.payee.PayeesRepository
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyUiState
 import com.example.expensetracker.ui.screen.operations.entity.currency.toCurrency
@@ -180,7 +180,10 @@ class EntityViewModel(
         return if (!onlineData.isNullOrEmpty()) {
             val data: Map<LocalDate, Float> = onlineData
                 .associate {
-                    LocalDate.parse(it.dateStart, DateTimeFormatter.ofPattern("dd/MM/yyyy")) to it.amount.toFloat()
+                    LocalDate.parse(
+                        it.dateStart,
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                    ) to it.amount.toFloat()
                 }
             data
         } else {
@@ -192,7 +195,8 @@ class EntityViewModel(
     private suspend fun getCurrencyHistory(currencySymbol: String): List<InfoEuroCurrencyHistoryResponse>? {
         return try {
             withContext(Dispatchers.IO) {
-                val response = InfoEuroApi.retrofitService.getCurrencyHistory("https://ec.europa.eu/budg/inforeuro/api/public/currencies/$currencySymbol")
+                val response =
+                    InfoEuroApi.retrofitService.getCurrencyHistory("https://ec.europa.eu/budg/inforeuro/api/public/currencies/$currencySymbol")
                 response.body()
             }
         } catch (e: Exception) {

@@ -85,14 +85,14 @@ fun PayeeEntryScreen(
                 actions = {
                     Button(
                         onClick = {
-                        coroutineScope.launch {
-                            viewModel.savePayee()
-                            navigateBack(
+                            coroutineScope.launch {
+                                viewModel.savePayee()
+                                navigateBack(
 
-                            )
-                        }
+                                )
+                            }
                         },
-                        modifier = modifier.padding(0.dp,0.dp,8.dp,0.dp),
+                        modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp),
                         enabled = viewModel.payeeUiState.isEntryValid
                     ) {
                         Text(text = "Create")

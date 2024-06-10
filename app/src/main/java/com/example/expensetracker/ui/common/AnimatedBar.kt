@@ -27,7 +27,7 @@ fun AnimatedBar(
                 color = Color.Blue,
                 topLeft = Offset(x = 50f + spacer, y = (height - value)),
                 size = Size(width = 100f, height = value),
-                )
+            )
             spacer += 110
         }
         drawLine(
@@ -39,8 +39,8 @@ fun AnimatedBar(
     }
 }
 
-private fun getProportion (values : List<Double>, height : Float) : List<Float> {
+private fun getProportion(values: List<Double>, height: Float): List<Float> {
     return values.map {
-        ((it / values.sum())*(height * 2)).toFloat()
+        ((it / values.sum()) * (height * 2)).toFloat()
     }
 }

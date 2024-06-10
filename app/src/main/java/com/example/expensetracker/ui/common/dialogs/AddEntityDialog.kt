@@ -33,7 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.expensetracker.model.CategoryDetails
+import com.example.expensetracker.data.model.CategoryDetails
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
@@ -266,7 +266,8 @@ fun PayeeEntryDialog(
                     })
                 )
                 Row(
-                    modifier = Modifier.padding(0.dp, 8.dp)
+                    modifier = Modifier
+                        .padding(0.dp, 8.dp)
                         .fillMaxWidth(),
                 ) {
                     Checkbox(

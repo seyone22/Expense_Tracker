@@ -3,11 +3,11 @@ package com.example.expensetracker.ui.screen.settings
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
-import com.example.expensetracker.data.metadata.MetadataRepository
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Metadata
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.Metadata
+import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.repository.metadata.MetadataRepository
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
 import com.example.expensetracker.ui.theme.DarkTheme
 import kotlinx.coroutines.Dispatchers
@@ -51,7 +51,7 @@ class SettingsViewModel(
         metadataRepository.getMetadataByNameStream("SECURESCREEN")
 
     val securityObject: Flow<SecurityObject> =
-        combine(requireUnlockFlow, secureScreenFlow) {r, s ->
+        combine(requireUnlockFlow, secureScreenFlow) { r, s ->
             SecurityObject(r?.infoValue.toBoolean(), s?.infoValue.toBoolean())
         }
 
@@ -79,14 +79,17 @@ class SettingsViewModel(
     }
 
     suspend fun getCurrentTheme(): DarkTheme {
-        val x = metadataRepository.getMetadataByNameStream("THEME").firstOrNull() ?: return DarkTheme()
-        when(x.infoValue) {
+        val x =
+            metadataRepository.getMetadataByNameStream("THEME").firstOrNull() ?: return DarkTheme()
+        when (x.infoValue) {
             "LIGHT" -> {
                 return DarkTheme(false, false)
             }
+
             "DARK" -> {
                 return DarkTheme(true, false)
             }
+
             "MIDNIGHHT" -> {
                 return DarkTheme(true, true)
             }
@@ -95,18 +98,21 @@ class SettingsViewModel(
     }
 
     suspend fun setTheme(theme: Int) {
-        when(theme) {
+        when (theme) {
             0 -> {
-                metadataRepository.insertMetadata(com.example.expensetracker.model.Metadata(99,"THEME","LIGHT"))
+                metadataRepository.insertMetadata(Metadata(99, "THEME", "LIGHT"))
             }
+
             1 -> {
-                metadataRepository.insertMetadata(com.example.expensetracker.model.Metadata(99,"THEME","DARK"))
+                metadataRepository.insertMetadata(Metadata(99, "THEME", "DARK"))
             }
+
             2 -> {
-                metadataRepository.insertMetadata(com.example.expensetracker.model.Metadata(99,"THEME","SYSTEM"))
+                metadataRepository.insertMetadata(Metadata(99, "THEME", "SYSTEM"))
             }
+
             3 -> {
-                metadataRepository.insertMetadata(com.example.expensetracker.model.Metadata(99,"THEME","MIDNIGHT"))
+                metadataRepository.insertMetadata(Metadata(99, "THEME", "MIDNIGHT"))
             }
         }
     }
@@ -117,20 +123,22 @@ class SettingsViewModel(
         )
     }
 
-    suspend fun getRequireUnlock() : Boolean {
-        return metadataRepository.getMetadataByNameStream("REQUIREUNLOCK").firstOrNull()?.infoValue.toString().toBoolean()
+    suspend fun getRequireUnlock(): Boolean {
+        return metadataRepository.getMetadataByNameStream("REQUIREUNLOCK")
+            .firstOrNull()?.infoValue.toString().toBoolean()
     }
 
     suspend fun setRequireUnlock(value: Boolean) {
-        metadataRepository.insertMetadata( com.example.expensetracker.model.Metadata(100, "REQUIREUNLOCK", value.toString()) )
+        metadataRepository.insertMetadata(Metadata(100, "REQUIREUNLOCK", value.toString()))
     }
 
-    suspend fun getSecureScreen() : Boolean {
-        return metadataRepository.getMetadataByNameStream("SECURESCREEN").firstOrNull()?.infoValue.toString().toBoolean()
+    suspend fun getSecureScreen(): Boolean {
+        return metadataRepository.getMetadataByNameStream("SECURESCREEN")
+            .firstOrNull()?.infoValue.toString().toBoolean()
     }
 
     suspend fun setSecureScreen(value: Boolean) {
-        metadataRepository.insertMetadata( com.example.expensetracker.model.Metadata(101, "SECURESCREEN", value.toString()) )
+        metadataRepository.insertMetadata(Metadata(101, "SECURESCREEN", value.toString()))
     }
 
     suspend fun changeCurrency(newCurrency: Int) {

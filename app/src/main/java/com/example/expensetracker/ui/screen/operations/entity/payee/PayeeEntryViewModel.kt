@@ -5,8 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.expensetracker.data.payee.PayeesRepository
-import com.example.expensetracker.model.Payee
+import com.example.expensetracker.data.model.Payee
+import com.example.expensetracker.data.repository.payee.PayeesRepository
 
 class PayeeEntryViewModel(private val payeesRepository: PayeesRepository) : ViewModel() {
     var payeeUiState by mutableStateOf(PayeeUiState())
@@ -56,7 +56,7 @@ data class PayeeDetails(
 fun PayeeDetails.toPayee(): Payee = Payee(
     payeeId = payeeId,
     payeeName = payeeName,
-    categId =  categId.toInt(),
+    categId = categId.toInt(),
     number = number,
     website = website,
     notes = notes,

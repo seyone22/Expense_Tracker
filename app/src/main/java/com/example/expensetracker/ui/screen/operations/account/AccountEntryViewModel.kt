@@ -6,10 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.data.account.AccountsRepository
-import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
-import com.example.expensetracker.model.Account
-import com.example.expensetracker.model.AccountTypes
+import com.example.expensetracker.data.model.Account
+import com.example.expensetracker.data.model.AccountTypes
+import com.example.expensetracker.data.repository.account.AccountsRepository
+import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,12 +42,15 @@ class AccountEntryViewModel(
 
     fun updateUiState(accountDetails: AccountDetails) {
         accountUiState =
-            AccountUiState(accountDetails = accountDetails, isEntryValid = validateInput(accountDetails))
+            AccountUiState(
+                accountDetails = accountDetails,
+                isEntryValid = validateInput(accountDetails)
+            )
     }
 
     suspend fun saveAccount() {
         Log.d("DEBUG", "saveAccount: Called!")
-        if(validateInput()) {
+        if (validateInput()) {
             Log.d("DEBUG", "saveAccount: Input Valid!")
             accountsRepository.insertAccount(accountUiState.accountDetails.toAccount())
         }
@@ -71,6 +74,7 @@ data class AccountUiState(
     val accountDetails: AccountDetails = AccountDetails(),
     val isEntryValid: Boolean = false
 )
+
 //Data class for AccountDetails
 data class AccountDetails(
     val accountId: Int = 0,
@@ -84,7 +88,10 @@ data class AccountDetails(
     val contactInfo: String? = "",
     val accessInfo: String? = "",
     val initialBalance: String? = "0.0", // Changed the type to String
-    val initialDate: String? = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Instant.now().toEpochMilli()).toString(),
+    val initialDate: String? = SimpleDateFormat(
+        "yyyy-MM-dd",
+        Locale.getDefault()
+    ).format(Instant.now().toEpochMilli()).toString(),
     val favoriteAccount: String = "",
     val currencyId: String = "0", // Changed the type to String
     val statementLocked: String? = "", // Changed the type to String

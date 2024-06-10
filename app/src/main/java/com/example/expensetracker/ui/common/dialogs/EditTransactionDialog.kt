@@ -95,7 +95,9 @@ fun EditTransactionDialog(
                         transactionDetails = transactionSelected,
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
-                        onValueChange = { transactionDetails, _ -> transactionSelected = transactionDetails },
+                        onValueChange = { transactionDetails, _ ->
+                            transactionSelected = transactionDetails
+                        },
                         edit = true
                     )
 

@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
-import com.example.expensetracker.model.Account
+import com.example.expensetracker.data.model.Account
 import com.example.expensetracker.ui.screen.operations.account.AccountDetails
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryForm
 import com.example.expensetracker.ui.screen.operations.account.toAccountDetails

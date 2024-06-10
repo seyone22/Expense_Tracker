@@ -6,13 +6,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.data.account.AccountsRepository
-import com.example.expensetracker.data.billsDeposit.BillsDepositsRepository
-import com.example.expensetracker.data.currencyFormat.CurrencyFormatsRepository
-import com.example.expensetracker.data.transaction.TransactionsRepository
-import com.example.expensetracker.model.Account
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Transaction
+import com.example.expensetracker.data.model.Account
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.Transaction
+import com.example.expensetracker.data.repository.account.AccountsRepository
+import com.example.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
+import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.repository.transaction.TransactionsRepository
 import com.example.expensetracker.ui.screen.operations.account.AccountDetailTransactionUiState
 import com.example.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
@@ -88,7 +88,10 @@ class TransactionsViewModel(
         }
     }
 
-    fun updateUiState(transactionDetails: TransactionDetails, billsDepositsDetails: BillsDepositsDetails) {
+    fun updateUiState(
+        transactionDetails: TransactionDetails,
+        billsDepositsDetails: BillsDepositsDetails
+    ) {
         transactionUiState =
             TransactionUiState(
                 transactionDetails = transactionDetails,

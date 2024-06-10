@@ -40,9 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.SelectedObjects
-import com.example.expensetracker.model.Category
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Payee
+import com.example.expensetracker.data.model.Category
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.Payee
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.removeTrPrefix
@@ -69,7 +69,7 @@ fun EntityScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    var chartData: Map<LocalDate, Float> by remember { mutableStateOf( mapOf(LocalDate.parse("2022-01-01") to 2f) ) }
+    var chartData: Map<LocalDate, Float> by remember { mutableStateOf(mapOf(LocalDate.parse("2022-01-01") to 2f)) }
     var finished: Boolean by remember { mutableStateOf(false) }
 
     var state by remember { mutableIntStateOf(0) }
@@ -142,47 +142,47 @@ fun EntityScreen(
 
                     Column {
                         // TODO : DO the chart here.
-/*                        if(finished) {
-                            val scrollState = rememberVicoScrollState()
-                            val zoomState = rememberVicoZoomState()
+                        /*                        if(finished) {
+                                                    val scrollState = rememberVicoScrollState()
+                                                    val zoomState = rememberVicoZoomState()
 
-                            val xToDateMapKey = ExtraStore.Key<Map<Float, LocalDate>>()
-                            var xToDates: Map<Float, LocalDate> = mapOf()
+                                                    val xToDateMapKey = ExtraStore.Key<Map<Float, LocalDate>>()
+                                                    var xToDates: Map<Float, LocalDate> = mapOf()
 
-                            val dateTimeFormatter = DateTimeFormatter.ofPattern("MMM yyyy")
-                            var x: ValueFormatter
-                            val dataLoaded = remember { mutableStateOf(false) }
+                                                    val dateTimeFormatter = DateTimeFormatter.ofPattern("MMM yyyy")
+                                                    var x: ValueFormatter
+                                                    val dataLoaded = remember { mutableStateOf(false) }
 
-                            val modelProducer = remember { CartesianChartModelProducer.build() }
-                            LaunchedEffect(Unit) {
-                                xToDates = chartData.keys.associateBy { it.toEpochDay().toFloat() }
+                                                    val modelProducer = remember { CartesianChartModelProducer.build() }
+                                                    LaunchedEffect(Unit) {
+                                                        xToDates = chartData.keys.associateBy { it.toEpochDay().toFloat() }
 
-                                modelProducer.tryRunTransaction {
-                                    columnSeries { series(xToDates.keys, chartData.values) }
-                                }
-                                dataLoaded.value = true
-                            }
+                                                        modelProducer.tryRunTransaction {
+                                                            columnSeries { series(xToDates.keys, chartData.values) }
+                                                        }
+                                                        dataLoaded.value = true
+                                                    }
 
-                            if (dataLoaded.value) {
-                                ProvideVicoTheme(theme = rememberM3VicoTheme()) {
-                                    CartesianChartHost(
-                                        chart = rememberCartesianChart(
-                                            rememberColumnCartesianLayer(),
-                                            startAxis = rememberStartAxis(),
-                                            bottomAxis = rememberBottomAxis(
-                                                valueFormatter = AxisValueFormatter<AxisPosition.Horizontal.Bottom> { x, chartValues, _ ->
-                                                    (chartValues.model.extraStore[xToDateMapKey][x] ?: LocalDate.ofEpochDay(x.toLong()))
-                                                        .format(dateTimeFormatter)
-                                                }
-                                            )
-                                        ),
-                                        modelProducer = modelProducer,
-                                        scrollState = scrollState,
-                                        zoomState = zoomState
-                                    )
-                                }
-                            }
-                        }*/
+                                                    if (dataLoaded.value) {
+                                                        ProvideVicoTheme(theme = rememberM3VicoTheme()) {
+                                                            CartesianChartHost(
+                                                                chart = rememberCartesianChart(
+                                                                    rememberColumnCartesianLayer(),
+                                                                    startAxis = rememberStartAxis(),
+                                                                    bottomAxis = rememberBottomAxis(
+                                                                        valueFormatter = AxisValueFormatter<AxisPosition.Horizontal.Bottom> { x, chartValues, _ ->
+                                                                            (chartValues.model.extraStore[xToDateMapKey][x] ?: LocalDate.ofEpochDay(x.toLong()))
+                                                                                .format(dateTimeFormatter)
+                                                                        }
+                                                                    )
+                                                                ),
+                                                                modelProducer = modelProducer,
+                                                                scrollState = scrollState,
+                                                                zoomState = zoomState
+                                                            )
+                                                        }
+                                                    }
+                                                }*/
 
                         CurrenciesList(
                             list = entityUiState.currenciesList,

@@ -52,7 +52,8 @@ data class DonutChartDataCollection(
 
 private data class DrawingAngles(val start: Float, val end: Float)
 
-private fun DrawingAngles.isInsideAngle(angle: Float) = angle > this.start && angle < this.start + this.end
+private fun DrawingAngles.isInsideAngle(angle: Float) =
+    angle > this.start && angle < this.start + this.end
 
 private class DonutChartState(
     val state: State = State.Unselected
@@ -137,7 +138,7 @@ fun DonutChart(
                                     selectedIndex = -1
                                 },
                                 currentStrokeValues = animValues.map { it.value.toPx() },
-                                )
+                            )
                         }
                     )
                 },
@@ -157,7 +158,10 @@ fun DonutChart(
                         useCenter = false,
                         topLeft = Offset(defaultStrokeWidth / 2, defaultStrokeWidth / 2),
                         style = Stroke(STROKE_SIZE_UNSELECTED.toPx(), cap = StrokeCap.Butt),
-                        size = Size(size.width - defaultStrokeWidth, size.height - defaultStrokeWidth)
+                        size = Size(
+                            size.width - defaultStrokeWidth,
+                            size.height - defaultStrokeWidth
+                        )
                     )
                     lastAngle += sweepAngle + gapAngle
                 }
@@ -166,7 +170,6 @@ fun DonutChart(
         selectionView(if (selectedIndex >= 0) data.items[selectedIndex] else null)
     }
 }
-
 
 
 private fun handleCanvasTap(
@@ -228,7 +231,10 @@ private fun Offset.findNormalizedPointFromTouch(canvasCenter: Offset) =
  * Calculate the touch angle based on the canvas center. Then adjust the angle so that
  * drawing starts from the 4th quadrant instead of the first.
  */
-private fun calculateTouchAngleAccordingToCanvas(canvasCenter: Offset, normalizedPoint: Offset): Float {
+private fun calculateTouchAngleAccordingToCanvas(
+    canvasCenter: Offset,
+    normalizedPoint: Offset
+): Float {
     val angle = calculateTouchAngleInDegrees(canvasCenter, normalizedPoint)
     return adjustAngleToCanvas(angle).toFloat()
 }
@@ -238,8 +244,10 @@ private fun calculateTouchAngleAccordingToCanvas(canvasCenter: Offset, normalize
  * compared to other data points.
  */
 private fun calculateTouchAngleInDegrees(canvasCenter: Offset, normalizedPoint: Offset): Double {
-    val touchInRadian = kotlin.math.atan2(normalizedPoint.y - canvasCenter.y,
-        normalizedPoint.x - canvasCenter.x)
+    val touchInRadian = kotlin.math.atan2(
+        normalizedPoint.y - canvasCenter.y,
+        normalizedPoint.x - canvasCenter.x
+    )
     return touchInRadian * -180 / Math.PI // Convert radians to angle in degrees
 }
 

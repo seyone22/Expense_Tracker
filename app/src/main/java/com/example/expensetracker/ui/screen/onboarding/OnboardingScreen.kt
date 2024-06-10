@@ -33,8 +33,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Metadata
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.Metadata
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import kotlinx.coroutines.launch

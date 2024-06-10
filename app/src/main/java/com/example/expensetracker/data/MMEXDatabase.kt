@@ -4,22 +4,22 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.expensetracker.data.account.AccountDao
-import com.example.expensetracker.data.billsDeposit.BillsDepositsDao
-import com.example.expensetracker.data.category.CategoryDao
-import com.example.expensetracker.data.currencyFormat.CurrencyFormatDao
-import com.example.expensetracker.data.metadata.MetadataDao
-import com.example.expensetracker.data.payee.PayeeDao
-import com.example.expensetracker.data.report.ReportDao
-import com.example.expensetracker.data.transaction.TransactionDao
-import com.example.expensetracker.model.Account
-import com.example.expensetracker.model.BillsDeposits
-import com.example.expensetracker.model.Category
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Metadata
-import com.example.expensetracker.model.Payee
-import com.example.expensetracker.model.Report
-import com.example.expensetracker.model.Transaction
+import com.example.expensetracker.data.model.Account
+import com.example.expensetracker.data.model.BillsDeposits
+import com.example.expensetracker.data.model.Category
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.Metadata
+import com.example.expensetracker.data.model.Payee
+import com.example.expensetracker.data.model.Report
+import com.example.expensetracker.data.model.Transaction
+import com.example.expensetracker.data.repository.account.AccountDao
+import com.example.expensetracker.data.repository.billsDeposit.BillsDepositsDao
+import com.example.expensetracker.data.repository.category.CategoryDao
+import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatDao
+import com.example.expensetracker.data.repository.metadata.MetadataDao
+import com.example.expensetracker.data.repository.payee.PayeeDao
+import com.example.expensetracker.data.repository.report.ReportDao
+import com.example.expensetracker.data.repository.transaction.TransactionDao
 
 @Database(
     entities = [Account::class, Transaction::class, Payee::class, Category::class, CurrencyFormat::class, Metadata::class, BillsDeposits::class, Report::class],

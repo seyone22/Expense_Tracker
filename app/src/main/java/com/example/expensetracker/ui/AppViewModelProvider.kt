@@ -85,7 +85,10 @@ object AppViewModelProvider {
         }
         // Initializer for Settings ViewModel
         initializer {
-            SettingsViewModel(expenseApplication().container.metadataRepository, expenseApplication().container.currenciesRepository)
+            SettingsViewModel(
+                expenseApplication().container.metadataRepository,
+                expenseApplication().container.currenciesRepository
+            )
         }
         // Initializer for Onboarding ViewModel
         initializer {

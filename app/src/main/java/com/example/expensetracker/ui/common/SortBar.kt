@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SortBar(
-    modifier : Modifier = Modifier,
-    periodSortAction : (Int) -> Unit
+    modifier: Modifier = Modifier,
+    periodSortAction: (Int) -> Unit
 ) {
     Row(
         modifier = modifier

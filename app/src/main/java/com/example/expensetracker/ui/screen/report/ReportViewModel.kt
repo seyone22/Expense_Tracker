@@ -1,16 +1,13 @@
 package com.example.expensetracker.ui.screen.report
 
 import androidx.lifecycle.ViewModel
-import com.example.expensetracker.data.category.CategoriesRepository
-import com.example.expensetracker.data.payee.PayeesRepository
-import com.example.expensetracker.data.transaction.TransactionsRepository
-import com.example.expensetracker.model.Category
-import com.example.expensetracker.model.Payee
-import com.example.expensetracker.model.Transaction
+import com.example.expensetracker.data.model.Transaction
+import com.example.expensetracker.data.repository.category.CategoriesRepository
+import com.example.expensetracker.data.repository.payee.PayeesRepository
+import com.example.expensetracker.data.repository.transaction.TransactionsRepository
 import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.model.ExtraStore
 import com.patrykandpatrick.vico.core.model.columnSeries
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.util.Locale
@@ -42,25 +39,26 @@ class ReportViewModel(
         )
     }
 
-    // Flow for expenses
-    private val transactionsExpenseFlow: Flow<List<Transaction>> =
-        transactionsRepository.getAllTransactionsByCode("Withdrawal")
+    suspend fun getExpensesByCategoryFromDB(
+        transCode: String? = null,
+        categName: String? = null
+    ): List<Transaction> {
+        return if (transCode != null) {
+            transactionsRepository.getAllTransactionsByCategory(transCode).first()
+        } else if (categName != null) {
+            transactionsRepository.getAllTransactionsByCategoryName(categName).first()
+        } else {
+            listOf()
+        }
+    }
 
-    // Flow for income
-    private val transactionsIncomeFlow: Flow<List<Transaction>> =
-        transactionsRepository.getAllTransactionsByCode("Deposit")
-
-    // Flow for categories
-    private val categoriesFlow: Flow<List<Category>> =
-        categoriesRepository.getAllCategoriesStream()
-
-    // Flow for payees
-    private val payeesFlow: Flow<List<Payee>> =
-        payeesRepository.getAllActivePayeesStream()
+    suspend fun getExpensesByPayeeFromDB(payeeId: String): List<Transaction> {
+        return transactionsRepository.getAllTransactionsByPayee(payeeId).first()
+    }
 
 
-    suspend fun getExpensesFromCategory(transCode: String) : CartesianChartModelProducer? {
-        val transactions = transactionsRepository.getAllTransactionsByCategory(transCode).first()
+    suspend fun getExpensesFromCategory(transCode: String): CartesianChartModelProducer? {
+        val transactions = getExpensesByCategoryFromDB(transCode)
 
         if (transactions.isNotEmpty()) {
             val transactionMap = transactions.groupBy { transaction ->
@@ -70,7 +68,9 @@ class ReportViewModel(
             }
 
             val xToDateMapKey = ExtraStore.Key<List<String>>()
-            val xToDates = transactionMap.keys.associateBy { monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f }
+            val xToDates = transactionMap.keys.associateBy {
+                monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f
+            }
 
             val modelProducer = CartesianChartModelProducer.build()
 
@@ -90,7 +90,7 @@ class ReportViewModel(
     }
 
     suspend fun getExpensesFromPayee(payeeId: String): CartesianChartModelProducer? {
-        val transactions = transactionsRepository.getAllTransactionsByPayee(payeeId).first()
+        val transactions = getExpensesByPayeeFromDB(payeeId)
 
         if (transactions.isNotEmpty()) {
             val transactionMap = transactions.groupBy { transaction ->
@@ -100,7 +100,9 @@ class ReportViewModel(
             }
 
             val xToDateMapKey = ExtraStore.Key<List<String>>()
-            val xToDates = transactionMap.keys.associateBy { monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f }
+            val xToDates = transactionMap.keys.associateBy {
+                monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f
+            }
 
             val modelProducer = CartesianChartModelProducer.build()
 

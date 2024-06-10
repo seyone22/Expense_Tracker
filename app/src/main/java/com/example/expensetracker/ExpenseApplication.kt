@@ -23,7 +23,8 @@ class ExpenseApplication : Application() {
         createNotificationChannel()
 
         val metadataDao = MMEXDatabase.getDatabase(this).metadataDao()
-        val baseCurrencyId = metadataDao.getMetadataByName("BASECURRENCYID") // Replace with your actual method
+        val baseCurrencyId =
+            metadataDao.getMetadataByName("BASECURRENCYID") // Replace with your actual method
 
         container = AppDataContainer(this)
     }

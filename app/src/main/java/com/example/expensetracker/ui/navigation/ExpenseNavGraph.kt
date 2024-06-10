@@ -57,11 +57,11 @@ fun ExpenseNavHost(
     navController: NavHostController,
     windowSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier,
-    setTopBarAction : (Int) -> Unit,
+    setTopBarAction: (Int) -> Unit,
     onToggleDarkTheme: () -> Unit,
-    setIsItemSelected : (Boolean) -> Unit,
-    setSelectedObject : (SelectedObjects) -> Unit,
-    innerPadding : PaddingValues
+    setIsItemSelected: (Boolean) -> Unit,
+    setSelectedObject: (SelectedObjects) -> Unit,
+    innerPadding: PaddingValues
 ) {
     NavHost(
         modifier = modifier.padding(innerPadding),
@@ -93,15 +93,15 @@ fun ExpenseNavHost(
                 setSelectedObject = { selObj ->
                     setSelectedObject(selObj)
                     Log.d("TAG", "ExpenseNavHost: $selObj")
-                                    },
+                },
                 setTopBarAction = setTopBarAction,
-                )
+            )
         }
         composable(route = ReportsDestination.route) {
             ReportScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 setTopBarAction = setTopBarAction,
-                )
+            )
         }
         composable(route = BudgetsDestination.route) {
             BudgetScreen(
@@ -163,7 +163,8 @@ fun ExpenseNavHost(
                 navigateBack = { navController.popBackStack() },
             )
         }
-        composable(route = SettingsDetailDestination.route + "/{setting}",
+        composable(
+            route = SettingsDetailDestination.route + "/{setting}",
             arguments = listOf(navArgument("setting") { type = NavType.StringType })
         ) {
             SettingsDetailScreen(

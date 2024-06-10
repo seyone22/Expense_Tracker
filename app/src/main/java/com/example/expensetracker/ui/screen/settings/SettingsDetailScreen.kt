@@ -46,8 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
-import com.example.expensetracker.model.CurrencyFormat
-import com.example.expensetracker.model.Metadata
+import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.Metadata
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
@@ -125,11 +125,13 @@ fun SettingsDetailScreen(
                         viewModel = viewModel
                     )
                 }
+
                 "ImportExport" -> {
                     ImportExportSettingsList(
                         viewModel = viewModel
                     )
                 }
+
                 "About" -> {
                     AboutList(
 
@@ -487,7 +489,7 @@ fun SecuritySettingsList(
     val securityObject by viewModel.securityObject.collectAsState(initial = SecurityObject())
     Log.d("TAG", "INITIAL SecuritySettingsList: $securityObject")
 
-    val x:Boolean by remember { mutableStateOf(securityObject.requireUnlock) }
+    val x: Boolean by remember { mutableStateOf(securityObject.requireUnlock) }
 
     Column {
         SettingsToggleListItem(
@@ -529,7 +531,7 @@ fun ImportExportSettingsList(
     val securityObject by viewModel.securityObject.collectAsState(initial = SecurityObject())
     Log.d("TAG", "INITIAL SecuritySettingsList: $securityObject")
 
-    val x:Boolean by remember { mutableStateOf(securityObject.requireUnlock) }
+    val x: Boolean by remember { mutableStateOf(securityObject.requireUnlock) }
 
     Column {
         SettingsToggleListItem(
