@@ -58,7 +58,7 @@ fun ExpenseNavHost(
     windowSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier,
     setTopBarAction: (Int) -> Unit,
-    onToggleDarkTheme: () -> Unit,
+    onToggleDarkTheme: (Int) -> Unit,
     setIsItemSelected: (Boolean) -> Unit,
     setSelectedObject: (SelectedObjects) -> Unit,
     innerPadding: PaddingValues
@@ -171,7 +171,7 @@ fun ExpenseNavHost(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 navigateBack = { navController.popBackStack() },
                 backStackEntry = it.arguments?.getString("setting") ?: "-1",
-                onToggleDarkTheme = onToggleDarkTheme
+                onToggleDarkTheme = { it -> onToggleDarkTheme(it) }
             )
         }
 

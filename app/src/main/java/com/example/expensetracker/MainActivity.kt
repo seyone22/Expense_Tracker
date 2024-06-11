@@ -1,6 +1,7 @@
 package com.example.expensetracker
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -9,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -40,44 +42,47 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val windowSize = calculateWindowSizeClass(this)
-            val darkTheme = DarkTheme()
             val viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
+            val darkThemeState = remember { mutableStateOf(DarkTheme()) }
             var requireUnlock by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
-                darkTheme.isDark = viewModel.getCurrentTheme().isDark
-                darkTheme.isMidnight = viewModel.getCurrentTheme().isMidnight
-
+                val currentTheme = viewModel.getCurrentTheme()
+                darkThemeState.value = currentTheme // assuming getCurrentTheme returns DarkTheme
                 requireUnlock = viewModel.getRequireUnlock()
             }
 
-            CompositionLocalProvider(LocalTheme provides darkTheme) {
+            CompositionLocalProvider(LocalTheme provides darkThemeState.value) {
                 ExpenseTrackerTheme(
-                    darkTheme = LocalTheme.current.isDark,
-                    midnight = LocalTheme.current.isMidnight
+                    darkTheme = darkThemeState.value.isDark,
+                    midnight = darkThemeState.value.isMidnight
                 ) {
-                    // A surface container using the 'background' color from the theme
-                    Surface(modifier = Modifier.fillMaxSize())
-                    {
+                    Surface(modifier = Modifier.fillMaxSize()) {
                         ExpenseApp(
                             windowSizeClass = windowSize.widthSizeClass,
-                            onToggleDarkTheme = { darkTheme.isDark = !darkTheme.isDark }
+                            onToggleDarkTheme = { option ->
+                                darkThemeState.value = when (option) {
+                                    1 -> darkThemeState.value.copy(isDark = true)
+                                    0 -> darkThemeState.value.copy(isDark = false)
+                                    2 -> darkThemeState.value.copy(isDark = isSystemInDarkTheme())
+                                    else -> darkThemeState.value
+                                }
+                            }
                         )
-
                     }
                 }
             }
         }
     }
+
+    private fun isSystemInDarkTheme(): Boolean {
+        return (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    }
 }
 
-
 enum class AppTheme {
-    MODE_DAY,
-    MODE_NIGHT,
-    MODE_AUTO,
-    MODE_MIDNIGHT;
+    MODE_DAY, MODE_NIGHT, MODE_AUTO, MODE_MIDNIGHT;
 
     companion object {
         fun fromOrdinal(ordinal: Int) = entries[ordinal]
@@ -110,12 +115,9 @@ fun isBiometricReady(context: Context): Boolean =
 
 
 private fun showBiometricPrompt(
-    proceedToMainActivity: () -> Unit,
-    context: Context,
-    fragmentActivity: FragmentActivity
+    proceedToMainActivity: () -> Unit, context: Context, fragmentActivity: FragmentActivity
 ) {
-    val biometricPrompt = BiometricPrompt(
-        fragmentActivity,
+    val biometricPrompt = BiometricPrompt(fragmentActivity,
         ContextCompat.getMainExecutor(context),
         object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
@@ -134,11 +136,8 @@ private fun showBiometricPrompt(
             }
         })
 
-    val promptInfo = BiometricPrompt.PromptInfo.Builder()
-        .setTitle("Unlock")
-        .setDescription("Use biometric to unlock")
-        .setNegativeButtonText("Cancel")
-        .build()
+    val promptInfo = BiometricPrompt.PromptInfo.Builder().setTitle("Unlock")
+        .setDescription("Use biometric to unlock").setNegativeButtonText("Cancel").build()
 
     biometricPrompt.authenticate(promptInfo)
 }
