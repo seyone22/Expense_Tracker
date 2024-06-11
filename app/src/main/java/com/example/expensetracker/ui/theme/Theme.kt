@@ -54,7 +54,7 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
-data class DarkTheme(var isDark: Boolean = false, var isMidnight: Boolean = false)
+data class DarkTheme(var isDark: Boolean = false, var isMidnight: Boolean = false, val systemTheme: Boolean = false)
 
 var LocalTheme = compositionLocalOf { DarkTheme() }
 
@@ -66,6 +66,7 @@ fun ExpenseTrackerTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    val isSystemInDarkTheme = darkTheme
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current

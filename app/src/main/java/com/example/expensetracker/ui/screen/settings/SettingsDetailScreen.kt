@@ -66,7 +66,7 @@ object SettingsDetailDestination : NavigationDestination {
 fun SettingsDetailScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
-    onToggleDarkTheme: () -> Unit,
+    onToggleDarkTheme: (Int) -> Unit,
     navigateBack: () -> Unit,
     backStackEntry: String,
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
@@ -77,21 +77,17 @@ fun SettingsDetailScreen(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
-                title = { Text(text = backStackEntry) },
-                navigationIcon = {
-                    IconButton(onClick = { navigateBack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
-                        )
-                    }
+            TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background,
+                titleContentColor = MaterialTheme.colorScheme.onSurface,
+            ), title = { Text(text = backStackEntry) }, navigationIcon = {
+                IconButton(onClick = { navigateBack() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
+                    )
                 }
-            )
+            })
         },
     ) { innerPadding ->
         Column(
@@ -100,23 +96,21 @@ fun SettingsDetailScreen(
             when (backStackEntry) {
                 "General" -> {
                     GeneralSettingsList(
-                        metadata = metadataList,
-                        viewModel = viewModel
+                        metadata = metadataList, viewModel = viewModel
                     )
                 }
 
                 "Appearance" -> {
                     AppearanceSettingsList(
                         metadata = metadataList,
-                        onToggleDarkTheme = onToggleDarkTheme,
+                        onToggleDarkTheme = { it -> onToggleDarkTheme(it) },
                         viewModel = viewModel
                     )
                 }
 
                 "Data" -> {
                     DataSettingsList(
-                        metadata = metadataList,
-                        viewModel = viewModel
+                        metadata = metadataList, viewModel = viewModel
                     )
                 }
 
@@ -145,8 +139,7 @@ fun SettingsDetailScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeneralSettingsList(
-    metadata: List<Metadata?>,
-    viewModel: SettingsViewModel
+    metadata: List<Metadata?>, viewModel: SettingsViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
     var baseCurrencyName by remember { mutableStateOf("") }
@@ -155,27 +148,20 @@ fun GeneralSettingsList(
     var editName by remember { mutableStateOf((false)) }
 
     Column {
-        ListItem(
-            headlineContent = { Text(text = "Username") },
-            supportingContent = {
-                metadata.find { (it?.infoName ?: "USERNAME") == "USERNAME" }
-                    ?.let { Text(text = it.infoValue) }
-            },
-            modifier = Modifier.clickable { editName = !editName }
-        )
-        ListItem(
-            headlineContent = { Text(text = "Base Currency") },
-            supportingContent = {
-                metadata.find { (it?.infoName ?: "BASECURRENCYID") == "BASECURRENCYID" }?.let {
-                    coroutineScope.launch {
-                        baseCurrencyName =
-                            viewModel.getBaseCurrencyInfo(it.infoValue.toInt()).currencyName
-                        Log.d("TAG", "GeneralSettingsList: $baseCurrencyName")
-                    }
+        ListItem(headlineContent = { Text(text = "Username") }, supportingContent = {
+            metadata.find { (it?.infoName ?: "USERNAME") == "USERNAME" }
+                ?.let { Text(text = it.infoValue) }
+        }, modifier = Modifier.clickable { editName = !editName })
+        ListItem(headlineContent = { Text(text = "Base Currency") }, supportingContent = {
+            metadata.find { (it?.infoName ?: "BASECURRENCYID") == "BASECURRENCYID" }?.let {
+                coroutineScope.launch {
+                    baseCurrencyName =
+                        viewModel.getBaseCurrencyInfo(it.infoValue.toInt()).currencyName
+                    Log.d("TAG", "GeneralSettingsList: $baseCurrencyName")
                 }
-                Text(text = removeTrPrefix(baseCurrencyName))
-            },
-            modifier = Modifier.clickable { editCurrency = !editCurrency }
+            }
+            Text(text = removeTrPrefix(baseCurrencyName))
+        }, modifier = Modifier.clickable { editCurrency = !editCurrency }
 
         )
     }
@@ -197,8 +183,7 @@ fun GeneralSettingsList(
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -214,8 +199,7 @@ fun GeneralSettingsList(
                         singleLine = true,
                     )
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         TextButton(
@@ -263,8 +247,7 @@ fun GeneralSettingsList(
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
@@ -272,8 +255,7 @@ fun GeneralSettingsList(
                         text = "Select your new base currency",
                         modifier = Modifier.padding(8.dp),
                     )
-                    ExposedDropdownMenuBox(
-                        expanded = baseCurrencyExpanded,
+                    ExposedDropdownMenuBox(expanded = baseCurrencyExpanded,
                         onExpandedChange = { baseCurrencyExpanded = !baseCurrencyExpanded }) {
                         OutlinedTextField(
                             modifier = Modifier
@@ -295,19 +277,16 @@ fun GeneralSettingsList(
                             onDismissRequest = { baseCurrencyExpanded = false },
                         ) {
                             currencyList.currenciesList.forEach { currency ->
-                                DropdownMenuItem(
-                                    text = { Text(removeTrPrefix(currency.currencyName)) },
+                                DropdownMenuItem(text = { Text(removeTrPrefix(currency.currencyName)) },
                                     onClick = {
                                         newCurrency = currency
                                         baseCurrencyExpanded = false
-                                    }
-                                )
+                                    })
                             }
                         }
                     }
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         TextButton(
@@ -351,52 +330,44 @@ fun AboutList() {
     }
     HorizontalDivider()
     Column {
-        ListItem(
-            headlineContent = { Text(text = "Version") },
-            supportingContent = {
-                Text(
-                    text = "${stringResource(id = R.string.app_version)} (${
-                        stringResource(
-                            id = R.string.release_date
-                        )
-                    } | ${stringResource(id = R.string.release_time)})"
-                )
-            },
-            modifier = Modifier.clickable { }
-        )
+        ListItem(headlineContent = { Text(text = "Version") }, supportingContent = {
+            Text(
+                text = "${stringResource(id = R.string.app_version)} (${
+                    stringResource(
+                        id = R.string.release_date
+                    )
+                } | ${stringResource(id = R.string.release_time)})"
+            )
+        }, modifier = Modifier.clickable { })
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppearanceSettingsList(
-    metadata: List<Metadata?>,
-    onToggleDarkTheme: () -> Unit,
-    viewModel: SettingsViewModel
+    metadata: List<Metadata?>, onToggleDarkTheme: (Int) -> Unit, viewModel: SettingsViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     var editTheme by remember { mutableStateOf(false) }
 
+    var selectedTheme by remember { mutableIntStateOf(0) }
+
     Column {
-        ListItem(
-            headlineContent = { Text(text = "Theme") },
-            supportingContent = {
-                if (LocalTheme.current.isDark && !LocalTheme.current.isMidnight) {
-                    Text(text = "Dark")
-                } else if (LocalTheme.current.isDark && LocalTheme.current.isMidnight) {
-                    Text(text = "Midnight")
-                } else {
-                    Text(text = "Light")
-                }
-            },
-            modifier = Modifier.clickable { editTheme = !editTheme }
-        )
+        ListItem(headlineContent = { Text(text = "Theme") }, supportingContent = {
+            if (LocalTheme.current.isDark && !LocalTheme.current.isMidnight) {
+                Text(text = "Dark")
+                selectedTheme = 1
+            } else if (LocalTheme.current.isDark && LocalTheme.current.isMidnight) {
+                Text(text = "Midnight")
+            } else {
+                Text(text = "Light")
+                selectedTheme = 0
+            }
+        }, modifier = Modifier.clickable { editTheme = !editTheme })
 
         // Edit Theme Dialog
         if (editTheme) {
-            var selectedTheme by remember { mutableIntStateOf(2) }
-
             Dialog(
                 onDismissRequest = { editTheme = !editTheme },
             ) {
@@ -408,8 +379,7 @@ fun AppearanceSettingsList(
                     shape = RoundedCornerShape(16.dp),
                 ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize(),
+                        modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.Start,
                     ) {
@@ -421,33 +391,31 @@ fun AppearanceSettingsList(
                         Row(
 
                         ) {
-                            RadioButton(
-                                enabled = true,
-                                selected = (selectedTheme == 0),
-                                onClick = {
-                                    selectedTheme = 0
-                                    coroutineScope.launch { viewModel.setTheme(selectedTheme) }
-                                    onToggleDarkTheme()
-                                })
+                            RadioButton(enabled = true, selected = (selectedTheme == 0), onClick = {
+                                selectedTheme = 0
+                                coroutineScope.launch { viewModel.setTheme(selectedTheme) }
+                                onToggleDarkTheme(selectedTheme)
+                            })
                             Text(text = "Light")
                         }
                         Row {
-                            RadioButton(
-                                enabled = true,
-                                selected = (selectedTheme == 1),
-                                onClick = { selectedTheme = 1 })
+                            RadioButton(enabled = true, selected = (selectedTheme == 1), onClick = {
+                                selectedTheme = 1
+                                coroutineScope.launch { viewModel.setTheme(selectedTheme) }
+                                onToggleDarkTheme(selectedTheme)
+                            })
                             Text(text = "Dark")
                         }
                         Row {
-                            RadioButton(
-                                enabled = true,
-                                selected = (selectedTheme == 2),
-                                onClick = { selectedTheme = 2 })
+                            RadioButton(enabled = true, selected = (selectedTheme == 2), onClick = {
+                                selectedTheme = 2
+                                coroutineScope.launch { viewModel.setTheme(selectedTheme) }
+                                onToggleDarkTheme(selectedTheme)
+                            })
                             Text(text = "System Default")
                         }
                         Row {
-                            RadioButton(
-                                enabled = true,
+                            RadioButton(enabled = true,
                                 selected = (selectedTheme == 3),
                                 onClick = { selectedTheme = 3 })
                             Text(text = "Midnight")
@@ -468,23 +436,20 @@ fun DataSettingsList(
     val coroutineScope = rememberCoroutineScope()
 
     Column {
-        SettingsListItem(
-            settingName = "Update Currency Formats",
+        SettingsListItem(settingName = "Update Currency Formats",
             settingSubtext = "Exchange rates are updated monthly from the InfoEuro portal",
             action = {
                 Log.d("TAG", metadata.toString())
                 viewModel.getMonthlyRates(
                     baseCurrencyId = metadata.find { it -> it!!.infoName == "BASECURRENCYID" }!!.infoValue.toInt()
                 )
-            }
-        )
+            })
     }
 }
 
 @Composable
 fun SecuritySettingsList(
-    viewModel: SettingsViewModel,
-    scope: CoroutineScope = rememberCoroutineScope()
+    viewModel: SettingsViewModel, scope: CoroutineScope = rememberCoroutineScope()
 ) {
     val securityObject by viewModel.securityObject.collectAsState(initial = SecurityObject())
     Log.d("TAG", "INITIAL SecuritySettingsList: $securityObject")
@@ -500,17 +465,11 @@ fun SecuritySettingsList(
                 scope.launch {
                     viewModel.setRequireUnlock(value = securityObject.requireUnlock)
                 }
-            }
-        )
-        SettingsListItem(
-            settingName = "Lock when idle",
-            settingSubtext = "",
-            action = {
+            })
+        SettingsListItem(settingName = "Lock when idle", settingSubtext = "", action = {
 
-            }
-        )
-        SettingsToggleListItem(
-            settingName = "Secure screen",
+        })
+        SettingsToggleListItem(settingName = "Secure screen",
             settingSubtext = "Hides app contents when switching apps, and blocks screenshots",
             toggle = securityObject.secureScreen,
             onToggleChange = { newValue ->
@@ -518,15 +477,13 @@ fun SecuritySettingsList(
                 scope.launch {
                     viewModel.setSecureScreen(value = securityObject.secureScreen)
                 }
-            }
-        )
+            })
     }
 }
 
 @Composable
 fun ImportExportSettingsList(
-    viewModel: SettingsViewModel,
-    scope: CoroutineScope = rememberCoroutineScope()
+    viewModel: SettingsViewModel, scope: CoroutineScope = rememberCoroutineScope()
 ) {
     val securityObject by viewModel.securityObject.collectAsState(initial = SecurityObject())
     Log.d("TAG", "INITIAL SecuritySettingsList: $securityObject")
@@ -542,17 +499,11 @@ fun ImportExportSettingsList(
                 scope.launch {
                     viewModel.setRequireUnlock(value = securityObject.requireUnlock)
                 }
-            }
-        )
-        SettingsListItem(
-            settingName = "Lock when idle",
-            settingSubtext = "",
-            action = {
+            })
+        SettingsListItem(settingName = "Lock when idle", settingSubtext = "", action = {
 
-            }
-        )
-        SettingsToggleListItem(
-            settingName = "Secure screen",
+        })
+        SettingsToggleListItem(settingName = "Secure screen",
             settingSubtext = "Hides app contents when switching apps, and blocks screenshots",
             toggle = securityObject.secureScreen,
             onToggleChange = { newValue ->
@@ -560,7 +511,6 @@ fun ImportExportSettingsList(
                 scope.launch {
                     viewModel.setSecureScreen(value = securityObject.secureScreen)
                 }
-            }
-        )
+            })
     }
 }
