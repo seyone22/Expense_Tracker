@@ -928,7 +928,7 @@ fun PayeeEntryDialog(
     edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
-    var payeeSelected by remember { mutableStateOf(selectedPayee) }
+    val payeeSelected by remember { mutableStateOf(selectedPayee) }
 
     viewModel.updatePayeeState(
         viewModel.payeeUiState.payeeDetails.copy(

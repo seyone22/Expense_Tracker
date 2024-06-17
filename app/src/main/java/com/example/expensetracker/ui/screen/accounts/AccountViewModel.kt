@@ -83,30 +83,6 @@ class AccountViewModel(
                 initialValue = AccountsUiState()
             )
 
-    val accountBalances: StateFlow<Balances> =
-        accountsRepository.getAllActiveAccountsStream()
-            .map { accountList ->
-                val balanceData: MutableList<BalanceResult> = mutableListOf()
-                var totalBalance = 0.0
-
-                accountList.forEach {
-                    val accountBalance =
-                        accountsRepository.getAccountBalance(it.accountId).firstOrNull()?.balance
-                    val balance = it.initialBalance?.plus(accountBalance ?: 0.0)
-
-                    balanceData.add(BalanceResult(it.accountId, balance ?: 0.0))
-                    if (balance != null) {
-                        totalBalance += balance
-                    }
-                }
-                Balances(balanceData, totalBalance)
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = Balances()
-            )
-
     //TODO : FIX
     suspend fun getBaseCurrencyInfo(baseCurrencyId: Int): CurrencyFormat {
         val x = currencyFormatsRepository.getCurrencyFormatStream(baseCurrencyId)
