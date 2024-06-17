@@ -113,11 +113,6 @@ data class AccountsUiState(
     val grandTotal: Double = 0.0
 )
 
-data class Balances(
-    val balancesList: List<BalanceResult> = emptyList(),
-    val grandTotal: Double = 0.0
-)
-
 data class Totals(
     val expenses: Double = 0.0,
     val income: Double = 0.0,
