@@ -168,5 +168,5 @@ fun getStartOfLastMonthDateString(): String {
 }
 
 fun getArbitaryEndDateString(): String {
-    return "9999-12-31";
+    return "9999-12-31"
 }
