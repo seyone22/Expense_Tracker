@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -70,8 +71,8 @@ class AccountViewModel(
         accountsRepository.getAllAccountsStream()
             .map { accounts ->
                 val transformedList = accounts.map { account ->
-                    val balance = accountsRepository.getAccountBalance(account.accountId)
-                        .firstOrNull()?.balance
+                    val balance = transactionsRepository.getBalanceByAccountId().first()
+                        .find { it.accountId == account.accountId }?.balance
                     Pair(account, balance ?: 0.0) // Default value for balance if it's null
                 }
                 AccountsUiState(transformedList)

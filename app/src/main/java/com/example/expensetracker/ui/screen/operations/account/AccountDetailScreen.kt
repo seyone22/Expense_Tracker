@@ -80,17 +80,14 @@ fun AccountDetailScreen(
     }
 
     Column(
-        modifier = modifier
-            .padding(0.dp, 100.dp)
+        modifier = modifier.padding(0.dp, 100.dp)
     ) {
-        DetailedAccountCard(
-            modifier = modifier,
+        DetailedAccountCard(modifier = modifier,
             accountDetailAccountUiState = accountDetailAccountUiState,
             setOpenEditDialog = { it -> openEditDialog.value = it },
             setOpenEditDialogType = { it -> openEditType.value = it },
             setOpenDeleteDialog = { it -> openDeleteDialog.value = it },
-            setOpenDeleteDialogType = { it -> openDeleteDialogType.value = it }
-        )
+            setOpenDeleteDialogType = { it -> openDeleteDialogType.value = it })
 
         TransactionList(
             transactions = accountDetailTransactionUiState.transactions,
@@ -103,12 +100,11 @@ fun AccountDetailScreen(
     }
 
     if (openEditDialog.value and (openEditType.value == EntryFields.TRANSACTION)) {
-        EditTransactionDialog(
-            onConfirmClick = {
-                coroutineScope.launch {
-                    viewModel.editTransaction(selectedTransaction)
-                }
-            },
+        EditTransactionDialog(onConfirmClick = {
+            coroutineScope.launch {
+                viewModel.editTransaction(selectedTransaction)
+            }
+        },
             onDismissRequest = { openEditDialog.value = !openEditDialog.value },
             edit = true,
             title = "Edit Transaction",
@@ -116,12 +112,11 @@ fun AccountDetailScreen(
         )
     }
     if (openEditDialog.value and (openEditType.value == EntryFields.ACCOUNT)) {
-        EditAccountDialog(
-            onConfirmClick = {
-                coroutineScope.launch {
-                    viewModel.editAccount(it)
-                }
-            },
+        EditAccountDialog(onConfirmClick = {
+            coroutineScope.launch {
+                viewModel.editAccount(it)
+            }
+        },
             onDismissRequest = { openEditDialog.value = !openEditDialog.value },
             viewModel = viewModel,
             edit = true,
@@ -130,8 +125,7 @@ fun AccountDetailScreen(
         )
     }
     if (openDeleteDialog.value) {
-        DeleteConfirmationDialog(
-            onDismissRequest = { openDeleteDialog.value = false },
+        DeleteConfirmationDialog(onDismissRequest = { openDeleteDialog.value = false },
             confirmButtonAction = {
                 coroutineScope.launch {
                     viewModel.deleteAccount(
@@ -163,8 +157,7 @@ fun DetailedAccountCard(
             .padding(24.dp, 0.dp)
     ) {
         Row(
-            modifier = modifier
-                .padding(16.dp, 8.dp, 0.dp, 8.dp),
+            modifier = modifier.padding(16.dp, 8.dp, 0.dp, 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
@@ -183,16 +176,11 @@ fun DetailedAccountCard(
                 }
                 HorizontalDivider()
                 Text(
-                    text = "Account Balance : " +
-                            (accountDetailAccountUiState.account.initialBalance?.plus(
-                                accountDetailAccountUiState.balance
-                            )).toString(),
+                    text = "Account Balance : " + (accountDetailAccountUiState.balance).toString(),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = "Reconciled Balance : " + (accountDetailAccountUiState.account.initialBalance?.plus(
-                        accountDetailAccountUiState.balance
-                    )).toString(),
+                    text = "Reconciled Balance : " + (accountDetailAccountUiState.balance).toString(),
                     style = MaterialTheme.typography.titleSmall
                 )
             }
@@ -209,22 +197,16 @@ fun DetailedAccountCard(
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             ) {
-                DropdownMenuItem(
-                    onClick = {
-                        setOpenEditDialog(true)
-                        setOpenEditDialogType(EntryFields.ACCOUNT)
-                        expanded = !expanded
-                    },
-                    text = { Text(text = "Edit") }
-                )
-                DropdownMenuItem(
-                    onClick = {
-                        setOpenDeleteDialog(true)
-                        setOpenDeleteDialogType(EntryFields.ACCOUNT)
-                        expanded = !expanded
-                    },
-                    text = { Text(text = "Delete") }
-                )
+                DropdownMenuItem(onClick = {
+                    setOpenEditDialog(true)
+                    setOpenEditDialogType(EntryFields.ACCOUNT)
+                    expanded = !expanded
+                }, text = { Text(text = "Edit") })
+                DropdownMenuItem(onClick = {
+                    setOpenDeleteDialog(true)
+                    setOpenDeleteDialogType(EntryFields.ACCOUNT)
+                    expanded = !expanded
+                }, text = { Text(text = "Delete") })
             }
         }
     }
