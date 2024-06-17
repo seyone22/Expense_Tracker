@@ -251,12 +251,11 @@ fun EditableTransactionForm(
 
         if (showRecurringFields) {
             // Due date
-            OutlinedTextField(
-                modifier = modifier
-                    .padding(0.dp, 8.dp)
-                    .clickable(enabled = true) {
-                        openDateDueDialog = true
-                    },
+            OutlinedTextField(modifier = modifier
+                .padding(0.dp, 8.dp)
+                .clickable(enabled = true) {
+                    openDateDueDialog = true
+                },
                 enabled = false,
                 colors = OutlinedTextFieldDefaults.colors(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
@@ -281,8 +280,7 @@ fun EditableTransactionForm(
             )
 
             // Repeat Frequency Dropdown
-            ExposedDropdownMenuBox(
-                expanded = statusExpanded,
+            ExposedDropdownMenuBox(expanded = statusExpanded,
                 onExpandedChange = { statusExpanded = !statusExpanded }) {
                 OutlinedTextField(
                     modifier = modifier
@@ -359,8 +357,7 @@ fun EditableTransactionForm(
                 )
             }
 
-            OutlinedTextField(
-                value = editableTransactionDetails.NUMOCCURRENCES,
+            OutlinedTextField(value = editableTransactionDetails.NUMOCCURRENCES,
                 onValueChange = {
                     onValueChange(
                         viewModel.transactionUiState.transactionDetails,
@@ -460,12 +457,11 @@ fun TransactionEntryForm(
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        OutlinedTextField(
-            modifier = Modifier
-                .padding(0.dp, 8.dp)
-                .clickable(enabled = true) {
-                    openTransactionDateDialog = true
-                },
+        OutlinedTextField(modifier = Modifier
+            .padding(0.dp, 8.dp)
+            .clickable(enabled = true) {
+                openTransactionDateDialog = true
+            },
             enabled = false,
             colors = OutlinedTextFieldDefaults.colors(
                 disabledTextColor = MaterialTheme.colorScheme.onSurface,
@@ -490,8 +486,7 @@ fun TransactionEntryForm(
         )
 
         // Transaction Status Dropdown
-        ExposedDropdownMenuBox(
-            expanded = statusExpanded,
+        ExposedDropdownMenuBox(expanded = statusExpanded,
             onExpandedChange = { statusExpanded = !statusExpanded }) {
             OutlinedTextField(
                 modifier = Modifier
@@ -532,8 +527,7 @@ fun TransactionEntryForm(
             }
         }
 
-        OutlinedTextField(
-            value = transactionDetails.transAmount,
+        OutlinedTextField(value = transactionDetails.transAmount,
             onValueChange = {
                 onValueChange(
                     transactionDetails.copy(transAmount = it),
@@ -546,8 +540,7 @@ fun TransactionEntryForm(
         )
 
         // Transaction Type (transCode) Dropdown
-        ExposedDropdownMenuBox(
-            expanded = typeExpanded,
+        ExposedDropdownMenuBox(expanded = typeExpanded,
             onExpandedChange = { typeExpanded = !typeExpanded }) {
             OutlinedTextField(
                 modifier = Modifier
@@ -841,8 +834,7 @@ fun TransactionEntryForm(
             }
         }
 
-        OutlinedTextField(
-            value = transactionDetails.transactionNumber,
+        OutlinedTextField(value = transactionDetails.transactionNumber,
             onValueChange = {
                 onValueChange(
                     transactionDetails.copy(transactionNumber = it),
@@ -861,8 +853,7 @@ fun TransactionEntryForm(
             )
         }, label = { Text("Notes") })
 
-        OutlinedTextField(
-            value = transactionDetails.color,
+        OutlinedTextField(value = transactionDetails.color,
             onValueChange = {
                 onValueChange(
                     transactionDetails.copy(color = it),

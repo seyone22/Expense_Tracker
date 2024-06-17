@@ -91,9 +91,10 @@ interface TransactionDao {
 
     @Query(
         "SELECT " +
-                "    accountId, " +
-                "    SUM(balanceChange) AS balance " +
-                "FROM ( " +
+                "    a.accountId, " +
+                "    a.initialBalance + COALESCE(SUM(subquery.balanceChange), 0) AS balance " +
+                "FROM ACCOUNTLIST_V1 a " +
+                "LEFT JOIN ( " +
                 "    SELECT " +
                 "        accountId, " +
                 "        SUM(CASE WHEN transCode = 'Deposit' THEN transAmount " +
@@ -110,10 +111,11 @@ interface TransactionDao {
                 "    FROM CHECKINGACCOUNT_V1 " +
                 "    WHERE transCode = 'Transfer' " +
                 "    GROUP BY toAccountId " +
-                ") AS subquery " +
-                "GROUP BY accountId"
+                ") AS subquery ON a.accountId = subquery.accountId " +
+                "GROUP BY a.accountId, a.initialBalance"
     )
     fun getAllAccountBalances(): Flow<List<BalanceResult>>
+    // INCLUDES THE ACCOUNT OPENING VALUE
 
     @Query(
         "SELECT " +
@@ -127,15 +129,21 @@ interface TransactionDao {
 
     @Query(
         "SELECT " +
-                "   SUM(CASE WHEN transCode = 'Deposit' THEN transAmount * baseConvRate " +
-                "       WHEN transCode = 'Withdrawal' OR transCode = 'Transfer' THEN -transAmount * baseConvRate " +
-                "       ELSE 0 END) AS totalWithdrawal " +
-                "FROM CHECKINGACCOUNT_V1 " +
-                "JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId " +
-                "JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId " +
-                "WHERE CHECKINGACCOUNT_V1.status LIKE :status"
+                "SUM(CASE WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate " +
+                "         WHEN c.transCode = 'Withdrawal' OR c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate " +
+                "         ELSE 0 END) AS totalTransactionBalance " +
+                "FROM CHECKINGACCOUNT_V1 c " +
+                "JOIN ACCOUNTLIST_V1 al ON c.accountId = al.accountId " +
+                "JOIN CURRENCYFORMATS_V1 cf ON al.currencyId = cf.currencyId " +
+                "WHERE c.status LIKE :status"
     )
-    fun getTotalBalance(status: String): Flow<Double>
+    fun getTotalTransactionBalance(status: String): Flow<Double>
+
+    @Query(
+        "SELECT SUM(initialBalance) FROM ACCOUNTLIST_V1"
+    )
+    fun getSumOfInitialBalances(): Flow<Double>
+    // TODO: REFACTOR THIS TO INCLUDE STARTING BALANCE
 }
 
 data class BalanceResult(
