@@ -62,7 +62,7 @@ abstract class MMEXDatabase : RoomDatabase() {
             CREATE TABLE IF NOT EXISTS CURRENCYHISTORY_V1 (
                 currHistId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 currencyId INTEGER NOT NULL,
-                currDate INTEGER NOT NULL,
+                currDate TEXT NOT NULL,
                 currValue REAL NOT NULL,
                 currUpdType INTEGER NOT NULL
             )
