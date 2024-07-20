@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,15 +36,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.R
 import com.example.expensetracker.SelectedObjects
 import com.example.expensetracker.data.model.Category
 import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.CurrencyHistory
 import com.example.expensetracker.data.model.Payee
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.FormattedCurrency
@@ -50,6 +56,7 @@ import com.example.expensetracker.ui.navigation.NavigationDestination
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.math.log
 
 object EntitiesDestination : NavigationDestination {
     override val route = "Entities"
@@ -314,7 +321,7 @@ fun PayeeList(
 @Composable
 fun CurrenciesList(
     modifier: Modifier = Modifier,
-    list: List<CurrencyFormat>,
+    list: Pair<List<CurrencyFormat>, List<CurrencyHistory>?>,
     coroutineScope: CoroutineScope,
     longClicked: (CurrencyFormat) -> Unit,
     onClicked: (String) -> Unit,
@@ -323,13 +330,50 @@ fun CurrenciesList(
     val haptics = LocalHapticFeedback.current
 
     LazyColumn() {
-        items(list, key = { it.currencyId }) {
+        items(list.first, key = { it.currencyId }) {
+            Log.d("TAG", "CurrenciesList: ${list.second}")
+            val x = list.second?.find { historyEntry -> historyEntry.currencyId == it.currencyId }
             ListItem(
                 headlineContent = {
-                    FormattedCurrency(
-                        value = it.baseConvRate,
-                        currency = CurrencyFormat(),
-                    )
+                    Row{
+                        FormattedCurrency(
+                            value = it.baseConvRate,
+                            currency = CurrencyFormat(),
+                        )
+                        if (x != null) {
+                            val difference = x.currValue.minus(it.baseConvRate)
+                            if (x.currValue > it.baseConvRate) {
+                                // Red down triangle and difference in red
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowDownward,
+                                    contentDescription = null,
+                                    tint = Color.Red,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
+                                Text(
+                                    text = String.format("%.2f", difference),
+                                    color = Color.Red,
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
+                            } else if (x.currValue < it.baseConvRate) {
+                                // Green up triangle and difference in green
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowUpward,
+                                    contentDescription = null,
+                                    tint = Color.Green,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
+                                Text(
+                                    text = String.format("%.2f", -difference!!),
+                                    color = Color.Green,
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
+                            }
+                            // If the values are the same (to 2 decimal places), nothing is shown
+                        }
+                    }
                 },
                 overlineContent = { Text(removeTrPrefix(it.currencyName)) },
                 leadingContent = {

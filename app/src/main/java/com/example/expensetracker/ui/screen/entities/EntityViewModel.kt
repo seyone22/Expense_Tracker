@@ -10,11 +10,13 @@ import com.example.expensetracker.data.model.Category
 import com.example.expensetracker.data.model.CategoryDetails
 import com.example.expensetracker.data.model.CategoryUiState
 import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.CurrencyHistory
 import com.example.expensetracker.data.model.InfoEuroCurrencyHistoryResponse
 import com.example.expensetracker.data.model.Payee
 import com.example.expensetracker.data.model.toCategory
 import com.example.expensetracker.data.repository.category.CategoriesRepository
 import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.repository.currencyHistory.CurrencyHistoryRepository
 import com.example.expensetracker.data.repository.payee.PayeesRepository
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyUiState
@@ -37,6 +39,7 @@ class EntityViewModel(
     private val categoriesRepository: CategoriesRepository,
     private val payeesRepository: PayeesRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository,
+    private val currencyHistoryRepository: CurrencyHistoryRepository
 ) : ViewModel() {
 
     // Flows for each type of entity
@@ -47,6 +50,7 @@ class EntityViewModel(
     private val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
     private val currencyFormatsFlow: Flow<List<CurrencyFormat>> =
         currencyFormatsRepository.getAllCurrencyFormatsStream()
+    private val currencyHistoryFlow: Flow<List<CurrencyHistory>> = currencyHistoryRepository.getAllCurrencyHistoryStream()
     private val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllActivePayeesStream()
 
     // Combine the flows and calculate the totals
@@ -54,9 +58,10 @@ class EntityViewModel(
         categoriesParentFlow,
         categoriesSubFlow,
         currencyFormatsFlow,
+        currencyHistoryFlow,
         payeesFlow
-    ) { categoriesParent, categoriesSub, currencies, payees ->
-        EntitiesUiState(categoriesParent, categoriesSub, payees, currencies)
+    ) { categoriesParent, categoriesSub, currencies, currencyHistory, payees ->
+        EntitiesUiState(categoriesParent, categoriesSub, payees, Pair(currencies, currencyHistory))
     }
 
     companion object {
@@ -213,7 +218,7 @@ data class EntitiesUiState(
     val categoriesParent: List<Category> = listOf(),
     val categoriesSub: List<Category> = listOf(),
     val payeesList: List<Payee> = listOf(),
-    val currenciesList: List<CurrencyFormat> = listOf(),
+    val currenciesList: Pair<List<CurrencyFormat>, List<CurrencyHistory>?> = Pair(listOf(), listOf()),
 )
 
 // Enum for entity types
