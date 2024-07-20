@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
 import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.data.model.CurrencyHistory
 import com.example.expensetracker.data.model.Metadata
 import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.repository.currencyHistory.CurrencyHistoryRepository
 import com.example.expensetracker.data.repository.metadata.MetadataRepository
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
 import com.example.expensetracker.ui.theme.DarkTheme
@@ -23,13 +25,16 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * ViewModel to retrieve all items in the Room database.
  */
 class SettingsViewModel(
     private val metadataRepository: MetadataRepository,
-    private val currencyFormatsRepository: CurrencyFormatsRepository
+    private val currencyFormatsRepository: CurrencyFormatsRepository,
+    private val currencyHistoryRepository: CurrencyHistoryRepository
 
 ) : ViewModel() {
     companion object {
@@ -147,7 +152,6 @@ class SettingsViewModel(
         )
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun getMonthlyRates(baseCurrencyId: Int) {
         viewModelScope.launch {
             val onlineData = withContext(Dispatchers.IO) {
@@ -157,7 +161,7 @@ class SettingsViewModel(
             val baseCurrency = getBaseCurrencyInfo(baseCurrencyId)
 
             val currencyList = currencyFormatsRepository.getAllCurrencyFormatsStream().first()
-
+            val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             flow {
                 val onlineDataMap = onlineData.associateBy { it.isoA3Code }
                 val baseCurrExchangeRate =
@@ -187,6 +191,27 @@ class SettingsViewModel(
                 }
             }.collect {
                 currencyFormatsRepository.updateCurrencyFormat(it)
+                Log.d("TAG", it.toString())
+            }
+            flow {
+                val onlineDataMap = onlineData.associateBy { it.isoA3Code }
+                val baseCurrExchangeRate =
+                    (onlineData.find { it.isoA3Code == baseCurrency.currency_symbol })!!.value
+
+                for (currency in currencyList) {
+                    val datum = onlineDataMap[currency.currency_symbol]
+                    if (datum != null) {
+                        val historyEntry = CurrencyHistory(
+                            currencyId = currency.currencyId,
+                            currDate = LocalDate.now().format(dateFormatter),
+                            currValue = ((1 / datum.value) * baseCurrExchangeRate),
+                            currUpdType = 1
+                        )
+                        emit(historyEntry)
+                    }
+                }
+            }.collect {
+                currencyHistoryRepository.insertCurrencyHistory(it)
                 Log.d("TAG", it.toString())
             }
 
