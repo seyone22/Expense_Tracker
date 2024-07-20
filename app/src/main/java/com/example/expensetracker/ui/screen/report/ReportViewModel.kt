@@ -5,9 +5,10 @@ import com.example.expensetracker.data.model.Transaction
 import com.example.expensetracker.data.repository.category.CategoriesRepository
 import com.example.expensetracker.data.repository.payee.PayeesRepository
 import com.example.expensetracker.data.repository.transaction.TransactionsRepository
-import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.model.ExtraStore
-import com.patrykandpatrick.vico.core.model.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer.ColumnProvider.Companion.series
+import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.util.Locale
