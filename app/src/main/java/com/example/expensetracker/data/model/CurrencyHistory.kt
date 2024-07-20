@@ -8,7 +8,7 @@ data class CurrencyHistory(
     @PrimaryKey(autoGenerate = true)
     val currHistId: Int = 0, //make this into an autonumber of some sort.
     val currencyId: Int,
-    val currDate: Int,
+    val currDate: String,
     val currValue: Double,
     val currUpdType: Int
 )
