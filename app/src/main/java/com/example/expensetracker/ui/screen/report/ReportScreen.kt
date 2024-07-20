@@ -31,7 +31,6 @@ import com.patrykandpatrick.vico.compose.common.ProvideVicoTheme
 import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 
-
 object ReportsDestination : NavigationDestination {
     override val route = "Reports"
     override val titleRes = R.string.app_name
