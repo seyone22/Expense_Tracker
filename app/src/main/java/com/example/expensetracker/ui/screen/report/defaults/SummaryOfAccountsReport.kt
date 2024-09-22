@@ -1,27 +1,20 @@
-package com.example.expensetracker.ui.screen.report
+package com.example.expensetracker.ui.screen.report.defaults
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.expensetracker.R
 import com.example.expensetracker.data.model.Report
-import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.report.ReportViewModel
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
@@ -40,38 +33,8 @@ import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.Shape
 
-object ReportsDestination : NavigationDestination {
-    override val route = "Reports"
-    override val titleRes = R.string.app_name
-    override val routeId = 4
-}
-
 @Composable
-fun ReportScreen(
-    modifier: Modifier = Modifier,
-    navigateToScreen: (screen: String) -> Unit,
-    viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    setTopBarAction: (Int) -> Unit
-) {
-    val reports by viewModel.reportsFlow.collectAsState(initial = listOf())
-
-    LaunchedEffect(Unit) {
-        setTopBarAction(12)
-    }
-
-    LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(minSize = 320.dp)) {
-        items(reports.size) { index ->
-            ReportCard(
-                modifier = Modifier,
-                viewModel = viewModel,
-                report = reports[index]
-            )
-        }
-    }
-}
-
-@Composable
-fun ReportCard(
+fun SummaryOfAccountsReportCard(
     modifier: Modifier = Modifier,
     viewModel: ReportViewModel,
     report: Report,
@@ -154,4 +117,3 @@ fun ReportCard(
         }
     }
 }
-

@@ -9,10 +9,14 @@ import com.example.expensetracker.data.repository.category.CategoriesRepository
 import com.example.expensetracker.data.repository.category.OfflineCategoriesRepository
 import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.repository.currencyFormat.OfflineCurrencyFormatsRepository
+import com.example.expensetracker.data.repository.currencyHistory.CurrencyHistoryRepository
+import com.example.expensetracker.data.repository.currencyHistory.OfflineCurrencyHistoryRepository
 import com.example.expensetracker.data.repository.metadata.MetadataRepository
 import com.example.expensetracker.data.repository.metadata.OfflineMetadataRepository
 import com.example.expensetracker.data.repository.payee.OfflinePayeesRepository
 import com.example.expensetracker.data.repository.payee.PayeesRepository
+import com.example.expensetracker.data.repository.report.OfflineReportsRepository
+import com.example.expensetracker.data.repository.report.ReportsRepository
 import com.example.expensetracker.data.repository.transaction.OfflineTransactionsRepository
 import com.example.expensetracker.data.repository.transaction.TransactionsRepository
 
@@ -24,6 +28,8 @@ interface AppContainer {
     val currenciesRepository: CurrencyFormatsRepository
     val metadataRepository: MetadataRepository
     val billsDepositsRepository: BillsDepositsRepository
+    val currencyHistoryRepository: CurrencyHistoryRepository
+    val reportsRepository: ReportsRepository
 }
 
 /**
@@ -53,5 +59,11 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
     override val billsDepositsRepository: BillsDepositsRepository by lazy {
         OfflineBillsDepositsRepository(MMEXDatabase.getDatabase(context).billsDepositsDao())
+    }
+    override val currencyHistoryRepository: CurrencyHistoryRepository by lazy {
+        OfflineCurrencyHistoryRepository(MMEXDatabase.getDatabase(context).currencyHistoryDao())
+    }
+    override val reportsRepository: ReportsRepository by lazy {
+        OfflineReportsRepository(MMEXDatabase.getDatabase(context).reportDao())
     }
 }

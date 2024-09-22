@@ -134,7 +134,8 @@ fun ExpenseNavHost(
         composable(route = ReportEntryDestination.route) {
             ReportEntryScreen(
                 navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
+                onNavigateUp = { navController.navigateUp() },
+                modifier = modifier
             )
         }
         //Routes to pages for Create operations for Entities

@@ -14,10 +14,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import java.time.LocalDate
 
 /**
  * ViewModel to retrieve all items in the Room database.
@@ -51,7 +53,7 @@ class AccountViewModel(
             )
 
     // Combine the flows and calculate the totals
-    val totals: Flow<Totals> =
+    var totals: Flow<Totals> =
         combine(expensesFlow, incomeFlow, totalFlow) { expenses, income, total ->
             Totals(expenses, income, total)
         }
@@ -102,6 +104,30 @@ class AccountViewModel(
             }
         }
         return counter
+    }
+
+    fun getFilteredTotal(filter: String) : Flow<Totals> {
+        var filteredTotals = totals
+
+        when (filter) {
+            "All" -> {
+                filteredTotals = totals
+            }
+            "Current Month" -> {
+                val newExpensesFlow = transactionsRepository.getTotalBalanceByCodeAndDate("Withdrawal", month = LocalDate.now().monthValue, year = LocalDate.now().year)
+                val newIncomeFlow = transactionsRepository.getTotalBalanceByCodeAndDate("Deposit", month = LocalDate.now().monthValue, year = LocalDate.now().year)
+                val newTotalFlow = transactionsRepository.getTotalBalanceByDate("Total", month = LocalDate.now().monthValue, year = LocalDate.now().year)
+
+                filteredTotals =
+                    combine(newExpensesFlow, newIncomeFlow, newTotalFlow) { expenses, income, total ->
+                        Totals(expenses, income, total)
+                    }
+            }
+            else -> {
+                filteredTotals = totals
+            }
+        }
+        return filteredTotals
     }
 }
 
