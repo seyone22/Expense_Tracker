@@ -11,6 +11,7 @@ import com.example.expensetracker.data.model.CurrencyFormat
 import com.example.expensetracker.data.model.Transaction
 import com.example.expensetracker.data.repository.account.AccountsRepository
 import com.example.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
+import com.example.expensetracker.data.repository.category.CategoriesRepository
 import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.repository.transaction.TransactionsRepository
 import com.example.expensetracker.ui.screen.operations.account.AccountDetailTransactionUiState
@@ -32,21 +33,21 @@ class TransactionsViewModel(
     private val transactionsRepository: TransactionsRepository,
     private val billsDepositsRepository: BillsDepositsRepository,
     private val accountsRepository: AccountsRepository,
-    private val currencyFormatsRepository: CurrencyFormatsRepository
+    private val currencyFormatsRepository: CurrencyFormatsRepository,
 ) : ViewModel() {
     var transactionUiState by mutableStateOf(TransactionUiState())
 
-    val transactionsFlow = transactionsRepository.getAllTransactionsStream()
-    val billsDepositsFlow = billsDepositsRepository.getAllTransactionsStream()
+    private val transactionsFlow = transactionsRepository.getAllTransactionsStream()
+    private val billsDepositsFlow = billsDepositsRepository.getAllTransactionsStream()
 
     var transactionsUiState: StateFlow<AccountDetailTransactionUiState> = combine(
         transactionsFlow,
-        billsDepositsFlow
+        billsDepositsFlow,
     ) { transactions, billsDeposits ->
         Log.d("TAG", "Transactions: $transactions, BillsDeposits: $billsDeposits")
         AccountDetailTransactionUiState(
             transactions = transactions,
-            billsDeposits = billsDeposits
+            billsDeposits = billsDeposits,
         )
     }.stateIn(
         scope = viewModelScope,

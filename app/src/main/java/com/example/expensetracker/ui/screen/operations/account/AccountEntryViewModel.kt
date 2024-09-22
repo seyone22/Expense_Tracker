@@ -10,6 +10,9 @@ import com.example.expensetracker.data.model.Account
 import com.example.expensetracker.data.model.AccountTypes
 import com.example.expensetracker.data.repository.account.AccountsRepository
 import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
+import com.example.expensetracker.data.repository.metadata.MetadataRepository
+import com.example.expensetracker.ui.screen.accounts.AccountViewModel
+import com.example.expensetracker.ui.screen.accounts.AccountViewModel.Companion
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,8 +24,10 @@ import java.util.Locale
 
 class AccountEntryViewModel(
     private val accountsRepository: AccountsRepository,
-    private val currencyFormatsRepository: CurrencyFormatsRepository
-) : ViewModel() {
+    private val currencyFormatsRepository: CurrencyFormatsRepository,
+    private val metadataRepository: MetadataRepository,
+    ) : ViewModel() {
+
     val currencyList: StateFlow<CurrencyList> =
         currencyFormatsRepository.getAllCurrencyFormatsStream()
             .map { currencies ->
@@ -34,6 +39,17 @@ class AccountEntryViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
                 initialValue = CurrencyList()
+            )
+
+    val baseCurrencyId =
+        metadataRepository.getMetadataByNameStream("BASECURRENCYID")
+            .map { info ->
+                info?.infoValue ?: 0
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+                initialValue = 0
             )
 
 

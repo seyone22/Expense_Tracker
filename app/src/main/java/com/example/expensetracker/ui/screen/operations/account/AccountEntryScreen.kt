@@ -24,6 +24,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -33,6 +34,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -166,6 +168,11 @@ fun AccountEntryForm(
     val focusManager = LocalFocusManager.current
 
     val currencyList by viewModel.currencyList.collectAsState()
+    val baseCurrencyId by viewModel.baseCurrencyId.collectAsState()
+
+    LaunchedEffect(baseCurrencyId) {
+        onValueChange(accountDetails.copy(currencyId = baseCurrencyId.toString()))
+    }
 
     Column(
         modifier = modifier
@@ -180,7 +187,7 @@ fun AccountEntryForm(
                 modifier = Modifier
                     .padding(0.dp, 8.dp)
                     .clickable(enabled = true) { baseCurrencyExpanded = true }
-                    .menuAnchor(),
+                    .menuAnchor(MenuAnchorType.PrimaryEditable, true),
                 value = (currencyList.currenciesList.find { it.currencyId == accountDetails.currencyId.toInt() })?.currencyName
                     ?: "",
                 readOnly = true,
