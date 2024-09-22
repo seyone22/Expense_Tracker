@@ -13,6 +13,7 @@ import com.example.expensetracker.ui.screen.operations.account.AccountDetailView
 import com.example.expensetracker.ui.screen.operations.account.AccountEntryViewModel
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyEntryViewModel
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeEntryViewModel
+import com.example.expensetracker.ui.screen.operations.report.AddReportViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.report.ReportViewModel
 import com.example.expensetracker.ui.screen.settings.SettingsViewModel
@@ -32,7 +33,8 @@ object AppViewModelProvider {
             EntityViewModel(
                 expenseApplication().container.categoriesRepository,
                 expenseApplication().container.payeesRepository,
-                expenseApplication().container.currenciesRepository
+                expenseApplication().container.currenciesRepository,
+                expenseApplication().container.currencyHistoryRepository
             )
         }
         initializer {
@@ -50,7 +52,8 @@ object AppViewModelProvider {
             ReportViewModel(
                 expenseApplication().container.transactionsRepository,
                 expenseApplication().container.categoriesRepository,
-                expenseApplication().container.payeesRepository
+                expenseApplication().container.payeesRepository,
+                expenseApplication().container.reportsRepository
             )
         }
         //Initializer for AccountEntryViewModel
@@ -87,7 +90,8 @@ object AppViewModelProvider {
         initializer {
             SettingsViewModel(
                 expenseApplication().container.metadataRepository,
-                expenseApplication().container.currenciesRepository
+                expenseApplication().container.currenciesRepository,
+                expenseApplication().container.currencyHistoryRepository
             )
         }
         // Initializer for Onboarding ViewModel
@@ -96,6 +100,12 @@ object AppViewModelProvider {
                 expenseApplication().container.metadataRepository,
                 expenseApplication().container.currenciesRepository,
                 expenseApplication().container.categoriesRepository
+            )
+        }
+        initializer {
+            AddReportViewModel(
+                expenseApplication().container.reportsRepository,
+                expenseApplication().container.currenciesRepository
             )
         }
     }

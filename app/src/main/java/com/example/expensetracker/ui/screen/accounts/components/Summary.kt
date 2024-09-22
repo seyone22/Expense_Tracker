@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.accounts.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,21 +17,50 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.ui.common.SortBar
 import com.example.expensetracker.ui.screen.accounts.Totals
 import com.github.tehras.charts.piechart.PieChart
 import com.github.tehras.charts.piechart.PieChartData
 import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 import com.github.tehras.charts.piechart.renderer.SimpleSliceDrawer
+import androidx.compose.runtime.*
+import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun Summary(totals: Totals, baseCurrencyInfo: CurrencyFormat) {
-    Card(
-    ) {
+fun Summary(
+    initialTotals: Totals,
+    baseCurrencyInfo: CurrencyFormat,
+    filter: (String) -> Flow<Totals>
+) {
+    // State to hold the current totals
+    var currentTotals by remember { mutableStateOf(initialTotals) }
+
+    // State to hold the current filter
+    var currentFilter by remember { mutableStateOf("All") }
+
+    // Collect the filtered totals and update the state
+    val filteredTotalsFlow = remember(currentFilter) {
+        filter(currentFilter)
+    }
+
+    // Use collectAsState to collect the latest totals
+    val latestTotals by filteredTotalsFlow.collectAsState(initial = initialTotals)
+
+    LaunchedEffect(latestTotals) {
+        currentTotals = latestTotals
+    }
+
+    Card {
         Box(
             modifier = Modifier
                 .padding(24.dp)
@@ -42,14 +72,31 @@ fun Summary(totals: Totals, baseCurrencyInfo: CurrencyFormat) {
                 LegendItem("Income", MaterialTheme.colorScheme.primary)
                 LegendItem("Expense", Color(0xfff75e51))
             }
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(0.dp)
+            ) {
+                SortBar(
+                    periodSortAction = { sortCase ->
+                        currentFilter = when (sortCase) {
+                            0 -> "All"
+                            1 -> "Current Month"
+                            // Add more cases as needed
+                            else -> "All" // Default filter for other cases
+                        }
+                    }
+                )
+            }
             PieChart(
                 pieChartData = PieChartData(
                     listOf(
                         PieChartData.Slice(
-                            totals.income.toFloat(),
+                            currentTotals.income.toFloat(),
                             MaterialTheme.colorScheme.primary
-                        ), PieChartData.Slice(
-                            totals.expenses.toFloat(),
+                        ),
+                        PieChartData.Slice(
+                            currentTotals.expenses.toFloat(),
                             MaterialTheme.colorScheme.error,
                         )
                     )

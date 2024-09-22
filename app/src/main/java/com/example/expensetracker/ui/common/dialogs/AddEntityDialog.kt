@@ -1,13 +1,16 @@
 package com.example.expensetracker.ui.common.dialogs
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +18,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -24,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -33,16 +41,25 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.expensetracker.data.model.Category
 import com.example.expensetracker.data.model.CategoryDetails
 import com.example.expensetracker.ui.AppViewModelProvider
+import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
+import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedMutableState")
 @Composable
 fun CategoryEntryDialog(
     modifier: Modifier = Modifier,
+    coroutineScope: CoroutineScope,
+    transactionViewModel: TransactionEntryViewModel,
     title: String = "Add Category",
     selectedCategory: CategoryDetails = CategoryDetails(categName = ""),
     onConfirmClick: () -> Unit,
@@ -51,7 +68,10 @@ fun CategoryEntryDialog(
     edit: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
-    val categorySelected by remember { mutableStateOf(selectedCategory) }
+    var categorySelected by remember { mutableStateOf(selectedCategory) }
+    var categoryParent by remember { mutableStateOf(Category()) }
+
+    var categoryExpanded by remember { mutableStateOf(false) }
 
     viewModel.updateCategoryState(
         viewModel.categoryUiState.categoryDetails.copy(
@@ -85,6 +105,60 @@ fun CategoryEntryDialog(
                     text = title,
                     style = MaterialTheme.typography.titleLarge
                 )
+
+                // Transaction Categories
+                ExposedDropdownMenuBox(expanded = categoryExpanded, onExpandedChange = {
+                    categoryExpanded = !categoryExpanded
+
+                }) {
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .padding(0.dp, 8.dp)
+                            .clickable(enabled = true) {
+                                categoryExpanded = true
+
+                            }
+                            .menuAnchor(),
+                        value = removeTrPrefix(categoryParent.categName),
+                        readOnly = true,
+                        onValueChange = {
+                            categorySelected = categorySelected.copy(parentId = categoryParent.categId.toString())
+                            viewModel.updateCategoryState(
+                                categorySelected.copy(
+                                    parentId = categoryParent.categId.toString()
+                                )
+                            )
+                        },
+                        label = { Text("Transaction Category *") },
+                        singleLine = true,
+                        keyboardActions = KeyboardActions(onDone = {
+                            focusManager.moveFocus(
+                                FocusDirection.Next
+                            )
+                        }),
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = categoryExpanded,
+                        onDismissRequest = { categoryExpanded = false },
+                    ) {
+                        transactionViewModel.transactionUiState.categoriesList.forEach { category ->
+                            DropdownMenuItem(text = {
+                                Row {
+                                    if (category.parentId != -1) {
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                    }
+                                    Text(removeTrPrefix(category.categName))
+                                }
+                            }, onClick = {
+                                categoryParent = category
+                                categoryExpanded = false
+                            })
+                        }
+                    }
+                }
+
                 OutlinedTextField(
                     modifier = Modifier.padding(0.dp, 8.dp),
                     value = categorySelected.categName,

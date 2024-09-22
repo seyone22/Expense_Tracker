@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,7 +44,7 @@ fun AccountScreen(
     windowSizeClass: WindowWidthSizeClass,
     setTopBarAction: (Int) -> Unit
 ) {
-    var offset by remember { mutableStateOf(0f) }
+    var offset by remember { mutableFloatStateOf(0f) }
 
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.totals.collectAsState(Totals())
@@ -78,14 +79,16 @@ fun AccountScreen(
     ) {
         item() {
             Column {
-                Log.d("TAG", "AccountScreen: $totals")
-
                 NetWorth(
                     totals = totals,
                     baseCurrencyInfo = baseCurrencyInfo
                 )
 
-                Summary(totals = totals, baseCurrencyInfo = baseCurrencyInfo)
+                Summary(
+                    initialTotals = totals,
+                    baseCurrencyInfo = baseCurrencyInfo,
+                    filter = { filter -> viewModel.getFilteredTotal(filter)}
+                )
             }
         }
         item(

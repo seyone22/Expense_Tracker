@@ -62,12 +62,20 @@ interface TransactionDao {
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE transCode = :transCode")
     fun getAllTransactionsByCode(transCode: String): Flow<List<Transaction>>
 
-    @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE categoryId = :categoryId AND (transDate BETWEEN :startDate AND :endDate OR :startDate IS NULL OR :endDate IS NULL)")
+    @Query("""
+    SELECT * FROM CHECKINGACCOUNT_V1 
+    WHERE 
+        (categoryId = :categoryId 
+        OR categoryId IN (SELECT categId FROM CATEGORY_V1 WHERE parentId = :categoryId)) 
+        AND 
+        (:startDate IS NULL OR :endDate IS NULL OR transDate BETWEEN :startDate AND :endDate)
+""")
     fun getAllTransactionsByCategory(
-        categoryId: String,
+        categoryId: Int,
         startDate: String?,
         endDate: String?
     ): Flow<List<Transaction>>
+
 
     @Query(
         "SELECT" +
@@ -129,6 +137,21 @@ interface TransactionDao {
 
     @Query(
         "SELECT " +
+                "   SUM(transAmount * baseConvRate) AS totalWithdrawal " +
+                "FROM CHECKINGACCOUNT_V1 " +
+                "JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId " +
+                "JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId " +
+                "WHERE " +
+                "   transCode = :transCode " +
+                "   AND" +
+                "   CHECKINGACCOUNT_V1.status LIKE :status" +
+                "   AND" +
+                "   strftime('%m', CHECKINGACCOUNT_V1.transDate) = :month AND strftime('%Y', CHECKINGACCOUNT_V1.transDate) = :year"
+    )
+    fun getTotalBalanceByCode(transCode: String, status: String, month: Int, year: Int): Flow<Double>
+
+    @Query(
+        "SELECT " +
                 "SUM(CASE WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate " +
                 "         WHEN c.transCode = 'Withdrawal' OR c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate " +
                 "         ELSE 0 END) AS totalTransactionBalance " +
@@ -138,6 +161,18 @@ interface TransactionDao {
                 "WHERE c.status LIKE :status"
     )
     fun getTotalTransactionBalance(status: String): Flow<Double>
+
+    @Query(
+        "SELECT " +
+                "SUM(CASE WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate " +
+                "         WHEN c.transCode = 'Withdrawal' OR c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate " +
+                "         ELSE 0 END) AS totalTransactionBalance " +
+                "FROM CHECKINGACCOUNT_V1 c " +
+                "JOIN ACCOUNTLIST_V1 al ON c.accountId = al.accountId " +
+                "JOIN CURRENCYFORMATS_V1 cf ON al.currencyId = cf.currencyId " +
+                "WHERE c.status LIKE :status AND strftime('%m', c.transDate) = :month AND strftime('%Y', c.transDate) = :year"
+    )
+    fun getTotalTransactionBalance(status: String, month: Int, year: Int): Flow<Double>
 
     @Query(
         "SELECT SUM(initialBalance) FROM ACCOUNTLIST_V1"

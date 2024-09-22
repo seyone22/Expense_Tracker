@@ -1,17 +1,22 @@
 package com.example.expensetracker.ui.screen.report
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.example.expensetracker.data.model.Category
+import com.example.expensetracker.data.model.Report
 import com.example.expensetracker.data.model.Transaction
 import com.example.expensetracker.data.repository.category.CategoriesRepository
 import com.example.expensetracker.data.repository.payee.PayeesRepository
+import com.example.expensetracker.data.repository.report.ReportsRepository
 import com.example.expensetracker.data.repository.transaction.TransactionsRepository
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
-import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer.ColumnProvider.Companion.series
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.util.Locale
+import kotlin.math.absoluteValue
 
 /**
  * ViewModel to retrieve all items in the Room database.
@@ -19,7 +24,9 @@ import java.util.Locale
 class ReportViewModel(
     private val transactionsRepository: TransactionsRepository,
     private val categoriesRepository: CategoriesRepository,
-    private val payeesRepository: PayeesRepository
+    private val payeesRepository: PayeesRepository,
+    private val reportsRepository: ReportsRepository
+
 ) : ViewModel() {
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
@@ -40,54 +47,48 @@ class ReportViewModel(
         )
     }
 
-    suspend fun getExpensesByCategoryFromDB(
+    // Flows for each type of entity
+    val reportsFlow: Flow<List<Report>> =
+        reportsRepository.getAllReportsStream()
+
+    private suspend fun getExpensesByCategoryFromDB(
         transCode: String? = null,
-        categName: String? = null
+        categName: String? = null,
+        categoryId: Int? = null,
     ): List<Transaction> {
-        return if (transCode != null) {
-            transactionsRepository.getAllTransactionsByCategory(transCode).first()
-        } else if (categName != null) {
-            transactionsRepository.getAllTransactionsByCategoryName(categName).first()
+        return if (categoryId != null) {
+            transactionsRepository.getAllTransactionsByCategory(categoryId).first()
         } else {
-            listOf()
+            return listOf()
         }
     }
 
-    suspend fun getExpensesByPayeeFromDB(payeeId: String): List<Transaction> {
+    private suspend fun getExpensesByPayeeFromDB(payeeId: String): List<Transaction> {
         return transactionsRepository.getAllTransactionsByPayee(payeeId).first()
     }
 
-
-    suspend fun getExpensesFromCategory(transCode: String): CartesianChartModelProducer? {
-        val transactions = getExpensesByCategoryFromDB(transCode)
+    suspend fun getExpensesFromCategory(categoryId: Int): Map<Int?, Double> {
+        val transactions = getExpensesByCategoryFromDB(categoryId = categoryId)
 
         if (transactions.isNotEmpty()) {
-            val transactionMap = transactions.groupBy { transaction ->
-                LocalDate.parse(transaction.transDate).month.toString()
-            }.mapValues { (_, transactions) ->
-                transactions.sumOf { if (it.transCode == "Withdrawal") -it.transAmount else it.transAmount }
-            }
-
-            val xToDateMapKey = ExtraStore.Key<List<String>>()
-            val xToDates = transactionMap.keys.associateBy {
-                monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f
-            }
-
-            val modelProducer = CartesianChartModelProducer.build()
-
-            modelProducer.tryRunTransaction {
-                columnSeries {
-                    series(xToDates.keys, transactionMap.values)
+            val transactionMap = transactions
+                .groupBy { transaction ->
+                    transaction.categoryId
                 }
-                updateExtras {
-                    it[xToDateMapKey] = transactionMap.keys.toList()
+                .mapValues { (_, transactions) ->
+                    transactions.sumOf { if (it.transCode == "Withdrawal") -it.transAmount else it.transAmount }.absoluteValue
                 }
-            }
 
-            return modelProducer
+            Log.d("TAG", "getExpensesFromCategory: $transactionMap")
+            return transactionMap
         } else {
-            return null
+            return mapOf()
         }
+    }
+
+    suspend fun categoryNameOf(categoryId: Int): String {
+        val category = categoriesRepository.getCategoriesStream(categoryId).first()
+        return category?.categName ?: "NOT FOUND"
     }
 
     suspend fun getExpensesFromPayee(payeeId: String): CartesianChartModelProducer? {

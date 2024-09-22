@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -112,7 +112,7 @@ fun AccountCard(
             viewModel.getBaseCurrencyInfo(baseCurrencyId = accountWithBalance.first.currencyId)
     }
 
-    OutlinedCard(
+    ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(104.dp)
@@ -145,12 +145,12 @@ fun AccountCard(
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text(
-                    text = accountWithBalance.first.accountName,
-                    style = MaterialTheme.typography.titleSmall
+                FormattedCurrency(
+                    value = accountWithBalance.second,
+                    currency = accountCurrencyInfo
                 )
                 Text(
-                    text = accountWithBalance.first.status,
+                    text = accountWithBalance.first.accountName,
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -162,14 +162,7 @@ fun AccountCard(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Center
             ) {
-                FormattedCurrency(
-                    value = accountWithBalance.second,
-                    currency = accountCurrencyInfo
-                )
-                FormattedCurrency(
-                    value = accountWithBalance.second,
-                    currency = accountCurrencyInfo
-                )
+
             }
         }
     }

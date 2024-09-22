@@ -23,14 +23,14 @@ class OfflineTransactionsRepository(private val transactionDao: TransactionDao) 
         transactionDao.getAllTransactionsByCode(transCode)
 
     override fun getAllTransactionsByCategory(
-        transCode: String, startDate: String?, endDate: String?
+        categoryId: Int, startDate: String?, endDate: String?
     ): Flow<List<Transaction>> =
-        transactionDao.getAllTransactionsByCategory(transCode, startDate, endDate)
+        transactionDao.getAllTransactionsByCategory(categoryId, startDate, endDate)
 
     override fun getAllTransactionsByCategoryName(
         categName: String, startDate: String?, endDate: String?
     ): Flow<List<Transaction>> =
-        transactionDao.getAllTransactionsByCategory(categName, startDate, endDate)
+        transactionDao.getAllTransactionsByCategory(categName.toInt(), startDate, endDate)
 
     override fun getAllTransactionsByPayee(
         payeeId: String, startDate: String?, endDate: String?
@@ -43,7 +43,19 @@ class OfflineTransactionsRepository(private val transactionDao: TransactionDao) 
     override fun getTotalBalanceByCode(transactionCode: String, status: String): Flow<Double> =
         transactionDao.getTotalBalanceByCode(transactionCode, status)
 
+    override fun getTotalBalanceByCodeAndDate(transactionCode: String, status: String, month: Int, year: Int): Flow<Double> =
+        transactionDao.getTotalBalanceByCode(transactionCode, status, month, year)
+
     override fun getTotalBalance(status: String): Flow<Double> {
+        return combine(
+            transactionDao.getTotalTransactionBalance(status),
+            transactionDao.getSumOfInitialBalances()
+        ) { transBal, initBal ->
+            transBal + initBal
+        }
+    }
+
+    override fun getTotalBalanceByDate(status: String, month: Int, year: Int): Flow<Double> {
         return combine(
             transactionDao.getTotalTransactionBalance(status),
             transactionDao.getSumOfInitialBalances()

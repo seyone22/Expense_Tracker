@@ -101,10 +101,6 @@ fun ExpenseApp(
 
     if (navBackStackEntry?.destination?.route == ReportsDestination.route) {
         LaunchedEffect(Unit) {
-            snackbarHostState.showSnackbar(
-                message = "Reports are hardcoded for now, stay tuned for customizable reports!",
-                duration = SnackbarDuration.Indefinite
-            )
         }
     }
 
@@ -139,8 +135,6 @@ fun ExpenseApp(
                                 IconButton(onClick = {
                                     isSelected = !isSelected
                                     showEditDialog.value = !showEditDialog.value
-
-                                    Log.d("TAG", "ExpenseApp: $showEditDialog $topBarOperation")
                                 }) {
                                     Icon(
                                         imageVector = Icons.Filled.Edit,
@@ -234,7 +228,9 @@ fun ExpenseApp(
                         coroutineScope.launch {
                             viewModel.saveCategory()
                         }
-                    }
+                    },
+                    coroutineScope = coroutineScope,
+                    transactionViewModel = transactionEntryViewModel
                 )
             }
 
@@ -321,7 +317,9 @@ fun ExpenseApp(
                     onDismissRequest = { showEditDialog.value = !showEditDialog.value },
                     edit = true,
                     title = "Edit Category",
-                    selectedCategory = (selectedObject.category).toCategoryDetails()
+                    selectedCategory = (selectedObject.category).toCategoryDetails(),
+                    coroutineScope = coroutineScope,
+                    transactionViewModel = transactionEntryViewModel
                 )
             }
 
