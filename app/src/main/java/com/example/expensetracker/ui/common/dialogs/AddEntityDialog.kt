@@ -1,6 +1,7 @@
 package com.example.expensetracker.ui.common.dialogs
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,11 +24,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +52,7 @@ import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
+import com.example.expensetracker.ui.screen.operations.transaction.TransactionUiState
 import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -69,9 +73,12 @@ fun CategoryEntryDialog(
 ) {
     val focusManager = LocalFocusManager.current
     var categorySelected by remember { mutableStateOf(selectedCategory) }
-    var categoryParent by remember { mutableStateOf(Category()) }
+    var categoryParent by remember { mutableStateOf(Category(categId = -1)) }
 
     var categoryExpanded by remember { mutableStateOf(false) }
+
+    val transactionUiState: TransactionUiState by transactionViewModel.transactionUiState1.collectAsState()
+    Log.d("TAG", "CategoryEntryDialog: $transactionUiState")
 
     viewModel.updateCategoryState(
         viewModel.categoryUiState.categoryDetails.copy(
@@ -90,14 +97,14 @@ fun CategoryEntryDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(235.dp)
+                .height(300.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp, 0.dp),
+                    .padding(16.dp, 8.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -118,7 +125,7 @@ fun CategoryEntryDialog(
                                 categoryExpanded = true
 
                             }
-                            .menuAnchor(),
+                            .menuAnchor(MenuAnchorType.PrimaryEditable, true),
                         value = removeTrPrefix(categoryParent.categName),
                         readOnly = true,
                         onValueChange = {
@@ -129,7 +136,7 @@ fun CategoryEntryDialog(
                                 )
                             )
                         },
-                        label = { Text("Transaction Category *") },
+                        label = { Text("Parent Category") },
                         singleLine = true,
                         keyboardActions = KeyboardActions(onDone = {
                             focusManager.moveFocus(
@@ -143,7 +150,7 @@ fun CategoryEntryDialog(
                         expanded = categoryExpanded,
                         onDismissRequest = { categoryExpanded = false },
                     ) {
-                        transactionViewModel.transactionUiState.categoriesList.forEach { category ->
+                        transactionUiState.categoriesList.forEach { category ->
                             DropdownMenuItem(text = {
                                 Row {
                                     if (category.parentId != -1) {
@@ -195,7 +202,7 @@ fun CategoryEntryDialog(
                             viewModel.updateCategoryState(
                                 viewModel.categoryUiState.categoryDetails.copy(
                                     active = "1",
-                                    parentId = "-1"
+                                    parentId = categoryParent.categId.toString()
                                 )
                             )
                             onConfirmClick()

@@ -60,7 +60,8 @@ object AppViewModelProvider {
         initializer {
             AccountEntryViewModel(
                 expenseApplication().container.accountsRepository,
-                expenseApplication().container.currenciesRepository
+                expenseApplication().container.currenciesRepository,
+                expenseApplication().container.metadataRepository
             )
         }
         initializer {
