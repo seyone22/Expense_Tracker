@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,22 +22,20 @@ import com.example.expensetracker.data.model.Report
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
-import com.patrykandpatrick.vico.compose.cartesian.fullWidth
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
-import com.patrykandpatrick.vico.core.cartesian.HorizontalLayout
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
-import com.patrykandpatrick.vico.core.common.shape.Shape
 
 object ReportsDestination : NavigationDestination {
     override val route = "Reports"
@@ -90,7 +87,7 @@ fun ReportCard(
     // Use LaunchedEffect to run a coroutine within the Composable
     LaunchedEffect(Unit) {
         categoryName.value = viewModel.categoryNameOf(report.GROUPNAME?.toInt() ?: -1)
-        values.value = viewModel.getExpensesFromCategory(report.GROUPNAME?.toInt() ?: -1 )
+        values.value = viewModel.getExpensesFromCategory(report.GROUPNAME?.toInt() ?: -1)
 
         val doubleValues = values.value.values.toList()
         val keysList = values.value.keys.toList()
@@ -104,7 +101,7 @@ fun ReportCard(
         }
     }
     val xx =
-        CartesianValueFormatter { x, chartValues, _ -> chartValues.model.extraStore[labelListKey][x.toInt()] }
+        CartesianValueFormatter { x, chartValues, _ -> chartValues.toString() }
 
     Card(
         modifier = modifier
@@ -123,25 +120,19 @@ fun ReportCard(
                     rememberColumnCartesianLayer(
                         ColumnCartesianLayer.ColumnProvider.series(
                             rememberLineComponent(
-                                color = MaterialTheme.colorScheme.primary,
                                 thickness = 16.dp,
-                                shape = remember { Shape.rounded(allPercent = 24) },
                             )
                         )
                     ),
-                    startAxis = rememberStartAxis(),
+                    startAxis = VerticalAxis.rememberStart(),
                     bottomAxis =
-                    rememberBottomAxis(
+                    HorizontalAxis.rememberBottom(
                         valueFormatter = xx,
                         itemPlacer =
                         remember {
-                            HorizontalAxis.ItemPlacer.default(
-                                spacing = 1,
-                                addExtremeLabelPadding = true
-                            )
+                            HorizontalAxis.ItemPlacer.segmented()
                         },
                     ),
-                    horizontalLayout = HorizontalLayout.fullWidth(),
                 ),
                 scrollState = scrollState,
                 zoomState = zoomState,

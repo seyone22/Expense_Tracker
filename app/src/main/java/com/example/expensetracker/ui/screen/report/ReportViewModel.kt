@@ -106,14 +106,11 @@ class ReportViewModel(
                 monthNumericalMap[it.uppercase(Locale.ROOT)] ?: 0f
             }
 
-            val modelProducer = CartesianChartModelProducer.build()
+            val modelProducer = CartesianChartModelProducer()
 
-            modelProducer.tryRunTransaction {
+            modelProducer.runTransaction {
                 columnSeries {
                     series(xToDates.keys, transactionMap.values)
-                }
-                updateExtras {
-                    it[xToDateMapKey] = transactionMap.keys.toList()
                 }
             }
 

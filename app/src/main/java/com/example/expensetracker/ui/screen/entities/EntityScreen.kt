@@ -331,7 +331,6 @@ fun CurrenciesList(
 
     LazyColumn() {
         items(list.first, key = { it.currencyId }) {
-            Log.d("TAG", "CurrenciesList: ${list.second}")
             val x = list.second?.find { historyEntry -> historyEntry.currencyId == it.currencyId }
             ListItem(
                 headlineContent = {
