@@ -16,16 +16,15 @@ import androidx.compose.ui.unit.dp
 import com.example.expensetracker.data.model.Report
 import com.example.expensetracker.ui.screen.report.ReportViewModel
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottomAxis
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
-import com.patrykandpatrick.vico.compose.cartesian.fullWidth
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
-import com.patrykandpatrick.vico.core.cartesian.HorizontalLayout
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
@@ -67,7 +66,7 @@ fun SummaryOfAccountsReportCard(
         }
     }
     val xx =
-        CartesianValueFormatter { x, chartValues, _ -> chartValues.model.extraStore[labelListKey][x.toInt()] }
+        CartesianValueFormatter { x, chartValues, _ -> chartValues.toString() }
 
     Card(
         modifier = modifier
@@ -86,25 +85,22 @@ fun SummaryOfAccountsReportCard(
                     rememberColumnCartesianLayer(
                         ColumnCartesianLayer.ColumnProvider.series(
                             rememberLineComponent(
-                                color = MaterialTheme.colorScheme.primary,
                                 thickness = 16.dp,
-                                shape = remember { Shape.rounded(allPercent = 24) },
                             )
                         )
                     ),
-                    startAxis = rememberStartAxis(),
+                    startAxis = VerticalAxis.rememberStart(),
                     bottomAxis =
-                    rememberBottomAxis(
+                    HorizontalAxis.rememberBottom(
                         valueFormatter = xx,
                         itemPlacer =
                         remember {
-                            HorizontalAxis.ItemPlacer.default(
+                            HorizontalAxis.ItemPlacer.aligned(
                                 spacing = 1,
                                 addExtremeLabelPadding = true
                             )
                         },
                     ),
-                    horizontalLayout = HorizontalLayout.fullWidth(),
                 ),
                 scrollState = scrollState,
                 zoomState = zoomState,

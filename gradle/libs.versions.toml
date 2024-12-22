@@ -1,25 +1,25 @@
 [versions]
-accompanistPermissions = "0.35.0-alpha"
-agp = "8.5.2"
+accompanistPermissions = "0.36.0"
+agp = "8.7.3"
 charts = "0.2.4-alpha"
-coilCompose = "2.6.0"
+coilCompose = "2.7.0"
 kotlin = "1.9.24"
-coreKtx = "1.13.1"
+coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.6"
-activityCompose = "1.9.2"
-composeBom = "2024.09.02"
-material3 = "1.3.0"
-navigationCompose = "2.8.1"
-materialIconsExtended = "1.7.2"
-material3AdaptiveNavigationSuite = "1.3.0"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.9.3"
+composeBom = "2024.12.01"
+material3 = "1.3.1"
+navigationCompose = "2.8.5"
+materialIconsExtended = "1.7.6"
+material3AdaptiveNavigationSuite = "1.3.1"
 room = "2.6.1"
 datastorePreferences = "1.1.1"
-lifecycleViewModelCompose = "2.8.6"
-lifecycleViewModelKtx = "2.8.6"
-lifecycleRuntimeCompose = "2.8.6"
+lifecycleViewModelCompose = "2.8.7"
+lifecycleViewModelKtx = "2.8.7"
+lifecycleRuntimeCompose = "2.8.7"
 retrofit = "2.11.0"
 kotlinxSerializationConverter = "1.0.0"
 okhttp = "4.12.0"
@@ -27,10 +27,18 @@ okhttpLoggingInterceptor = "4.12.0"
 # Do not update, later versions require Kotlin 2.0
 kotlinxSerializationJson = "1.6.3"
 window = "1.3.0"
-vicoComposeM3 = "1.14.0"
-vicoComposeM3Alpha = "2.0.0-alpha.27"
-workRuntimeKtx = "2.9.1"
+vico = "2.0.0-beta.3"
+workRuntimeKtx = "2.10.0"
 biometricKtx = "1.2.0-alpha05"
+playServicesWearable = "19.0.0"
+composeMaterial = "1.4.0"
+composeFoundation = "1.4.0"
+coreSplashscreen = "1.0.1"
+tiles = "1.4.1"
+tilesMaterial = "1.4.1"
+horologistComposeTools = "0.4.8"
+horologistTiles = "0.4.8"
+watchfaceComplicationsDataSourceKtx = "1.2.1"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -66,11 +74,18 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttpLoggingInterceptor" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
-vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vicoComposeM3" }
-vico-compose-m3-alpha = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vicoComposeM3Alpha" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 androidx-biometric-ktx = { group = "androidx.biometric", name = "biometric-ktx", version.ref = "biometricKtx" }
-
+play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
+androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
+androidx-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "composeFoundation" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-tiles = { group = "androidx.wear.tiles", name = "tiles", version.ref = "tiles" }
+androidx-tiles-material = { group = "androidx.wear.tiles", name = "tiles-material", version.ref = "tilesMaterial" }
+horologist-compose-tools = { group = "com.google.android.horologist", name = "horologist-compose-tools", version.ref = "horologistComposeTools" }
+horologist-tiles = { group = "com.google.android.horologist", name = "horologist-tiles", version.ref = "horologistTiles" }
+androidx-watchface-complications-data-source-ktx = { group = "androidx.wear.watchface", name = "watchface-complications-data-source-ktx", version.ref = "watchfaceComplicationsDataSourceKtx" }
+vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

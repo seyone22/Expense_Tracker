@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.example.expensetracker"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.expensetracker"
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "v0.3.2-alpha"
 
@@ -121,9 +121,8 @@ dependencies {
     // AndroidX Window
     implementation(libs.androidx.window)
 
-    // For `compose`. Creates a `ChartStyle` based on an M3 Material Theme.
+    // Vico Charts - M3 Compose
     implementation(libs.vico.compose.m3)
-    implementation(libs.vico.compose.m3.alpha)
 
     // Workers
     implementation(libs.androidx.work.runtime.ktx)
@@ -141,5 +140,5 @@ dependencies {
     implementation(libs.charts)
 
     // AndroidX Compose Material3 Window Size Class Android
-    implementation("androidx.compose.material3:material3-window-size-class-android:1.2.1")
+    implementation("androidx.compose.material3:material3-window-size-class-android:1.3.1")
 }
