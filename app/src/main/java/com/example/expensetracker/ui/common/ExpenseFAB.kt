@@ -13,7 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.expensetracker.ui.screen.accounts.AccountsDestination
+import com.example.expensetracker.ui.screen.home.HomeDestination
 import com.example.expensetracker.ui.screen.budget.BudgetsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
 import com.example.expensetracker.ui.screen.report.ReportsDestination
@@ -26,7 +26,7 @@ fun ExpenseFAB(
     navigateToScreen: (screen: String) -> Unit,
     currentActivity: String
 ) {
-    if ((currentActivity == AccountsDestination.route) or (currentActivity == EntitiesDestination.route) or (currentActivity == BudgetsDestination.route) or (currentActivity == TransactionsDestination.route) or (currentActivity == ReportsDestination.route)) {
+    if ((currentActivity == HomeDestination.route) or (currentActivity == EntitiesDestination.route) or (currentActivity == BudgetsDestination.route) or (currentActivity == TransactionsDestination.route) or (currentActivity == ReportsDestination.route)) {
         FloatingActionButton(onClick = {
             navigateToScreen("TransactionEntry")
         }) {

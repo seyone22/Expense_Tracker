@@ -1,8 +1,9 @@
-package com.example.expensetracker.ui.screen.accounts.components
+package com.example.expensetracker.ui.screen.home.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,7 +24,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.example.expensetracker.data.model.CurrencyFormat
 import com.example.expensetracker.ui.common.FormattedCurrency
-import com.example.expensetracker.ui.screen.accounts.Totals
+import com.example.expensetracker.ui.screen.home.Totals
 
 @Composable
 fun NetWorth(
@@ -33,9 +34,8 @@ fun NetWorth(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(224.dp)
-            .padding(0.dp, 24.dp, 0.dp, 0.dp)
     ) {
+        Spacer(modifier = Modifier.height(24.dp))
         FormattedCurrency(
             value = totals.total,
             currency = baseCurrencyInfo,
@@ -54,18 +54,17 @@ fun NetWorth(
         )
 
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(16.dp), // 16px gap between cards
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(0.dp, 0.dp, 0.dp, 24.dp),
+                .fillMaxWidth() // Make the row take up the full width
         ) {
+            // First Card
             Card(
                 modifier = Modifier
-                    .padding(0.dp, 0.dp, 0.dp, 0.dp)
-                    .width(165.dp)
+                    .weight(1f) // This makes the card take equal space
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ArrowDownward,
@@ -80,13 +79,14 @@ fun NetWorth(
                     )
                 }
             }
+
+            // Second Card
             Card(
                 modifier = Modifier
-                    .padding(0.dp, 0.dp, 0.dp, 0.dp)
-                    .width(165.dp)
+                    .weight(1f) // This makes the card take equal space
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ArrowUpward,

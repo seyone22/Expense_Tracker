@@ -19,7 +19,7 @@ import com.example.expensetracker.data.repository.billsDeposit.BillsDepositsRepo
 import com.example.expensetracker.data.repository.category.CategoriesRepository
 import com.example.expensetracker.data.repository.payee.PayeesRepository
 import com.example.expensetracker.data.repository.transaction.TransactionsRepository
-import com.example.expensetracker.ui.screen.accounts.AccountsUiState
+import com.example.expensetracker.ui.screen.home.HomeUiState
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeUiState
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayee
@@ -75,7 +75,7 @@ class TransactionEntryViewModel(
                 .stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                    initialValue = AccountsUiState()
+                    initialValue = HomeUiState()
                 )
         }
 

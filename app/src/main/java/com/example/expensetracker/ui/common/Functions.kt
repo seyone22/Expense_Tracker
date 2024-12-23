@@ -46,7 +46,7 @@ fun FormattedCurrency(
     }
 
     val displayText = if (currency.pfx_symbol.isNotEmpty()) {
-        "${currency.pfx_symbol}$formattedValue"
+        "${currency.pfx_symbol} $formattedValue"
     } else {
         "$formattedValue${currency.sfx_symbol}"
     }

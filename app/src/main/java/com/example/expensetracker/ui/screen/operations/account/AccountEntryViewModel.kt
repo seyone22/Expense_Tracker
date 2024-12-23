@@ -11,8 +11,6 @@ import com.example.expensetracker.data.model.AccountTypes
 import com.example.expensetracker.data.repository.account.AccountsRepository
 import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.repository.metadata.MetadataRepository
-import com.example.expensetracker.ui.screen.accounts.AccountViewModel
-import com.example.expensetracker.ui.screen.accounts.AccountViewModel.Companion
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

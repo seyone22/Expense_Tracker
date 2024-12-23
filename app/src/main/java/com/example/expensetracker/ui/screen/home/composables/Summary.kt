@@ -1,6 +1,5 @@
-package com.example.expensetracker.ui.screen.accounts.components
+package com.example.expensetracker.ui.screen.home.composables
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.expensetracker.data.model.CurrencyFormat
 import com.example.expensetracker.ui.common.SortBar
-import com.example.expensetracker.ui.screen.accounts.Totals
+import com.example.expensetracker.ui.screen.home.Totals
 import com.github.tehras.charts.piechart.PieChart
 import com.github.tehras.charts.piechart.PieChartData
 import com.github.tehras.charts.piechart.animation.simpleChartAnimation

@@ -51,6 +51,7 @@ import com.example.expensetracker.ui.common.TransactionType
 import com.example.expensetracker.ui.common.getAbbreviatedMonthName
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.transactions.composables.TransactionList
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -244,127 +245,6 @@ fun ScheduledTransactionList(
                             onLongClick = {
                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                 longClicked(filteredTransactions[it].toBillsDeposit())
-                            },
-                            onLongClickLabel = "  "
-                        )
-                    )
-                    HorizontalDivider()
-                }
-            }
-        } else {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Text(
-                    text = "Nothing to show here!",
-                    fontStyle = FontStyle.Italic,
-                    color = Color.Gray,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun TransactionList(
-    modifier: Modifier = Modifier,
-    transactions: List<TransactionWithDetails>,
-    longClicked: (Transaction) -> Unit,
-    viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory)
-) {
-    val haptics = LocalHapticFeedback.current
-    var filteredTransactions by remember { mutableStateOf(transactions) }
-    // Use derivedStateOf to update filteredTransactions when transactions change
-    val derivedFilteredTransactions by remember(transactions) {
-        derivedStateOf {
-            transactions // or apply your filtering logic here
-        }
-    }
-    filteredTransactions = derivedFilteredTransactions
-
-    Column {
-        SortBar(
-            periodSortAction = { sortCase ->
-                filteredTransactions = when (sortCase) {
-                    0 -> transactions
-                    1 -> transactions.filter {
-                        val transactionDate =
-                            LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
-                        transactionDate.monthValue == LocalDate.now().monthValue
-                    }
-
-                    3 -> transactions.filter {
-                        val transactionDate =
-                            LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
-                        // Check if the transaction date is in the last month
-                        when {
-                            LocalDate.now().monthValue != 1 ->
-                                transactionDate.monthValue == LocalDate.now().monthValue - 1
-
-                            else ->
-                                transactionDate.year == LocalDate.now().year - 1 && transactionDate.monthValue == 12
-                        }
-                    }
-                    // Add more cases as needed
-                    else -> transactions // No filtering for other cases
-                }
-            }
-        )
-
-        if (filteredTransactions.isNotEmpty()) {
-            LazyColumn(
-                modifier = modifier
-            ) {
-                items(count = filteredTransactions.size) {
-                    ListItem(
-                        headlineContent = {
-                            Text(text = filteredTransactions[it].payeeName ?: "Transfer")
-                        },
-                        supportingContent = {
-                            Text(text = removeTrPrefix(filteredTransactions[it].categName))
-                        },
-                        trailingContent = {
-                            var currencyFormat by remember { mutableStateOf(CurrencyFormat()) }
-
-                            LaunchedEffect(filteredTransactions[it].accountId) {
-                                val currencyFormatFunction =
-                                    viewModel.getAccountFromId(filteredTransactions[it].accountId)
-                                        ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
-                                currencyFormat = currencyFormatFunction!!
-                            }
-
-                            FormattedCurrency(
-                                value = filteredTransactions[it].transAmount,
-                                currency = currencyFormat,
-                                type = if ((filteredTransactions[it].transCode == "Deposit") or (filteredTransactions[it].toAccountId != -1)) {
-                                    TransactionType.CREDIT
-                                } else {
-                                    TransactionType.DEBIT
-                                }
-                            )
-                        },
-                        leadingContent = {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = getAbbreviatedMonthName(
-                                        filteredTransactions[it].transDate!!.substring(
-                                            5,
-                                            7
-                                        ).toInt()
-                                    )
-                                )
-                                Text(text = filteredTransactions[it].transDate!!.substring(8, 10))
-                            }
-                        },
-                        modifier = Modifier.combinedClickable(
-                            onClick = {},
-                            onLongClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                longClicked(filteredTransactions[it].toTransaction())
                             },
                             onLongClickLabel = "  "
                         )
