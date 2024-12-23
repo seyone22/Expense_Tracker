@@ -1,168 +1,168 @@
-1,_tr_US dollar,$,,.,",",Dollar,Cent,100,1.0,USD,Fiat
-2,_tr_Euro,€,,., ,,,100,1.0,EUR,Fiat
-3,_tr_British pound,£,,., ,Pound,Pence,100,1.0,GBP,Fiat
-4,_tr_Russian ruble,,р,",", ,руб.,коп.,100,1.0,RUB,Fiat
-5,_tr_Ukrainian hryvnia,₴,,",", ,,,100,1.0,UAH,Fiat
-6,_tr_Afghan afghani,؋,,., ,,pul,100,1.0,AFN,Fiat
-7,_tr_Albanian lek,,L,., ,,,1,1.0,ALL,Fiat
-8,_tr_Algerian dinar,دج,,., ,,,100,1.0,DZD,Fiat
-9,_tr_Angolan kwanza,,Kz,., ,,Céntimo,100,1.0,AOA,Fiat
-10,_tr_East Caribbean dollar,EC$,,., ,,,100,1.0,XCD,Fiat
-11,_tr_Argentine peso,AR$,,",",.,,centavo,100,1.0,ARS,Fiat
-12,_tr_Armenian dram,,,., ,,,1,1.0,AMD,Fiat
-13,_tr_Aruban florin,ƒ,,., ,,,100,1.0,AWG,Fiat
-14,_tr_Australian dollar,$,,.,",",,,100,1.0,AUD,Fiat
-15,_tr_Azerbaijani manat,,,., ,,,100,1.0,AZN,Fiat
-16,_tr_Bahamian dollar,B$,,., ,,,100,1.0,BSD,Fiat
-17,_tr_Bahraini dinar,,,., ,,,100,1.0,BHD,Fiat
-18,_tr_Bangladeshi taka,,,., ,,,100,1.0,BDT,Fiat
-19,_tr_Barbadian dollar,Bds$,,., ,,,100,1.0,BBD,Fiat
-20,_tr_Belarusian ruble (2000-2016),Br,,",", ,,,1,1.0,BYR,Fiat
-21,_tr_Belize dollar,BZ$,,., ,,,100,1.0,BZD,Fiat
-22,_tr_West African CFA franc,CFA,,., ,,,100,1.0,XOF,Fiat
-23,_tr_Bermudan dollar,BD$,,., ,,,100,1.0,BMD,Fiat
-24,_tr_Bhutanese ngultrum,Nu.,,., ,,,100,1.0,BTN,Fiat
-25,_tr_Bolivian boliviano,Bs.,,., ,,,100,1.0,BOB,Fiat
-26,_tr_Bosnia-Herzegovina convertible mark,KM,,",",.,,,100,1.0,BAM,Fiat
-27,_tr_Botswanan pula,P,,., ,,,100,1.0,BWP,Fiat
-28,_tr_Brazilian real,R$,,., ,,,100,1.0,BRL,Fiat
-29,_tr_Brunei dollar,B$,,., ,,,100,1.0,BND,Fiat
-30,_tr_Bulgarian lev,,,., ,,,100,1.0,BGN,Fiat
-31,_tr_Burundian franc,FBu,,., ,,,1,1.0,BIF,Fiat
-32,_tr_Cambodian riel,,,., ,,,100,1.0,KHR,Fiat
-33,_tr_Central African CFA franc,CFA,,., ,,,1,1.0,XAF,Fiat
-34,_tr_Canadian dollar,$,,., ,,,100,1.0,CAD,Fiat
-35,_tr_Cape Verdean escudo,Esc,,., ,,,100,1.0,CVE,Fiat
-36,_tr_Cayman Islands dollar,KY$,,., ,,,100,1.0,KYD,Fiat
-37,_tr_Chilean peso,$,,., ,,,1,1.0,CLP,Fiat
-38,_tr_Chinese yuan,¥,,., ,,,100,1.0,CNY,Fiat
-39,_tr_Colombian peso,Col$,,., ,,,100,1.0,COP,Fiat
-40,_tr_Comorian franc,,,., ,,,1,1.0,KMF,Fiat
-41,_tr_Congolese franc,F,,., ,,,100,1.0,CDF,Fiat
+1,US dollar,$,,.,",",Dollar,Cent,100,1.0,USD,Fiat
+2,Euro,€,,., ,,,100,1.0,EUR,Fiat
+3,British pound,£,,., ,Pound,Pence,100,1.0,GBP,Fiat
+4,Russian ruble,,р,",", ,руб.,коп.,100,1.0,RUB,Fiat
+5,Ukrainian hryvnia,₴,,",", ,,,100,1.0,UAH,Fiat
+6,Afghan afghani,؋,,., ,,pul,100,1.0,AFN,Fiat
+7,Albanian lek,,L,., ,,,1,1.0,ALL,Fiat
+8,Algerian dinar,دج,,., ,,,100,1.0,DZD,Fiat
+9,Angolan kwanza,,Kz,., ,,Céntimo,100,1.0,AOA,Fiat
+10,East Caribbean dollar,EC$,,., ,,,100,1.0,XCD,Fiat
+11,Argentine peso,AR$,,",",.,,centavo,100,1.0,ARS,Fiat
+12,Armenian dram,,,., ,,,1,1.0,AMD,Fiat
+13,Aruban florin,ƒ,,., ,,,100,1.0,AWG,Fiat
+14,Australian dollar,$,,.,",",,,100,1.0,AUD,Fiat
+15,Azerbaijani manat,,,., ,,,100,1.0,AZN,Fiat
+16,Bahamian dollar,B$,,., ,,,100,1.0,BSD,Fiat
+17,Bahraini dinar,,,., ,,,100,1.0,BHD,Fiat
+18,Bangladeshi taka,,,., ,,,100,1.0,BDT,Fiat
+19,Barbadian dollar,Bds$,,., ,,,100,1.0,BBD,Fiat
+20,Belarusian ruble (2000-2016),Br,,",", ,,,1,1.0,BYR,Fiat
+21,Belize dollar,BZ$,,., ,,,100,1.0,BZD,Fiat
+22,West African CFA franc,CFA,,., ,,,100,1.0,XOF,Fiat
+23,Bermudan dollar,BD$,,., ,,,100,1.0,BMD,Fiat
+24,Bhutanese ngultrum,Nu.,,., ,,,100,1.0,BTN,Fiat
+25,Bolivian boliviano,Bs.,,., ,,,100,1.0,BOB,Fiat
+26,Bosnia-Herzegovina convertible mark,KM,,",",.,,,100,1.0,BAM,Fiat
+27,Botswanan pula,P,,., ,,,100,1.0,BWP,Fiat
+28,Brazilian real,R$,,., ,,,100,1.0,BRL,Fiat
+29,Brunei dollar,B$,,., ,,,100,1.0,BND,Fiat
+30,Bulgarian lev,,,., ,,,100,1.0,BGN,Fiat
+31,Burundian franc,FBu,,., ,,,1,1.0,BIF,Fiat
+32,Cambodian riel,,,., ,,,100,1.0,KHR,Fiat
+33,Central African CFA franc,CFA,,., ,,,1,1.0,XAF,Fiat
+34,Canadian dollar,$,,., ,,,100,1.0,CAD,Fiat
+35,Cape Verdean escudo,Esc,,., ,,,100,1.0,CVE,Fiat
+36,Cayman Islands dollar,KY$,,., ,,,100,1.0,KYD,Fiat
+37,Chilean peso,$,,., ,,,1,1.0,CLP,Fiat
+38,Chinese yuan,¥,,., ,,,100,1.0,CNY,Fiat
+39,Colombian peso,Col$,,., ,,,100,1.0,COP,Fiat
+40,Comorian franc,,,., ,,,1,1.0,KMF,Fiat
+41,Congolese franc,F,,., ,,,100,1.0,CDF,Fiat
 42,Costa Rican colón,₡,,., ,,,1,1.0,CRC,Fiat
-43,_tr_Croatian kuna,kn,,., ,,,100,1.0,HRK,Fiat
-44,_tr_Czech koruna,Kč,,., ,,,100,1.0,CZK,Fiat
-45,_tr_Danish krone,Kr,,., ,,,100,1.0,DKK,Fiat
-46,_tr_Djiboutian franc,Fdj,,., ,,,1,1.0,DJF,Fiat
-47,_tr_Dominican peso,RD$,,., ,,,100,1.0,DOP,Fiat
-48,_tr_Egyptian pound,£,,., ,,,100,1.0,EGP,Fiat
-49,_tr_Eritrean nakfa,Nfa,,., ,,,100,1.0,ERN,Fiat
-50,_tr_Ethiopian birr,Br,,., ,,,100,1.0,ETB,Fiat
-51,_tr_Falkland Islands pound,£,,., ,,,100,1.0,FKP,Fiat
-52,_tr_Fijian dollar,FJ$,,., ,,,100,1.0,FJD,Fiat
-53,_tr_CFP franc,F,,., ,,,100,1.0,XPF,Fiat
-54,_tr_Gambian dalasi,D,,., ,,,100,1.0,GMD,Fiat
-55,_tr_Georgian lari,,,., ,,,100,1.0,GEL,Fiat
-56,_tr_Ghanaian cedi,,,., ,,,100,1.0,GHS,Fiat
-57,_tr_Gibraltar pound,£,,., ,,,100,1.0,GIP,Fiat
-58,_tr_Guatemalan quetzal,Q,,., ,,,100,1.0,GTQ,Fiat
-59,_tr_Guinean franc,FG,,., ,,,1,1.0,GNF,Fiat
-60,_tr_Guyanaese dollar,GY$,,., ,,,100,1.0,GYD,Fiat
-61,_tr_Haitian gourde,G,,., ,,,100,1.0,HTG,Fiat
-62,_tr_Honduran lempira,L,,., ,,,100,1.0,HNL,Fiat
-63,_tr_Hong Kong dollar,HK$,,., ,,,100,1.0,HKD,Fiat
-64,_tr_Hungarian forint,Ft,,., ,,,1,1.0,HUF,Fiat
+43,Croatian kuna,kn,,., ,,,100,1.0,HRK,Fiat
+44,Czech koruna,Kč,,., ,,,100,1.0,CZK,Fiat
+45,Danish krone,Kr,,., ,,,100,1.0,DKK,Fiat
+46,Djiboutian franc,Fdj,,., ,,,1,1.0,DJF,Fiat
+47,Dominican peso,RD$,,., ,,,100,1.0,DOP,Fiat
+48,Egyptian pound,£,,., ,,,100,1.0,EGP,Fiat
+49,Eritrean nakfa,Nfa,,., ,,,100,1.0,ERN,Fiat
+50,Ethiopian birr,Br,,., ,,,100,1.0,ETB,Fiat
+51,Falkland Islands pound,£,,., ,,,100,1.0,FKP,Fiat
+52,Fijian dollar,FJ$,,., ,,,100,1.0,FJD,Fiat
+53,CFP franc,F,,., ,,,100,1.0,XPF,Fiat
+54,Gambian dalasi,D,,., ,,,100,1.0,GMD,Fiat
+55,Georgian lari,,,., ,,,100,1.0,GEL,Fiat
+56,Ghanaian cedi,,,., ,,,100,1.0,GHS,Fiat
+57,Gibraltar pound,£,,., ,,,100,1.0,GIP,Fiat
+58,Guatemalan quetzal,Q,,., ,,,100,1.0,GTQ,Fiat
+59,Guinean franc,FG,,., ,,,1,1.0,GNF,Fiat
+60,Guyanaese dollar,GY$,,., ,,,100,1.0,GYD,Fiat
+61,Haitian gourde,G,,., ,,,100,1.0,HTG,Fiat
+62,Honduran lempira,L,,., ,,,100,1.0,HNL,Fiat
+63,Hong Kong dollar,HK$,,., ,,,100,1.0,HKD,Fiat
+64,Hungarian forint,Ft,,., ,,,1,1.0,HUF,Fiat
 65,Icelandic króna,kr,,., ,,,1,1.0,ISK,Fiat
-66,_tr_Indian rupee,₹,,., ,,,100,1.0,INR,Fiat
-67,_tr_Indonesian rupiah,Rp,,., ,,,1,1.0,IDR,Fiat
-68,_tr_Special drawing rights,SDR,,., ,,,100,1.0,XDR,Fiat
-69,_tr_Iranian rial,,,., ,,,1,1.0,IRR,Fiat
-70,_tr_Iraqi dinar,,,., ,,,1,1.0,IQD,Fiat
-71,_tr_Israeli new shekel,₪,,., ,,,100,1.0,ILS,Fiat
-72,_tr_Jamaican dollar,J$,,., ,,,100,1.0,JMD,Fiat
-73,_tr_Japanese yen,¥,,., ,,,1,1.0,JPY,Fiat
-74,_tr_Jordanian dinar,,,., ,,,100,1.0,JOD,Fiat
-75,_tr_Kazakhstani tenge,T,,., ,,,100,1.0,KZT,Fiat
-76,_tr_Kenyan shilling,KSh,,., ,,,100,1.0,KES,Fiat
-77,_tr_North Korean won,W,,., ,,,100,1.0,KPW,Fiat
-78,_tr_South Korean won,W,,., ,,,1,1.0,KRW,Fiat
-79,_tr_Kuwaiti dinar,,,., ,,,100,1.0,KWD,Fiat
-80,_tr_Kyrgystani som,,,., ,,,100,1.0,KGS,Fiat
-81,_tr_Laotian kip,KN,,., ,,,100,1.0,LAK,Fiat
-82,_tr_Latvian lats,Ls,,., ,,,100,1.0,LVL,Fiat
-83,_tr_Lebanese pound,,,., ,,,1,1.0,LBP,Fiat
-84,_tr_Lesotho loti,M,,., ,,,100,1.0,LSL,Fiat
-85,_tr_Liberian dollar,L$,,., ,,,100,1.0,LRD,Fiat
-86,_tr_Libyan dinar,LD,,., ,,,100,1.0,LYD,Fiat
-87,_tr_Lithuanian litas,Lt,,., ,,,100,1.0,LTL,Fiat
-88,_tr_Macanese pataca,P,,., ,,,100,1.0,MOP,Fiat
-89,_tr_Macedonian denar,,,., ,,,100,1.0,MKD,Fiat
-90,_tr_Malagasy ariary,FMG,,., ,,,100,1.0,MGA,Fiat
-91,_tr_Malawian kwacha,MK,,., ,,,1,1.0,MWK,Fiat
-92,_tr_Malaysian ringgit,RM,,., ,,,100,1.0,MYR,Fiat
-93,_tr_Maldivian rufiyaa,Rf,,., ,,,100,1.0,MVR,Fiat
-94,_tr_Mauritanian ouguiya (1973-2017),UM,,., ,,,100,1.0,MRO,Fiat
-95,_tr_Mauritian rupee,Rs,,., ,,,1,1.0,MUR,Fiat
-96,_tr_Mexican peso,$,,., ,,,100,1.0,MXN,Fiat
-97,_tr_Moldovan leu,,,., ,,,100,1.0,MDL,Fiat
-98,_tr_Mongolian tugrik,₮,,., ,,,100,1.0,MNT,Fiat
-99,_tr_Moroccan dirham,,,., ,,,100,1.0,MAD,Fiat
-100,_tr_Myanmar kyat,K,,., ,,,1,1.0,MMK,Fiat
-101,_tr_Namibian dollar,N$,,., ,,,100,1.0,NAD,Fiat
-102,_tr_Nepalese rupee,NRs,,., ,,,100,1.0,NPR,Fiat
-103,_tr_Netherlands Antillean guilder,NAƒ,,., ,,,100,1.0,ANG,Fiat
-104,_tr_New Zealand dollar,NZ$,,., ,,,100,1.0,NZD,Fiat
+66,Indian rupee,₹,,., ,,,100,1.0,INR,Fiat
+67,Indonesian rupiah,Rp,,., ,,,1,1.0,IDR,Fiat
+68,Special drawing rights,SDR,,., ,,,100,1.0,XDR,Fiat
+69,Iranian rial,,,., ,,,1,1.0,IRR,Fiat
+70,Iraqi dinar,,,., ,,,1,1.0,IQD,Fiat
+71,Israeli new shekel,₪,,., ,,,100,1.0,ILS,Fiat
+72,Jamaican dollar,J$,,., ,,,100,1.0,JMD,Fiat
+73,Japanese yen,¥,,., ,,,1,1.0,JPY,Fiat
+74,Jordanian dinar,,,., ,,,100,1.0,JOD,Fiat
+75,Kazakhstani tenge,T,,., ,,,100,1.0,KZT,Fiat
+76,Kenyan shilling,KSh,,., ,,,100,1.0,KES,Fiat
+77,North Korean won,W,,., ,,,100,1.0,KPW,Fiat
+78,South Korean won,W,,., ,,,1,1.0,KRW,Fiat
+79,Kuwaiti dinar,,,., ,,,100,1.0,KWD,Fiat
+80,Kyrgystani som,,,., ,,,100,1.0,KGS,Fiat
+81,Laotian kip,KN,,., ,,,100,1.0,LAK,Fiat
+82,Latvian lats,Ls,,., ,,,100,1.0,LVL,Fiat
+83,Lebanese pound,,,., ,,,1,1.0,LBP,Fiat
+84,Lesotho loti,M,,., ,,,100,1.0,LSL,Fiat
+85,Liberian dollar,L$,,., ,,,100,1.0,LRD,Fiat
+86,Libyan dinar,LD,,., ,,,100,1.0,LYD,Fiat
+87,Lithuanian litas,Lt,,., ,,,100,1.0,LTL,Fiat
+88,Macanese pataca,P,,., ,,,100,1.0,MOP,Fiat
+89,Macedonian denar,,,., ,,,100,1.0,MKD,Fiat
+90,Malagasy ariary,FMG,,., ,,,100,1.0,MGA,Fiat
+91,Malawian kwacha,MK,,., ,,,1,1.0,MWK,Fiat
+92,Malaysian ringgit,RM,,., ,,,100,1.0,MYR,Fiat
+93,Maldivian rufiyaa,Rf,,., ,,,100,1.0,MVR,Fiat
+94,Mauritanian ouguiya (1973-2017),UM,,., ,,,100,1.0,MRO,Fiat
+95,Mauritian rupee,Rs,,., ,,,1,1.0,MUR,Fiat
+96,Mexican peso,$,,., ,,,100,1.0,MXN,Fiat
+97,Moldovan leu,,,., ,,,100,1.0,MDL,Fiat
+98,Mongolian tugrik,₮,,., ,,,100,1.0,MNT,Fiat
+99,Moroccan dirham,,,., ,,,100,1.0,MAD,Fiat
+100,Myanmar kyat,K,,., ,,,1,1.0,MMK,Fiat
+101,Namibian dollar,N$,,., ,,,100,1.0,NAD,Fiat
+102,Nepalese rupee,NRs,,., ,,,100,1.0,NPR,Fiat
+103,Netherlands Antillean guilder,NAƒ,,., ,,,100,1.0,ANG,Fiat
+104,New Zealand dollar,NZ$,,., ,,,100,1.0,NZD,Fiat
 105,Nicaraguan córdoba,C$,,., ,,,100,1.0,NIO,Fiat
-106,_tr_Nigerian naira,₦,,., ,,,100,1.0,NGN,Fiat
-107,_tr_Norwegian krone,kr,,., ,,,100,1.0,NOK,Fiat
-108,_tr_Omani rial,,,., ,,,100,1.0,OMR,Fiat
-109,_tr_Pakistani rupee,Rs.,,., ,,,1,1.0,PKR,Fiat
-110,_tr_Panamanian balboa,B./,,., ,,,100,1.0,PAB,Fiat
-111,_tr_Papua New Guinean kina,K,,., ,,,100,1.0,PGK,Fiat
-112,_tr_Paraguayan guarani,,,., ,,,1,1.0,PYG,Fiat
-113,_tr_Peruvian sol,S/.,,., ,,,100,1.0,PEN,Fiat
-114,_tr_Philippine peso,₱,,., ,,,100,1.0,PHP,Fiat
-115,_tr_Polish zloty,,zł,",",.,złoty,grosz,100,1.0,PLN,Fiat
-116,_tr_Qatari riyal,QR,,., ,,,100,1.0,QAR,Fiat
-117,_tr_Romanian leu,L,,., ,,,100,1.0,RON,Fiat
-118,_tr_Rwandan franc,RF,,., ,,,1,1.0,RWF,Fiat
+106,Nigerian naira,₦,,., ,,,100,1.0,NGN,Fiat
+107,Norwegian krone,kr,,., ,,,100,1.0,NOK,Fiat
+108,Omani rial,,,., ,,,100,1.0,OMR,Fiat
+109,Pakistani rupee,Rs.,,., ,,,1,1.0,PKR,Fiat
+110,Panamanian balboa,B./,,., ,,,100,1.0,PAB,Fiat
+111,Papua New Guinean kina,K,,., ,,,100,1.0,PGK,Fiat
+112,Paraguayan guarani,,,., ,,,1,1.0,PYG,Fiat
+113,Peruvian sol,S/.,,., ,,,100,1.0,PEN,Fiat
+114,Philippine peso,₱,,., ,,,100,1.0,PHP,Fiat
+115,Polish zloty,,zł,",",.,złoty,grosz,100,1.0,PLN,Fiat
+116,Qatari riyal,QR,,., ,,,100,1.0,QAR,Fiat
+117,Romanian leu,L,,., ,,,100,1.0,RON,Fiat
+118,Rwandan franc,RF,,., ,,,1,1.0,RWF,Fiat
 119,São Tomé & Príncipe dobra (1977-2017),Db,,., ,,,100,1.0,STD,Fiat
-120,_tr_Saudi riyal,SR,,., ,,,100,1.0,SAR,Fiat
-121,_tr_Serbian dinar,din.,,., ,,,1,1.0,RSD,Fiat
-122,_tr_Seychellois rupee,SR,,., ,,,100,1.0,SCR,Fiat
-123,_tr_Sierra Leonean leone (1964-2022),Le,,., ,,,100,1.0,SLL,Fiat
-124,_tr_Singapore dollar,S$,,., ,,,100,1.0,SGD,Fiat
-125,_tr_Solomon Islands dollar,SI$,,., ,,,100,1.0,SBD,Fiat
-126,_tr_Somali shilling,Sh.,,., ,,,1,1.0,SOS,Fiat
-127,_tr_South African rand,R,,., ,,,100,1.0,ZAR,Fiat
-128,_tr_Sri Lankan rupee,Rs,,., ,,,100,1.0,LKR,Fiat
-129,_tr_St. Helena pound,£,,., ,,,100,1.0,SHP,Fiat
-130,_tr_Sudanese pound,,,., ,,,100,1.0,SDG,Fiat
-131,_tr_Surinamese dollar,$,,., ,,,100,1.0,SRD,Fiat
-132,_tr_Swazi lilangeni,E,,., ,,,100,1.0,SZL,Fiat
-133,_tr_Swedish krona,kr,,., ,,,100,1.0,SEK,Fiat
-134,_tr_Swiss franc,Fr.,,., ,,,100,1.0,CHF,Fiat
-135,_tr_Syrian pound,,,., ,,,1,1.0,SYP,Fiat
-136,_tr_New Taiwan dollar,NT$,,., ,,,100,1.0,TWD,Fiat
-137,_tr_Tajikistani somoni,,,., ,,,100,1.0,TJS,Fiat
-138,_tr_Tanzanian shilling,,,., ,,,1,1.0,TZS,Fiat
-139,_tr_Thai baht,฿,,., ,,,100,1.0,THB,Fiat
-140,_tr_Trinidad & Tobago dollar,TT$,,., ,,,100,1.0,TTD,Fiat
-141,_tr_Tunisian dinar,DT,,., ,,,100,1.0,TND,Fiat
-142,_tr_Turkish lira,₺,,., ,,,100,1.0,TRY,Fiat
-143,_tr_Turkmenistani manat,m,,., ,,,100,1.0,TMT,Fiat
-144,_tr_Ugandan shilling,USh,,., ,,,1,1.0,UGX,Fiat
-145,_tr_UAE dirham,,,., ,,,100,1.0,AED,Fiat
-146,_tr_Uruguayan peso,$U,,., ,,,100,1.0,UYU,Fiat
-147,_tr_Uzbekistani som,,,., ,,,1,1.0,UZS,Fiat
-148,_tr_Vanuatu vatu,VT,,., ,,,100,1.0,VUV,Fiat
-149,_tr_Vietnamese dong,₫,,., ,,,1,1.0,VND,Fiat
-150,_tr_Samoan tala,WS$,,., ,,,100,1.0,WST,Fiat
-151,_tr_Yemeni rial,,,., ,,,1,1.0,YER,Fiat
+120,Saudi riyal,SR,,., ,,,100,1.0,SAR,Fiat
+121,Serbian dinar,din.,,., ,,,1,1.0,RSD,Fiat
+122,Seychellois rupee,SR,,., ,,,100,1.0,SCR,Fiat
+123,Sierra Leonean leone (1964-2022),Le,,., ,,,100,1.0,SLL,Fiat
+124,Singapore dollar,S$,,., ,,,100,1.0,SGD,Fiat
+125,Solomon Islands dollar,SI$,,., ,,,100,1.0,SBD,Fiat
+126,Somali shilling,Sh.,,., ,,,1,1.0,SOS,Fiat
+127,South African rand,R,,., ,,,100,1.0,ZAR,Fiat
+128,Sri Lankan rupee,Rs,,., ,,,100,1.0,LKR,Fiat
+129,St. Helena pound,£,,., ,,,100,1.0,SHP,Fiat
+130,Sudanese pound,,,., ,,,100,1.0,SDG,Fiat
+131,Surinamese dollar,$,,., ,,,100,1.0,SRD,Fiat
+132,Swazi lilangeni,E,,., ,,,100,1.0,SZL,Fiat
+133,Swedish krona,kr,,., ,,,100,1.0,SEK,Fiat
+134,Swiss franc,Fr.,,., ,,,100,1.0,CHF,Fiat
+135,Syrian pound,,,., ,,,1,1.0,SYP,Fiat
+136,New Taiwan dollar,NT$,,., ,,,100,1.0,TWD,Fiat
+137,Tajikistani somoni,,,., ,,,100,1.0,TJS,Fiat
+138,Tanzanian shilling,,,., ,,,1,1.0,TZS,Fiat
+139,Thai baht,฿,,., ,,,100,1.0,THB,Fiat
+140,Trinidad & Tobago dollar,TT$,,., ,,,100,1.0,TTD,Fiat
+141,Tunisian dinar,DT,,., ,,,100,1.0,TND,Fiat
+142,Turkish lira,₺,,., ,,,100,1.0,TRY,Fiat
+143,Turkmenistani manat,m,,., ,,,100,1.0,TMT,Fiat
+144,Ugandan shilling,USh,,., ,,,1,1.0,UGX,Fiat
+145,UAE dirham,,,., ,,,100,1.0,AED,Fiat
+146,Uruguayan peso,$U,,., ,,,100,1.0,UYU,Fiat
+147,Uzbekistani som,,,., ,,,1,1.0,UZS,Fiat
+148,Vanuatu vatu,VT,,., ,,,100,1.0,VUV,Fiat
+149,Vietnamese dong,₫,,., ,,,1,1.0,VND,Fiat
+150,Samoan tala,WS$,,., ,,,100,1.0,WST,Fiat
+151,Yemeni rial,,,., ,,,1,1.0,YER,Fiat
 152,Venezuelan bolívar (2008-2018),Bs.,,.,",",bolívar,céntimos,100,1.0,VEF,Fiat
-153,_tr_Bitcoin,Ƀ,,.,",",,,100000000,1.0,BTC,Crypto
-154,_tr_Belarusian ruble,BYN,,.,",",,,100,1.0,BYN,Fiat
-155,_tr_Cuban convertible peso,$,,.,",",,,100,1.0,CUC,Fiat
-156,_tr_Cuban peso,$,,.,",",,,100,1.0,CUP,Fiat
-157,_tr_Mauritanian ouguiya,MRU,,.,",",,,100,1.0,MRU,Fiat
-158,_tr_Mozambican metical,MZN,,.,",",,,100,1.0,MZN,Fiat
-159,_tr_Sierra Leonean leone,SLE,,.,",",,,100,1.0,SLE,Fiat
-160,_tr_South Sudanese pound,£,,.,",",,,100,1.0,SSP,Fiat
+153,Bitcoin,Ƀ,,.,",",,,100000000,1.0,BTC,Crypto
+154,Belarusian ruble,BYN,,.,",",,,100,1.0,BYN,Fiat
+155,Cuban convertible peso,$,,.,",",,,100,1.0,CUC,Fiat
+156,Cuban peso,$,,.,",",,,100,1.0,CUP,Fiat
+157,Mauritanian ouguiya,MRU,,.,",",,,100,1.0,MRU,Fiat
+158,Mozambican metical,MZN,,.,",",,,100,1.0,MZN,Fiat
+159,Sierra Leonean leone,SLE,,.,",",,,100,1.0,SLE,Fiat
+160,South Sudanese pound,£,,.,",",,,100,1.0,SSP,Fiat
 161,São Tomé & Príncipe dobra,Db,,.,",",,,100,1.0,STN,Fiat
 162,Salvadoran colón,SVC,,.,",",,,100,1.0,SVC,Fiat
 163,Tongan paʻanga,T$,,.,",",,,100,1.0,TOP,Fiat
-164,_tr_Uruguayan nominal wage index unit,UYW,,.,",",,,10000,1.0,UYW,Fiat
+164,Uruguayan nominal wage index unit,UYW,,.,",",,,10000,1.0,UYW,Fiat
 165,Bolívar soberano,VED,,.,",",,,100,1.0,VED,Fiat
 166,Venezuelan bolívar,VES,,.,",",,,100,1.0,VES,Fiat
-167,_tr_Zambian kwacha,ZK,,.,",",,,100,1.0,ZMW,Fiat
-168,_tr_Zimbabwean dollar (2009),ZWL,,.,",",,,100,1.0,ZWL,Fiat
+167,Zambian kwacha,ZK,,.,",",,,100,1.0,ZMW,Fiat
+168,Zimbabwean dollar (2009),ZWL,,.,",",,,100,1.0,ZWL,Fiat

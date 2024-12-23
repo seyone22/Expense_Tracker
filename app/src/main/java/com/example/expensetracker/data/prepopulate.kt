@@ -48,10 +48,9 @@ fun readCsvCategory(context: Context): List<Category> {
 
 suspend fun insertCurrencies(context: Context, repository: CurrencyFormatsRepository) {
     val list = readCsvCurrency(context)
-    Log.d("TAG", "insertCategories: $list")
 
     list.forEach { currencyFormat ->
-        Log.d("TAG", "insertCategories: $currencyFormat")
+        Log.d("TAG", "insert Currency: $currencyFormat")
         repository.insertCurrencyFormat(currencyFormat)
     }
 }
@@ -61,7 +60,6 @@ fun readCsvCurrency(context: Context): List<CurrencyFormat> {
     val bufferedReader = BufferedReader(InputStreamReader(inputStream))
     val list = mutableListOf<CurrencyFormat>()
     bufferedReader.forEachLine { line ->
-        Log.d("TAG", "insertCategories: $line")
         val tokens = parseLine(line)
         val entity = CurrencyFormat(
             tokens[0].toInt(),

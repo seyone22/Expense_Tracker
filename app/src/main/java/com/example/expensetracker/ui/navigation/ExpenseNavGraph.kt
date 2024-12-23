@@ -16,8 +16,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.expensetracker.SelectedObjects
-import com.example.expensetracker.ui.screen.accounts.AccountScreen
-import com.example.expensetracker.ui.screen.accounts.AccountsDestination
+import com.example.expensetracker.ui.screen.home.HomeScreen
+import com.example.expensetracker.ui.screen.home.HomeDestination
 import com.example.expensetracker.ui.screen.budget.BudgetScreen
 import com.example.expensetracker.ui.screen.budget.BudgetsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
@@ -66,13 +66,13 @@ fun ExpenseNavHost(
     NavHost(
         modifier = modifier.padding(innerPadding),
         navController = navController,
-        startDestination = AccountsDestination.route,
+        startDestination = HomeDestination.route,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None },
     ) {
         // Routes to main Navbar destinations
-        composable(route = AccountsDestination.route) {
-            AccountScreen(
+        composable(route = HomeDestination.route) {
+            HomeScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 windowSizeClass = windowSizeClass,
                 setTopBarAction = setTopBarAction

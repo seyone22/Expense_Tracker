@@ -5,7 +5,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.expensetracker.ExpenseApplication
-import com.example.expensetracker.ui.screen.accounts.AccountViewModel
+import com.example.expensetracker.SharedViewModel
+import com.example.expensetracker.ui.screen.home.HomeViewModel
 import com.example.expensetracker.ui.screen.budget.BudgetViewModel
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import com.example.expensetracker.ui.screen.onboarding.OnboardingViewModel
@@ -22,7 +23,7 @@ import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            AccountViewModel(
+            HomeViewModel(
                 expenseApplication().container.accountsRepository,
                 expenseApplication().container.transactionsRepository,
                 expenseApplication().container.metadataRepository,
@@ -106,6 +107,12 @@ object AppViewModelProvider {
         initializer {
             AddReportViewModel(
                 expenseApplication().container.reportsRepository,
+                expenseApplication().container.currenciesRepository
+            )
+        }
+        initializer {
+            SharedViewModel(
+                expenseApplication().container.metadataRepository,
                 expenseApplication().container.currenciesRepository
             )
         }
