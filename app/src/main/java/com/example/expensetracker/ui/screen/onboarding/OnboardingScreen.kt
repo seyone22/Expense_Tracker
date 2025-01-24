@@ -7,12 +7,15 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -64,14 +67,19 @@ fun OnboardingScreen(
         viewModel.prepopulateDB(context)
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.ime)
+    ) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f) // Allow pager to take up available space
         ) { page ->
             when (page) {
-                0 -> OnboardingPageOne(setButtonState = {v -> buttonEnabled = v})
-                1 -> OnboardingPageTwo(viewModel = viewModel, setButtonState = {v ->  buttonEnabled = v})
+                0 -> OnboardingPageOne(setButtonState = { v -> buttonEnabled = v })
+                1 -> OnboardingPageTwo(viewModel = viewModel,
+                    setButtonState = { v -> buttonEnabled = v })
                 // Add a third page if needed
             }
         }
@@ -112,12 +120,12 @@ fun OnboardingScreen(
                             ).value
                         )
                         .width(
-                        animateDpAsState(
-                            targetValue = if (pagerState.currentPage == 0) 64.dp else 128.dp,
-                            animationSpec = tween(durationMillis = 300),
-                            label = "" // Animation duration
-                        ).value
-                    )
+                            animateDpAsState(
+                                targetValue = if (pagerState.currentPage == 0) 64.dp else 128.dp,
+                                animationSpec = tween(durationMillis = 300),
+                                label = "" // Animation duration
+                            ).value
+                        )
                 ),
             ) {
                 Row(
