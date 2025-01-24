@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -59,7 +60,7 @@ fun NetWorth(
                 .fillMaxWidth() // Make the row take up the full width
         ) {
             // First Card
-            Card(
+            OutlinedCard(
                 modifier = Modifier
                     .weight(1f) // This makes the card take equal space
             ) {
@@ -81,7 +82,7 @@ fun NetWorth(
             }
 
             // Second Card
-            Card(
+            OutlinedCard(
                 modifier = Modifier
                     .weight(1f) // This makes the card take equal space
             ) {
