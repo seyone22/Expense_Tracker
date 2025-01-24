@@ -54,6 +54,7 @@ import com.example.expensetracker.R
 import com.example.expensetracker.data.model.AccountTypes
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
+import com.example.expensetracker.ui.screen.home.HomeDestination
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -106,7 +107,7 @@ fun AccountEntryScreen(
                         onClick = {
                             coroutineScope.launch {
                                 viewModel.saveAccount()
-                                navigateToScreen("Accounts")
+                                navigateToScreen(HomeDestination.route)
                             }
                         },
                         modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp),

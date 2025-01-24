@@ -1,5 +1,7 @@
 package com.example.expensetracker.ui.screen.home
 
+import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.model.Account
@@ -9,12 +11,14 @@ import com.example.expensetracker.data.repository.account.AccountsRepository
 import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.repository.metadata.MetadataRepository
 import com.example.expensetracker.data.repository.transaction.TransactionsRepository
+import com.example.expensetracker.utils.getCurrentWeekNumber
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 /**
@@ -36,6 +40,9 @@ class HomeViewModel(
     private val expensesFlow = transactionsRepository.getTotalBalanceByCode("Withdrawal")
     private val incomeFlow = transactionsRepository.getTotalBalanceByCode("Deposit")
     private val totalFlow = transactionsRepository.getTotalBalance()
+
+    // Direct access from frontend composable
+    val expensesByWeekFlow = transactionsRepository.getTotalExpensesForWeek(getCurrentWeekNumber())
 
     // Combine flows for expenses, income, and total into one flow
     private val totalsFlow =

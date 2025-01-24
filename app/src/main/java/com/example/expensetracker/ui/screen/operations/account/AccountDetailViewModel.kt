@@ -4,179 +4,77 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.model.Account
-import com.example.expensetracker.data.model.BillsDepositWithDetails
 import com.example.expensetracker.data.model.Transaction
-import com.example.expensetracker.data.model.TransactionCode
-import com.example.expensetracker.data.model.TransactionStatus
 import com.example.expensetracker.data.model.TransactionWithDetails
 import com.example.expensetracker.data.model.toTransaction
 import com.example.expensetracker.data.repository.account.AccountsRepository
+import com.example.expensetracker.data.repository.transaction.BalanceResult
 import com.example.expensetracker.data.repository.transaction.TransactionsRepository
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
-import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.toTransaction
-import kotlinx.coroutines.flow.SharingStarted
+import com.example.expensetracker.ui.screen.transactions.AccountDetailTransactionUiState
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class AccountDetailViewModel(
     private val accountsRepository: AccountsRepository,
-    private val transactionsRepository: TransactionsRepository,
-    //private val billsDepositsRepository: BillsDepositsRepository
+    private val transactionsRepository: TransactionsRepository
 ) : ViewModel() {
     var accountId: Int = -1
 
-    var accountDetailAccountUiState: StateFlow<AccountDetailAccountUiState> =
-        accountsRepository.getAccountStream(accountId)
-            .map { account ->
-                AccountDetailAccountUiState(
-                    account = account ?: Account(),
-                    balance = transactionsRepository.getBalanceByAccountId().first()
-                        .find { it.accountId == account?.accountId }?.balance ?: 3.3
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = AccountDetailAccountUiState()
-            )
+    private val _accountDetailAccountUiState = MutableStateFlow(AccountDetailAccountUiState())
+    val accountDetailAccountUiState: StateFlow<AccountDetailAccountUiState> =
+        _accountDetailAccountUiState
 
-    var accountDetailTransactionUiState: StateFlow<AccountDetailTransactionUiState> =
-        transactionsRepository.getTransactionsFromAccount(0)
-            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
-            .map { transactions ->
-                AccountDetailTransactionUiState(
-                    transactions = transactions
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TransactionEntryViewModel.TIMEOUT_MILLIS),
-                initialValue = AccountDetailTransactionUiState()
-            )
+    private val _accountDetailTransactionUiState =
+        MutableStateFlow(AccountDetailTransactionUiState())
+    val accountDetailTransactionUiState: StateFlow<AccountDetailTransactionUiState> =
+        _accountDetailTransactionUiState
 
-    fun getAccount() {
-        accountDetailAccountUiState = accountsRepository.getAccountStream(accountId)
-            .map { account ->
-                AccountDetailAccountUiState(
-                    account = account ?: Account(),
-                    balance = transactionsRepository.getBalanceByAccountId().first()
-                        .find { it.accountId == account?.accountId }?.balance
-                        ?: 0.0 //If there are no transactions for this account
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = AccountDetailAccountUiState()
-            )
+    suspend fun getAccount() {
+        // Generate the last 7 days' dates
+        val last7Days = (0..6).map {
+            LocalDate.now().minusDays(it.toLong()).format(DateTimeFormatter.ISO_LOCAL_DATE)
+        }
 
+        // Fetch account
+        val account = accountsRepository.getAccountStream(accountId).firstOrNull()
+
+        Log.d("TAG", "getAccount: $account")
+
+        // Fetch balance for each of the last 7 days
+        val balanceHistoryForLast7Days = mutableListOf<BalanceResult>()
+        for (date in last7Days.reversed()) {
+            val balanceForDate = accountsRepository.getAccountBalance(accountId, date).firstOrNull()
+            val balance = balanceForDate?.balance ?: 0.0 // Default to 0.0 if balanceForDate is null
+            balanceHistoryForLast7Days.add(BalanceResult(accountId, balance, date))
+        }
+
+        // Set the account details with the balance history
+        val lastBalance = (balanceHistoryForLast7Days.lastOrNull()?.balance?.plus(account?.initialBalance ?: 0.0)) ?: 0.0
+
+        // Emit the updated state to the MutableStateFlow
+        _accountDetailAccountUiState.value = AccountDetailAccountUiState(
+            account = account ?: Account(),
+            balance = lastBalance,
+            balanceHistory = balanceHistoryForLast7Days
+        )
     }
 
     fun getTransactions() {
-        accountDetailTransactionUiState =
-            transactionsRepository.getTransactionsFromAccount(accountId)
-                //.onEach { Log.d("DEBUG", ": flow emitted $it") }
-                .map { transactions ->
-                    AccountDetailTransactionUiState(
-                        transactions = transactions
+        viewModelScope.launch {
+            val transactions =
+                transactionsRepository.getTransactionsFromAccount(accountId).firstOrNull()
+                    ?: emptyList()
 
-                    )
-                }
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(TransactionEntryViewModel.TIMEOUT_MILLIS),
-                    initialValue = AccountDetailTransactionUiState()
-                )
-        Log.d("DEBUG", "getTransactions: AccountId is $accountId")
-    }
-
-
-    companion object {
-        private const val TIMEOUT_MILLIS = 5_000L
-    }
-
-    private fun calculateBalance(account: Account): Double {
-        var balance = account.initialBalance ?: 0.0
-        var reconciledBalance = 0.0
-
-
-        val getBalancesThread = Thread {
-            var hi = transactionsRepository.getTransactionsFromAccount(account.accountId)
-                .map {
-                    it.forEach() {
-                        when (it.status) {
-                            TransactionStatus.R.displayName -> {
-                                when (it.transCode) {
-                                    TransactionCode.DEPOSIT.displayName -> {
-                                        balance += it.transAmount
-                                        reconciledBalance += it.transAmount
-                                    }
-
-                                    TransactionCode.WITHDRAWAL.displayName -> {
-                                        balance -= it.transAmount
-                                        reconciledBalance -= it.transAmount
-                                    }
-
-                                    TransactionCode.TRANSFER.displayName -> {
-                                        balance -= it.transAmount
-                                        reconciledBalance -= it.transAmount
-                                    }
-                                }
-                            }
-
-                            TransactionStatus.D.displayName, TransactionStatus.F.displayName, TransactionStatus.U.displayName, TransactionStatus.V.displayName -> {
-                                when (it.transCode) {
-                                    TransactionCode.DEPOSIT.displayName -> {
-                                        balance += it.transAmount
-                                    }
-
-                                    TransactionCode.WITHDRAWAL.displayName -> {
-                                        balance -= it.transAmount
-                                    }
-
-                                    TransactionCode.TRANSFER.displayName -> {
-                                        balance -= it.transAmount
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            _accountDetailTransactionUiState.value =
+                AccountDetailTransactionUiState(transactions = transactions)
+            Log.d("DEBUG", "getTransactions: AccountId is $accountId")
         }
-
-        val addInboundTransfersThread = Thread {
-            var hi = transactionsRepository.getAllTransactionsByToAccount(account.accountId)
-                .forEach() {
-                    when (it.status) {
-                        TransactionStatus.R.displayName -> {
-                            when (it.transCode) {
-                                TransactionCode.TRANSFER.displayName -> {
-                                    balance += it.toTransAmount ?: 0.0
-                                }
-                            }
-                        }
-
-                        TransactionStatus.D.displayName, TransactionStatus.F.displayName, TransactionStatus.U.displayName, TransactionStatus.V.displayName -> {
-                            when (it.transCode) {
-                                TransactionCode.TRANSFER.displayName -> {
-                                    balance += it.toTransAmount ?: 0.0
-                                    reconciledBalance += it.toTransAmount ?: 0.0
-                                }
-                            }
-                        }
-                    }
-                }
-        }
-
-        getBalancesThread.start()
-        getBalancesThread.join()
-        addInboundTransfersThread.start()
-        addInboundTransfersThread.join()
-
-        return balance
     }
 
     suspend fun deleteTransaction(transaction: Transaction): Boolean {
@@ -214,8 +112,7 @@ class AccountDetailViewModel(
     }
 
     suspend fun deleteAccount(
-        account: Account,
-        transactions: List<TransactionWithDetails>
+        account: Account, transactions: List<TransactionWithDetails>
     ): Boolean {
         return try {
             accountsRepository.deleteAccount(account)
@@ -232,10 +129,10 @@ class AccountDetailViewModel(
 
 data class AccountDetailAccountUiState(
     val account: Account = Account(),
-    val balance: Double = 0.0
+    val balance: Double = 0.0,
+    val balanceHistory: List<BalanceResult> = listOf()
 )
 
 data class AccountDetailTransactionUiState(
-    val transactions: List<TransactionWithDetails> = listOf(),
-    val billsDeposits: List<BillsDepositWithDetails> = listOf()
+    val transactions: List<Transaction> = listOf()
 )

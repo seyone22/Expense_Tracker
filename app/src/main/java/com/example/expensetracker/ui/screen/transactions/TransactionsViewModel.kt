@@ -7,14 +7,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.model.Account
+import com.example.expensetracker.data.model.BillsDepositWithDetails
 import com.example.expensetracker.data.model.CurrencyFormat
 import com.example.expensetracker.data.model.Transaction
+import com.example.expensetracker.data.model.TransactionWithDetails
 import com.example.expensetracker.data.repository.account.AccountsRepository
 import com.example.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
-import com.example.expensetracker.data.repository.category.CategoriesRepository
 import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.example.expensetracker.data.repository.transaction.TransactionsRepository
-import com.example.expensetracker.ui.screen.operations.account.AccountDetailTransactionUiState
 import com.example.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
@@ -101,3 +101,8 @@ class TransactionsViewModel(
             )
     }
 }
+
+data class AccountDetailTransactionUiState(
+    val transactions: List<TransactionWithDetails> = listOf(),
+    val billsDeposits: List<BillsDepositWithDetails> = listOf()
+)

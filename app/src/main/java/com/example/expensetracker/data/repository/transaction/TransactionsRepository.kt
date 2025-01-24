@@ -28,6 +28,9 @@ interface TransactionsRepository {
         endDate: String? = null
     ): Flow<List<Transaction>>
 
+    // Fetches the total expenses for a specific week number
+    fun getTotalExpensesForWeek(weekNumber: Int): Flow<List<ExpensePerDay>>
+
 
     fun getBalanceByAccountId(): Flow<List<BalanceResult>>
     fun getTotalBalanceByCode(transactionCode: String, status: String = "Reconciled"): Flow<Double>

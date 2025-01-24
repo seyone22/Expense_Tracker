@@ -78,7 +78,7 @@ object AppViewModelProvider {
 
             AccountDetailViewModel(
                 expenseApplication().container.accountsRepository,
-                expenseApplication().container.transactionsRepository
+                expenseApplication().container.transactionsRepository,
             )
         }
         // Initializers for Entity type Viewmodels

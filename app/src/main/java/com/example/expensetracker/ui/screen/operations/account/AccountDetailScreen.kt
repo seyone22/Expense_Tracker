@@ -33,13 +33,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.expensetracker.R
+import com.example.expensetracker.SharedViewModel
+import com.example.expensetracker.data.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.common.EntryFields
+import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.dialogs.DeleteConfirmationDialog
 import com.example.expensetracker.ui.common.dialogs.EditAccountDialog
 import com.example.expensetracker.ui.common.dialogs.EditTransactionDialog
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.home.HomeDestination
+import com.example.expensetracker.ui.screen.operations.account.composables.AccountDetailCard
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.example.expensetracker.ui.screen.operations.transaction.toTransactionDetails
 import com.example.expensetracker.ui.screen.transactions.composables.TransactionList
@@ -60,9 +64,12 @@ fun AccountDetailScreen(
 ) {
     viewModel.accountId = backStackEntry.toInt()
 
+    // Code block to get the current currency's detail.
+    val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
     val accountDetailAccountUiState by viewModel.accountDetailAccountUiState.collectAsState()
     val accountDetailTransactionUiState by viewModel.accountDetailTransactionUiState.collectAsState()
-    Log.d("TAG", "getAccount: $accountDetailAccountUiState")
+    Log.d("TAG", "UISTATE: $accountDetailAccountUiState")
 
 
     var isSelected by remember { mutableStateOf(false) }
@@ -74,20 +81,31 @@ fun AccountDetailScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
+    var currencyData by remember { mutableStateOf(CurrencyFormat()) } ;
+
+    LaunchedEffect(Unit, accountDetailAccountUiState.account.currencyId) {
         viewModel.getTransactions()
         viewModel.getAccount()
+        currencyData = sharedViewModel.getCurrencyById(accountDetailAccountUiState.account.currencyId) ?: CurrencyFormat();
+
     }
 
     Column(
-        modifier = modifier.padding(0.dp, 100.dp)
+        modifier = modifier.padding(16.dp, 0.dp)
     ) {
-        DetailedAccountCard(modifier = modifier,
-            accountDetailAccountUiState = accountDetailAccountUiState,
-            setOpenEditDialog = { it -> openEditDialog.value = it },
-            setOpenEditDialogType = { it -> openEditType.value = it },
-            setOpenDeleteDialog = { it -> openDeleteDialog.value = it },
-            setOpenDeleteDialogType = { it -> openDeleteDialogType.value = it })
+        Text(
+            "Account Balance"
+        )
+        FormattedCurrency(
+            modifier = Modifier,
+            style = MaterialTheme.typography.displaySmall,
+            value = accountDetailAccountUiState.balance,
+            currency = currencyData
+        )
+
+        AccountDetailCard(modifier = modifier,
+            accountDetailUiState = accountDetailAccountUiState,
+        )
 
         TransactionList(
             transactions = accountDetailTransactionUiState.transactions,

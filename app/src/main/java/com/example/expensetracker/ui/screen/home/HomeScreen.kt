@@ -3,7 +3,6 @@ package com.example.expensetracker.ui.screen.home
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -25,8 +24,8 @@ import com.example.expensetracker.data.model.CurrencyFormat
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.home.composables.AccountData
+import com.example.expensetracker.ui.screen.home.composables.MySpending
 import com.example.expensetracker.ui.screen.home.composables.NetWorth
-import com.example.expensetracker.ui.screen.home.composables.Summary
 import com.example.expensetracker.ui.screen.home.composables.TransactionData
 import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
 
@@ -50,6 +49,7 @@ fun HomeScreen(
 
     // Collect the filtered totals (you can pass "All" or "Current Month" as the filter)
     val totals by viewModel.getFilteredTotal("All").collectAsState(initial = Totals())
+    val expensesByWeek by viewModel.expensesByWeekFlow.collectAsState(initial = emptyList())
 
     // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
     LaunchedEffect(true) {
@@ -64,7 +64,6 @@ fun HomeScreen(
     if (!isUsed) {
         navigateToScreen(OnboardingDestination.route)
     }
-
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 320.dp),
         modifier = modifier
@@ -77,19 +76,25 @@ fun HomeScreen(
                     delta
                 }),
     ) {
-        item() {
+        item {
             NetWorth(
                 totals = totals, baseCurrencyInfo = baseCurrency ?: CurrencyFormat()
             )
         }
-        item() {
+        item {
+            MySpending(
+                expensesByWeek = expensesByWeek,
+                baseCurrencyInfo = baseCurrency ?: CurrencyFormat()
+            )
+        }
+        item {
             AccountData(
                 modifier = modifier,
                 accountsUiState = accountsUiState,
                 navigateToScreen = navigateToScreen,
             )
         }
-        item() {
+        item {
             TransactionData(
                 modifier = modifier,
                 accountsUiState = accountsUiState,
