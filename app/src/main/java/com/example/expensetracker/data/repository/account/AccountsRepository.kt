@@ -9,7 +9,7 @@ interface AccountsRepository {
     fun getAllActiveAccountsStream(): Flow<List<Account>>
     fun getAccountStream(accountId: Int): Flow<Account?>
     fun getAccountsFromTypeStream(accountType: String): Flow<List<Account>>
-    fun getAccountBalance(accountId: Int): Flow<BalanceResult>
+    fun getAccountBalance(accountId: Int, date: String?): Flow<BalanceResult>
 
     suspend fun insertAccount(account: Account)
     suspend fun deleteAccount(account: Account)

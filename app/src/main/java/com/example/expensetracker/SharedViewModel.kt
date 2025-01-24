@@ -7,6 +7,7 @@ import com.example.expensetracker.data.repository.currencyFormat.CurrencyFormats
 import com.example.expensetracker.data.repository.metadata.MetadataRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
 class SharedViewModel(
@@ -27,6 +28,12 @@ class SharedViewModel(
             allCurrencyFormats.firstOrNull { it.currencyId == baseCurrencyId?.infoValue?.toInt() }
         }
     //serve it globally
+
+    // Common functions
+    suspend fun getCurrencyById(currencyId: Int): CurrencyFormat? {
+        val stream = currencyFormatsRepository.getCurrencyFormatStream(currencyId);
+        return stream.firstOrNull();
+    }
 }
 
 
