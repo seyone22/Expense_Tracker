@@ -67,9 +67,15 @@ fun OnboardingForm(
         )
         Spacer(modifier = Modifier.height(64.dp))
 
-        Text(text = "Your name (For labelling transactions)", textAlign = TextAlign.Left, style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Your name (For labelling transactions)",
+            textAlign = TextAlign.Left,
+            style = MaterialTheme.typography.titleMedium
+        )
         OutlinedTextField(
-            modifier = Modifier.padding(bottom = 8.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .fillMaxWidth(),
             value = username,
             onValueChange = {
                 username = it
@@ -86,21 +92,25 @@ fun OnboardingForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Choose your currency", textAlign = TextAlign.Left, style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Choose your currency",
+            textAlign = TextAlign.Left,
+            style = MaterialTheme.typography.titleMedium
+        )
 
         var currencyFilter by remember { mutableStateOf("") }
         val filteredCurrencies = currencyList.currenciesList.filter {
             it.currencyName.contains(currencyFilter, true)
         }
 
-        ExposedDropdownMenuBox(
-            expanded = baseCurrencyExpanded,
+        ExposedDropdownMenuBox(expanded = baseCurrencyExpanded,
             onExpandedChange = { baseCurrencyExpanded = !baseCurrencyExpanded }) {
             OutlinedTextField(
                 modifier = Modifier
                     .padding(bottom = 8.dp)
                     .clickable(enabled = true) { baseCurrencyExpanded = true }
-                    .menuAnchor(MenuAnchorType.PrimaryEditable, true).fillMaxWidth(),
+                    .menuAnchor(MenuAnchorType.PrimaryEditable, true)
+                    .fillMaxWidth(),
                 value = currencyFilter,
                 onValueChange = { v -> currencyFilter = v },
                 label = { Text("Base Currency") },
@@ -116,23 +126,18 @@ fun OnboardingForm(
                 onDismissRequest = { baseCurrencyExpanded = false },
             ) {
                 filteredCurrencies.forEach { currency ->
-                    DropdownMenuItem(
-                        text = { Text(currency.currencyName) },
-                        onClick = {
-                            currencyFilter = currency.currencyName
-                            currentCurrency = currency
-                            viewModel.updateUiState(
-                                viewModel.metadataUiState.metadataDetails.copy(
-                                    baseCurrencyMetadata = Metadata(
-                                        5,
-                                        "BASECURRENCYID",
-                                        currentCurrency.currencyId.toString()
-                                    )
+                    DropdownMenuItem(text = { Text(currency.currencyName) }, onClick = {
+                        currencyFilter = currency.currencyName
+                        currentCurrency = currency
+                        viewModel.updateUiState(
+                            viewModel.metadataUiState.metadataDetails.copy(
+                                baseCurrencyMetadata = Metadata(
+                                    5, "BASECURRENCYID", currentCurrency.currencyId.toString()
                                 )
                             )
-                            baseCurrencyExpanded = false
-                        }
-                    )
+                        )
+                        baseCurrencyExpanded = false
+                    })
                 }
             }
         }
