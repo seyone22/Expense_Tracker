@@ -14,6 +14,8 @@ class OfflineCurrencyFormatsRepository(private val currencyFormatDao: CurrencyFo
     override fun getCurrencyFormatsFromTypeStream(currencyId: Int): Flow<List<CurrencyFormat>> =
         currencyFormatDao.getAllCurrencyFormatsByCurrencyFormat(currencyId)
 
+    override fun getActiveCurrencies(): Flow<List<Int>> = currencyFormatDao.getActiveCurrencies()
+
     override suspend fun insertCurrencyFormat(currency: CurrencyFormat) =
         currencyFormatDao.insert(currency)
 

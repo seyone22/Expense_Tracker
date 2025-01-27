@@ -8,6 +8,8 @@ interface CurrencyFormatsRepository {
     fun getCurrencyFormatStream(currencyId: Int): Flow<CurrencyFormat?>
     fun getCurrencyFormatsFromTypeStream(currencyId: Int): Flow<List<CurrencyFormat>>
 
+    fun getActiveCurrencies(): Flow<List<Int>>
+
     suspend fun insertCurrencyFormat(currency: CurrencyFormat)
     suspend fun deleteCurrencyFormat(currency: CurrencyFormat)
     suspend fun updateCurrencyFormat(currency: CurrencyFormat)

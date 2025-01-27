@@ -47,11 +47,11 @@ class EntityViewModel(
         categoriesRepository.getAllParentCategories()
     private val categoriesSubFlow: Flow<List<Category>> = categoriesRepository.getAllSubCategories()
 
-    private val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
     private val currencyFormatsFlow: Flow<List<CurrencyFormat>> =
         currencyFormatsRepository.getAllCurrencyFormatsStream()
     private val currencyHistoryFlow: Flow<List<CurrencyHistory>> = currencyHistoryRepository.getAllCurrencyHistoryStream()
     private val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllActivePayeesStream()
+    val activeCurrenciesFlow: Flow<List<Int>> = currencyFormatsRepository.getActiveCurrencies()
 
     // Combine the flows and calculate the totals
     val entitiesUiState: Flow<EntitiesUiState> = combine(
@@ -59,7 +59,7 @@ class EntityViewModel(
         categoriesSubFlow,
         currencyFormatsFlow,
         currencyHistoryFlow,
-        payeesFlow
+        payeesFlow,
     ) { categoriesParent, categoriesSub, currencies, currencyHistory, payees ->
         EntitiesUiState(categoriesParent, categoriesSub, payees, Pair(currencies, currencyHistory))
     }
@@ -219,6 +219,7 @@ data class EntitiesUiState(
     val categoriesSub: List<Category> = listOf(),
     val payeesList: List<Payee> = listOf(),
     val currenciesList: Pair<List<CurrencyFormat>, List<CurrencyHistory>?> = Pair(listOf(), listOf()),
+    val activeCurrencies: List<Int> = listOf()
 )
 
 // Enum for entity types

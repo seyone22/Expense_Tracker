@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.expensetracker.data.model.CurrencyFormat
+import com.example.expensetracker.ui.common.FilterOption
 import com.example.expensetracker.ui.common.SortBar
 import com.example.expensetracker.ui.screen.home.Totals
 import com.github.tehras.charts.piechart.PieChart
@@ -66,8 +67,8 @@ fun Summary(
             ) {
                 SortBar(periodSortAction = { sortCase ->
                     currentFilter = when (sortCase) {
-                        0 -> "All"
-                        1 -> "Current Month"
+                        FilterOption.ALL -> "All"
+                        FilterOption.CURRENT_MONTH -> "Current Month"
                         // Add more cases as needed
                         else -> "All" // Default filter for other cases
                     }
