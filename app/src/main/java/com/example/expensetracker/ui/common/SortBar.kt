@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,14 +25,13 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SortBar(
-    modifier: Modifier = Modifier,
-    periodSortAction: (Int) -> Unit
+    modifier: Modifier = Modifier, periodSortAction: (FilterOption) -> Unit
 ) {
     Row(
         modifier = modifier
     ) {
         var expanded by remember { mutableStateOf(false) }
-        var selectedIndex by remember { mutableIntStateOf(0) }
+        var selectedFilterOption by remember { mutableStateOf(FilterOption.ALL) }
 
         Column {
             // TextButton with an icon
@@ -48,7 +46,7 @@ fun SortBar(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(menuItems[selectedIndex])
+                    Text(selectedFilterOption.displayName)
                     Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                 }
             }
@@ -59,38 +57,35 @@ fun SortBar(
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             ) {
-                menuItems.forEachIndexed { index, item ->
-                    DropdownMenuItem(
-                        onClick = {
-                            selectedIndex = index
-                            expanded = false
-                            // Perform Sort action
-                            periodSortAction(selectedIndex)
-                        },
-                        text = { Text(text = item) }
-                    )
+                FilterOption.entries.forEachIndexed { index, filterOption ->
+                    DropdownMenuItem(onClick = {
+                        selectedFilterOption = filterOption
+                        expanded = false
+                        // Perform Sort action
+                        periodSortAction(filterOption)
+                    }, text = { Text(text = filterOption.displayName) })
                 }
             }
         }
     }
 }
 
-val menuItems = listOf(
-    "All",
-    "Current Month",
-    "Current Month to Date",
-    "Last Month",
-    "Last 30 Days",
-    "Last 90 Days",
-    "Last 3 Months",
-    "Last 12 Months",
-    "Current Year",
-    "Current Year to Date",
-    "Last Year",
-    "Current Financial Year",
-    "Current Financial Year to Date",
-    "Last Financial Year",
-    "Over Time",
-    "Last 365 Days",
-    "Custom"
-)
+enum class FilterOption(val displayName: String) {
+    ALL("All"), CURRENT_MONTH("Current Month"), CURRENT_MONTH_TO_DATE("Current Month to Date"), LAST_MONTH(
+        "Last Month"
+    ),
+    LAST_30_DAYS("Last 30 Days"), LAST_90_DAYS("Last 90 Days"), LAST_3_MONTHS("Last 3 Months"), LAST_12_MONTHS(
+        "Last 12 Months"
+    ),
+    CURRENT_YEAR("Current Year"), CURRENT_YEAR_TO_DATE("Current Year to Date"), LAST_YEAR("Last Year"), CURRENT_FINANCIAL_YEAR(
+        "Current Financial Year"
+    ),
+    CURRENT_FINANCIAL_YEAR_TO_DATE("Current Financial Year to Date"), LAST_FINANCIAL_YEAR("Last Financial Year"), OVER_TIME(
+        "Over Time"
+    ),
+    LAST_365_DAYS("Last 365 Days"), CUSTOM("Custom");
+
+    companion object {
+        fun fromString(value: String) = entries.find { it.displayName == value } ?: ALL
+    }
+}

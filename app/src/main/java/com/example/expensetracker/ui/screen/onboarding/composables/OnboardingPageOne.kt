@@ -1,10 +1,8 @@
 package com.example.expensetracker.ui.screen.onboarding.composables
 
-import PaginationDotsIndicator
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -35,8 +32,7 @@ import com.example.expensetracker.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingPageOne(
-    pageIndex: Int = 1,
-    setButtonState: (Boolean) -> Unit
+    pageIndex: Int = 1, setButtonState: (Boolean) -> Unit
 ) {
     val onPrimary = MaterialTheme.colorScheme.inversePrimary
     val primary = MaterialTheme.colorScheme.primaryContainer
@@ -57,9 +53,7 @@ fun OnboardingPageOne(
         Canvas(modifier = Modifier.fillMaxSize()) {
             clipRect {
                 drawCircle(
-                    color = onPrimary,
-                    radius = 240f,
-                    center = Offset(200F,900F)
+                    color = onPrimary, radius = 240f, center = Offset(200F, 900F)
                 )
                 drawRoundRect(
                     color = secondary,
@@ -88,9 +82,7 @@ fun OnboardingPageOne(
         }
 
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(R.drawable.wavy_circle)
-                .build(),
+            model = ImageRequest.Builder(LocalContext.current).data(R.drawable.wavy_circle).build(),
             colorFilter = ColorFilter.tint(tertiary),
             contentDescription = null,
             modifier = Modifier.size(200.dp)
@@ -112,7 +104,7 @@ fun OnboardingPageOne(
                 .align(Alignment.BottomStart)
                 .width(310.dp)
                 .padding(16.dp)
-        ){
+        ) {
             Text(
                 text = "Take control of your finances",
                 style = MaterialTheme.typography.displayLarge,

@@ -28,4 +28,13 @@ interface CurrencyFormatDao {
 
     @Query("SELECT * FROM CURRENCYFORMATS_V1 WHERE currencyId = :currencyId")
     fun getAllCurrencyFormatsByCurrencyFormat(currencyId: Int): Flow<List<CurrencyFormat>>
+
+    @Query(
+        """
+    SELECT DISTINCT
+        currencyId
+    FROM ACCOUNTLIST_V1    
+        """
+    )
+    fun getActiveCurrencies(): Flow<List<Int>>
 }
