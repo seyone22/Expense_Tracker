@@ -92,7 +92,6 @@ fun DonutChart(
             targetValue = animationTargetState[it].value.stroke,
             animationSpec = TweenSpec(700),
             label = "",
-            label = ""
         )
     }
     val animationProgress by transition.animateFloat(
