@@ -50,7 +50,6 @@ suspend fun insertCurrencies(context: Context, repository: CurrencyFormatsReposi
     val list = readCsvCurrency(context)
 
     list.forEach { currencyFormat ->
-        Log.d("TAG", "insert Currency: $currencyFormat")
         repository.insertCurrencyFormat(currencyFormat)
     }
 }
