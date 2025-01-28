@@ -53,9 +53,7 @@ import com.example.expensetracker.ui.screen.operations.entity.currency.CurrencyD
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionUiState
-import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnrememberedMutableState")
@@ -129,7 +127,8 @@ fun CategoryEntryDialog(
                         value = removeTrPrefix(categoryParent.categName),
                         readOnly = true,
                         onValueChange = {
-                            categorySelected = categorySelected.copy(parentId = categoryParent.categId.toString())
+                            categorySelected =
+                                categorySelected.copy(parentId = categoryParent.categId.toString())
                             viewModel.updateCategoryState(
                                 categorySelected.copy(
                                     parentId = categoryParent.categId.toString()

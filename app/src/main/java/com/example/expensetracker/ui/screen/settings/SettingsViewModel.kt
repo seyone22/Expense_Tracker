@@ -13,7 +13,6 @@ import com.example.expensetracker.data.repository.metadata.MetadataRepository
 import com.example.expensetracker.ui.screen.onboarding.CurrencyList
 import com.example.expensetracker.ui.theme.DarkTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

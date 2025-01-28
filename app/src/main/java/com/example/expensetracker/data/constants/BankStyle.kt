@@ -1,7 +1,7 @@
 package com.example.expensetracker.data.constants
 
-import androidx.compose.ui.graphics.Color
 import androidx.annotation.DrawableRes
+import androidx.compose.ui.graphics.Color
 import com.example.expensetracker.R
 
 data class BankStyle(

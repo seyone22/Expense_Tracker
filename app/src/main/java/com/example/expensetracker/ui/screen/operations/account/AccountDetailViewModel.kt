@@ -55,7 +55,9 @@ class AccountDetailViewModel(
         }
 
         // Set the account details with the balance history
-        val lastBalance = (balanceHistoryForLast7Days.lastOrNull()?.balance?.plus(account?.initialBalance ?: 0.0)) ?: 0.0
+        val lastBalance =
+            (balanceHistoryForLast7Days.lastOrNull()?.balance?.plus(account?.initialBalance ?: 0.0))
+                ?: 0.0
 
         // Emit the updated state to the MutableStateFlow
         _accountDetailAccountUiState.value = AccountDetailAccountUiState(

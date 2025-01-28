@@ -5,10 +5,6 @@ import com.example.expensetracker.data.model.Transaction
 import com.example.expensetracker.data.model.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlin.math.log
 
 class OfflineTransactionsRepository(private val transactionDao: TransactionDao) :
     TransactionsRepository {
@@ -48,7 +44,12 @@ class OfflineTransactionsRepository(private val transactionDao: TransactionDao) 
     override fun getTotalBalanceByCode(transactionCode: String, status: String): Flow<Double> =
         transactionDao.getTotalBalanceByCode(transactionCode, status)
 
-    override fun getTotalBalanceByCodeAndDate(transactionCode: String, status: String, month: Int, year: Int): Flow<Double> =
+    override fun getTotalBalanceByCodeAndDate(
+        transactionCode: String,
+        status: String,
+        month: Int,
+        year: Int
+    ): Flow<Double> =
         transactionDao.getTotalBalanceByCode(transactionCode, status, month, year)
 
     override fun getTotalBalance(status: String): Flow<Double> {
@@ -70,12 +71,10 @@ class OfflineTransactionsRepository(private val transactionDao: TransactionDao) 
     }
 
 
-    override fun getTotalExpensesForWeek(weekNumber: Int): Flow<List<ExpensePerDay>>{
+    override fun getTotalExpensesForWeek(weekNumber: Int): Flow<List<ExpensePerDay>> {
         Log.d("TAG", "getTotalExpensesForWeek: $weekNumber")
         return transactionDao.getTotalExpensesForWeek(weekNumber)
     }
-
-
 
 
     override suspend fun insertTransaction(transaction: Transaction) =

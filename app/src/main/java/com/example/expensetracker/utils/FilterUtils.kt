@@ -86,7 +86,9 @@ fun filterTransactions(
             } else {
                 LocalDate.of(now.year, 4, 1)
             }
-            transactionDate.isAfter(startOfFinancialYear.minusDays(1)) && transactionDate.isBefore(now.plusDays(1))
+            transactionDate.isAfter(startOfFinancialYear.minusDays(1)) && transactionDate.isBefore(
+                now.plusDays(1)
+            )
         }
 
         FilterOption.LAST_FINANCIAL_YEAR -> transactions.filter {

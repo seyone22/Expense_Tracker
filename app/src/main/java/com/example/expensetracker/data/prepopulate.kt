@@ -1,7 +1,6 @@
 package com.example.expensetracker.data
 
 import android.content.Context
-import android.util.Log
 import com.example.expensetracker.data.model.Category
 import com.example.expensetracker.data.model.CurrencyFormat
 import com.example.expensetracker.data.repository.category.CategoriesRepository

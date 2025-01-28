@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,7 +29,6 @@ import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
-import com.patrykandpatrick.vico.core.common.shape.Shape
 
 @Composable
 fun SummaryOfAccountsReportCard(
@@ -52,7 +50,7 @@ fun SummaryOfAccountsReportCard(
     // Use LaunchedEffect to run a coroutine within the Composable
     LaunchedEffect(Unit) {
         categoryName.value = viewModel.categoryNameOf(report.GROUPNAME?.toInt() ?: -1)
-        values.value = viewModel.getExpensesFromCategory(report.GROUPNAME?.toInt() ?: -1 )
+        values.value = viewModel.getExpensesFromCategory(report.GROUPNAME?.toInt() ?: -1)
 
         val doubleValues = values.value.values.toList()
         val keysList = values.value.keys.toList()

@@ -34,7 +34,13 @@ interface TransactionsRepository {
 
     fun getBalanceByAccountId(): Flow<List<BalanceResult>>
     fun getTotalBalanceByCode(transactionCode: String, status: String = "Reconciled"): Flow<Double>
-    fun getTotalBalanceByCodeAndDate(transactionCode: String, status: String = "Reconciled", month: Int, year: Int): Flow<Double>
+    fun getTotalBalanceByCodeAndDate(
+        transactionCode: String,
+        status: String = "Reconciled",
+        month: Int,
+        year: Int
+    ): Flow<Double>
+
     fun getTotalBalance(status: String = "Reconciled"): Flow<Double>
     fun getTotalBalanceByDate(status: String = "Reconciled", month: Int, year: Int): Flow<Double>
 

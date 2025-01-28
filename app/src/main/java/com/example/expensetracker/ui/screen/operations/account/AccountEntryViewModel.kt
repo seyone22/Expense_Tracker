@@ -24,7 +24,7 @@ class AccountEntryViewModel(
     private val accountsRepository: AccountsRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository,
     private val metadataRepository: MetadataRepository,
-    ) : ViewModel() {
+) : ViewModel() {
 
     val currencyList: StateFlow<CurrencyList> =
         currencyFormatsRepository.getAllCurrencyFormatsStream()

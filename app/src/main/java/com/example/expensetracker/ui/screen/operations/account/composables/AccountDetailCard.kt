@@ -68,8 +68,11 @@ fun AccountDetailCard(
 
 
     Card(
-        modifier = modifier.fillMaxWidth().height(200.dp),
-        colors = CardDefaults.cardColors().copy(containerColor = MaterialTheme.colorScheme.background)
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        colors = CardDefaults.cardColors()
+            .copy(containerColor = MaterialTheme.colorScheme.background)
     ) {
         CartesianChartHost(
             modifier = Modifier
@@ -80,7 +83,11 @@ fun AccountDetailCard(
                     LineCartesianLayer.LineProvider.series(
                         LineCartesianLayer.rememberLine(
                             fill = remember { LineCartesianLayer.LineFill.single(fill(Color(primary))) },
-                            pointConnector = remember { LineCartesianLayer.PointConnector.cubic(curvature = 0f) },
+                            pointConnector = remember {
+                                LineCartesianLayer.PointConnector.cubic(
+                                    curvature = 0f
+                                )
+                            },
                         )
                     )
                 ),

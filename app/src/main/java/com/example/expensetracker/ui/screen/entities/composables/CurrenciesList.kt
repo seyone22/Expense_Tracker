@@ -45,7 +45,7 @@ fun CurrenciesList(
             val x = list.second?.find { historyEntry -> historyEntry.currencyId == it.currencyId }
             ListItem(
                 headlineContent = {
-                    Row{
+                    Row {
                         FormattedCurrency(
                             value = it.baseConvRate,
                             currency = CurrencyFormat(),

@@ -139,7 +139,7 @@ fun EntityScreen(
                             modifier = Modifier.padding(12.dp, 12.dp, 0.dp, 12.dp),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            items(activeCurrencies.size-1) { i ->
+                            items(activeCurrencies.size - 1) { i ->
                                 Card(
                                     modifier = Modifier
 
@@ -148,7 +148,7 @@ fun EntityScreen(
                                     var currency by remember { mutableStateOf(CurrencyFormat()) }
                                     LaunchedEffect(activeCurrencies) {
                                         currency =
-                                            sharedViewModel.getCurrencyById(activeCurrencies[i+1])!!
+                                            sharedViewModel.getCurrencyById(activeCurrencies[i + 1])!!
                                     }
 
                                     Column(
@@ -156,12 +156,13 @@ fun EntityScreen(
                                     ) {
                                         if (currency.currencyName.isNotEmpty()) {
                                             ProfileAvatarWithFallback(
-                                                initial = currency.currencyName.first().uppercaseChar().toString(),
+                                                initial = currency.currencyName.first()
+                                                    .uppercaseChar().toString(),
                                                 size = 48.dp
                                             )
                                         }
 
-                                        Spacer(modifier=Modifier.height(24.dp))
+                                        Spacer(modifier = Modifier.height(24.dp))
 
                                         Text(text = currency.currencyName)
 
