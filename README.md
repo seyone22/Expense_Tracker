@@ -1,5 +1,8 @@
 # Expense Tracker
 
+![GitHub License](https://img.shields.io/github/license/seyone22/Expense_Tracker)
+
+
 Expense Tracker is a personal finance application for Android, designed to help users manage their
 expenses efficiently. It draws inspiration from the popular Money Manager EX project but offers a
 modernized approach to expense tracking on the Android platform. Leveraging modern Android
