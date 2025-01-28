@@ -119,7 +119,7 @@ dependencies {
 // Kotlinx Serialization JSON
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
-    implementation("androidx.window:window:1.2.0")
+    implementation("androidx.window:window:1.3.0")
 
     implementation("com.github.tehras:charts:0.2.4-alpha")
 
