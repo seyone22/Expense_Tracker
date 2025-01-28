@@ -108,12 +108,13 @@ fun AccountDetailScreen(
         )
 
         TransactionList(
-            transactions = accountDetailTransactionUiState.transactions,
             modifier = modifier,
+            transactions = accountDetailTransactionUiState.transactions,
             longClicked = { selected ->
                 isSelected = !isSelected
                 selectedTransaction = selected.toTransactionDetails()
             },
+            showFilter = false,
         )
     }
 
