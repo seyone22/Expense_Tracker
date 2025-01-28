@@ -99,7 +99,7 @@ fun TransactionsScreen(
                             setSelectedObject(selObj)
                         },
                         viewModel = viewModel,
-                        showFilter = false
+                        showFilter = true
                     )
                 }
 
