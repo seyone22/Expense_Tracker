@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v3
+        uses: gradle/actions/wrapper-validation@v4
 
       - name: Setup Android SDK
         run: |
@@ -31,7 +31,7 @@ jobs:
           distribution: adopt
 
       - name: Set up gradle
-        uses: gradle/actions/setup-gradle@6cec5d49d4d6d4bb982fbed7047db31ea6d38f11 # v3.3.0
+        uses: gradle/actions/setup-gradle@65a3beb9413b5a43f94e1eea10a51c507e62b78f # v3.3.0
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
