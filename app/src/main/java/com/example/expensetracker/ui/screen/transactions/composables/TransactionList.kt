@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -27,7 +26,6 @@ import com.example.expensetracker.data.model.Transaction
 import com.example.expensetracker.data.model.TransactionWithDetails
 import com.example.expensetracker.data.model.toTransaction
 import com.example.expensetracker.ui.AppViewModelProvider
-import com.example.expensetracker.ui.common.FilterOption
 import com.example.expensetracker.ui.common.FormattedCurrency
 import com.example.expensetracker.ui.common.SortBar
 import com.example.expensetracker.ui.common.TransactionType
@@ -35,8 +33,6 @@ import com.example.expensetracker.ui.common.getAbbreviatedMonthName
 import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.screen.transactions.TransactionsViewModel
 import com.example.expensetracker.utils.filterTransactions
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -44,7 +40,8 @@ fun TransactionList(
     modifier: Modifier = Modifier,
     transactions: List<TransactionWithDetails>,
     longClicked: (Transaction) -> Unit,
-    viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    showFilter: Boolean = true
 ) {
     val haptics = LocalHapticFeedback.current
     var filteredTransactions by remember { mutableStateOf(transactions) }
@@ -60,14 +57,16 @@ fun TransactionList(
     }
 
     Column(modifier = modifier) {
-        SortBar(
-            periodSortAction = { sortCase ->
-                filteredTransactions = filterTransactions(
-                    transactions = transactions,
-                    filterOption = sortCase
-                )
-            }
-        )
+        if (showFilter) {
+            SortBar(
+                periodSortAction = { sortCase ->
+                    filteredTransactions = filterTransactions(
+                        transactions = transactions,
+                        filterOption = sortCase
+                    )
+                }
+            )
+        }
 
         if (filteredTransactions.isNotEmpty()) {
             // Iterate over the list of filtered transactions
