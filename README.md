@@ -1,6 +1,11 @@
 # Expense Tracker
 
 ![GitHub License](https://img.shields.io/github/license/seyone22/Expense_Tracker)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/seyone22/Expense_Tracker)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/seyone22/Expense_Tracker/dev_test.yml?label=build%3A%20Dev)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/seyone22/Expense_Tracker/build_push.yml?label=build%3A%20Master)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/eb10603b1a9b4a9483c099a5767da56d)](https://app.codacy.com/gh/seyone22/Expense_Tracker/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 
 
 Expense Tracker is a personal finance application for Android, designed to help users manage their
