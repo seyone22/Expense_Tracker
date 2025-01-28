@@ -1,0 +1,20 @@
+# dependabot.yml
+version: 2
+updates:
+  # Configure Gradle dependencies
+  - package-ecosystem: "gradle" # Use "gradle" for Kotlin and Android projects
+    directory: "/" # Root directory of your project containing the Gradle files
+    schedule:
+      interval: "weekly" # Check for updates every week
+    ignore:
+      # Example: Ignore specific dependencies if needed
+      - dependency-name: "com.example:kotlinx-serialization-json"
+        versions: ["1.6.3"]
+      - dependency-name: "com.example:kotlin"
+        versions: ["1.9.24"]
+
+  # Configure GitHub Actions dependencies
+  - package-ecosystem: "github-actions" # Manage dependencies for GitHub Actions
+    directory: "/" # Root directory where workflows are located
+    schedule:
+      interval: "weekly" # Check for updates every week
