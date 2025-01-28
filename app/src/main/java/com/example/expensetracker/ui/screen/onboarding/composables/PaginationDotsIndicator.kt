@@ -1,3 +1,5 @@
+package com.example.expensetracker.ui.screen.onboarding.composables
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Canvas

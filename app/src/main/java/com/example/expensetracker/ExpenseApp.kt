@@ -24,6 +24,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,7 +76,7 @@ fun ExpenseApp(
     val coroutineScope = rememberCoroutineScope()
 
     // Auto scroll for FAB
-    var offset by remember { mutableStateOf(0f) }
+    var offset by remember { mutableFloatStateOf(0f) }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val navigationType: ExpenseNavigationType = getNavigationType(windowSizeClass)
@@ -103,8 +104,7 @@ fun ExpenseApp(
         }
     }
 
-    Row(
-    ) {
+    Row{
         if ((navigationType == ExpenseNavigationType.NAVIGATION_RAIL) or (navigationType == ExpenseNavigationType.PERMANENT_NAVIGATION_DRAWER)) {
             ExpenseNavBar(
                 navigateToScreen = { screen -> navController.navigate(screen) },
@@ -208,7 +208,7 @@ fun ExpenseApp(
                 navController = navController,
                 windowSizeClass = windowSizeClass,
                 setTopBarAction = { action: Int -> topBarOperation = action },
-                onToggleDarkTheme = { it -> onToggleDarkTheme(it) },
+                onToggleDarkTheme = { onToggleDarkTheme(it) },
                 setIsItemSelected = { boolean: Boolean -> isSelected = boolean },
                 setSelectedObject = { item ->
                     selectedObject = item
@@ -356,7 +356,7 @@ fun ExpenseApp(
                     onConfirmClick = {
                         coroutineScope.launch {
                             transactionViewModel.transactionUiState =
-                                transactionEntryViewModel.transactionUiState
+                                transactionEntryViewModel.transactionUiState.value
                             transactionViewModel.editTransaction(transactionViewModel.transactionUiState.transactionDetails)
                         }
                     },

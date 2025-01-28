@@ -81,14 +81,14 @@ fun AccountDetailScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    var currencyData by remember { mutableStateOf(CurrencyFormat()) };
+    var currencyData by remember { mutableStateOf(CurrencyFormat()) }
 
     LaunchedEffect(Unit, accountDetailAccountUiState.account.currencyId) {
         viewModel.getTransactions()
         viewModel.getAccount()
         currencyData =
             sharedViewModel.getCurrencyById(accountDetailAccountUiState.account.currencyId)
-                ?: CurrencyFormat();
+                ?: CurrencyFormat()
 
     }
 

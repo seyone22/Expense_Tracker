@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screen.operations.transaction
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +9,8 @@ import com.example.expensetracker.data.model.Account
 import com.example.expensetracker.data.model.BillsDeposits
 import com.example.expensetracker.data.model.Category
 import com.example.expensetracker.data.model.Payee
+import com.example.expensetracker.data.model.Tag
+import com.example.expensetracker.data.model.TagLink
 import com.example.expensetracker.data.model.Transaction
 import com.example.expensetracker.data.model.TransactionCode
 import com.example.expensetracker.data.model.TransactionStatus
@@ -19,15 +20,12 @@ import com.example.expensetracker.data.repository.billsDeposit.BillsDepositsRepo
 import com.example.expensetracker.data.repository.category.CategoriesRepository
 import com.example.expensetracker.data.repository.payee.PayeesRepository
 import com.example.expensetracker.data.repository.transaction.TransactionsRepository
-import com.example.expensetracker.ui.screen.home.HomeUiState
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.example.expensetracker.ui.screen.operations.entity.payee.PayeeUiState
 import com.example.expensetracker.ui.screen.operations.entity.payee.toPayee
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -39,46 +37,23 @@ class TransactionEntryViewModel(
     private val payeesRepository: PayeesRepository,
     private val categoriesRepository: CategoriesRepository,
     private val billsDepositsRepository: BillsDepositsRepository
-) :
-    ViewModel() {
-    var transactionUiState by mutableStateOf(TransactionUiState())
-        private set
-    var transactionUiState2 by mutableStateOf(TransactionUiState())
-        private set
-
-    val transactionUiState1: StateFlow<TransactionUiState> =
-        categoriesRepository.getAllCategoriesStream()
-            //.onEach { Log.d("DEBUG", ": flow emitted $it") }
-            .map { categories ->
-                TransactionUiState(
-                    categoriesList = categories.sortedBy { it ->
-                        if (it.parentId != -1) {
-                            it.parentId
-                        } else {
-                            it.categId
-                        }
-                    }
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = TransactionUiState()
-            )
+) : ViewModel() {
+    private val _transactionUiState = MutableStateFlow(TransactionUiState())
+    val transactionUiState: StateFlow<TransactionUiState> get() = _transactionUiState
 
     init {
         viewModelScope.launch {
-            accountsRepository.getAllActiveAccountsStream().map {
-                Log.d("DEBUG", ": Value is:  $it")
-                TransactionUiState(TransactionDetails(), BillsDepositsDetails(), false, false, it)
-            }
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                    initialValue = HomeUiState()
-                )
-        }
+            val accounts = accountsRepository.getAllAccountsStream().first()
+            val payees = payeesRepository.getAllPayeesStream().first()
+            val categories = categoriesRepository.getAllCategoriesStream().first()
+            //val tags = tagsRepository.getAllTagsStream().first()
 
+            _transactionUiState.value = TransactionUiState(
+                accountsList = accounts,
+                payeesList = payees,
+                categoriesList = categories,
+            )
+        }
     }
 
     companion object {
@@ -86,50 +61,31 @@ class TransactionEntryViewModel(
     }
 
     fun updateUiState(
-        transactionDetails: TransactionDetails,
-        billsDepositsDetails: BillsDepositsDetails
+        transactionDetails: TransactionDetails? = null,
+        billsDepositsDetails: BillsDepositsDetails? = null
     ) {
-        transactionUiState =
-            TransactionUiState(
-                transactionDetails = transactionDetails,
-                billsDepositsDetails = billsDepositsDetails,
-                isEntryValid = validateInput(transactionDetails),
-                isRecurringEntryValid = validateRecurringInput(billsDepositsDetails)
-            )
-    }
-
-    suspend fun getAllAccounts() {
-        accountsRepository.getAllAccountsStream().collect {
-            transactionUiState =
-                TransactionUiState(
-                    transactionDetails = transactionUiState.transactionDetails,
-                    isEntryValid = transactionUiState.isEntryValid,
-                    accountsList = it
-                )
-        }
-    }
-
-    suspend fun getAllPayees() {
-        payeesRepository.getAllPayeesStream().collect {
-            transactionUiState2 =
-                TransactionUiState(
-                    transactionDetails = transactionUiState2.transactionDetails,
-                    isEntryValid = transactionUiState2.isEntryValid,
-                    payeesList = it
-                )
-        }
+        _transactionUiState.value =
+            _transactionUiState.value.copy(transactionDetails = transactionDetails
+                ?: _transactionUiState.value.transactionDetails,
+                billsDepositsDetails = billsDepositsDetails
+                    ?: _transactionUiState.value.billsDepositsDetails,
+                isEntryValid = transactionDetails?.let { validateInput(it) }
+                    ?: _transactionUiState.value.isEntryValid,
+                isRecurringEntryValid = billsDepositsDetails?.let { validateRecurringInput(it) }
+                    ?: _transactionUiState.value.isRecurringEntryValid)
     }
 
     suspend fun saveTransaction() {
         if (validateInput()) {
-            transactionsRepository.insertTransaction(transactionUiState.transactionDetails.toTransaction())
+            transactionsRepository.insertTransaction(transactionUiState.value.transactionDetails.toTransaction())
         }
     }
 
     suspend fun saveRecurringTransaction() {
         if (validateInput()) {
-            val x =
-                transactionUiState.billsDepositsDetails.addTransactionDetails(transactionUiState.transactionDetails)
+            val x = transactionUiState.value.billsDepositsDetails.addTransactionDetails(
+                transactionUiState.value.transactionDetails
+            )
             x.REPEATS = numericOf(x.REPEATS).toString()
             billsDepositsRepository.insertBillsDeposit(x.toBillsDeposits())
 
@@ -137,13 +93,13 @@ class TransactionEntryViewModel(
         }
     }
 
-    private fun validateInput(uiState: TransactionDetails = transactionUiState.transactionDetails): Boolean {
+    private fun validateInput(uiState: TransactionDetails = transactionUiState.value.transactionDetails): Boolean {
         return with(uiState) {
             transAmount.isNotBlank() && transDate.isNotBlank() && accountId.isNotBlank() && categoryId.isNotBlank()
         }
     }
 
-    private fun validateRecurringInput(uiState: BillsDepositsDetails = transactionUiState.billsDepositsDetails): Boolean {
+    private fun validateRecurringInput(uiState: BillsDepositsDetails = transactionUiState.value.billsDepositsDetails): Boolean {
         return with(uiState) {
             NEXTOCCURRENCEDATE.isNotBlank() && REPEATS.isNotBlank() && NUMOCCURRENCES.isNotBlank()
         }
@@ -165,11 +121,9 @@ class TransactionEntryViewModel(
     }
 
     fun updatePayeeState(payeeDetails: PayeeDetails) {
-        payeeUiState =
-            PayeeUiState(
-                payeeDetails = payeeDetails,
-                isEntryValid = validatePayeeInput(payeeDetails)
-            )
+        payeeUiState = PayeeUiState(
+            payeeDetails = payeeDetails, isEntryValid = validatePayeeInput(payeeDetails)
+        )
     }
 
     //Get Account, Payee, Category
@@ -195,6 +149,8 @@ data class TransactionUiState(
     val accountsList: List<Account> = listOf(),
     val categoriesList: List<Category> = listOf(),
     val payeesList: List<Payee> = listOf(),
+    val tagList: List<Tag> = listOf(),
+    val tagLinkList: List<TagLink> = listOf()
 )
 
 //Data class for AccountDetails
@@ -241,8 +197,7 @@ fun TransactionDetails.toTransaction(): Transaction = Transaction(
 
 fun Transaction.toTransactionUiState(isEntryValid: Boolean = false): TransactionUiState =
     TransactionUiState(
-        transactionDetails = this.toTransactionDetails(),
-        isEntryValid = isEntryValid
+        transactionDetails = this.toTransactionDetails(), isEntryValid = isEntryValid
     )
 
 fun Transaction.toTransactionDetails(): TransactionDetails = TransactionDetails(
@@ -311,8 +266,7 @@ fun BillsDepositsDetails.toBillsDeposits(): BillsDeposits = BillsDeposits(
 
 fun BillsDeposits.toTransactionUiState(isEntryValid: Boolean = false): TransactionUiState =
     TransactionUiState(
-        billsDepositsDetails = this.toBillsDepositsDetails(),
-        isEntryValid = isEntryValid
+        billsDepositsDetails = this.toBillsDepositsDetails(), isEntryValid = isEntryValid
     )
 
 fun BillsDeposits.toBillsDepositsDetails(): BillsDepositsDetails = BillsDepositsDetails(

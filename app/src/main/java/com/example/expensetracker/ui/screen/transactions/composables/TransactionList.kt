@@ -107,7 +107,7 @@ fun TransactionList(
                                     transaction.transDate!!.substring(5, 7).toInt()
                                 )
                             )
-                            Text(text = transaction.transDate!!.substring(8, 10))
+                            Text(text = transaction.transDate.substring(8, 10))
                         }
                     },
                     modifier = Modifier.combinedClickable(

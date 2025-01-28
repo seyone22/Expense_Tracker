@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screen.onboarding
 
-import PaginationDotsIndicator
 import android.content.Context
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -43,6 +42,7 @@ import com.example.expensetracker.ui.navigation.NavigationDestination
 import com.example.expensetracker.ui.screen.home.HomeDestination
 import com.example.expensetracker.ui.screen.onboarding.composables.OnboardingPageOne
 import com.example.expensetracker.ui.screen.onboarding.composables.OnboardingPageTwo
+import com.example.expensetracker.ui.screen.onboarding.composables.PaginationDotsIndicator
 import kotlinx.coroutines.launch
 
 object OnboardingDestination : NavigationDestination {
@@ -89,7 +89,7 @@ fun OnboardingScreen(
                 .height(96.dp) // Adjust height for proper spacing
                 .padding(top = 16.dp, start = 16.dp, end = 16.dp)
                 .fillMaxWidth(),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             PaginationDotsIndicator(

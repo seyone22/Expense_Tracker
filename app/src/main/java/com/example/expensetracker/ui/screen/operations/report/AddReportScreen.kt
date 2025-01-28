@@ -132,7 +132,6 @@ fun ReportEntryBody(
 }
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportEntryForm(
     modifier: Modifier = Modifier,

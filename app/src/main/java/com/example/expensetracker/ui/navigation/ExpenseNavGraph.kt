@@ -172,7 +172,7 @@ fun ExpenseNavHost(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 navigateBack = { navController.popBackStack() },
                 backStackEntry = it.arguments?.getString("setting") ?: "-1",
-                onToggleDarkTheme = { it -> onToggleDarkTheme(it) }
+                onToggleDarkTheme = { x -> onToggleDarkTheme(x) }
             )
         }
 

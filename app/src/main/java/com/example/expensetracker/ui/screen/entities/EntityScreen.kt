@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screen.entities
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -52,7 +51,7 @@ object EntitiesDestination : NavigationDestination {
     override val routeId = 1
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EntityScreen(
     modifier: Modifier = Modifier,

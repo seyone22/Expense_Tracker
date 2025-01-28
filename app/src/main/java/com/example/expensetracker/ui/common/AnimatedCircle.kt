@@ -4,8 +4,8 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,22 +25,19 @@ private const val DividerLengthInDegrees = 1.8f
  */
 @Composable
 fun AnimatedCircle(
-    proportions: List<Float>,
-    colors: List<Color>,
-    modifier: Modifier = Modifier
+    proportions: List<Float>, colors: List<Color>, modifier: Modifier = Modifier
 ) {
     val currentState = remember {
-        MutableTransitionState(AnimatedCircleProgress.START)
-            .apply { targetState = AnimatedCircleProgress.END }
+        MutableTransitionState(AnimatedCircleProgress.START).apply {
+                targetState = AnimatedCircleProgress.END
+            }
     }
     val stroke = with(LocalDensity.current) { Stroke(50.dp.toPx()) }
-    val transition = updateTransition(currentState)
+    val transition = rememberTransition(currentState)
     val angleOffset by transition.animateFloat(
         transitionSpec = {
             tween(
-                delayMillis = 500,
-                durationMillis = 900,
-                easing = LinearOutSlowInEasing
+                delayMillis = 500, durationMillis = 900, easing = LinearOutSlowInEasing
             )
         }, label = ""
     ) { progress ->
@@ -73,8 +70,7 @@ fun AnimatedCircle(
         val innerRadius = (size.minDimension - stroke.width) / 2
         val halfSize = size / 2.0f
         val topLeft = Offset(
-            halfSize.width - innerRadius,
-            halfSize.height - innerRadius
+            halfSize.width - innerRadius, halfSize.height - innerRadius
         )
         val size = Size(innerRadius * 2, innerRadius * 2)
         var startAngle = shift - 90f

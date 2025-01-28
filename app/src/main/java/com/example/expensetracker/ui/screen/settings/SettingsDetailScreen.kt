@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -103,7 +104,7 @@ fun SettingsDetailScreen(
                 "Appearance" -> {
                     AppearanceSettingsList(
                         metadata = metadataList,
-                        onToggleDarkTheme = { it -> onToggleDarkTheme(it) },
+                        onToggleDarkTheme = { onToggleDarkTheme(it) },
                         viewModel = viewModel
                     )
                 }
@@ -261,7 +262,7 @@ fun GeneralSettingsList(
                             modifier = Modifier
                                 .padding(0.dp, 8.dp)
                                 .clickable(enabled = true) { baseCurrencyExpanded = true }
-                                .menuAnchor(),
+                                .menuAnchor(MenuAnchorType.PrimaryEditable, true),
                             value = newCurrency.currencyName,
                             readOnly = true,
                             onValueChange = {
@@ -342,7 +343,6 @@ fun AboutList() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppearanceSettingsList(
     metadata: List<Metadata?>, onToggleDarkTheme: (Int) -> Unit, viewModel: SettingsViewModel
@@ -388,9 +388,7 @@ fun AppearanceSettingsList(
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(0.dp, 8.dp)
                         )
-                        Row(
-
-                        ) {
+                        Row{
                             RadioButton(enabled = true, selected = (selectedTheme == 0), onClick = {
                                 selectedTheme = 0
                                 coroutineScope.launch { viewModel.setTheme(selectedTheme) }
@@ -427,7 +425,6 @@ fun AppearanceSettingsList(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DataSettingsList(
     metadata: List<Metadata?>,
@@ -441,7 +438,7 @@ fun DataSettingsList(
             action = {
                 Log.d("TAG", metadata.toString())
                 viewModel.getMonthlyRates(
-                    baseCurrencyId = metadata.find { it -> it!!.infoName == "BASECURRENCYID" }!!.infoValue.toInt()
+                    baseCurrencyId = metadata.find { it!!.infoName == "BASECURRENCYID" }!!.infoValue.toInt()
                 )
             })
     }

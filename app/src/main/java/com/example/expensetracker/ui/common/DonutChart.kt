@@ -6,8 +6,8 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.rememberTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -82,22 +82,23 @@ fun DonutChart(
         remember { mutableStateOf(DonutChartState()) }
     }
     val transitionState = remember {
-        MutableTransitionState(DonutChartProgress.START)
-            .apply { targetState = DonutChartProgress.END }
+        MutableTransitionState(DonutChartProgress.START).apply {
+                targetState = DonutChartProgress.END
+            }
     }
-    val transition = updateTransition(transitionState)
+    val transition = rememberTransition(transitionState)
     val animValues = (0..data.items.size).map {
         animateDpAsState(
             targetValue = animationTargetState[it].value.stroke,
-            animationSpec = TweenSpec(700)
+            animationSpec = TweenSpec(700),
+            label = "",
+            label = ""
         )
     }
     val animationProgress by transition.animateFloat(
         transitionSpec = {
             tween(
-                delayMillis = 500,
-                durationMillis = 900,
-                easing = LinearOutSlowInEasing
+                delayMillis = 500, durationMillis = 900, easing = LinearOutSlowInEasing
             )
         }, label = ""
     ) { progress ->
@@ -117,56 +118,50 @@ fun DonutChart(
             .padding(top = 24.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Canvas(
-            modifier = Modifier
-                .size(chartSize)
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = { tapOffset ->
-                            handleCanvasTap(
-                                center = center,
-                                tapOffset = tapOffset,
-                                anglesList = anglesList,
-                                currentSelectedIndex = selectedIndex,
-                                onItemSelected = { index ->
-                                    selectedIndex = index
-                                },
-                                onItemDeselected = {
-                                    selectedIndex = -1
-                                },
-                                onNoItemSelected = {
-                                    selectedIndex = -1
-                                },
-                                currentStrokeValues = animValues.map { it.value.toPx() },
-                            )
-                        }
+        Canvas(modifier = Modifier
+            .size(chartSize)
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { tapOffset ->
+                    handleCanvasTap(
+                        center = center,
+                        tapOffset = tapOffset,
+                        anglesList = anglesList,
+                        currentSelectedIndex = selectedIndex,
+                        onItemSelected = { index ->
+                            selectedIndex = index
+                        },
+                        onItemDeselected = {
+                            selectedIndex = -1
+                        },
+                        onNoItemSelected = {
+                            selectedIndex = -1
+                        },
+                        currentStrokeValues = animValues.map { it.value.toPx() },
                     )
-                },
-            onDraw = {
-                val defaultStrokeWidth = STROKE_SIZE_UNSELECTED.toPx()
-                center = this.center
-                anglesList.clear()
-                var lastAngle = 0f
-                data.items.forEachIndexed { ind, item ->
-                    val sweepAngle = data.findSweepAngle(ind, gapPercentage)
-                    anglesList.add(DrawingAngles(lastAngle, sweepAngle))
-                    val animatedSweep = sweepAngle * animationProgress
-                    drawArc(
-                        color = item.color,
-                        startAngle = lastAngle,
-                        sweepAngle = animatedSweep,
-                        useCenter = false,
-                        topLeft = Offset(defaultStrokeWidth / 2, defaultStrokeWidth / 2),
-                        style = Stroke(STROKE_SIZE_UNSELECTED.toPx(), cap = StrokeCap.Butt),
-                        size = Size(
-                            size.width - defaultStrokeWidth,
-                            size.height - defaultStrokeWidth
-                        )
+                })
+            }, onDraw = {
+            val defaultStrokeWidth = STROKE_SIZE_UNSELECTED.toPx()
+            center = this.center
+            anglesList.clear()
+            var lastAngle = 0f
+            data.items.forEachIndexed { ind, item ->
+                val sweepAngle = data.findSweepAngle(ind, gapPercentage)
+                anglesList.add(DrawingAngles(lastAngle, sweepAngle))
+                val animatedSweep = sweepAngle * animationProgress
+                drawArc(
+                    color = item.color,
+                    startAngle = lastAngle,
+                    sweepAngle = animatedSweep,
+                    useCenter = false,
+                    topLeft = Offset(defaultStrokeWidth / 2, defaultStrokeWidth / 2),
+                    style = Stroke(STROKE_SIZE_UNSELECTED.toPx(), cap = StrokeCap.Butt),
+                    size = Size(
+                        size.width - defaultStrokeWidth, size.height - defaultStrokeWidth
                     )
-                    lastAngle += sweepAngle + gapAngle
-                }
+                )
+                lastAngle += sweepAngle + gapAngle
             }
-        )
+        })
         selectionView(if (selectedIndex >= 0) data.items[selectedIndex] else null)
     }
 }
@@ -184,8 +179,7 @@ private fun handleCanvasTap(
 ) {
     Log.d("TAG", "AnglesList: $anglesList")
     val normalized = tapOffset.findNormalizedPointFromTouch(center)
-    val touchAngle =
-        calculateTouchAngleAccordingToCanvas(center, normalized)
+    val touchAngle = calculateTouchAngleAccordingToCanvas(center, normalized)
     val distance = findTouchDistanceFromCenter(center, normalized)
 
     var selectedIndex = -1
@@ -194,9 +188,7 @@ private fun handleCanvasTap(
     anglesList.forEachIndexed { ind, angle ->
         val stroke = currentStrokeValues[ind]
         if (angle.isInsideAngle(touchAngle)) {
-            if (distance > (center.x - stroke) &&
-                distance < (center.x)
-            ) { // since it's a square center.x or center.y will be the same
+            if (distance > (center.x - stroke) && distance < (center.x)) { // since it's a square center.x or center.y will be the same
                 selectedIndex = ind
                 newDataTapped = true
             }
@@ -232,8 +224,7 @@ private fun Offset.findNormalizedPointFromTouch(canvasCenter: Offset) =
  * drawing starts from the 4th quadrant instead of the first.
  */
 private fun calculateTouchAngleAccordingToCanvas(
-    canvasCenter: Offset,
-    normalizedPoint: Offset
+    canvasCenter: Offset, normalizedPoint: Offset
 ): Float {
     val angle = calculateTouchAngleInDegrees(canvasCenter, normalizedPoint)
     return adjustAngleToCanvas(angle).toFloat()
@@ -245,8 +236,7 @@ private fun calculateTouchAngleAccordingToCanvas(
  */
 private fun calculateTouchAngleInDegrees(canvasCenter: Offset, normalizedPoint: Offset): Double {
     val touchInRadian = kotlin.math.atan2(
-        normalizedPoint.y - canvasCenter.y,
-        normalizedPoint.x - canvasCenter.x
+        normalizedPoint.y - canvasCenter.y, normalizedPoint.x - canvasCenter.x
     )
     return touchInRadian * -180 / Math.PI // Convert radians to angle in degrees
 }
@@ -291,8 +281,7 @@ private fun DonutChartDataCollection.calculateGapAngle(gapPercentage: Float): Fl
  * takes the gap between arcs into the account.
  */
 private fun DonutChartDataCollection.findSweepAngle(
-    index: Int,
-    gapPercentage: Float
+    index: Int, gapPercentage: Float
 ): Float {
     val amount = items[index].amount
     val gap = this.calculateGap(gapPercentage)

@@ -134,7 +134,6 @@ fun PayeeEntryBody(
 }
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PayeeEntryForm(
     payeeDetails: PayeeDetails,

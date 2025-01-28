@@ -1,5 +1,6 @@
 package com.example.expensetracker.ui.screen.entities.composables
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,7 @@ import com.example.expensetracker.ui.common.removeTrPrefix
 import com.example.expensetracker.ui.screen.entities.EntityViewModel
 import kotlinx.coroutines.CoroutineScope
 
+@SuppressLint("DefaultLocale")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CurrenciesList(
@@ -40,7 +42,7 @@ fun CurrenciesList(
 ) {
     val haptics = LocalHapticFeedback.current
 
-    LazyColumn() {
+    LazyColumn {
         items(list.first, key = { it.currencyId }) {
             val x = list.second?.find { historyEntry -> historyEntry.currencyId == it.currencyId }
             ListItem(
@@ -75,7 +77,7 @@ fun CurrenciesList(
                                     modifier = Modifier.padding(start = 4.dp)
                                 )
                                 Text(
-                                    text = String.format("%.2f", -difference!!),
+                                    text = String.format("%.2f", -difference),
                                     color = Color.Green,
                                     fontSize = 16.sp,
                                     modifier = Modifier.padding(start = 4.dp)

@@ -33,7 +33,7 @@ fun CategoryList(
     val haptics = LocalHapticFeedback.current
     val groupedList = (listSub.groupBy { it.parentId })
 
-    LazyColumn() {
+    LazyColumn {
         item {
             listParent.forEach { parent ->
                 ListItem(

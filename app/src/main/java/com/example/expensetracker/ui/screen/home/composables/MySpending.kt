@@ -100,7 +100,7 @@ fun MySpending(expensesByWeek: List<ExpensePerDay>, baseCurrencyInfo: CurrencyFo
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Row(
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ArrowDropUp,

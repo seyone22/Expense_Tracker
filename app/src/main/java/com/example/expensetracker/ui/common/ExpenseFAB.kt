@@ -36,7 +36,7 @@ fun ExpenseFAB(
                 Icon(Icons.Outlined.Edit, "Add")
 
                 AnimatedVisibility(visible = extended) {
-                    Row() {
+                    Row {
                         Spacer(Modifier.width(12.dp))
                         Text(text = "New Transaction")
                     }

@@ -67,7 +67,7 @@ fun EditAccountDialog(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                LazyColumn() {
+                LazyColumn {
                     item {
                         Text(
                             text = title,
