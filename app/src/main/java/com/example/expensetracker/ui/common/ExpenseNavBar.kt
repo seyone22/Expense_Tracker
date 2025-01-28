@@ -108,7 +108,7 @@ fun ExpenseNavBar(
                 }
             }
         } else {
-            NavigationRail() {
+            NavigationRail {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {

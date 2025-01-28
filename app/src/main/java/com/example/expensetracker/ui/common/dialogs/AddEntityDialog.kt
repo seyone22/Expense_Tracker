@@ -75,7 +75,7 @@ fun CategoryEntryDialog(
 
     var categoryExpanded by remember { mutableStateOf(false) }
 
-    val transactionUiState: TransactionUiState by transactionViewModel.transactionUiState1.collectAsState()
+    val transactionUiState: TransactionUiState by transactionViewModel.transactionUiState.collectAsState()
     Log.d("TAG", "CategoryEntryDialog: $transactionUiState")
 
     viewModel.updateCategoryState(

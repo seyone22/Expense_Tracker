@@ -1,7 +1,6 @@
 package com.example.expensetracker.ui.screen.operations.account
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
@@ -78,47 +77,38 @@ fun AccountEntryScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                ),
-                title = {
-                    Text(
-                        text = "Create Account",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        navigateBack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = "Close"
-                        )
-                    }
-                },
-                actions = {
-                    Button(
-                        onClick = {
-                            coroutineScope.launch {
-                                viewModel.saveAccount()
-                                navigateToScreen(HomeDestination.route)
-                            }
-                        },
-                        modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp),
-                        enabled = viewModel.accountUiState.isEntryValid
-                    ) {
-                        Text(text = "Create")
-                    }
-                }
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = {
+        TopAppBar(colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+        ), title = {
+            Text(
+                text = "Create Account", style = MaterialTheme.typography.titleLarge
             )
+        }, navigationIcon = {
+            IconButton(onClick = {
+                navigateBack()
+            }) {
+                Icon(
+                    imageVector = Icons.Filled.Close, contentDescription = "Close"
+                )
+            }
+        }, actions = {
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        viewModel.saveAccount()
+                        navigateToScreen(HomeDestination.route)
+                    }
+                },
+                modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp),
+                enabled = viewModel.accountUiState.isEntryValid
+            ) {
+                Text(text = "Create")
+            }
+        })
 
-        }
+    }
 
     ) { padding ->
         AccountEntryBody(
@@ -137,8 +127,7 @@ fun AccountEntryBody(
     onAccountValueChange: (AccountDetails) -> Unit = {},
 ) {
     LazyColumn(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         item {
@@ -179,10 +168,8 @@ fun AccountEntryForm(
         modifier = modifier
             .focusGroup()
             .padding(0.dp, 8.dp)
-    )
-    {
-        ExposedDropdownMenuBox(
-            expanded = baseCurrencyExpanded,
+    ) {
+        ExposedDropdownMenuBox(expanded = baseCurrencyExpanded,
             onExpandedChange = { baseCurrencyExpanded = !baseCurrencyExpanded }) {
             OutlinedTextField(
                 modifier = Modifier
@@ -203,24 +190,20 @@ fun AccountEntryForm(
                 onDismissRequest = { baseCurrencyExpanded = false },
             ) {
                 currencyList.currenciesList.forEach { currency ->
-                    DropdownMenuItem(
-                        text = { Text(currency.currencyName) },
-                        onClick = {
-                            onValueChange(accountDetails.copy(currencyId = currency.currencyId.toString()))
-                            baseCurrencyExpanded = false
-                        }
-                    )
+                    DropdownMenuItem(text = { Text(currency.currencyName) }, onClick = {
+                        onValueChange(accountDetails.copy(currencyId = currency.currencyId.toString()))
+                        baseCurrencyExpanded = false
+                    })
                 }
             }
         }
-        ExposedDropdownMenuBox(
-            expanded = accountTypeExpanded,
+        ExposedDropdownMenuBox(expanded = accountTypeExpanded,
             onExpandedChange = { accountTypeExpanded = !accountTypeExpanded }) {
             OutlinedTextField(
                 modifier = Modifier
                     .padding(0.dp, 8.dp)
                     .clickable(enabled = true) { accountTypeExpanded = true }
-                    .menuAnchor(),
+                    .menuAnchor(MenuAnchorType.PrimaryEditable, true),
                 value = accountDetails.accountType,
                 readOnly = true,
                 onValueChange = { onValueChange(accountDetails.copy(accountName = it)) },
@@ -236,13 +219,10 @@ fun AccountEntryForm(
             ) {
                 enumValues<AccountTypes>().forEach { accountType ->
                     val displayName: String = accountType.displayName
-                    DropdownMenuItem(
-                        text = { Text(displayName) },
-                        onClick = {
-                            onValueChange(accountDetails.copy(accountType = accountType.displayName))
-                            accountTypeExpanded = false
-                        }
-                    )
+                    DropdownMenuItem(text = { Text(displayName) }, onClick = {
+                        onValueChange(accountDetails.copy(accountType = accountType.displayName))
+                        accountTypeExpanded = false
+                    })
                 }
             }
         }
@@ -271,7 +251,6 @@ fun AccountEntryForm(
                 .padding(0.dp, 8.dp)
                 .clickable(enabled = true) {
                     openInitialDateDialog = true
-                    Log.d("DEBUG", "AccountEntryForm: $openInitialDateDialog")
                 },
             enabled = false,
             colors = OutlinedTextFieldDefaults.colors(
@@ -458,111 +437,90 @@ fun AccountEntryForm(
     if (openInitialDateDialog) {
         val datePickerState = rememberDatePickerState()
         val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
-        DatePickerDialog(
-            onDismissRequest = {
-                // Dismiss the dialog when the user clicks outside the dialog or on the back
-                // button. If you want to disable that functionality, simply use an empty
-                // onDismissRequest.
-                openInitialDateDialog = false
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        openInitialDateDialog = false
-                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        val date = Date(datePickerState.selectedDateMillis!!)
+        DatePickerDialog(onDismissRequest = {
+            // Dismiss the dialog when the user clicks outside the dialog or on the back
+            // button. If you want to disable that functionality, simply use an empty
+            // onDismissRequest.
+            openInitialDateDialog = false
+        }, confirmButton = {
+            TextButton(
+                onClick = {
+                    openInitialDateDialog = false
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val date = Date(datePickerState.selectedDateMillis!!)
 
-                        onValueChange(accountDetails.copy(initialDate = dateFormat.format(date)))
-                    },
-                    enabled = confirmEnabled.value
-                ) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        openInitialDateDialog = false
-                    }
-                ) {
-                    Text("Cancel")
-                }
+                    onValueChange(accountDetails.copy(initialDate = dateFormat.format(date)))
+                }, enabled = confirmEnabled.value
+            ) {
+                Text("OK")
             }
-        ) {
+        }, dismissButton = {
+            TextButton(onClick = {
+                openInitialDateDialog = false
+            }) {
+                Text("Cancel")
+            }
+        }) {
             DatePicker(state = datePickerState)
         }
     }
     if (openStatementDateDialog) {
         val datePickerState = rememberDatePickerState()
         val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
-        DatePickerDialog(
-            onDismissRequest = {
-                // Dismiss the dialog when the user clicks outside the dialog or on the back
-                // button. If you want to disable that functionality, simply use an empty
-                // onDismissRequest.
-                openStatementDateDialog = false
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        openStatementDateDialog = false
-                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        val date = Date(datePickerState.selectedDateMillis!!)
+        DatePickerDialog(onDismissRequest = {
+            // Dismiss the dialog when the user clicks outside the dialog or on the back
+            // button. If you want to disable that functionality, simply use an empty
+            // onDismissRequest.
+            openStatementDateDialog = false
+        }, confirmButton = {
+            TextButton(
+                onClick = {
+                    openStatementDateDialog = false
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val date = Date(datePickerState.selectedDateMillis!!)
 
-                        onValueChange(accountDetails.copy(statementDate = dateFormat.format(date)))
-                    },
-                    enabled = confirmEnabled.value
-                ) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        openStatementDateDialog = false
-                    }
-                ) {
-                    Text("Cancel")
-                }
+                    onValueChange(accountDetails.copy(statementDate = dateFormat.format(date)))
+                }, enabled = confirmEnabled.value
+            ) {
+                Text("OK")
             }
-        ) {
+        }, dismissButton = {
+            TextButton(onClick = {
+                openStatementDateDialog = false
+            }) {
+                Text("Cancel")
+            }
+        }) {
             DatePicker(state = datePickerState)
         }
     }
     if (openPaymentDueDateDialog) {
         val datePickerState = rememberDatePickerState()
         val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
-        DatePickerDialog(
-            onDismissRequest = {
-                // Dismiss the dialog when the user clicks outside the dialog or on the back
-                // button. If you want to disable that functionality, simply use an empty
-                // onDismissRequest.
-                openPaymentDueDateDialog = false
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        openPaymentDueDateDialog = false
-                        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        val date = Date(datePickerState.selectedDateMillis!!)
+        DatePickerDialog(onDismissRequest = {
+            // Dismiss the dialog when the user clicks outside the dialog or on the back
+            // button. If you want to disable that functionality, simply use an empty
+            // onDismissRequest.
+            openPaymentDueDateDialog = false
+        }, confirmButton = {
+            TextButton(
+                onClick = {
+                    openPaymentDueDateDialog = false
+                    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val date = Date(datePickerState.selectedDateMillis!!)
 
-                        onValueChange(accountDetails.copy(paymentDueDate = dateFormat.format(date)))
-                    },
-                    enabled = confirmEnabled.value
-                ) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        openPaymentDueDateDialog = false
-                    }
-                ) {
-                    Text("Cancel")
-                }
+                    onValueChange(accountDetails.copy(paymentDueDate = dateFormat.format(date)))
+                }, enabled = confirmEnabled.value
+            ) {
+                Text("OK")
             }
-        ) {
+        }, dismissButton = {
+            TextButton(onClick = {
+                openPaymentDueDateDialog = false
+            }) {
+                Text("Cancel")
+            }
+        }) {
             DatePicker(state = datePickerState)
         }
     }

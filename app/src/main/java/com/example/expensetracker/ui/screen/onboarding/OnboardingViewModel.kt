@@ -114,9 +114,7 @@ class OnboardingViewModel(
     }
 
     private fun validateInput(uiState: MetadataDetails = metadataUiState.metadataDetails): Boolean {
-        return with(uiState) {
-            uiState.usernameMetadata.infoValue.isNotBlank() && uiState.baseCurrencyMetadata.infoValue != "-1"
-        }
+        return uiState.usernameMetadata.infoValue.isNotBlank() && uiState.baseCurrencyMetadata.infoValue != "-1"
     }
 
     suspend fun prepopulateDB(context: Context) {

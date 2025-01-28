@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screen.budget
 
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -18,7 +17,6 @@ object BudgetsDestination : NavigationDestination {
     override val routeId = 2
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BudgetScreen(
     modifier: Modifier = Modifier,

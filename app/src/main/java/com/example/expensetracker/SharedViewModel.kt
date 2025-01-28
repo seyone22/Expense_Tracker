@@ -31,8 +31,8 @@ class SharedViewModel(
 
     // Common functions
     suspend fun getCurrencyById(currencyId: Int): CurrencyFormat? {
-        val stream = currencyFormatsRepository.getCurrencyFormatStream(currencyId);
-        return stream.firstOrNull();
+        val stream = currencyFormatsRepository.getCurrencyFormatStream(currencyId)
+        return stream.firstOrNull()
     }
 }
 

@@ -34,7 +34,7 @@ fun AnimatedBar(
             color = Color.Black,
             start = Offset(0f, 0f),
             end = Offset(0f, size.height),
-            strokeWidth = with(density) { 1.dp.toPx() }
+            strokeWidth = 1.dp.toPx()
         )
     }
 }

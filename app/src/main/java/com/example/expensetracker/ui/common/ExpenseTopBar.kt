@@ -44,7 +44,7 @@ fun ExpenseTopBar(
                 Text(titleString)
             },
             navigationIcon = {
-                if (selectedActivity!!.contains(AccountDetailDestination.route)) { // Null check performed at the very topn
+                if (selectedActivity!!.contains(AccountDetailDestination.route)) { // Null check performed at the very top
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,

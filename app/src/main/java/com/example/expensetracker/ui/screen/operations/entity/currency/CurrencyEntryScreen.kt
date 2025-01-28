@@ -126,7 +126,6 @@ fun CurrencyEntryBody(
 }
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CurrencyEntryForm(
     currencyDetails: CurrencyDetails,

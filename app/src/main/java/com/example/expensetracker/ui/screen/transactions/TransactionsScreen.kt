@@ -1,6 +1,5 @@
 package com.example.expensetracker.ui.screen.transactions
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,7 +36,7 @@ object TransactionsDestination : NavigationDestination {
     override val routeId = 3
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsScreen(
     modifier: Modifier = Modifier,

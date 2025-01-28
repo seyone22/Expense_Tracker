@@ -29,7 +29,7 @@ fun PayeeList(
 ) {
     val haptics = LocalHapticFeedback.current
 
-    LazyColumn() {
+    LazyColumn {
         items(list, key = { it.payeeId }) {
             ListItem(
                 headlineContent = { Text(it.payeeName) },

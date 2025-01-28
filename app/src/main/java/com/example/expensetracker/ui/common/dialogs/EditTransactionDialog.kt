@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,8 +29,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.ui.AppViewModelProvider
 import com.example.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionDetails
-import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryForm
 import com.example.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
+import com.example.expensetracker.ui.screen.operations.transaction.composables.TransactionEntryForm
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -43,13 +44,15 @@ fun EditTransactionDialog(
 ) {
     val viewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
+    val transactionUiState by viewModel.transactionUiState.collectAsState()
+
     val coroutineScope = rememberCoroutineScope()
 
     val focusManager = LocalFocusManager.current
     var transactionSelected by remember { mutableStateOf(selectedTransaction) }
 
     viewModel.updateUiState(
-        viewModel.transactionUiState.transactionDetails.copy(
+        transactionUiState.transactionDetails.copy(
             transId = transactionSelected.transId,
             transDate = transactionSelected.transDate,
             status = transactionSelected.status,
@@ -98,7 +101,8 @@ fun EditTransactionDialog(
                         onValueChange = { transactionDetails, _ ->
                             transactionSelected = transactionDetails
                         },
-                        edit = true
+                        edit = true,
+                        transactionUiState = transactionUiState
                     )
 
                     Row(

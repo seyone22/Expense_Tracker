@@ -120,7 +120,6 @@ fun CategoryEntryBody(
 }
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryEntryForm(
     categoryDetails: CategoryDetails,
