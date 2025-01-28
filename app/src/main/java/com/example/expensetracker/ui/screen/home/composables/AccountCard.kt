@@ -36,15 +36,17 @@ fun AccountCard(
 ) {
     // Code block to get the current currency's detail.
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
-    var currencyData by remember { mutableStateOf(CurrencyFormat()) } ;
+    var currencyData by remember { mutableStateOf(CurrencyFormat()) };
 
     LaunchedEffect(accountWithBalance.first.currencyId) {
-        currencyData = sharedViewModel.getCurrencyById(accountWithBalance.first.currencyId) ?: CurrencyFormat();
+        currencyData = sharedViewModel.getCurrencyById(accountWithBalance.first.currencyId)
+            ?: CurrencyFormat();
         Log.d("TAG", "AccountCard: $currencyData")
     }
 
     Card(
-        colors = CardDefaults.cardColors().copy(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = CardDefaults.cardColors()
+            .copy(containerColor = MaterialTheme.colorScheme.primaryContainer),
         modifier = Modifier
             .width(260.dp)
             .height(160.dp)

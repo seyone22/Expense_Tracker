@@ -81,12 +81,14 @@ fun AccountDetailScreen(
 
     val coroutineScope = rememberCoroutineScope()
 
-    var currencyData by remember { mutableStateOf(CurrencyFormat()) } ;
+    var currencyData by remember { mutableStateOf(CurrencyFormat()) };
 
     LaunchedEffect(Unit, accountDetailAccountUiState.account.currencyId) {
         viewModel.getTransactions()
         viewModel.getAccount()
-        currencyData = sharedViewModel.getCurrencyById(accountDetailAccountUiState.account.currencyId) ?: CurrencyFormat();
+        currencyData =
+            sharedViewModel.getCurrencyById(accountDetailAccountUiState.account.currencyId)
+                ?: CurrencyFormat();
 
     }
 
@@ -103,7 +105,8 @@ fun AccountDetailScreen(
             currency = currencyData
         )
 
-        AccountDetailCard(modifier = modifier,
+        AccountDetailCard(
+            modifier = modifier,
             accountDetailUiState = accountDetailAccountUiState,
         )
 
@@ -119,11 +122,12 @@ fun AccountDetailScreen(
     }
 
     if (openEditDialog.value and (openEditType.value == EntryFields.TRANSACTION)) {
-        EditTransactionDialog(onConfirmClick = {
-            coroutineScope.launch {
-                viewModel.editTransaction(selectedTransaction)
-            }
-        },
+        EditTransactionDialog(
+            onConfirmClick = {
+                coroutineScope.launch {
+                    viewModel.editTransaction(selectedTransaction)
+                }
+            },
             onDismissRequest = { openEditDialog.value = !openEditDialog.value },
             edit = true,
             title = "Edit Transaction",
@@ -131,11 +135,12 @@ fun AccountDetailScreen(
         )
     }
     if (openEditDialog.value and (openEditType.value == EntryFields.ACCOUNT)) {
-        EditAccountDialog(onConfirmClick = {
-            coroutineScope.launch {
-                viewModel.editAccount(it)
-            }
-        },
+        EditAccountDialog(
+            onConfirmClick = {
+                coroutineScope.launch {
+                    viewModel.editAccount(it)
+                }
+            },
             onDismissRequest = { openEditDialog.value = !openEditDialog.value },
             viewModel = viewModel,
             edit = true,
@@ -144,7 +149,8 @@ fun AccountDetailScreen(
         )
     }
     if (openDeleteDialog.value) {
-        DeleteConfirmationDialog(onDismissRequest = { openDeleteDialog.value = false },
+        DeleteConfirmationDialog(
+            onDismissRequest = { openDeleteDialog.value = false },
             confirmButtonAction = {
                 coroutineScope.launch {
                     viewModel.deleteAccount(

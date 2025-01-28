@@ -49,7 +49,8 @@ class EntityViewModel(
 
     private val currencyFormatsFlow: Flow<List<CurrencyFormat>> =
         currencyFormatsRepository.getAllCurrencyFormatsStream()
-    private val currencyHistoryFlow: Flow<List<CurrencyHistory>> = currencyHistoryRepository.getAllCurrencyHistoryStream()
+    private val currencyHistoryFlow: Flow<List<CurrencyHistory>> =
+        currencyHistoryRepository.getAllCurrencyHistoryStream()
     private val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllActivePayeesStream()
     val activeCurrenciesFlow: Flow<List<Int>> = currencyFormatsRepository.getActiveCurrencies()
 
@@ -218,7 +219,10 @@ data class EntitiesUiState(
     val categoriesParent: List<Category> = listOf(),
     val categoriesSub: List<Category> = listOf(),
     val payeesList: List<Payee> = listOf(),
-    val currenciesList: Pair<List<CurrencyFormat>, List<CurrencyHistory>?> = Pair(listOf(), listOf()),
+    val currenciesList: Pair<List<CurrencyFormat>, List<CurrencyHistory>?> = Pair(
+        listOf(),
+        listOf()
+    ),
     val activeCurrencies: List<Int> = listOf()
 )
 

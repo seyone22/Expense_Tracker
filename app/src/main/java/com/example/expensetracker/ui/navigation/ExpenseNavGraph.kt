@@ -16,12 +16,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.expensetracker.SelectedObjects
-import com.example.expensetracker.ui.screen.home.HomeScreen
-import com.example.expensetracker.ui.screen.home.HomeDestination
 import com.example.expensetracker.ui.screen.budget.BudgetScreen
 import com.example.expensetracker.ui.screen.budget.BudgetsDestination
 import com.example.expensetracker.ui.screen.entities.EntitiesDestination
 import com.example.expensetracker.ui.screen.entities.EntityScreen
+import com.example.expensetracker.ui.screen.home.HomeDestination
+import com.example.expensetracker.ui.screen.home.HomeScreen
 import com.example.expensetracker.ui.screen.onboarding.OnboardingDestination
 import com.example.expensetracker.ui.screen.onboarding.OnboardingScreen
 import com.example.expensetracker.ui.screen.operations.account.AccountDetailDestination

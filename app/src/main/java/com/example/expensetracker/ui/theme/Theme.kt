@@ -54,7 +54,11 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
-data class DarkTheme(var isDark: Boolean = false, var isMidnight: Boolean = false, val systemTheme: Boolean = false)
+data class DarkTheme(
+    var isDark: Boolean = false,
+    var isMidnight: Boolean = false,
+    val systemTheme: Boolean = false
+)
 
 var LocalTheme = compositionLocalOf { DarkTheme() }
 

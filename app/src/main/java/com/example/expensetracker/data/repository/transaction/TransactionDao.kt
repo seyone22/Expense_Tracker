@@ -136,7 +136,12 @@ interface TransactionDao {
         AND strftime('%Y', CHECKINGACCOUNT_V1.transDate) = :year
     """
     )
-    fun getTotalBalanceByCode(transCode: String, status: String, month: Int, year: Int): Flow<Double>
+    fun getTotalBalanceByCode(
+        transCode: String,
+        status: String,
+        month: Int,
+        year: Int
+    ): Flow<Double>
 
     @Query(
         """
