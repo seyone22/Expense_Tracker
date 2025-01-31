@@ -7,20 +7,21 @@ plugins {
 }
 
 android {
-    namespace = "com.example.expensetracker"
+    namespace = "com.seyone22.expensetracker"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.expensetracker"
+        applicationId = "com.seyone22.expenses"
         minSdk = 28
         targetSdk = 35
         versionCode = 4
-        versionName = "v0.4.0-alpha"
+        versionName = "0.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
+        versionNameSuffix = "-alpha"
     }
 
     buildTypes {
