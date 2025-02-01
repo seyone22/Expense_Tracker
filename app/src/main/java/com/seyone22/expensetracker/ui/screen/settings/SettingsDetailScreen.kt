@@ -1,7 +1,6 @@
 package com.seyone22.expensetracker.ui.screen.settings
 
 import android.app.Activity
-import android.app.Application
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -240,11 +239,6 @@ fun GeneralSettingsList(
     // Edit Currency Dialog
     if (editCurrency) {
         val currencyList by viewModel.currencyList.collectAsState()
-        var newCurrencyId: String by remember {
-            mutableStateOf(
-                metadata.find { it?.infoName == "BASECURRENCYID" }?.infoValue ?: ""
-            )
-        }
         var newCurrency = CurrencyFormat()
         newCurrency.currencyName = removeTrPrefix(baseCurrencyName)
         var baseCurrencyExpanded by remember { mutableStateOf(false) }
@@ -442,8 +436,6 @@ fun DataSettingsList(
     metadata: List<Metadata?>,
     viewModel: SettingsViewModel,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
     Column {
         SettingsListItem(settingName = "Update Currency Formats",
             settingSubtext = "Exchange rates are updated monthly from the InfoEuro portal",
@@ -459,16 +451,14 @@ fun DataSettingsList(
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun SecuritySettingsList(
-    scope: CoroutineScope = rememberCoroutineScope(),
     activity: Activity? = LocalActivity.current,
     context: Context? = LocalContext.current,
 ) {
     val cryptoManager = remember { CryptoManager() }
     val screenLockManager = remember {
         ScreenLockManager(
-            context?.applicationContext as Application,
-            context,
-            cryptoManager
+            context = context!!,
+            cryptoManager = cryptoManager
         )
     }
 
