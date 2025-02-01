@@ -18,7 +18,7 @@ import com.seyone22.expensetracker.ui.screen.transactions.composables.Transactio
 
 @Composable
 fun TransactionData(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     accountsUiState: HomeUiState,
     navigateToScreen: (screen: String) -> Unit,
 ) {
@@ -47,7 +47,6 @@ fun TransactionData(
         }
 
         TransactionList(
-            modifier = modifier,
             transactions = accountsUiState.transactionSample,
             longClicked = { },
             showFilter = false

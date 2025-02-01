@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Card
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +36,7 @@ import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.data.model.Report
 import com.seyone22.expensetracker.ui.AppViewModelProvider
+import com.seyone22.expensetracker.ui.common.ExpenseNavBar
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 
 object ReportsDestination : NavigationDestination {
@@ -48,21 +50,23 @@ fun ReportScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
     viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    setTopBarAction: (Int) -> Unit
 ) {
     val reports by viewModel.reportsFlow.collectAsState(initial = listOf())
 
-    LaunchedEffect(Unit) {
-        setTopBarAction(12)
-    }
-
-    LazyVerticalGrid(modifier = modifier, columns = GridCells.Adaptive(minSize = 320.dp)) {
-        items(reports.size) { index ->
-            ReportCard(
-                modifier = Modifier,
-                viewModel = viewModel,
-                report = reports[index]
-            )
+    Scaffold(bottomBar = {
+        ExpenseNavBar(
+            currentActivity = ReportsDestination.route, navigateToScreen = navigateToScreen
+        )
+    }) {
+        LazyVerticalGrid(
+            modifier = Modifier.padding(paddingValues = it),
+            columns = GridCells.Adaptive(minSize = 320.dp)
+        ) {
+            items(reports.size) { index ->
+                ReportCard(
+                    modifier = Modifier, viewModel = viewModel, report = reports[index]
+                )
+            }
         }
     }
 }
@@ -100,12 +104,10 @@ fun ReportCard(
             extras { it[labelListKey] = resultsList }
         }
     }
-    val xx =
-        CartesianValueFormatter { x, chartValues, _ -> chartValues.toString() }
+    val xx = CartesianValueFormatter { x, chartValues, _ -> chartValues.toString() }
 
     Card(
-        modifier = modifier
-            .padding(24.dp)
+        modifier = modifier.padding(24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -125,11 +127,9 @@ fun ReportCard(
                         )
                     ),
                     startAxis = VerticalAxis.rememberStart(),
-                    bottomAxis =
-                    HorizontalAxis.rememberBottom(
+                    bottomAxis = HorizontalAxis.rememberBottom(
                         valueFormatter = xx,
-                        itemPlacer =
-                        remember {
+                        itemPlacer = remember {
                             HorizontalAxis.ItemPlacer.segmented()
                         },
                     ),

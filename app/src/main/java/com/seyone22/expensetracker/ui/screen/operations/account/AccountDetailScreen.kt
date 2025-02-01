@@ -1,6 +1,5 @@
 package com.seyone22.expensetracker.ui.screen.operations.account
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -69,8 +68,6 @@ fun AccountDetailScreen(
 
     val accountDetailAccountUiState by viewModel.accountDetailAccountUiState.collectAsState()
     val accountDetailTransactionUiState by viewModel.accountDetailTransactionUiState.collectAsState()
-    Log.d("TAG", "UISTATE: $accountDetailAccountUiState")
-
 
     var isSelected by remember { mutableStateOf(false) }
     var selectedTransaction by remember { mutableStateOf(TransactionDetails()) }

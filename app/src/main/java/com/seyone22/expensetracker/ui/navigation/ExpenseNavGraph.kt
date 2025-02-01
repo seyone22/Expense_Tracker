@@ -1,12 +1,10 @@
 package com.seyone22.expensetracker.ui.navigation
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,7 +13,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.seyone22.expensetracker.SelectedObjects
 import com.seyone22.expensetracker.ui.screen.budget.BudgetScreen
 import com.seyone22.expensetracker.ui.screen.budget.BudgetsDestination
 import com.seyone22.expensetracker.ui.screen.entities.EntitiesDestination
@@ -57,14 +54,10 @@ fun ExpenseNavHost(
     navController: NavHostController,
     windowSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier,
-    setTopBarAction: (Int) -> Unit,
     onToggleDarkTheme: (Int) -> Unit,
-    setIsItemSelected: (Boolean) -> Unit,
-    setSelectedObject: (SelectedObjects) -> Unit,
-    innerPadding: PaddingValues
+    snackbarHostState: SnackbarHostState,
 ) {
     NavHost(
-        modifier = modifier.padding(innerPadding),
         navController = navController,
         startDestination = HomeDestination.route,
         enterTransition = { EnterTransition.None },
@@ -75,32 +68,24 @@ fun ExpenseNavHost(
             HomeScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 windowSizeClass = windowSizeClass,
-                setTopBarAction = setTopBarAction
             )
         }
         composable(route = EntitiesDestination.route) {
             EntityScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
-                setTopBarAction = setTopBarAction,
-                setIsItemSelected = setIsItemSelected,
-                setSelectedObject = setSelectedObject
+                navController = navController
+
             )
         }
         composable(route = TransactionsDestination.route) {
             TransactionsScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
-                setIsItemSelected = setIsItemSelected,
-                setSelectedObject = { selObj ->
-                    setSelectedObject(selObj)
-                    Log.d("TAG", "ExpenseNavHost: $selObj")
-                },
-                setTopBarAction = setTopBarAction,
+                navController = navController
             )
         }
         composable(route = ReportsDestination.route) {
             ReportScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
-                setTopBarAction = setTopBarAction,
             )
         }
         composable(route = BudgetsDestination.route) {

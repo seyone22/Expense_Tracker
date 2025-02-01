@@ -15,11 +15,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ProfileAvatarWithFallback(image: Painter? = null, initial: String = "S", size: Dp = 64.dp) {
+fun ProfileAvatarWithFallback(
+    image: Painter? = null,
+    initial: String = "S",
+    size: Dp = 64.dp,
+    fontSize: TextUnit = 28.sp
+) {
     Box(
         modifier = Modifier
             .size(size)
@@ -35,7 +41,7 @@ fun ProfileAvatarWithFallback(image: Painter? = null, initial: String = "S", siz
             )
         } ?: Text(
             text = initial.uppercase(),
-            fontSize = 28.sp,
+            fontSize = fontSize,
             color = Color.White
         )
     }

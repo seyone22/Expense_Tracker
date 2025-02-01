@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -22,6 +22,7 @@ import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.ui.AppViewModelProvider
+import com.seyone22.expensetracker.ui.common.ExpenseNavBar
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.home.composables.AccountData
 import com.seyone22.expensetracker.ui.screen.home.composables.MySpending
@@ -41,7 +42,6 @@ fun HomeScreen(
     navigateToScreen: (screen: String) -> Unit,
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
     windowSizeClass: WindowWidthSizeClass,
-    setTopBarAction: (Int) -> Unit
 ) {
     var offset by remember { mutableFloatStateOf(0f) }
 
@@ -51,11 +51,6 @@ fun HomeScreen(
     val totals by viewModel.getFilteredTotal("All").collectAsState(initial = Totals())
     val expensesByWeek by viewModel.expensesByWeekFlow.collectAsState(initial = emptyList())
 
-    // Use LaunchedEffect to launch the coroutine when the composable is first recomposed
-    LaunchedEffect(true) {
-        setTopBarAction(9)
-    }
-
     // Code block to get the current currency's detail.
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val baseCurrency by sharedViewModel.baseCurrencyFlow.collectAsState(initial = CurrencyFormat())
@@ -64,42 +59,54 @@ fun HomeScreen(
     if (!isUsed) {
         navigateToScreen(OnboardingDestination.route)
     }
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 320.dp),
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp, 0.dp)
-            .scrollable(
-                orientation = Orientation.Vertical,
-                state = rememberScrollableState { delta ->
-                    offset += delta
-                    delta
-                }),
+    Scaffold(
+        bottomBar = {
+            ExpenseNavBar(
+                currentActivity = HomeDestination.route,
+                navigateToScreen = navigateToScreen
+            )
+        }
     ) {
-        item {
-            NetWorth(
-                totals = totals, baseCurrencyInfo = baseCurrency ?: CurrencyFormat()
-            )
-        }
-        item {
-            MySpending(
-                expensesByWeek = expensesByWeek,
-                baseCurrencyInfo = baseCurrency ?: CurrencyFormat()
-            )
-        }
-        item {
-            AccountData(
-                modifier = modifier,
-                accountsUiState = accountsUiState,
-                navigateToScreen = navigateToScreen,
-            )
-        }
-        item {
-            TransactionData(
-                modifier = modifier,
-                accountsUiState = accountsUiState,
-                navigateToScreen = navigateToScreen,
-            )
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 320.dp),
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues = it)
+                .scrollable(
+                    orientation = Orientation.Vertical,
+                    state = rememberScrollableState { delta ->
+                        offset += delta
+                        delta
+                    }),
+        ) {
+            item {
+                NetWorth(
+                    totals = totals,
+                    baseCurrencyInfo = baseCurrency ?: CurrencyFormat(),
+                    modifier = Modifier.padding(16.dp, 0.dp)
+                )
+            }
+            item {
+                MySpending(
+                    expensesByWeek = expensesByWeek,
+                    baseCurrencyInfo = baseCurrency ?: CurrencyFormat(),
+                    modifier = Modifier.padding(16.dp, 0.dp)
+                )
+            }
+            item {
+                AccountData(
+                    modifier = modifier.padding(16.dp, 0.dp, 0.dp, 0.dp),
+                    accountsUiState = accountsUiState,
+                    navigateToScreen = navigateToScreen,
+                )
+            }
+            item {
+                TransactionData(
+                    modifier = modifier.padding(16.dp, 0.dp),
+                    accountsUiState = accountsUiState,
+                    navigateToScreen = navigateToScreen,
+                )
+            }
         }
     }
 }

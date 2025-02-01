@@ -48,7 +48,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun MySpending(expensesByWeek: List<ExpensePerDay>, baseCurrencyInfo: CurrencyFormat) {
+fun MySpending(
+    expensesByWeek: List<ExpensePerDay>,
+    baseCurrencyInfo: CurrencyFormat,
+    modifier: Modifier = Modifier
+) {
     // Initialize a list of 7 zeros
     val seriesState = remember { mutableStateOf(List(7) { 0.0 }) }
 
@@ -83,7 +87,7 @@ fun MySpending(expensesByWeek: List<ExpensePerDay>, baseCurrencyInfo: CurrencyFo
     }
 
     OutlinedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(top = 16.dp)
     ) {
