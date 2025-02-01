@@ -1,8 +1,8 @@
 package com.seyone22.expensetracker.utils
 
-import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,27 +12,26 @@ private const val PREFS_FILENAME = "secure_prefs"
 private const val PREF_KEY = "screen_lock_enabled"
 
 class ScreenLockManager(
-    private val application: Application,
     private val context: Context,
-    private val cryptoManager: CryptoManager
+    private val cryptoManager: CryptoManager,
+    private val biometricAuthLauncher: ActivityResultLauncher<Unit>? = null // Pass the launcher to the constructor
 ) : DefaultLifecycleObserver {
-    private val _isLocked = MutableStateFlow(false)
-    val isLocked: StateFlow<Boolean> = _isLocked
+    private val _isLocked = MutableStateFlow(true)
 
-    private fun lockApp() {
-        _isLocked.value = true
-    }
+    // Public exposure
+    val isAppLocked: StateFlow<Boolean> = _isLocked
 
-    private fun unlockApp() {
-        _isLocked.value = false
+    fun toggleLockState() {
+        _isLocked.value = !_isLocked.value
     }
 
     fun triggerLock() {
-        lockApp()
+        _isLocked.value = true
     }
 
     fun triggerUnlock() {
-        unlockApp()
+        if (biometricAuthLauncher == null) return
+        biometricAuthLauncher.launch(Unit)
     }
 
     // Save the screen lock preference
@@ -40,11 +39,7 @@ class ScreenLockManager(
         val cipher = cryptoManager.initEncryptionCipher("ScreenLockKey")
         val encryptedData = cryptoManager.encrypt(isEnabled.toString(), cipher)
         cryptoManager.saveToPrefs(
-            encryptedData,
-            context,
-            PREFS_FILENAME,
-            Context.MODE_PRIVATE,
-            PREF_KEY
+            encryptedData, context, PREFS_FILENAME, Context.MODE_PRIVATE, PREF_KEY
         )
     }
 
@@ -67,10 +62,4 @@ class ScreenLockManager(
         }
     }
 
-    override fun onStart(owner: LifecycleOwner) {
-        super.onStart(owner)
-        if (isScreenLockEnabled()) {
-            _isLocked.value = false
-        }
-    }
 }
