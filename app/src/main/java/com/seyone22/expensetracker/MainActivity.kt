@@ -25,6 +25,7 @@ import com.seyone22.expensetracker.ui.screen.settings.SettingsViewModel
 import com.seyone22.expensetracker.ui.theme.DarkTheme
 import com.seyone22.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.seyone22.expensetracker.ui.theme.LocalTheme
+import com.seyone22.expensetracker.utils.BiometricPromptActivityResultContract
 import com.seyone22.expensetracker.utils.CryptoManager
 import com.seyone22.expensetracker.utils.ScreenLockManager
 
@@ -33,6 +34,15 @@ class MainActivity : ComponentActivity() {
     private lateinit var cryptoManager: CryptoManager // Assuming you have a CryptoManager instance
     private lateinit var screenLockManager: ScreenLockManager
 
+    // Create an ActivityResultLauncher to launch biometric authentication
+    private val biometricAuthLauncher =
+        registerForActivityResult(BiometricPromptActivityResultContract()) { success ->
+            if (success) {
+                screenLockManager.toggleLockState()
+            } else {
+                screenLockManager.triggerLock()
+            }
+        }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(
@@ -42,20 +52,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         cryptoManager = CryptoManager()
-        screenLockManager = ScreenLockManager(application, context = this, cryptoManager)
+        screenLockManager =
+            ScreenLockManager(context = this, cryptoManager, biometricAuthLauncher)
 
         // Observe app lifecycle globally
         ProcessLifecycleOwner.get().lifecycle.addObserver(screenLockManager)
-
-        // Fetch the screen lock preference on app load
-        val isScreenLockEnabled = screenLockManager.isScreenLockEnabled()
-        if (isScreenLockEnabled) {
-            // Lock the app if the preference indicates screen lock is enabled
-            screenLockManager.triggerLock()
-        } else {
-            // Unlock the app if screen lock is disabled
-            screenLockManager.triggerUnlock()
-        }
 
         setContent {
             val windowSize = calculateWindowSizeClass(this)
@@ -76,9 +77,7 @@ class MainActivity : ComponentActivity() {
                     midnight = darkThemeState.value.isMidnight
                 ) {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        ExpenseApp(
-                            screenLockManager = screenLockManager,
-                            windowSizeClass = windowSize.widthSizeClass,
+                        ExpenseApp(windowSizeClass = windowSize.widthSizeClass,
                             onToggleDarkTheme = { option ->
                                 darkThemeState.value = when (option) {
                                     1 -> darkThemeState.value.copy(isDark = true)
@@ -86,11 +85,17 @@ class MainActivity : ComponentActivity() {
                                     2 -> darkThemeState.value.copy(isDark = isSystemInDarkTheme())
                                     else -> darkThemeState.value
                                 }
-                            }
-                        )
+                            })
                     }
                 }
             }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (screenLockManager.isScreenLockEnabled()) {
+            screenLockManager.triggerLock()
         }
     }
 
@@ -98,8 +103,8 @@ class MainActivity : ComponentActivity() {
     // Trigger biometric unlock when the app is resumed and locked
     override fun onResume() {
         super.onResume()
-        if (screenLockManager.isLocked.value) {
-            // Trigger biometric authentication to unlock the app
+        if (screenLockManager.isScreenLockEnabled() && screenLockManager.isAppLocked.value) {
+            screenLockManager.triggerUnlock()
         }
     }
 
