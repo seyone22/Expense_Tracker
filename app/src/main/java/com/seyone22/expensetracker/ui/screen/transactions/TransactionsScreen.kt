@@ -3,11 +3,13 @@ package com.seyone22.expensetracker.ui.screen.transactions
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,10 +24,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.SelectedObjects
 import com.seyone22.expensetracker.ui.AppViewModelProvider
+import com.seyone22.expensetracker.ui.common.ExpenseTopBar
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
+import com.seyone22.expensetracker.ui.screen.entities.EntitiesDestination
 import com.seyone22.expensetracker.ui.screen.transactions.composables.ScheduledTransactionList
 import com.seyone22.expensetracker.ui.screen.transactions.composables.TransactionList
 import kotlinx.coroutines.launch
@@ -41,10 +46,8 @@ object TransactionsDestination : NavigationDestination {
 fun TransactionsScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
-    setTopBarAction: (Int) -> Unit,
-    setIsItemSelected: (Boolean) -> Unit,
-    setSelectedObject: (SelectedObjects) -> Unit,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    navController: NavHostController,
 ) {
     val transactionsUiState by viewModel.transactionsUiState.collectAsState()
 
@@ -52,67 +55,72 @@ fun TransactionsScreen(
     val context = LocalContext.current
 
     var state by remember { mutableIntStateOf(0) }
-    setTopBarAction(8)
 
     val titles = listOf("Transactions", "Scheduled")
 
     val pagerState = rememberPagerState(pageCount = { 2 })
-
-    Column(modifier = modifier.fillMaxSize()) {
-        PrimaryTabRow(
-            selectedTabIndex = state,
-            containerColor = MaterialTheme.colorScheme.background,
-        ) {
-            titles.forEachIndexed { index, title ->
-                Tab(
-                    selected = state == index,
-                    onClick = {
-                        state = index
-                        setTopBarAction(state)
-                        coroutineScope.launch { pagerState.animateScrollToPage(index) }
-                    },
-                    text = {
-                        Text(
-                            text = title,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                )
-            }
+    Scaffold(
+        topBar = {
+            ExpenseTopBar(
+                selectedActivity = EntitiesDestination.route,
+                navController = navController,
+                type = "Left"
+            )
         }
-        HorizontalPager(
-            state = pagerState,
-            verticalAlignment = Alignment.Top,
-            modifier = Modifier.fillMaxHeight()
-
-        ) { page ->
-            when (page) {
-                0 -> {
-                    state = pagerState.currentPage
-                    TransactionList(
-                        transactions = transactionsUiState.transactions,
-                        longClicked = { selected ->
-                            setIsItemSelected(true)
-                            val selObj = SelectedObjects(transaction = selected)
-                            setSelectedObject(selObj)
+    ) {
+        Column(modifier = modifier
+            .fillMaxSize()
+            .padding(paddingValues = it)) {
+            PrimaryTabRow(
+                selectedTabIndex = state,
+                containerColor = MaterialTheme.colorScheme.background,
+            ) {
+                titles.forEachIndexed { index, title ->
+                    Tab(
+                        selected = state == index,
+                        onClick = {
+                            state = index
+                            coroutineScope.launch { pagerState.animateScrollToPage(index) }
                         },
-                        viewModel = viewModel,
-                        showFilter = true
+                        text = {
+                            Text(
+                                text = title,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     )
                 }
+            }
+            HorizontalPager(
+                state = pagerState,
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier.fillMaxHeight()
 
-                1 -> {
-                    state = pagerState.currentPage
-                    ScheduledTransactionList(
-                        billsDeposits = transactionsUiState.billsDeposits,
-                        longClicked = { selected ->
-                            setIsItemSelected(true)
-                            val selObj = SelectedObjects(billsDeposits = selected)
-                            setSelectedObject(selObj)
-                        },
-                        viewModel = viewModel
-                    )
+            ) { page ->
+                when (page) {
+                    0 -> {
+                        state = pagerState.currentPage
+                        TransactionList(
+                            transactions = transactionsUiState.transactions,
+                            longClicked = { selected ->
+                                val selObj = SelectedObjects(transaction = selected)
+                            },
+                            viewModel = viewModel,
+                            showFilter = true
+                        )
+                    }
+
+                    1 -> {
+                        state = pagerState.currentPage
+                        ScheduledTransactionList(
+                            billsDeposits = transactionsUiState.billsDeposits,
+                            longClicked = { selected ->
+                                val selObj = SelectedObjects(billsDeposits = selected)
+                            },
+                            viewModel = viewModel
+                        )
+                    }
                 }
             }
         }

@@ -28,6 +28,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".utils.BiometricAuthActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ExpenseTracker" />
     </application>
 
 </manifest>

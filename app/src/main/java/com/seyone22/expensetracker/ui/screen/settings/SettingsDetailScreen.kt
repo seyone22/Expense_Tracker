@@ -1,6 +1,13 @@
 package com.seyone22.expensetracker.ui.screen.settings
 
+import android.app.Activity
+import android.app.Application
+import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +49,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -53,6 +61,10 @@ import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.removeTrPrefix
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.theme.LocalTheme
+import com.seyone22.expensetracker.utils.BiometricHelper
+import com.seyone22.expensetracker.utils.BiometricPromptActivityResultContract
+import com.seyone22.expensetracker.utils.CryptoManager
+import com.seyone22.expensetracker.utils.ScreenLockManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -62,6 +74,7 @@ object SettingsDetailDestination : NavigationDestination {
     override val routeId = 15
 }
 
+@RequiresApi(Build.VERSION_CODES.R)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsDetailScreen(
@@ -117,7 +130,6 @@ fun SettingsDetailScreen(
 
                 "Security" -> {
                     SecuritySettingsList(
-                        viewModel = viewModel
                     )
                 }
 
@@ -388,7 +400,7 @@ fun AppearanceSettingsList(
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(0.dp, 8.dp)
                         )
-                        Row{
+                        Row {
                             RadioButton(enabled = true, selected = (selectedTheme == 0), onClick = {
                                 selectedTheme = 0
                                 coroutineScope.launch { viewModel.setTheme(selectedTheme) }
@@ -444,36 +456,63 @@ fun DataSettingsList(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun SecuritySettingsList(
-    viewModel: SettingsViewModel, scope: CoroutineScope = rememberCoroutineScope()
+    scope: CoroutineScope = rememberCoroutineScope(),
+    activity: Activity? = LocalActivity.current,
+    context: Context? = LocalContext.current,
 ) {
-    val securityObject by viewModel.securityObject.collectAsState(initial = SecurityObject())
-    Log.d("TAG", "INITIAL SecuritySettingsList: $securityObject")
+    val cryptoManager = remember { CryptoManager() }
+    val screenLockManager = remember {
+        ScreenLockManager(
+            context?.applicationContext as Application,
+            context,
+            cryptoManager
+        )
+    }
 
-    val x: Boolean by remember { mutableStateOf(securityObject.requireUnlock) }
+    // Check if biometric authentication is available on the device
+    val isBiometricAvailable = remember { BiometricHelper.isBiometricAvailable(activity) }
+    val requireUnlock = remember { mutableStateOf(screenLockManager.isScreenLockEnabled()) }
+
+    val secureScreen = remember { mutableStateOf(false) }
+
+    BiometricHelper.checkBiometricStatus(context = context)
+
+    // Register biometric authentication launcher
+    val biometricLauncher =
+        rememberLauncherForActivityResult(contract = BiometricPromptActivityResultContract()) { isSuccess ->
+            if (isSuccess) {
+                Log.d("TAG", "SecuritySettingsList: Succes")
+                requireUnlock.value = !requireUnlock.value
+                screenLockManager.saveScreenLockPreference(requireUnlock.value)
+            } else {
+                Log.d("TAG", "SecuritySettingsList: ERROR")
+                //throw Exception("Biometric authentication failed!")
+            }
+        }
 
     Column {
+        // Set the screen lock, enable setting when biometrics are available
         SettingsToggleListItem(
             settingName = "Require Unlock",
-            toggle = x,
+            toggle = requireUnlock.value,
             onToggleChange = { newValue ->
-                securityObject.requireUnlock = newValue
-                scope.launch {
-                    viewModel.setRequireUnlock(value = securityObject.requireUnlock)
-                }
-            })
+                biometricLauncher.launch(Unit) // Authenticate before toggling
+            },
+            enabled = isBiometricAvailable
+        )
+
         SettingsListItem(settingName = "Lock when idle", settingSubtext = "", action = {
 
         })
         SettingsToggleListItem(settingName = "Secure screen",
             settingSubtext = "Hides app contents when switching apps, and blocks screenshots",
-            toggle = securityObject.secureScreen,
+            toggle = secureScreen.value,
+            enabled = isBiometricAvailable,
             onToggleChange = { newValue ->
-                securityObject.secureScreen = newValue
-                scope.launch {
-                    viewModel.setSecureScreen(value = securityObject.secureScreen)
-                }
+                biometricLauncher.launch(Unit)
             })
     }
 }
@@ -496,18 +535,17 @@ fun ImportExportSettingsList(
                 scope.launch {
                     viewModel.setRequireUnlock(value = securityObject.requireUnlock)
                 }
-            })
+            },
+        )
         SettingsListItem(settingName = "Lock when idle", settingSubtext = "", action = {
 
         })
-        SettingsToggleListItem(settingName = "Secure screen",
+        SettingsToggleListItem(
+            settingName = "Secure screen",
             settingSubtext = "Hides app contents when switching apps, and blocks screenshots",
             toggle = securityObject.secureScreen,
             onToggleChange = { newValue ->
-                securityObject.secureScreen = newValue
-                scope.launch {
-                    viewModel.setSecureScreen(value = securityObject.secureScreen)
-                }
-            })
+            },
+        )
     }
 }

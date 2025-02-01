@@ -28,10 +28,11 @@ import com.seyone22.expensetracker.ui.screen.home.Totals
 @Composable
 fun NetWorth(
     totals: Totals,
-    baseCurrencyInfo: CurrencyFormat
+    baseCurrencyInfo: CurrencyFormat,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
     ) {
         Spacer(modifier = Modifier.height(24.dp))

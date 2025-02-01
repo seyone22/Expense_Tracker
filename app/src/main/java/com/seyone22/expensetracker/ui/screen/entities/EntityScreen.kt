@@ -15,6 +15,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,11 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.seyone22.expensetracker.R
-import com.seyone22.expensetracker.SelectedObjects
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.ui.AppViewModelProvider
+import com.seyone22.expensetracker.ui.common.ExpenseTopBar
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
 import com.seyone22.expensetracker.ui.common.ProfileAvatarWithFallback
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
@@ -56,10 +58,8 @@ object EntitiesDestination : NavigationDestination {
 fun EntityScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
-    setTopBarAction: (Int) -> Unit,
-    setIsItemSelected: (Boolean) -> Unit,
-    setSelectedObject: (SelectedObjects) -> Unit,
     viewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    navController: NavHostController,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -68,7 +68,6 @@ fun EntityScreen(
     var finished: Boolean by remember { mutableStateOf(false) }
 
     var state by remember { mutableIntStateOf(0) }
-    setTopBarAction(state)
 
     val titles = listOf("Categories", "Payees", "Currencies")
     val entityUiState: EntitiesUiState by viewModel.entitiesUiState.collectAsState(EntitiesUiState())
@@ -77,8 +76,18 @@ fun EntityScreen(
     val activeCurrencies by viewModel.activeCurrenciesFlow.collectAsState(listOf())
 
     val pagerState = rememberPagerState(pageCount = { 3 })
-
-    Column(modifier = modifier.fillMaxSize()) {
+    Scaffold(
+        topBar = {
+            ExpenseTopBar(
+                selectedActivity = EntitiesDestination.route,
+                navController = navController,
+                type = "Left"
+            )
+        }
+    ) {
+        Column(modifier = modifier
+            .fillMaxSize()
+            .padding(paddingValues = it)) {
         PrimaryTabRow(
             selectedTabIndex = state,
             containerColor = MaterialTheme.colorScheme.background,
@@ -86,7 +95,6 @@ fun EntityScreen(
             titles.forEachIndexed { index, title ->
                 Tab(selected = state == index, onClick = {
                     state = index
-                    setTopBarAction(state)
                     coroutineScope.launch { pagerState.animateScrollToPage(index) }
                 }, text = {
                     Text(
@@ -110,8 +118,6 @@ fun EntityScreen(
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
                         longClicked = { selected ->
-                            setIsItemSelected(true)
-                            setSelectedObject(SelectedObjects(category = selected))
                         },
                     )
                 }
@@ -119,12 +125,10 @@ fun EntityScreen(
                 1 -> {
                     state = pagerState.currentPage
                     PayeeList(
-                        list = entityUiState.payeesList,
+                        list = entityUiState.payeesList.sortedBy { p -> p.payeeName[0].lowercaseChar() },
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
                         longClicked = { selected ->
-                            setIsItemSelected(true)
-                            setSelectedObject(SelectedObjects(payee = selected))
                         },
                     )
                 }
@@ -186,13 +190,12 @@ fun EntityScreen(
                                 }
                             },
                             longClicked = { selected ->
-                                setIsItemSelected(true)
-                                setSelectedObject(SelectedObjects(currency = selected))
                             },
                         )
                     }
                 }
             }
         }
+    }
     }
 }
