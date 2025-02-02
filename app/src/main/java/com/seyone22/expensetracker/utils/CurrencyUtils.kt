@@ -5,7 +5,8 @@ enum class TransactionType {
     EXPENSE
 }
 
-fun getValueWithType(value: Double): Pair<Double, TransactionType> {
+fun getValueWithType(value: Double?): Pair<Double, TransactionType>? {
+    if (value == null) return null
     return if (value < 0) {
         Pair(value * -1, TransactionType.EXPENSE)
     } else {
