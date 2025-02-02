@@ -148,5 +148,3 @@ abstract class MMEXDatabase : RoomDatabase() {
         // Migrate to Version 5 (add assets, attachments, customfielddata, stocks & shares, and split transactions
     }
 }
-
-// When Modifying the database, make sure to modify prepopulate.db as well.
