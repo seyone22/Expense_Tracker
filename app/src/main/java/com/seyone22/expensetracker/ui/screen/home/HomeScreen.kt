@@ -27,6 +27,7 @@ import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.home.composables.AccountData
 import com.seyone22.expensetracker.ui.screen.home.composables.MySpending
 import com.seyone22.expensetracker.ui.screen.home.composables.NetWorth
+import com.seyone22.expensetracker.ui.screen.home.composables.QuickActions
 import com.seyone22.expensetracker.ui.screen.home.composables.TransactionData
 import com.seyone22.expensetracker.ui.screen.onboarding.OnboardingDestination
 
@@ -81,16 +82,23 @@ fun HomeScreen(
         ) {
             item {
                 NetWorth(
+                    modifier = Modifier.padding(16.dp, 0.dp),
                     totals = totals,
                     baseCurrencyInfo = baseCurrency ?: CurrencyFormat(),
-                    modifier = Modifier.padding(16.dp, 0.dp)
                 )
             }
             item {
                 MySpending(
+                    modifier = Modifier.padding(16.dp, 0.dp),
                     expensesByWeek = expensesByWeek,
                     baseCurrencyInfo = baseCurrency ?: CurrencyFormat(),
-                    modifier = Modifier.padding(16.dp, 0.dp)
+
+                    )
+            }
+            item {
+                QuickActions(
+                    modifier = modifier.padding(16.dp, 0.dp, 0.dp, 0.dp),
+                    navigateToScreen = navigateToScreen
                 )
             }
             item {
@@ -110,3 +118,4 @@ fun HomeScreen(
         }
     }
 }
+
