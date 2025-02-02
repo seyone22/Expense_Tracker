@@ -47,7 +47,11 @@ object AppViewModelProvider {
             )
         }
         initializer {
-            BudgetViewModel(expenseApplication().container.payeesRepository)
+            BudgetViewModel(
+                expenseApplication().container.transactionsRepository,
+                expenseApplication().container.categoriesRepository,
+                expenseApplication().container.payeesRepository
+            )
         }
         initializer {
             ReportViewModel(
