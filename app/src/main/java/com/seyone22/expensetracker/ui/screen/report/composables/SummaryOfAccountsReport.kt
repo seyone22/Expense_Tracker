@@ -1,4 +1,4 @@
-package com.seyone22.expensetracker.ui.screen.report.defaults
+package com.seyone22.expensetracker.ui.screen.report.composables
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
