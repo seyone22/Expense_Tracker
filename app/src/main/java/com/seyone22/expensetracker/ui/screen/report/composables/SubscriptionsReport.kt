@@ -1,4 +1,4 @@
-package com.seyone22.expensetracker.ui.screen.report.defaults
+package com.seyone22.expensetracker.ui.screen.report.composables
 
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
