@@ -80,8 +80,9 @@ fun EntityScreen(
         topBar = {
             ExpenseTopBar(
                 selectedActivity = EntitiesDestination.route,
+                type = "Left",
                 navController = navController,
-                type = "Left"
+                hasNavigation = false
             )
         }
     ) {

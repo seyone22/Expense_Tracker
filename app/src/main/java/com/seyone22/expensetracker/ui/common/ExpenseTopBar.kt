@@ -13,16 +13,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.seyone22.expensetracker.ui.screen.operations.account.AccountDetailDestination
+import com.seyone22.expensetracker.ui.screen.settings.SettingsDestination
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseTopBar(
     selectedActivity: String?,
-    navBarAction: () -> Unit = {},
     type: String = "Left",
     hasNavBarAction: Boolean = true,
+    navBarAction: () -> Unit = {},
     navController: NavController,
-    navigateToSettings: () -> Unit = {}
+    hasNavigation: Boolean = false
 ) {
     //Title string for header elements, view codes in NavigationDestinations
     val titleString: String = (selectedActivity ?: "Expenses").split(("/")).first()
@@ -39,9 +40,9 @@ fun ExpenseTopBar(
                     )
                 }
             } else {
-                if (true) {
+                if (hasNavigation) {
                     IconButton(onClick = {
-                        navigateToSettings()
+                        navController.navigate(SettingsDestination.route)
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Settings, contentDescription = "Settings"
@@ -60,18 +61,15 @@ fun ExpenseTopBar(
             }
         })
     } else if (type == "Left") {
-        TopAppBar(
-            title = {
-                Text(titleString)
-            },
-            navigationIcon = {
+        TopAppBar(title = { Text(titleString) }, navigationIcon = {
+            if (hasNavigation) {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Go Back"
                     )
                 }
-            },
-        )
+            }
+        })
     }
 }
