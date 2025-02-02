@@ -5,6 +5,8 @@ import com.seyone22.expensetracker.data.repository.account.AccountsRepository
 import com.seyone22.expensetracker.data.repository.account.OfflineAccountsRepository
 import com.seyone22.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
 import com.seyone22.expensetracker.data.repository.billsDeposit.OfflineBillsDepositsRepository
+import com.seyone22.expensetracker.data.repository.budgetEntry.BudgetEntryRepository
+import com.seyone22.expensetracker.data.repository.budgetEntry.OfflineBudgetEntryRepository
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.category.OfflineCategoriesRepository
 import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
@@ -30,6 +32,7 @@ interface AppContainer {
     val billsDepositsRepository: BillsDepositsRepository
     val currencyHistoryRepository: CurrencyHistoryRepository
     val reportsRepository: ReportsRepository
+    val budgetEntryRepository: BudgetEntryRepository
 }
 
 /**
@@ -65,5 +68,8 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
     override val reportsRepository: ReportsRepository by lazy {
         OfflineReportsRepository(MMEXDatabase.getDatabase(context).reportDao())
+    }
+    override val budgetEntryRepository: BudgetEntryRepository by lazy {
+        OfflineBudgetEntryRepository(MMEXDatabase.getDatabase(context).budgetEntryDao())
     }
 }
