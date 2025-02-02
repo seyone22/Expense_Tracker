@@ -13,6 +13,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.seyone22.expensetracker.ui.screen.budget.BudgetDetailDestination
+import com.seyone22.expensetracker.ui.screen.budget.BudgetDetailScreen
 import com.seyone22.expensetracker.ui.screen.budget.BudgetScreen
 import com.seyone22.expensetracker.ui.screen.budget.BudgetsDestination
 import com.seyone22.expensetracker.ui.screen.entities.EntitiesDestination
@@ -88,11 +90,23 @@ fun ExpenseNavHost(
                 navigateToScreen = { screen -> navController.navigate(screen) },
             )
         }
+        // Routes to budget destinations
         composable(route = BudgetsDestination.route) {
             BudgetScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
             )
         }
+        composable(
+            route = BudgetDetailDestination.route,
+            arguments = listOf(navArgument("backStackEntry") { type = NavType.IntType })
+
+        ) {
+            BudgetDetailScreen(
+                backStackEntry = it.arguments?.getInt("backStackEntry") ?: -1,
+                navigateToScreen = { screen -> navController.navigate(screen) },
+            )
+        }
+
         // Routes to pages for CRUD operations
         composable(route = AccountEntryDestination.route) {
             AccountEntryScreen(
