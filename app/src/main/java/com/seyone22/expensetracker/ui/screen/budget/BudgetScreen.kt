@@ -9,31 +9,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.seyone22.expensetracker.R
-import com.seyone22.expensetracker.data.model.BudgetEntry
 import com.seyone22.expensetracker.data.model.BudgetYear
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.ExpenseNavBar
 import com.seyone22.expensetracker.ui.common.ExpenseTopBar
+import com.seyone22.expensetracker.ui.common.dialogs.AddEditBudgetYearDialogAction
+import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 
 object BudgetsDestination : NavigationDestination {
@@ -42,28 +40,13 @@ object BudgetsDestination : NavigationDestination {
     override val routeId = 2
 }
 
+// Sample Budget Data
 val budgets = listOf(
     BudgetYear(1, "2025"),
     BudgetYear(2, "2025-01"),
     BudgetYear(3, "2024"),
     BudgetYear(4, "2025-02"),
     BudgetYear(5, "2025-03"),
-)
-
-val budgetData = listOf(
-    BudgetEntry(1, 1, 1, "Weekly", 240.0, "Test note"),
-    BudgetEntry(2, 1, 2, "Monthly", 240.0, "Test note"),
-    BudgetEntry(3, 1, 3, "Fortnightly", 240.0, "Test note"),
-    BudgetEntry(4, 1, 4, "Weekly", 240.0, "Test note"),
-    BudgetEntry(5, 1, 5, "Every 2 Months", 240.0, "Test note"),
-)
-
-val categoryExpenses = listOf(
-    Pair(1, 300.0),
-    Pair(2, 200.0),
-    Pair(3, 100.0),
-    Pair(4, 400.0),
-    Pair(5, 500.0),
 )
 
 @Composable
@@ -74,6 +57,30 @@ fun BudgetScreen(
 ) {
     val budgetUiState: BudgetUiState by viewModel.budgetUiState.collectAsState(BudgetUiState())
 
+    val sortedBudgets = budgets.sortedWith { budget1, budget2 ->
+        val parts1 = budget1.budgetYearName.split("-")
+        val parts2 = budget2.budgetYearName.split("-")
+
+        // Sort by the year first, then by month if available
+        val yearComparison = parts1[0].toInt().compareTo(parts2[0].toInt())
+        if (yearComparison != 0) {
+            return@sortedWith yearComparison
+        }
+        if (parts1.size > 1 && parts2.size > 1) {
+            // Compare months if both are month-based
+            parts1[1].toInt().compareTo(parts2[1].toInt())
+        } else {
+            // Keep year-only budgets above the month-based budgets
+            0
+        }
+    }
+
+    val currentDialog by viewModel.currentDialog
+
+    currentDialog?.let {
+        GenericDialog(dialogAction = it, onDismiss = { viewModel.dismissDialog() })
+    }
+
     Scaffold(bottomBar = {
         ExpenseNavBar(
             currentActivity = BudgetsDestination.route, navigateToScreen = navigateToScreen
@@ -82,65 +89,94 @@ fun BudgetScreen(
         ExpenseTopBar(
             selectedActivity = BudgetsDestination.route,
             navController = rememberNavController(),
-            type = "Center"
+            type = "Center",
+            hasNavBarAction = true,
+            navBarAction = {
+                viewModel.showDialog(
+                    AddEditBudgetYearDialogAction(
+                        onAdd = { name, date, baseBudget ->
+                            // Add logic to handle adding a new budget year
+                        },
+                        onEdit = { name, date, baseBudget ->
+                            // Add logic to handle editing an existing budget year
+                        },
+                        availableBudgets = listOf(
+                            "2024",
+                            "2025",
+                            "2026"
+                        ) // Example available budgets
+                    )
+                )
+            }
         )
     }) {
         LazyColumn(
             modifier = Modifier.padding(it), verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            val yearBudgets = sortedBudgets.filter { !it.budgetYearName.contains("-") }
+            val monthBudgetsMap = sortedBudgets.filter { it.budgetYearName.contains("-") }
+                .groupBy { it.budgetYearName.split("-")[0] } // Group by the year part of the name
 
-            items(count = budgetUiState.categoriesParent.size) { idx ->
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            text = budgetUiState.categoriesParent[idx].categName,
-                            style = MaterialTheme.typography.titleLarge
+            // Render Year Budgets
+            yearBudgets.forEach { yearBudget ->
+                item {
+                    BudgetCard(
+                        budgetYear = yearBudget,
+                        isYearBudget = true,
+                        navigateToScreen = navigateToScreen
+                    )
+                }
+            }
+
+            // Render Month Budgets
+            monthBudgetsMap.forEach { (year, monthBudgets) ->
+                monthBudgets.forEach { monthBudget ->
+                    item {
+                        BudgetCard(
+                            budgetYear = monthBudget,
+                            isYearBudget = false,
+                            navigateToScreen = navigateToScreen
                         )
-                    },
-                )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun BudgetItemCard(idx: Int) {
+fun BudgetCard(
+    budgetYear: BudgetYear, isYearBudget: Boolean, navigateToScreen: (screen: String) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp, 0.dp)
-            .clickable { },
+            .clickable { navigateToScreen("${BudgetDetailDestination.route}/${budgetYear.budgetYearId}") },
     ) {
-        Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            Box(
-                modifier = Modifier.padding(end = 32.dp),
-                contentAlignment = androidx.compose.ui.Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    progress = { (categoryExpenses[idx].second / budgetData[idx].amount).toFloat() },
-                    trackColor = MaterialTheme.colorScheme.inversePrimary,
-                    strokeCap = StrokeCap.Round,
-                    modifier = Modifier.size(54.dp)
-                )
-                Text(
-                    "${
-                        ((categoryExpenses[idx].second / budgetData[idx].amount) * 100).coerceIn(0.0..1000.0)
-                            .toInt()
-                    }%"
-                )
-            }
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Column(
-                modifier = Modifier.width(225.dp)
+                modifier = Modifier.height(24.dp),
+                verticalArrangement = Arrangement.Center,
             ) {
-                Text(text = "Rs.${categoryExpenses[idx].second} out of Rs.${budgetData[idx].amount}")
-                Text(text = "Rs.${budgetData[idx].amount} ${budgetData[idx].period}")
+                Text(
+                    text = if (isYearBudget) {
+                        "Year: ${budgetYear.budgetYearName}"
+                    } else {
+                        "Month: ${budgetYear.budgetYearName}"
+                    }, fontWeight = FontWeight.Bold
+                )
             }
             Box(
-                modifier = Modifier.height(54.dp),
-                contentAlignment = androidx.compose.ui.Alignment.Center
+                modifier = Modifier, contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Filled.ChevronRight, "", modifier = Modifier.size(32.dp)
+                    Icons.Filled.ChevronRight, "", modifier = Modifier.size(24.dp)
                 )
             }
         }
