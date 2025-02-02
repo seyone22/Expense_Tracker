@@ -97,12 +97,12 @@ fun ExpenseNavHost(
             )
         }
         composable(
-            route = BudgetDetailDestination.route,
-            arguments = listOf(navArgument("backStackEntry") { type = NavType.IntType })
+            route = BudgetDetailDestination.route + "/{budgetYearId}",
+            arguments = listOf(navArgument("budgetYearId") { type = NavType.IntType })
 
         ) {
             BudgetDetailScreen(
-                backStackEntry = it.arguments?.getInt("backStackEntry") ?: -1,
+                backStackEntry = it.arguments?.getInt("budgetYearId") ?: -1,
                 navigateToScreen = { screen -> navController.navigate(screen) },
             )
         }

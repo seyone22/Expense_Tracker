@@ -50,7 +50,8 @@ object AppViewModelProvider {
             BudgetViewModel(
                 expenseApplication().container.transactionsRepository,
                 expenseApplication().container.categoriesRepository,
-                expenseApplication().container.payeesRepository
+                expenseApplication().container.payeesRepository,
+                expenseApplication().container.budgetEntryRepository
             )
         }
         initializer {

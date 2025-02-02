@@ -1,5 +1,6 @@
 package com.seyone22.expensetracker.ui.screen.budget
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -55,14 +57,6 @@ val budgetData = listOf(
     BudgetEntry(5, 1, 5, "Every 2 Months", 2470.0, "Test note"),
 )
 
-val categoryExpenses = listOf(
-    Pair(1, 300.0),
-    Pair(2, 200.0),
-    Pair(3, 100.0),
-    Pair(4, 400.0),
-    Pair(5, 500.0),
-)
-
 @Composable
 fun BudgetDetailScreen(
     modifier: Modifier = Modifier,
@@ -72,6 +66,12 @@ fun BudgetDetailScreen(
 ) {
     val budgetYearId = backStackEntry
     val budgetUiState: BudgetUiState by viewModel.budgetUiState.collectAsState(BudgetUiState())
+
+    LaunchedEffect(Unit, budgetYearId) {
+        viewModel.fetchBudgetEntriesFor(budgetYearId)
+    }
+
+    Log.d("TAG", "BudgetDetailScreen: ${budgetUiState.budgetEntries}")
 
     Scaffold(bottomBar = {
         ExpenseNavBar(
