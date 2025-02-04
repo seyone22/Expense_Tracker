@@ -1,17 +1,16 @@
 package com.seyone22.expensetracker.ui.screen.budget
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.model.BudgetEntry
 import com.seyone22.expensetracker.data.model.BudgetYear
 import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
 import com.seyone22.expensetracker.data.repository.budgetEntry.BudgetEntryRepository
+import com.seyone22.expensetracker.data.repository.budgetYear.BudgetYearRepository
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.payee.PayeesRepository
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
-import com.seyone22.expensetracker.ui.common.dialogs.DialogAction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,13 +25,14 @@ class BudgetViewModel(
     private val transactionsRepository: TransactionsRepository,
     private val categoriesRepository: CategoriesRepository,
     private val payeesRepository: PayeesRepository,
-    private val budgetEntryRepository: BudgetEntryRepository
-) : ViewModel() {
-
+    private val budgetEntryRepository: BudgetEntryRepository,
+    private val budgetYearRepository: BudgetYearRepository
+) : BaseViewModel() {
     // Flow for categories and transactions
     private val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
     private val transactionsFlow: Flow<List<TransactionWithDetails>> =
         transactionsRepository.getAllTransactionsStream()
+    private val budgetYearsFlow: Flow<List<BudgetYear>> = budgetYearRepository.getAllBudgetYears()
 
     // Mutable StateFlow to store budget entries
     private val _budgetEntriesFlow = MutableStateFlow<List<BudgetEntry>>(emptyList())
@@ -42,10 +42,11 @@ class BudgetViewModel(
     val budgetUiState: Flow<BudgetUiState> = combine(
         categoriesFlow,
         transactionsFlow,
-        budgetEntriesFlow
-    ) { categories, transactions, budgetEntries ->
+        budgetEntriesFlow,
+        budgetYearsFlow,
+    ) { categories, transactions, budgetEntries, budgetYears ->
         // Return a new BudgetUiState combining all data
-        BudgetUiState(categories, transactions, budgetEntries)
+        BudgetUiState(categories, transactions, budgetEntries, budgetYears)
     }
 
     // Function to fetch Budget Entries for a specific Budget Year
@@ -57,18 +58,9 @@ class BudgetViewModel(
         }
     }
 
-    // This state holds the current dialog to be shown
-    private val _currentDialog = mutableStateOf<DialogAction?>(null)
-    val currentDialog = _currentDialog
-
-    // Method to show the dialog
-    fun showDialog(dialogAction: DialogAction) {
-        _currentDialog.value = dialogAction
-    }
-
-    // Method to dismiss the dialog
-    fun dismissDialog() {
-        _currentDialog.value = null
+    suspend fun addBudgetYear(year: String, month: Int?, baseBudget: BudgetYear) {
+        val yearString = year + if (month != null) "-${String.format("%02d", month)}" else ""
+        budgetYearRepository.insertBudgetYear(BudgetYear(0, yearString))
     }
 }
 
@@ -79,4 +71,5 @@ data class BudgetUiState(
     val transactions: List<TransactionWithDetails> = listOf(),
     val budgetEntries: List<BudgetEntry> = listOf(),
     val budgetYears: List<BudgetYear> = listOf(),
+    val selectedBudgetYear: BudgetYear? = null
 )
