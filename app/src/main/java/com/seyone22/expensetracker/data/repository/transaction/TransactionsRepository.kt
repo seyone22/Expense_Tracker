@@ -11,21 +11,15 @@ interface TransactionsRepository {
     fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction>
     fun getAllTransactionsByCode(transCode: String): Flow<List<Transaction>>
     fun getAllTransactionsByCategory(
-        categoryId: Int,
-        startDate: String? = null,
-        endDate: String? = null
+        categoryId: Int, startDate: String? = null, endDate: String? = null
     ): Flow<List<Transaction>>
 
     fun getAllTransactionsByCategoryName(
-        categName: String,
-        startDate: String? = null,
-        endDate: String? = null
+        categName: String, startDate: String? = null, endDate: String? = null
     ): Flow<List<Transaction>>
 
     fun getAllTransactionsByPayee(
-        payeeId: String,
-        startDate: String? = null,
-        endDate: String? = null
+        payeeId: String, startDate: String? = null, endDate: String? = null
     ): Flow<List<Transaction>>
 
     // Fetches the total expenses for a specific week number
@@ -35,11 +29,13 @@ interface TransactionsRepository {
     fun getBalanceByAccountId(): Flow<List<BalanceResult>>
     fun getTotalBalanceByCode(transactionCode: String, status: String = "Reconciled"): Flow<Double>
     fun getTotalBalanceByCodeAndDate(
-        transactionCode: String,
-        status: String = "Reconciled",
-        month: Int,
-        year: Int
+        transactionCode: String, status: String = "Reconciled", month: Int, year: Int
     ): Flow<Double>
+
+    fun getTotalBalanceByCategoryAndDate(
+        categId: Int, status: String = "Reconciled", month: Int?, year: Int
+    ): Flow<Double>
+
 
     fun getTotalBalance(status: String = "Reconciled"): Flow<Double>
     fun getTotalBalanceByDate(status: String = "Reconciled", month: Int, year: Int): Flow<Double>
