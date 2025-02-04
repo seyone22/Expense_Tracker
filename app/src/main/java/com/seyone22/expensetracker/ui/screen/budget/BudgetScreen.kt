@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -33,21 +34,14 @@ import com.seyone22.expensetracker.ui.common.ExpenseTopBar
 import com.seyone22.expensetracker.ui.common.dialogs.AddEditBudgetYearDialogAction
 import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
+import com.seyone22.expensetracker.ui.screen.budget.budgetDetail.BudgetDetailDestination
+import kotlinx.coroutines.launch
 
 object BudgetsDestination : NavigationDestination {
     override val route = "Budgets"
     override val titleRes = R.string.app_name
     override val routeId = 2
 }
-
-// Sample Budget Data
-val budgets = listOf(
-    BudgetYear(1, "2025"),
-    BudgetYear(2, "2025-01"),
-    BudgetYear(3, "2024"),
-    BudgetYear(4, "2025-02"),
-    BudgetYear(5, "2025-03"),
-)
 
 @Composable
 fun BudgetScreen(
@@ -56,16 +50,23 @@ fun BudgetScreen(
     viewModel: BudgetViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val budgetUiState: BudgetUiState by viewModel.budgetUiState.collectAsState(BudgetUiState())
+    val coroutineScope = rememberCoroutineScope()
 
-    val sortedBudgets = budgets.sortedWith { budget1, budget2 ->
+    val sortedBudgets = budgetUiState.budgetYears.sortedWith { budget1, budget2 ->
         val parts1 = budget1.budgetYearName.split("-")
         val parts2 = budget2.budgetYearName.split("-")
 
         // Sort by the year first, then by month if available
-        val yearComparison = parts1[0].toInt().compareTo(parts2[0].toInt())
+        val year1 =
+            parts1.getOrNull(0)?.let { if (it.isNotEmpty()) it.toIntOrNull() else null } ?: 0
+        val year2 =
+            parts2.getOrNull(0)?.let { if (it.isNotEmpty()) it.toIntOrNull() else null } ?: 0
+
+        val yearComparison = year1.compareTo(year2)
         if (yearComparison != 0) {
             return@sortedWith yearComparison
         }
+
         if (parts1.size > 1 && parts2.size > 1) {
             // Compare months if both are month-based
             parts1[1].toInt().compareTo(parts2[1].toInt())
@@ -86,38 +87,34 @@ fun BudgetScreen(
             currentActivity = BudgetsDestination.route, navigateToScreen = navigateToScreen
         )
     }, topBar = {
-        ExpenseTopBar(
-            selectedActivity = BudgetsDestination.route,
+        ExpenseTopBar(selectedActivity = BudgetsDestination.route,
             navController = rememberNavController(),
             type = "Center",
             hasNavBarAction = true,
             navBarAction = {
                 viewModel.showDialog(
                     AddEditBudgetYearDialogAction(
-                        onAdd = { name, date, baseBudget ->
-                            // Add logic to handle adding a new budget year
-                        },
-                        onEdit = { name, date, baseBudget ->
-                            // Add logic to handle editing an existing budget year
-                        },
-                        availableBudgets = listOf(
-                            "2024",
-                            "2025",
-                            "2026"
-                        ) // Example available budgets
+                        onAdd = { year, month, baseBudget ->
+                            // month is nullable
+                            coroutineScope.launch {
+                                viewModel.addBudgetYear(year, month, baseBudget)
+                            }
+
+                        }, availableBudgets = budgetUiState.budgetYears
                     )
                 )
-            }
-        )
+            })
     }) {
         LazyColumn(
-            modifier = Modifier.padding(it), verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(it),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             val yearBudgets = sortedBudgets.filter { !it.budgetYearName.contains("-") }
+                .sortedBy { it.budgetYearName } // Ensure years are sorted
             val monthBudgetsMap = sortedBudgets.filter { it.budgetYearName.contains("-") }
-                .groupBy { it.budgetYearName.split("-")[0] } // Group by the year part of the name
+                .groupBy { it.budgetYearName.split("-")[0] } // Group months by year
 
-            // Render Year Budgets
+            // Iterate over the years, adding their corresponding months immediately after
             yearBudgets.forEach { yearBudget ->
                 item {
                     BudgetCard(
@@ -126,11 +123,9 @@ fun BudgetScreen(
                         navigateToScreen = navigateToScreen
                     )
                 }
-            }
 
-            // Render Month Budgets
-            monthBudgetsMap.forEach { (year, monthBudgets) ->
-                monthBudgets.forEach { monthBudget ->
+                monthBudgetsMap[yearBudget.budgetYearName]?.sortedBy { it.budgetYearName }
+                    ?.forEach { monthBudget ->
                     item {
                         BudgetCard(
                             budgetYear = monthBudget,
@@ -165,11 +160,11 @@ fun BudgetCard(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    text = if (isYearBudget) {
-                        "Year: ${budgetYear.budgetYearName}"
+                    fontWeight = if (isYearBudget) {
+                        FontWeight.Bold
                     } else {
-                        "Month: ${budgetYear.budgetYearName}"
-                    }, fontWeight = FontWeight.Bold
+                        FontWeight.Normal
+                    }, text = budgetYear.budgetYearName
                 )
             }
             Box(
