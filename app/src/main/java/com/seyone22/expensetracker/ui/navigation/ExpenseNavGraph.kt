@@ -2,8 +2,11 @@ package com.seyone22.expensetracker.ui.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -13,10 +16,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.seyone22.expensetracker.ui.screen.budget.BudgetDetailDestination
-import com.seyone22.expensetracker.ui.screen.budget.BudgetDetailScreen
 import com.seyone22.expensetracker.ui.screen.budget.BudgetScreen
 import com.seyone22.expensetracker.ui.screen.budget.BudgetsDestination
+import com.seyone22.expensetracker.ui.screen.budget.budgetDetail.BudgetDetailDestination
+import com.seyone22.expensetracker.ui.screen.budget.budgetDetail.BudgetDetailScreen
 import com.seyone22.expensetracker.ui.screen.entities.EntitiesDestination
 import com.seyone22.expensetracker.ui.screen.entities.EntityScreen
 import com.seyone22.expensetracker.ui.screen.home.HomeDestination
@@ -62,8 +65,8 @@ fun ExpenseNavHost(
     NavHost(
         navController = navController,
         startDestination = HomeDestination.route,
-        enterTransition = { EnterTransition.None },
-        exitTransition = { ExitTransition.None },
+        enterTransition = { fadeIn(animationSpec = tween(500)) },
+        exitTransition = { fadeOut(animationSpec = tween(500)) },
     ) {
         // Routes to main Navbar destinations
         composable(route = HomeDestination.route) {
@@ -72,14 +75,30 @@ fun ExpenseNavHost(
                 windowSizeClass = windowSizeClass,
             )
         }
-        composable(route = EntitiesDestination.route) {
+        composable(route = EntitiesDestination.route, enterTransition = {
+            slideInHorizontally(animationSpec = tween(500),
+                initialOffsetX = { fullWidth -> fullWidth } // Slide in from the right
+            ) + fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            slideOutHorizontally(animationSpec = tween(500),
+                targetOffsetX = { fullWidth -> fullWidth } // Slide out to the right
+            ) + fadeOut(animationSpec = tween(500))
+        }) {
             EntityScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 navController = navController
 
             )
         }
-        composable(route = TransactionsDestination.route) {
+        composable(route = TransactionsDestination.route, enterTransition = {
+            slideInHorizontally(animationSpec = tween(500),
+                initialOffsetX = { fullWidth -> fullWidth } // Slide in from the right
+            ) + fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            slideOutHorizontally(animationSpec = tween(500),
+                targetOffsetX = { fullWidth -> fullWidth } // Slide out to the right
+            ) + fadeOut(animationSpec = tween(500))
+        }) {
             TransactionsScreen(
                 navigateToScreen = { screen -> navController.navigate(screen) },
                 navController = navController
@@ -98,7 +117,17 @@ fun ExpenseNavHost(
         }
         composable(
             route = BudgetDetailDestination.route + "/{budgetYearId}",
-            arguments = listOf(navArgument("budgetYearId") { type = NavType.IntType })
+            arguments = listOf(navArgument("budgetYearId") { type = NavType.IntType }),
+            enterTransition = {
+                slideInHorizontally(animationSpec = tween(500),
+                    initialOffsetX = { fullWidth -> fullWidth } // Slide in from the right
+                ) + fadeIn(animationSpec = tween(500))
+            },
+            exitTransition = {
+                slideOutHorizontally(animationSpec = tween(500),
+                    targetOffsetX = { fullWidth -> fullWidth } // Slide out to the right
+                ) + fadeOut(animationSpec = tween(500))
+            }
 
         ) {
             BudgetDetailScreen(
@@ -108,7 +137,15 @@ fun ExpenseNavHost(
         }
 
         // Routes to pages for CRUD operations
-        composable(route = AccountEntryDestination.route) {
+        composable(route = AccountEntryDestination.route, enterTransition = {
+            slideInHorizontally(animationSpec = tween(500),
+                initialOffsetX = { fullWidth -> fullWidth } // Slide in from the right
+            ) + fadeIn(animationSpec = tween(500))
+        }, exitTransition = {
+            slideOutHorizontally(animationSpec = tween(500),
+                targetOffsetX = { fullWidth -> fullWidth } // Slide out to the right
+            ) + fadeOut(animationSpec = tween(500))
+        }) {
             AccountEntryScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() },
@@ -125,10 +162,8 @@ fun ExpenseNavHost(
             )
         }
         composable(route = TransactionEntryDestination.route) {
-            TransactionEntryScreen(
-                navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
-            )
+            TransactionEntryScreen(navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() })
         }
         composable(route = ReportEntryDestination.route) {
             ReportEntryScreen(
@@ -139,22 +174,16 @@ fun ExpenseNavHost(
         }
         //Routes to pages for Create operations for Entities
         composable(route = CategoryEntryDestination.route) {
-            CategoryEntryScreen(
-                navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
-            )
+            CategoryEntryScreen(navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() })
         }
         composable(route = PayeeEntryDestination.route) {
-            PayeeEntryScreen(
-                navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
-            )
+            PayeeEntryScreen(navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() })
         }
         composable(route = CurrencyEntryDestination.route) {
-            CurrencyEntryScreen(
-                navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
-            )
+            CurrencyEntryScreen(navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() })
         }
         // Routes to settings screen
         composable(route = SettingsDestination.route) {
@@ -163,23 +192,27 @@ fun ExpenseNavHost(
                 navigateBack = { navController.popBackStack() },
             )
         }
-        composable(
-            route = SettingsDetailDestination.route + "/{setting}",
-            arguments = listOf(navArgument("setting") { type = NavType.StringType })
-        ) {
-            SettingsDetailScreen(
-                navigateToScreen = { screen -> navController.navigate(screen) },
+        composable(route = SettingsDetailDestination.route + "/{setting}",
+            arguments = listOf(navArgument("setting") { type = NavType.StringType }),
+            enterTransition = {
+                slideInHorizontally(animationSpec = tween(500),
+                    initialOffsetX = { fullWidth -> fullWidth } // Slide in from the right
+                ) + fadeIn(animationSpec = tween(500))
+            },
+            exitTransition = {
+                slideOutHorizontally(animationSpec = tween(500),
+                    targetOffsetX = { fullWidth -> fullWidth } // Slide out to the right
+                ) + fadeOut(animationSpec = tween(500))
+            }) {
+            SettingsDetailScreen(navigateToScreen = { screen -> navController.navigate(screen) },
                 navigateBack = { navController.popBackStack() },
                 backStackEntry = it.arguments?.getString("setting") ?: "-1",
-                onToggleDarkTheme = { x -> onToggleDarkTheme(x) }
-            )
+                onToggleDarkTheme = { x -> onToggleDarkTheme(x) })
         }
 
         //Route to Onboarding Screen
         composable(route = OnboardingDestination.route) {
-            OnboardingScreen(
-                navigateToScreen = { screen -> navController.navigate(screen) }
-            )
+            OnboardingScreen(navigateToScreen = { screen -> navController.navigate(screen) })
         }
     }
 }
