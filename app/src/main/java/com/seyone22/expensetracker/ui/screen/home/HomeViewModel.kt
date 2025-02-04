@@ -1,7 +1,7 @@
 package com.seyone22.expensetracker.ui.screen.home
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.AccountTypes
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
@@ -27,11 +27,7 @@ class HomeViewModel(
     private val transactionsRepository: TransactionsRepository,
     private val metadataRepository: MetadataRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository
-) : ViewModel() {
-
-    private companion object {
-        const val TIMEOUT_MILLIS = 5_000L
-    }
+) : BaseViewModel() {
 
     // Flow for different transaction types (expenses, income, total)
     private val expensesFlow = transactionsRepository.getTotalBalanceByCode("Withdrawal")
