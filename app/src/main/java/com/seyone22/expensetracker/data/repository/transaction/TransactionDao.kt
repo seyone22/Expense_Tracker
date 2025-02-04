@@ -146,6 +146,29 @@ interface TransactionDao {
     @Query(
         """
     SELECT 
+        SUM(transAmount * baseConvRate) AS totalWithdrawal 
+    FROM CHECKINGACCOUNT_V1 
+    JOIN ACCOUNTLIST_V1 
+        ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId 
+    JOIN CURRENCYFORMATS_V1 
+        ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId 
+    WHERE 
+        categoryId = :categId 
+        AND CHECKINGACCOUNT_V1.status LIKE :status 
+        AND strftime('%Y', CHECKINGACCOUNT_V1.transDate) = :year
+        AND (:month IS NULL OR strftime('%m', CHECKINGACCOUNT_V1.transDate) = :month)
+    """
+    )
+    fun getTotalBalanceByCategory(
+        categId: Int,
+        status: String,
+        month: Int?,
+        year: Int
+    ): Flow<Double>
+
+    @Query(
+        """
+    SELECT 
         SUM(
             CASE 
                 WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate 
@@ -210,7 +233,6 @@ interface TransactionDao {
 """
     )
     fun getTotalExpensesForWeek(weekNumber: Int): Flow<List<ExpensePerDay>>
-
 }
 
 data class BalanceResult(
