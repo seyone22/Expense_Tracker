@@ -21,15 +21,23 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.seyone22.expensetracker.ui.screen.home.HomeViewModel
 import com.seyone22.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun QuickActions(modifier: Modifier, navigateToScreen: (screen: String) -> Unit) {
+fun QuickActions(
+    modifier: Modifier,
+    navigateToScreen: (screen: String) -> Unit,
+    viewModel: HomeViewModel,
+    coroutineScope: CoroutineScope = rememberCoroutineScope()
+) {
     val actions = listOf(
         Triple("Deposit", Icons.Filled.ArrowDownward, TransactionEntryDestination),
         Triple("Withdraw", Icons.Filled.ArrowUpward, TransactionEntryDestination),
@@ -50,7 +58,23 @@ fun QuickActions(modifier: Modifier, navigateToScreen: (screen: String) -> Unit)
         items(actions.size) { index ->
             Card(modifier = Modifier
                 .size(100.dp)
-                .clickable { }) {
+                .clickable {
+                    if (actions[index].first == "Deposit" || actions[index].first == "Withdraw" || actions[index].first == "Transfer" || actions[index].first == "Account") {
+                        navigateToScreen(actions[index].third.route)
+                    } else {
+                        /*                        viewModel.showDialog(
+                                                    AddEditBudgetYearDialogAction(
+                                                        onAdd = { year, month, baseBudget ->
+                                                            // month is nullable
+                                                            coroutineScope.launch {
+
+                                                            }
+
+                                                        }, availableBudgets = null`
+                                                    )
+                                                )*/
+                    }
+                }) {
                 Box(
                     contentAlignment = Alignment.Center, // Centers content inside the Box
                     modifier = Modifier.fillMaxSize() // Ensures the Box takes up the full Card size
@@ -62,8 +86,7 @@ fun QuickActions(modifier: Modifier, navigateToScreen: (screen: String) -> Unit)
                         Icon(
                             actions[index].second,
                             contentDescription = actions[index].first,
-                            modifier = Modifier
-                                .size(36.dp)
+                            modifier = Modifier.size(36.dp)
                         )
                         Text(
                             text = actions[index].first,
