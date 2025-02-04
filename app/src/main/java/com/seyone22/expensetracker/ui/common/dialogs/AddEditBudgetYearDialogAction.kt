@@ -1,61 +1,90 @@
 package com.seyone22.expensetracker.ui.common.dialogs
 
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
+import com.seyone22.expensetracker.data.model.BudgetYear
+import com.seyone22.expensetracker.ui.common.inputs.DropdownSelector
 import java.time.LocalDate
 
 class AddEditBudgetYearDialogAction(
-    private val onAdd: (String, LocalDate, String) -> Unit,
-    private val onEdit: (String, LocalDate, String) -> Unit,
-    private val isEditing: Boolean = false,
-    initialValue: String = "",
-    initialDate: LocalDate = LocalDate.now(),
-    private val availableBudgets: List<String> = listOf()
+    private val onAdd: (String, Int?, BudgetYear) -> Unit,  // Adjusted to take year, month, and base budget
+    initialYear: LocalDate = LocalDate.now(),
+    initialMonth: LocalDate = LocalDate.now(),
+    private val availableBudgets: List<BudgetYear> = listOf()
 ) : DialogAction {
-    private var _budgetYear = initialValue
-    private var _selectedDate = initialDate
-    private var _selectedBaseBudget: String = availableBudgets.firstOrNull() ?: ""
+    private var _budgetYear by mutableStateOf(initialYear)
+    private var _budgetMonth by mutableStateOf(initialMonth)
+    private var _selectedBaseBudget by mutableStateOf(
+        availableBudgets.firstOrNull() ?: BudgetYear(-1, "None")
+    )
+    private var _isBudgetForMonthChecked by mutableStateOf(false)  // Track if the checkbox is checked
 
-
-    override val title: String
-        get() = if (isEditing) "Edit Budget Year" else "Add Budget Year"
-
-    override val message: String
-        get() = if (isEditing) "Modify the budget year name." else "Please enter the new budget year."
+    override val title = "Add Budget Year"
+    override val message = null
 
     override val content: @Composable () -> Unit = {
         Column {
+            // Checkbox for "Budget for Month"
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = _isBudgetForMonthChecked,
+                    onCheckedChange = { _isBudgetForMonthChecked = it })
+                Text("Budget for Month")
+            }
+
             // Date Picker (Year Selection Only)
-            YearPicker(selectedDate = _selectedDate, onDateSelected = { _selectedDate = it })
+            YearPicker(selectedDate = _budgetYear, onDateSelected = { _budgetYear = it })
+
+            // If "Budget for Month" is checked, show the Month Picker
+            if (_isBudgetForMonthChecked) {
+                // Animated MonthPicker based on checkbox state
+                AnimatedVisibility(
+                    visible = _isBudgetForMonthChecked,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 500)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 300))
+                ) {
+                    MonthPicker(
+                        selectedDate = _budgetMonth,
+                        onDateSelected = { _budgetMonth = it },
+                        modifier = Modifier.animateContentSize() // Smooth transition for content size
+                    )
+                }
+            }
 
             // Dropdown for Base Budget Selection
-            BaseBudgetDropdown(availableBudgets = availableBudgets,
+            BaseBudgetDropdown(
+                availableBudgets = availableBudgets,
                 selectedBaseBudget = _selectedBaseBudget,
-                onBaseBudgetSelected = { _selectedBaseBudget = it })
+                onBaseBudgetSelected = {
+                    if (it != null) {
+                        _selectedBaseBudget = it
+                    }
+                }
+            )
         }
     }
 
     override fun onConfirm() {
-        if (isEditing) {
-            onEdit(_budgetYear, _selectedDate, _selectedBaseBudget)
-        } else {
-            onAdd(_budgetYear, _selectedDate, _selectedBaseBudget)
-        }
+        // Extract the year and month values
+        val month =
+            if (_isBudgetForMonthChecked) _budgetMonth.monthValue else null  // Set month only if checked
+        onAdd(
+            _budgetYear.year.toString(),
+            month,
+            _selectedBaseBudget
+        )  // Pass year, month (nullable), and base budget
     }
 
     override fun onCancel() {
@@ -63,69 +92,72 @@ class AddEditBudgetYearDialogAction(
     }
 }
 
-
 @Composable
-fun YearPicker(selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit) {
-    val year = selectedDate.year.toString()
+fun YearPicker(
+    selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit, modifier: Modifier = Modifier
+) {
+    val currentYear = LocalDate.now().year
+    val years = (currentYear..currentYear + 50).toList()
 
-    OutlinedTextField(
-        value = year,
-        onValueChange = { newYear ->
-            val updatedDate = LocalDate.of(newYear.toIntOrNull() ?: 2025, 1, 1)
-            onDateSelected(updatedDate)
-        },
-        label = { Text("Select Year") },
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Next
-        ),
+    DropdownSelector(
+        items = years,
+        selectedItem = selectedDate.year,
+        onItemSelected = { selectedYear -> onDateSelected(LocalDate.of(selectedYear, 1, 1)) },
+        label = "Select Year",
+        modifier = modifier
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MonthPicker(
+    selectedDate: LocalDate, onDateSelected: (LocalDate) -> Unit, modifier: Modifier = Modifier
+) {
+    val currentYear = LocalDate.now().year
+    val months = listOf(
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+    )
+
+    DropdownSelector(
+        items = months,
+        selectedItem = months[selectedDate.monthValue - 1], // Adjust to 0-based index
+        onItemSelected = { selectedMonth ->
+            val selectedMonthIndex = months.indexOf(selectedMonth) + 1 // Get the 1-based month
+            onDateSelected(LocalDate.of(currentYear, selectedMonthIndex, 1))
+        },
+        label = "Select Month",
+        modifier = modifier
+    )
+}
+
 @Composable
 fun BaseBudgetDropdown(
-    availableBudgets: List<String>,
-    selectedBaseBudget: String,
-    onBaseBudgetSelected: (String) -> Unit
+    availableBudgets: List<BudgetYear>,
+    selectedBaseBudget: BudgetYear,
+    onBaseBudgetSelected: (BudgetYear?) -> Unit, // Nullable BudgetYear
+    modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = it }
-    ) {
-        OutlinedTextField(
-            value = selectedBaseBudget,
-            onValueChange = { },
-            label = { Text("Base Budget") },
-            readOnly = true,
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
-            modifier = Modifier
-                .clickable { expanded = true } // Allow dropdown to open when clicked
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            // Add the "none" option
-            DropdownMenuItem(
-                onClick = {
-                    onBaseBudgetSelected("none")
-                    expanded = false
-                },
-                text = { Text(text = "none") }
-            )
-            // Populate available budgets
-            availableBudgets.forEach { budget ->
-                DropdownMenuItem(
-                    onClick = {
-                        onBaseBudgetSelected(budget)
-                        expanded = false
-                    },
-                    text = { Text(text = budget) }
-                )
-            }
-        }
-    }
+    DropdownSelector(
+        items = listOf(BudgetYear(-1, "None")) + availableBudgets,
+        selectedItem = BudgetYear(-1, "None"),
+        onItemSelected = { onBaseBudgetSelected(it) },
+        label = "Base Budget",
+        modifier = modifier,
+        itemToString = { it.budgetYearName }
+    )
 }
+
+
+
+
 

@@ -16,7 +16,10 @@ fun GenericDialog(
         title = { Text(text = dialogAction.title) },
         text = {
             Column {
-                Text(text = dialogAction.message)
+                // Only render the message if it's not null or empty
+                dialogAction.message?.let { message ->
+                    Text(text = message)
+                }
                 dialogAction.content() // Render the dynamic content here
             }
         },
