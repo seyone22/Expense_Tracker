@@ -23,6 +23,7 @@ import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.ExpenseNavBar
+import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.home.composables.AccountData
 import com.seyone22.expensetracker.ui.screen.home.composables.MySpending
@@ -56,6 +57,12 @@ fun HomeScreen(
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val baseCurrency by sharedViewModel.baseCurrencyFlow.collectAsState(initial = CurrencyFormat())
     val isUsed by sharedViewModel.isUsedFlow.collectAsState(initial = true)
+
+    val currentDialog by viewModel.currentDialog
+
+    currentDialog?.let {
+        GenericDialog(dialogAction = it, onDismiss = { viewModel.dismissDialog() })
+    }
 
     if (!isUsed) {
         navigateToScreen(OnboardingDestination.route)
@@ -98,7 +105,8 @@ fun HomeScreen(
             item {
                 QuickActions(
                     modifier = modifier.padding(16.dp, 0.dp, 0.dp, 0.dp),
-                    navigateToScreen = navigateToScreen
+                    navigateToScreen = navigateToScreen,
+                    viewModel = viewModel
                 )
             }
             item {
