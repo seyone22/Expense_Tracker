@@ -1,4 +1,4 @@
-package com.seyone22.expensetracker.ui.screen.budget
+package com.seyone22.expensetracker.ui.screen.budget.budgetDetail
 
 import android.util.Log
 import androidx.compose.foundation.clickable
@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.NorthEast
+import androidx.compose.material.icons.filled.SouthWest
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -26,8 +28,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,8 +44,14 @@ import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.ExpenseNavBar
 import com.seyone22.expensetracker.ui.common.ExpenseTopBar
 import com.seyone22.expensetracker.ui.common.SortBar
+import com.seyone22.expensetracker.ui.common.dialogs.AddEditBudgetEntryDialogAction
+import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
+import com.seyone22.expensetracker.ui.screen.budget.BudgetsDestination
+import com.seyone22.expensetracker.utils.TransactionType
 import com.seyone22.expensetracker.utils.getValueWithType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 object BudgetDetailDestination : NavigationDestination {
     override val route = "Budget Detail"
@@ -49,29 +59,33 @@ object BudgetDetailDestination : NavigationDestination {
     override val routeId = 88
 }
 
-val budgetData = listOf(
-    BudgetEntry(1, 1, 1, "Weekly", 2410.0, "Test note"),
-    BudgetEntry(2, 1, 2, "Monthly", -2240.0, "Test note"),
-    BudgetEntry(3, 1, 3, "Fortnightly", 2340.0, "Test note"),
-    BudgetEntry(4, 1, 4, "Weekly", -2430.0, "Test note"),
-    BudgetEntry(5, 1, 5, "Every 2 Months", 2470.0, "Test note"),
-)
-
 @Composable
 fun BudgetDetailScreen(
     modifier: Modifier = Modifier,
     backStackEntry: Int,
     navigateToScreen: (screen: String) -> Unit,
-    viewModel: BudgetViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    viewModel: BudgetDetailViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
-    val budgetYearId = backStackEntry
-    val budgetUiState: BudgetUiState by viewModel.budgetUiState.collectAsState(BudgetUiState())
+    Log.d("TAG", "BudgetDetailScreen: $backStackEntry")
 
-    LaunchedEffect(Unit, budgetYearId) {
-        viewModel.fetchBudgetEntriesFor(budgetYearId)
+    val budgetDetailUiState: BudgetDetailUiState by viewModel.budgetDetailUiState.collectAsState(
+        BudgetDetailUiState()
+    )
+
+    val currentDialog by viewModel.currentDialog
+
+    currentDialog?.let {
+        GenericDialog(dialogAction = it, onDismiss = { viewModel.dismissDialog() })
     }
 
-    Log.d("TAG", "BudgetDetailScreen: ${budgetUiState.budgetEntries}")
+    LaunchedEffect(Unit, backStackEntry) {
+        viewModel.fetchBudgetEntriesFor(backStackEntry)
+        viewModel.fetchBudgetYearFor(backStackEntry)
+        viewModel.fetchStatistics(backStackEntry)
+    }
+
+    Log.d("TAG", "BudgetDetailScreen: ${budgetDetailUiState.selectedBudgetYear}")
 
     Scaffold(bottomBar = {
         ExpenseNavBar(
@@ -87,11 +101,12 @@ fun BudgetDetailScreen(
         LazyColumn(
             modifier = Modifier.padding(it), verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            val parentCategories = budgetUiState.categories.filter { it.parentId == -1 }
-            val childCategoriesMap = budgetUiState.categories.filter { it.parentId != -1 }
+            val parentCategories = budgetDetailUiState.categories.filter { it.parentId == -1 }
+            val childCategoriesMap = budgetDetailUiState.categories.filter { it.parentId != -1 }
                 .groupBy { it.parentId } // Group children by parentId
 
-            val budgetMap = budgetData.associateBy { it.categId } // Map for quick lookup
+            val budgetMap =
+                budgetDetailUiState.budgetEntries.associateBy { it.categId } // Map for quick lookup
 
             item {
                 SortBar(modifier = Modifier.padding(16.dp, 0.dp), periodSortAction = {})
@@ -158,28 +173,93 @@ fun BudgetDetailScreen(
 
                 // Render budget item for the parent
                 val budgetItem = budgetMap[parent.categId]
+                var expenseForCategory = 0.0
+                coroutineScope.launch {
+                    expenseForCategory = viewModel.getExpensesForCategory(
+                        parent.categId, budgetDetailUiState.selectedBudgetYear
+                    )
+                }
+
                 item {
                     if (budgetItem != null) {
-                        BudgetItemCard(
-                            category = parent, budgetItem = budgetItem, expenseForCategory = 200.0
-                        )
+                        BudgetItemCard(category = parent,
+                            budgetItem = budgetItem,
+                            expenseForCategory = expenseForCategory,
+                            cardClickAction = {
+                                viewModel.showDialog(
+                                    AddEditBudgetEntryDialogAction(
+                                        onEdit = { b ->
+                                            coroutineScope.launch {
+                                                viewModel.editBudgetEntry(b)
+                                                viewModel.fetchBudgetEntriesFor(backStackEntry)
+                                            }
+
+                                        },
+                                        initialEntry = budgetItem,
+                                        categId = parent.categId,
+                                        budgetYearId = backStackEntry
+                                    )
+                                )
+                            })
                     } else {
-                        UnsetBudgetItemCard(parent)
+                        UnsetBudgetItemCard(parent, cardClickAction = {
+                            viewModel.showDialog(
+                                AddEditBudgetEntryDialogAction(
+                                    onAdd = { budgetEntry ->
+                                        coroutineScope.launch {
+                                            viewModel.addBudgetEntry(budgetEntry)
+                                            viewModel.fetchBudgetEntriesFor(backStackEntry)
+                                        }
+
+                                    }, categId = parent.categId, budgetYearId = backStackEntry
+                                )
+                            )
+                        })
                     }
                 }
 
                 // Render child categories for this parent
                 childCategoriesMap[parent.categId]?.forEach { child ->
                     val childBudgetItem = budgetMap[child.categId]
+                    var expenseForCategoryChild = 0.0
+                    coroutineScope.launch {
+                        expenseForCategoryChild = viewModel.getExpensesForCategory(
+                            child.categId, budgetDetailUiState.selectedBudgetYear
+                        )
+                    }
                     item {
                         if (childBudgetItem != null) {
-                            BudgetItemCard(
-                                category = child,
+                            BudgetItemCard(category = child,
                                 budgetItem = childBudgetItem,
-                                expenseForCategory = 200.0
-                            )
+                                expenseForCategory = expenseForCategoryChild,
+                                cardClickAction = {
+                                    viewModel.showDialog(
+                                        AddEditBudgetEntryDialogAction(
+                                            onEdit = { b ->
+                                                coroutineScope.launch {
+                                                    viewModel.editBudgetEntry(b)
+                                                    viewModel.fetchBudgetEntriesFor(backStackEntry)
+                                                }
+                                            },
+                                            initialEntry = childBudgetItem,
+                                            categId = child.categId,
+                                            budgetYearId = backStackEntry
+                                        )
+                                    )
+                                })
                         } else {
-                            UnsetBudgetItemCard(child)
+                            UnsetBudgetItemCard(child, cardClickAction = {
+                                viewModel.showDialog(
+                                    AddEditBudgetEntryDialogAction(
+                                        onAdd = { budgetEntry ->
+                                            coroutineScope.launch {
+                                                viewModel.addBudgetEntry(budgetEntry)
+                                                viewModel.fetchBudgetEntriesFor(backStackEntry)
+                                            }
+                                        }, categId = child.categId, budgetYearId = backStackEntry
+                                    )
+                                )
+                            })
                         }
                     }
                 }
@@ -191,13 +271,13 @@ fun BudgetDetailScreen(
 
 @Composable
 fun UnsetBudgetItemCard(
-    category: Category?,
+    category: Category?, cardClickAction: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp, 0.dp)
-            .clickable { },
+            .clickable { cardClickAction() },
     ) {
         Row(
             modifier = Modifier
@@ -230,6 +310,7 @@ fun BudgetItemCard(
     category: Category?,
     budgetItem: BudgetEntry?,
     expenseForCategory: Double,
+    cardClickAction: () -> Unit
 ) {
     val actualValue = getValueWithType(budgetItem?.amount)
     val ratio = expenseForCategory.coerceAtLeast(1.0) / (actualValue?.first ?: 1.0)
@@ -238,7 +319,7 @@ fun BudgetItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp, 0.dp)
-            .clickable { },
+            .clickable { cardClickAction() },
     ) {
         Row(
             modifier = Modifier
@@ -248,8 +329,7 @@ fun BudgetItemCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.padding(end = 32.dp),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.padding(end = 32.dp), contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
                     progress = { ratio.toFloat() },
@@ -266,14 +346,29 @@ fun BudgetItemCard(
             Column(
                 modifier = Modifier.width(225.dp)
             ) {
-                Text(
-                    text = "${category?.categName}",
-                    fontWeight = if (category?.parentId == -1) FontWeight.Bold else FontWeight.Normal
-                )
+                Row {
+                    if (actualValue?.second == TransactionType.INCOME) {
+                        Icon(
+                            Icons.Filled.SouthWest,
+                            "",
+                            tint = Color.Green
+                        )
+                    } else {
+                        Icon(
+                            Icons.Filled.NorthEast,
+                            "",
+                            tint = Color.Red
+                        )
+                    }
+                    Text(
+                        text = "${category?.categName}",
+                        fontWeight = if (category?.parentId == -1) FontWeight.Bold else FontWeight.Normal
+                    )
+                }
                 Text(
                     text = "Rs.${expenseForCategory} out of Rs.${
                         String.format(
-                            "%.2f", budgetItem?.amount ?: 0.0
+                            "%.2f", actualValue?.first ?: 0.0
                         )
                     }"
                 )
