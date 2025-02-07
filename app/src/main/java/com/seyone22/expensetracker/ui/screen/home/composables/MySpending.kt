@@ -1,5 +1,6 @@
 package com.seyone22.expensetracker.ui.screen.home.composables
 
+import android.icu.text.DecimalFormat
 import android.text.Layout
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,6 +45,10 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.repository.transaction.BalanceResult
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
+import com.seyone22.expensetracker.utils.getEndOfCurrentWeek
+import com.seyone22.expensetracker.utils.getEndOfPreviousWeek
+import com.seyone22.expensetracker.utils.getStartOfCurrentWeek
+import com.seyone22.expensetracker.utils.getStartOfPreviousWeek
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -54,12 +59,30 @@ fun MySpending(
     baseCurrencyInfo: CurrencyFormat,
     modifier: Modifier = Modifier
 ) {
+    val currentWeekStart = LocalDate.parse(getStartOfCurrentWeek()) // Convert to LocalDate
+    val currentWeekEnd = LocalDate.parse(getEndOfCurrentWeek())
+    val previousWeekStart = LocalDate.parse(getStartOfPreviousWeek())
+    val previousWeekEnd = LocalDate.parse(getEndOfPreviousWeek())
+    
     // Initialize a list of 7 zeros
     val seriesState = remember { mutableStateOf(List(7) { 0.0 }) }
 
     // Sum up the total expenses from the list
-    val expenseSUM = expensesByWeek.sumOf { it.balance }
-
+    val currentWeekSum = expensesByWeek
+        .filter { (_, _, date) ->
+            date?.let { LocalDate.parse(it) in currentWeekStart..currentWeekEnd } == true
+        }
+        .sumOf { it.balance }
+    val previousWeekSum = expensesByWeek
+        .filter { (_, _, date) ->
+            date?.let { LocalDate.parse(it) in previousWeekStart..previousWeekEnd } == true
+        }
+        .sumOf { it.balance }
+    val percentageChange = if (previousWeekSum != 0.0) {
+        ((currentWeekSum - previousWeekSum) / previousWeekSum) * 100
+    } else {
+        if (currentWeekSum == 0.0) 0.0 else 100.0  // If both weeks are 0, change is 0%; if previous week was 0 but current has value, it's a full increase
+    }
     val modelProducer = remember { CartesianChartModelProducer() }
 
     LaunchedEffect(expensesByWeek) {
@@ -67,7 +90,11 @@ fun MySpending(
             // Create a mutable list of 7 zeros
             val updatedSeries = MutableList(7) { 0.0 }
 
-            expensesByWeek.forEach { (_, balance, date) ->
+            expensesByWeek
+                .filter { (_, _, date) ->
+                    date?.let { LocalDate.parse(it) in currentWeekStart..currentWeekEnd } == true
+                }
+                .forEach { (_, balance, date) ->
                 val dayIndex = date?.let {
                     (LocalDate.parse(it).dayOfWeek.value - 1) % 7  // Ensure correct day index
                 }
@@ -102,7 +129,7 @@ fun MySpending(
             ) {
                 Text("My Spending", color = Color.Gray)
                 FormattedCurrency(
-                    value = expenseSUM,
+                    value = currentWeekSum,
                     currency = baseCurrencyInfo,
                     style = MaterialTheme.typography.headlineMedium
                 )
@@ -119,7 +146,7 @@ fun MySpending(
                             .height(13.dp)
                     )
                     Text(
-                        "4.9% ",
+                        "${DecimalFormat("#.##").format(percentageChange)}% ",
                         color = Color(0xff50b381),
                         style = MaterialTheme.typography.bodySmall
                     )
