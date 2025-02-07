@@ -11,7 +11,7 @@ import com.seyone22.expensetracker.data.repository.metadata.MetadataRepository
 import com.seyone22.expensetracker.data.repository.transaction.BalanceResult
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
 import com.seyone22.expensetracker.utils.getEndOfCurrentWeek
-import com.seyone22.expensetracker.utils.getStartOfCurrentWeek
+import com.seyone22.expensetracker.utils.getStartOfPreviousWeek
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -49,7 +49,7 @@ class HomeViewModel(
 
     // Function to fetch Transactions for the week
     suspend fun fetchTransactionsForWeek(
-        startDate: String = getStartOfCurrentWeek(),
+        startDate: String = getStartOfPreviousWeek(),
         endDate: String = getEndOfCurrentWeek()
     ) {
         val entries = transactionsRepository.getExpensesForDateRange(startDate, endDate)
@@ -118,7 +118,7 @@ data class HomeUiState(
     val accountList: List<Pair<Account, Double>> = emptyList(), // Account info with balance
     val grandTotal: Double = 0.0, // Total balance for all accounts
     val transactionSample: List<TransactionWithDetails> = emptyList(), // List of transaction details
-    val expensesByWeek: List<BalanceResult> = emptyList()
+    val expensesByWeek: List<BalanceResult> = emptyList(),
 )
 
 /**
