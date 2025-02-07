@@ -84,7 +84,7 @@ fun SettingsDetailScreen(
     backStackEntry: String,
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    val metadataList by viewModel.metadataList.collectAsState(listOf())
+    val metadataList by viewModel.metadataList.collectAsState(emptyList())
 
     Scaffold(
         modifier = modifier,
