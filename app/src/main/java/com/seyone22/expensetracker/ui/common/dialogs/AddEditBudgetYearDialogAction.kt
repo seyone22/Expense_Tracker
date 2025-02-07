@@ -23,7 +23,7 @@ class AddEditBudgetYearDialogAction(
     private val onAdd: (String, Int?, BudgetYear) -> Unit,  // Adjusted to take year, month, and base budget
     initialYear: LocalDate = LocalDate.now(),
     initialMonth: LocalDate = LocalDate.now(),
-    private val availableBudgets: List<BudgetYear> = listOf()
+    private val availableBudgets: List<BudgetYear> = emptyList()
 ) : DialogAction {
     private var _budgetYear by mutableStateOf(initialYear)
     private var _budgetMonth by mutableStateOf(initialMonth)

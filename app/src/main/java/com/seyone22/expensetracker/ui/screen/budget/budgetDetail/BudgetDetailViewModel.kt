@@ -51,7 +51,7 @@ class BudgetDetailViewModel(
     suspend fun fetchBudgetEntriesFor(budgetYearId: Int) {
         // Fetch the budget entries from the repository and update the StateFlow
         val entries = budgetEntryRepository.getBudgetEntriesForBudgetYear(budgetYearId)
-        _budgetEntriesFlow.value = entries.firstOrNull() ?: listOf()
+        _budgetEntriesFlow.value = entries.firstOrNull() ?: emptyList()
     }
 
     suspend fun fetchBudgetYearFor(backStackEntry: Int) {
@@ -96,8 +96,8 @@ class BudgetDetailViewModel(
 
 //Data class for BudgetUiState
 data class BudgetDetailUiState(
-    val categories: List<Category> = listOf(),
-    val transactions: List<TransactionWithDetails> = listOf(),
-    val budgetEntries: List<BudgetEntry> = listOf(),
+    val categories: List<Category> = emptyList(),
+    val transactions: List<TransactionWithDetails> = emptyList(),
+    val budgetEntries: List<BudgetEntry> = emptyList(),
     val selectedBudgetYear: BudgetYear? = null
 )
