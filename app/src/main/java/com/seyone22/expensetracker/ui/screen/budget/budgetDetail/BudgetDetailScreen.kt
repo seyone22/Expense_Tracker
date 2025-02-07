@@ -85,17 +85,16 @@ fun BudgetDetailScreen(
         viewModel.fetchStatistics(backStackEntry)
     }
 
-    Log.d("TAG", "BudgetDetailScreen: ${budgetDetailUiState.selectedBudgetYear}")
-
     Scaffold(bottomBar = {
         ExpenseNavBar(
             currentActivity = BudgetsDestination.route, navigateToScreen = navigateToScreen
         )
     }, topBar = {
         ExpenseTopBar(
-            selectedActivity = BudgetsDestination.route,
+            selectedActivity = BudgetDetailDestination.route,
             navController = rememberNavController(),
-            type = "Center"
+            type = "Left",
+            hasNavigation = true
         )
     }) {
         LazyColumn(
