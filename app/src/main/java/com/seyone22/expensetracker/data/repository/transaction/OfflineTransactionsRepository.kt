@@ -84,6 +84,13 @@ class OfflineTransactionsRepository(private val transactionDao: TransactionDao) 
         return transactionDao.getTotalExpensesForWeek(weekNumber)
     }
 
+    override fun getExpensesForDateRange(
+        startDate: String,
+        endDate: String
+    ): Flow<List<BalanceResult>> {
+        return transactionDao.getExpensesForDateRange(startDate, endDate)
+    }
+
 
     override suspend fun insertTransaction(transaction: Transaction) =
         transactionDao.insert(transaction)

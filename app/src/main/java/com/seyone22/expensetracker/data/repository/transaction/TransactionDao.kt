@@ -219,28 +219,46 @@ interface TransactionDao {
 
     @Query(
         """
-    SELECT 
-        strftime('%w', transDate) AS dayOfWeek, 
-        SUM(transAmount * baseConvRate) AS totalExpense 
-    FROM CHECKINGACCOUNT_V1 
-    JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId 
-    JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId
-    WHERE
-        strftime('%W', transDate) = CAST(:weekNumber AS TEXT) AND
-        CHECKINGACCOUNT_V1.transCode LIKE 'Withdrawal'
-    GROUP BY dayOfWeek
-    ORDER BY dayOfWeek
-"""
+        SELECT 
+            (strftime('%w', transDate) + 6) % 7 AS dayOfWeek, 
+            SUM(transAmount * baseConvRate) AS totalExpense 
+        FROM CHECKINGACCOUNT_V1 
+        JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId 
+        JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId
+        WHERE
+            CHECKINGACCOUNT_V1.transCode = 'Withdrawal'
+            AND CHECKINGACCOUNT_V1.transDate = :weekNumber
+        GROUP BY dayOfWeek
+        ORDER BY dayOfWeek       
+        """
     )
     fun getTotalExpensesForWeek(weekNumber: Int): Flow<List<ExpensePerDay>>
+
+    @Query(
+        """
+    SELECT 
+        transDate AS dateIndex,
+        SUM(transAmount * baseConvRate) AS balance
+    FROM CHECKINGACCOUNT_V1
+    JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId
+    JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId
+    WHERE 
+        transDate BETWEEN date(:startDate) AND date(:endDate)
+        AND CHECKINGACCOUNT_V1.transCode = 'Withdrawal'
+    GROUP BY transDate
+    ORDER BY transDate
+    """
+    )
+    fun getExpensesForDateRange(startDate: String, endDate: String): Flow<List<BalanceResult>>
+
 }
 
 data class BalanceResult(
-    val accountId: Int, val balance: Double, val dateIndex: String? = null
+    val accountId: Int?, val balance: Double, val dateIndex: String? = null
 )
 
 data class ExpensePerDay(
-    val dayOfWeek: String, // For seyone22, "0" for Sunday
+    val dayOfWeek: String, // "0" for Sunday
     val totalExpense: Double
 )
 
