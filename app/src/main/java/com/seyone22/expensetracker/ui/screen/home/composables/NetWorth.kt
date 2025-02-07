@@ -37,10 +37,11 @@ fun NetWorth(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
         FormattedCurrency(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            style = MaterialTheme.typography.displayMedium,
             value = totals.total,
             currency = baseCurrencyInfo,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            style = MaterialTheme.typography.displayMedium
+            defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
         )
         Text(
             text = "Net Worth",
@@ -89,10 +90,11 @@ fun NetWorth(
                     )
 
                     FormattedCurrency(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        style = MaterialTheme.typography.headlineSmall,
                         value = totals.income,
                         currency = baseCurrencyInfo,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        style = MaterialTheme.typography.headlineSmall
+                        defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -129,10 +131,11 @@ fun NetWorth(
                         color = Color.Gray
                     )
                     FormattedCurrency(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        style = MaterialTheme.typography.headlineSmall,
                         value = totals.expenses,
                         currency = baseCurrencyInfo,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        style = MaterialTheme.typography.headlineSmall
+                        defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }

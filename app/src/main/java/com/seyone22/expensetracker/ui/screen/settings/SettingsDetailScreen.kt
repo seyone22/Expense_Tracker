@@ -34,6 +34,8 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -48,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -64,6 +67,7 @@ import com.seyone22.expensetracker.utils.BiometricHelper
 import com.seyone22.expensetracker.utils.BiometricPromptActivityResultContract
 import com.seyone22.expensetracker.utils.CryptoManager
 import com.seyone22.expensetracker.utils.ScreenLockManager
+import com.seyone22.expensetracker.utils.SnackbarManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -86,9 +90,19 @@ fun SettingsDetailScreen(
 ) {
     val metadataList by viewModel.metadataList.collectAsState(emptyList())
 
+    val snackbarHostState = SnackbarManager.hostState
+
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    actionColor = Color.Red // Customize for error messages
+                )
+            }
+        },
         topBar = {
             TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background,
@@ -437,14 +451,16 @@ fun DataSettingsList(
     viewModel: SettingsViewModel,
 ) {
     Column {
-        SettingsListItem(settingName = "Update Currency Formats",
+        SettingsListItem(
+            settingName = "Update Currency Formats",
             settingSubtext = "Exchange rates are updated monthly from the InfoEuro portal",
             action = {
-                Log.d("TAG", metadata.toString())
-                viewModel.getMonthlyRates(
-                    baseCurrencyId = metadata.find { it!!.infoName == "BASECURRENCYID" }!!.infoValue.toInt()
-                )
-            })
+                metadata.find { it?.infoName == "BASECURRENCYID" }?.infoValue?.toIntOrNull()
+                    ?.let { baseCurrencyId ->
+                        viewModel.getMonthlyRates(baseCurrencyId)
+                    }
+            }
+        )
     }
 }
 

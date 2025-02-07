@@ -171,9 +171,10 @@ fun EntityScreen(
                                         Text(text = currency.currencyName)
 
                                         FormattedCurrency(
-                                            currency = currency,
                                             style = MaterialTheme.typography.headlineMedium,
-                                            value = currency.baseConvRate
+                                            value = currency.baseConvRate,
+                                            currency = currency,
+                                            defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
                                         )
                                     }
                                 }

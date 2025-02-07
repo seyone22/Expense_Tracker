@@ -2,7 +2,10 @@ package com.seyone22.expensetracker
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.seyone22.expensetracker.ui.common.dialogs.DialogAction
+import com.seyone22.expensetracker.utils.SnackbarManager
+import kotlinx.coroutines.launch
 
 abstract class BaseViewModel : ViewModel() {
     protected companion object {
@@ -21,5 +24,11 @@ abstract class BaseViewModel : ViewModel() {
     // Method to dismiss the dialog
     fun dismissDialog() {
         _currentDialog.value = null
+    }
+
+    fun showSnackbar(message: String) {
+        viewModelScope.launch {
+            SnackbarManager.showMessage(message)
+        }
     }
 }
