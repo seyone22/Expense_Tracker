@@ -1,8 +1,7 @@
 package com.seyone22.expensetracker.ui.screen.operations.account
 
 import android.util.Log
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
@@ -12,71 +11,63 @@ import com.seyone22.expensetracker.data.repository.transaction.BalanceResult
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
 import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.seyone22.expensetracker.ui.screen.operations.transaction.toTransaction
-import com.seyone22.expensetracker.ui.screen.transactions.AccountDetailTransactionUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.update
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class AccountDetailViewModel(
     private val accountsRepository: AccountsRepository,
     private val transactionsRepository: TransactionsRepository
-) : ViewModel() {
-    var accountId: Int = -1
+) : BaseViewModel() {
+    private val _accountDetailUiState = MutableStateFlow(AccountDetailUiState())
+    val accountDetailUiState: StateFlow<AccountDetailUiState> = _accountDetailUiState.asStateFlow()
 
-    private val _accountDetailAccountUiState = MutableStateFlow(AccountDetailAccountUiState())
-    val accountDetailAccountUiState: StateFlow<AccountDetailAccountUiState> =
-        _accountDetailAccountUiState
+    private val _accountId = MutableStateFlow(-1)
+    val accountId: StateFlow<Int> = _accountId.asStateFlow()
 
-    private val _accountDetailTransactionUiState =
-        MutableStateFlow(AccountDetailTransactionUiState())
-    val accountDetailTransactionUiState: StateFlow<AccountDetailTransactionUiState> =
-        _accountDetailTransactionUiState
+    suspend fun setAccountId(id: Int) {
+        _accountId.value = id
+        refreshAccount()
+        getTransactions()
+    }
 
-    suspend fun getAccount() {
-        // Generate the last 7 days' dates
+    suspend fun refreshAccount() {
+        val accountId = _accountId.value
         val last7Days = (0..6).map {
             LocalDate.now().minusDays(it.toLong()).format(DateTimeFormatter.ISO_LOCAL_DATE)
         }
 
-        // Fetch account
         val account = accountsRepository.getAccountStream(accountId).firstOrNull()
 
-        Log.d("TAG", "getAccount: $account")
-
-        // Fetch balance for each of the last 7 days
-        val balanceHistoryForLast7Days = mutableListOf<BalanceResult>()
-        for (date in last7Days.reversed()) {
+        val balanceHistoryForLast7Days = last7Days.reversed().map { date ->
             val balanceForDate = accountsRepository.getAccountBalance(accountId, date).firstOrNull()
-            val balance = balanceForDate?.balance ?: 0.0 // Default to 0.0 if balanceForDate is null
-            balanceHistoryForLast7Days.add(BalanceResult(accountId, balance, date))
+            BalanceResult(accountId, balanceForDate?.balance ?: 0.0, date)
         }
 
-        // Set the account details with the balance history
-        val lastBalance =
-            (balanceHistoryForLast7Days.lastOrNull()?.balance?.plus(account?.initialBalance ?: 0.0))
-                ?: 0.0
+        val lastBalance = (balanceHistoryForLast7Days.lastOrNull()?.balance
+            ?.plus(account?.initialBalance ?: 0.0)) ?: 0.0
 
-        // Emit the updated state to the MutableStateFlow
-        _accountDetailAccountUiState.value = AccountDetailAccountUiState(
-            account = account ?: Account(),
-            balance = lastBalance,
-            balanceHistory = balanceHistoryForLast7Days
-        )
+        _accountDetailUiState.update {
+            it.copy(
+                account = account ?: Account(),
+                balance = lastBalance,
+                balanceHistory = balanceHistoryForLast7Days
+            )
+        }
     }
 
-    fun getTransactions() {
-        viewModelScope.launch {
-            val transactions =
-                transactionsRepository.getTransactionsFromAccount(accountId).firstOrNull()
-                    ?: emptyList()
+    suspend fun getTransactions() {
+        val accountId = _accountId.value
+        val transactions =
+            transactionsRepository.getTransactionsFromAccount(accountId).firstOrNull()
+                ?: emptyList()
 
-            _accountDetailTransactionUiState.value =
-                AccountDetailTransactionUiState(transactions = transactions)
+        _accountDetailUiState.update { it.copy(transactions = transactions) }
             Log.d("DEBUG", "getTransactions: AccountId is $accountId")
-        }
     }
 
     suspend fun deleteTransaction(transaction: Transaction): Boolean {
@@ -129,12 +120,9 @@ class AccountDetailViewModel(
     }
 }
 
-data class AccountDetailAccountUiState(
+data class AccountDetailUiState(
     val account: Account = Account(),
     val balance: Double = 0.0,
-    val balanceHistory: List<BalanceResult> = listOf()
-)
-
-data class AccountDetailTransactionUiState(
-    val transactions: List<Transaction> = listOf()
+    val balanceHistory: List<BalanceResult> = emptyList(),
+    val transactions: List<TransactionWithDetails> = emptyList()
 )

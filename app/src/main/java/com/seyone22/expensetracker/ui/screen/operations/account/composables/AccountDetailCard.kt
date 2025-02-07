@@ -1,114 +1,99 @@
 package com.seyone22.expensetracker.ui.screen.operations.account.composables
 
-import android.text.Layout
-import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
-import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
-import com.patrykandpatrick.vico.compose.common.dimensions
-import com.patrykandpatrick.vico.compose.common.fill
-import com.patrykandpatrick.vico.compose.common.shape.markerCorneredShape
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
-import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.core.common.component.TextComponent
-import com.patrykandpatrick.vico.core.common.shape.Corner
-import com.seyone22.expensetracker.ui.screen.operations.account.AccountDetailAccountUiState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.seyone22.expensetracker.SharedViewModel
+import com.seyone22.expensetracker.data.model.CurrencyFormat
+import com.seyone22.expensetracker.ui.AppViewModelProvider
+import com.seyone22.expensetracker.ui.common.FormattedCurrency
+import com.seyone22.expensetracker.ui.screen.operations.account.AccountDetailUiState
 
 @Composable
 fun AccountDetailCard(
     modifier: Modifier,
-    accountDetailUiState: AccountDetailAccountUiState,
+    accountDetailUiState: AccountDetailUiState,
 ) {
-    // Initialize seriesState with a default value (e.g., list of 0.0)
-    var seriesState by remember { mutableStateOf(List(2) { 10.0 }) }
+    val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    var expanded by remember { mutableStateOf(false) }
 
-    val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(accountDetailUiState.balanceHistory) {
-        Log.d("TAG", "AccountDetailCard: ${accountDetailUiState.balanceHistory}")
-        // Extract balance values into seriesState once data is available
-        if (accountDetailUiState.balanceHistory.isNotEmpty()) {
-            seriesState = accountDetailUiState.balanceHistory.map { (_, balance, _) ->
-                balance
-            }
-        }
+    // Get Currency data for the account
+    var currencyData by remember { mutableStateOf(CurrencyFormat()) }
 
-        // Update the model producer with the new series data
-        modelProducer.runTransaction {
-            lineSeries {
-                series(y = seriesState)
-            }
-        }
+    LaunchedEffect(Unit, accountDetailUiState.account.currencyId) {
+        currencyData = sharedViewModel.getCurrencyById(accountDetailUiState.account.currencyId)
+            ?: CurrencyFormat()
     }
 
-    val primary = MaterialTheme.colorScheme.primary.toArgb()
-
-
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        colors = CardDefaults.cardColors()
-            .copy(containerColor = MaterialTheme.colorScheme.background)
+        modifier = modifier.fillMaxWidth()
     ) {
-        CartesianChartHost(
-            modifier = Modifier
-                .height(100.dp)
-                .weight(1f),
-            chart = rememberCartesianChart(
-                rememberLineCartesianLayer(
-                    LineCartesianLayer.LineProvider.series(
-                        LineCartesianLayer.rememberLine(
-                            fill = remember { LineCartesianLayer.LineFill.single(fill(Color(primary))) },
-                            pointConnector = remember {
-                                LineCartesianLayer.PointConnector.cubic(
-                                    curvature = 0f
-                                )
-                            },
-                        )
-                    )
-                ),
-                startAxis = VerticalAxis.rememberStart(),
-                bottomAxis = HorizontalAxis.rememberBottom(
-
-                ), marker = rememberDefaultCartesianMarker(
-                    label = rememberTextComponent(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlignment = Layout.Alignment.ALIGN_CENTER,
-                        padding = dimensions(8.dp, 4.dp),
-                        background = rememberShapeComponent(
-                            fill = fill(MaterialTheme.colorScheme.surfaceBright),
-                            shape = markerCorneredShape(Corner.Sharp),
-                        ),
-                        minWidth = TextComponent.MinWidth.fixed(40f),
-                    )
+        Row(
+            modifier = modifier.padding(16.dp, 8.dp, 0.dp, 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(
+                modifier = Modifier.weight(9f),
+            ) {
+                FormattedCurrency(
+                    modifier = Modifier,
+                    style = MaterialTheme.typography.displaySmall,
+                    value = accountDetailUiState.balance,
+                    currency = currencyData
                 )
-            ),
-            modelProducer = modelProducer,
-
-            )
+                Text(
+                    text = accountDetailUiState.account.accountName,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Text(
+                    text = accountDetailUiState.account.accountType + " Account",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            IconButton(onClick = { expanded = true }, modifier = Modifier.weight(1f)) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = null,
+                    Modifier.size(24.dp, 24.dp)
+                )
+            }
+            // DropdownMenu
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.background)
+            ) {
+                DropdownMenuItem(onClick = {
+                    expanded = !expanded
+                }, text = { Text(text = "Edit") })
+                DropdownMenuItem(onClick = {
+                    expanded = !expanded
+                }, text = { Text(text = "Delete") })
+            }
+        }
     }
 }
