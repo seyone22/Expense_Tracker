@@ -63,7 +63,8 @@ fun AccountDetailCard(
                     modifier = Modifier,
                     style = MaterialTheme.typography.displaySmall,
                     value = accountDetailUiState.balance,
-                    currency = currencyData
+                    currency = currencyData,
+                    defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Text(
                     text = accountDetailUiState.account.accountName,

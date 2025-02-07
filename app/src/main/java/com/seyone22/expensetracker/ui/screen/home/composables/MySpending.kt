@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.ArrowDropUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -129,17 +130,23 @@ fun MySpending(
             ) {
                 Text("My Spending", color = Color.Gray)
                 FormattedCurrency(
+                    style = MaterialTheme.typography.headlineMedium,
                     value = currentWeekSum,
                     currency = baseCurrencyInfo,
-                    style = MaterialTheme.typography.headlineMedium
+                    defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
+                val changeColor =
+                    if (percentageChange <= 0) Color(0xff50b381) else Color(0xffd9534f)
+                val changeIcon =
+                    if (percentageChange <= 0) Icons.Outlined.ArrowDropUp else Icons.Outlined.ArrowDropDown
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.ArrowDropUp,
+                        imageVector = changeIcon,
                         contentDescription = null,
-                        tint = Color(0xff50b381),
+                        tint = changeColor,
                         modifier = Modifier
                             .padding(0.dp)
                             .width(13.dp)
@@ -147,7 +154,7 @@ fun MySpending(
                     )
                     Text(
                         "${DecimalFormat("#.##").format(percentageChange)}% ",
-                        color = Color(0xff50b381),
+                        color = changeColor,
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text("From last week", style = MaterialTheme.typography.bodySmall)

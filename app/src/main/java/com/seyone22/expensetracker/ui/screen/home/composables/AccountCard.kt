@@ -65,12 +65,14 @@ fun AccountCard(
             ) {
                 Text(
                     text = accountWithBalance.first.accountName,
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 FormattedCurrency(
                     value = accountWithBalance.second,
                     currency = currencyData,
-                    style = MaterialTheme.typography.headlineLarge
+                    style = MaterialTheme.typography.headlineLarge,
+                    defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
 

@@ -1,8 +1,8 @@
 package com.seyone22.expensetracker.ui.screen.settings
 
 import android.util.Log
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.CurrencyHistory
@@ -12,6 +12,7 @@ import com.seyone22.expensetracker.data.repository.currencyHistory.CurrencyHisto
 import com.seyone22.expensetracker.data.repository.metadata.MetadataRepository
 import com.seyone22.expensetracker.ui.screen.onboarding.CurrencyList
 import com.seyone22.expensetracker.ui.theme.DarkTheme
+import com.seyone22.expensetracker.utils.SnackbarManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,7 +36,7 @@ class SettingsViewModel(
     private val currencyFormatsRepository: CurrencyFormatsRepository,
     private val currencyHistoryRepository: CurrencyHistoryRepository
 
-) : ViewModel() {
+) : BaseViewModel() {
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
@@ -153,69 +154,79 @@ class SettingsViewModel(
 
     fun getMonthlyRates(baseCurrencyId: Int) {
         viewModelScope.launch {
-            val onlineData = withContext(Dispatchers.IO) {
-                InfoEuroApi.retrofitService.getMonthlyRates()
-            }
-
-            val baseCurrency = getBaseCurrencyInfo(baseCurrencyId)
-
-            val currencyList = currencyFormatsRepository.getAllCurrencyFormatsStream().first()
-            val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            flow {
-                val onlineDataMap = onlineData.associateBy { it.isoA3Code }
-                val baseCurrExchangeRate =
-                    (onlineData.find { it.isoA3Code == baseCurrency.currency_symbol })!!.value
-
-                for (currency in currencyList) {
-                    val datum = onlineDataMap[currency.currency_symbol]
-                    if (datum != null) {
-                        val updatedCurr = CurrencyFormat(
-                            currency.currencyId,
-                            currency.currencyName,
-                            currency.pfx_symbol,
-                            currency.sfx_symbol,
-                            currency.decimal_point,
-                            currency.group_seperator,
-                            currency.unit_name,
-                            currency.cent_name,
-                            currency.scale,
-                            ((1 / datum.value) * baseCurrExchangeRate),
-                            currency.currency_symbol,
-                            currency.currency_type
-                        )
-                        emit(updatedCurr)
-                    } else {
-                        emit(currency) // Emit the original currency format if data is not found
-                    }
+            try {
+                val onlineData = withContext(Dispatchers.IO) {
+                    InfoEuroApi.retrofitService.getMonthlyRates()
                 }
-            }.collect {
-                currencyFormatsRepository.updateCurrencyFormat(it)
-                Log.d("TAG", it.toString())
-            }
-            flow {
-                val onlineDataMap = onlineData.associateBy { it.isoA3Code }
-                val baseCurrExchangeRate =
-                    (onlineData.find { it.isoA3Code == baseCurrency.currency_symbol })!!.value
 
-                for (currency in currencyList) {
-                    val datum = onlineDataMap[currency.currency_symbol]
-                    if (datum != null) {
-                        val historyEntry = CurrencyHistory(
-                            currencyId = currency.currencyId,
-                            currDate = LocalDate.now().format(dateFormatter),
-                            currValue = ((1 / datum.value) * baseCurrExchangeRate),
-                            currUpdType = 1
-                        )
-                        emit(historyEntry)
+                val baseCurrency = getBaseCurrencyInfo(baseCurrencyId)
+                val currencyList = currencyFormatsRepository.getAllCurrencyFormatsStream().first()
+                val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+                // Update currency formats
+                flow {
+                    val onlineDataMap = onlineData.associateBy { it.isoA3Code }
+                    val baseCurrExchangeRate =
+                        onlineData.find { it.isoA3Code == baseCurrency.currency_symbol }!!.value
+
+                    for (currency in currencyList) {
+                        val datum = onlineDataMap[currency.currency_symbol]
+                        if (datum != null) {
+                            val updatedCurr = CurrencyFormat(
+                                currency.currencyId,
+                                currency.currencyName,
+                                currency.pfx_symbol,
+                                currency.sfx_symbol,
+                                currency.decimal_point,
+                                currency.group_seperator,
+                                currency.unit_name,
+                                currency.cent_name,
+                                currency.scale,
+                                ((1 / datum.value) * baseCurrExchangeRate),
+                                currency.currency_symbol,
+                                currency.currency_type
+                            )
+                            emit(updatedCurr)
+                        } else {
+                            emit(currency) // Emit original if no data found
+                        }
                     }
+                }.collect {
+                    currencyFormatsRepository.updateCurrencyFormat(it)
+                    Log.d("TAG", "Updated Currency: $it")
                 }
-            }.collect {
-                currencyHistoryRepository.insertCurrencyHistory(it)
-                Log.d("TAG", it.toString())
-            }
 
+                // Insert currency history
+                flow {
+                    val onlineDataMap = onlineData.associateBy { it.isoA3Code }
+                    val baseCurrExchangeRate =
+                        onlineData.find { it.isoA3Code == baseCurrency.currency_symbol }!!.value
+
+                    for (currency in currencyList) {
+                        val datum = onlineDataMap[currency.currency_symbol]
+                        if (datum != null) {
+                            val historyEntry = CurrencyHistory(
+                                currencyId = currency.currencyId,
+                                currDate = LocalDate.now().format(dateFormatter),
+                                currValue = ((1 / datum.value) * baseCurrExchangeRate),
+                                currUpdType = 1
+                            )
+                            emit(historyEntry)
+                        }
+                    }
+                }.collect {
+                    currencyHistoryRepository.insertCurrencyHistory(it)
+                    Log.d("TAG", "Inserted History: $it")
+                }
+
+                // Show success Snackbar **after** both operations are completed
+                SnackbarManager.showMessage("Currency formats updated successfully!")
+
+            } catch (e: Exception) {
+                SnackbarManager.showMessage("Failed to update currency formats: ${e.message}")
+                Log.e("TAG", "Error updating currency formats", e)
+            }
         }
-
     }
 }
 

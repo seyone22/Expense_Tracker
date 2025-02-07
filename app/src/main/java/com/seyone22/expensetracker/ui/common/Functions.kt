@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -36,13 +37,14 @@ fun FormattedCurrency(
     style: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.titleMedium,
     value: Double,
     currency: CurrencyFormat,
-    type: TransactionType = TransactionType.NEUTRAL
+    type: TransactionType = TransactionType.NEUTRAL,
+    defaultColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     val formattedValue = DecimalFormat("#,###.00").format(value) // Add comma separators
     val textColor = if ((type == TransactionType.DEBIT) or (value < 0)) {
         MaterialTheme.colorScheme.error
     } else {
-        MaterialTheme.colorScheme.onBackground
+        defaultColor
     }
 
     val displayText = if (currency.pfx_symbol.isNotEmpty()) {
