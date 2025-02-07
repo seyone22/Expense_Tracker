@@ -30,7 +30,7 @@ fun ReportScreen(
     navigateToScreen: (screen: String) -> Unit,
     viewModel: ReportViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
-    val reports by viewModel.reportsFlow.collectAsState(initial = listOf())
+    val reports by viewModel.reportsFlow.collectAsState(initial = emptyList())
 
     Scaffold(bottomBar = {
         ExpenseNavBar(
