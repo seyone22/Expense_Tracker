@@ -2,6 +2,7 @@ package com.seyone22.expensetracker.utils
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.time.temporal.WeekFields
 import java.util.Locale
@@ -23,4 +24,14 @@ fun getEndOfCurrentWeek(): String {
     return LocalDate.now()
         .with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))  // End of the week (Sunday)
         .toString()  // Convert to "YYYY-MM-DD"
+}
+
+fun getStartOfPreviousWeek(): String {
+    return LocalDate.now().with(DayOfWeek.MONDAY).minusWeeks(1)
+        .format(DateTimeFormatter.ISO_LOCAL_DATE)
+}
+
+fun getEndOfPreviousWeek(): String {
+    return LocalDate.now().with(DayOfWeek.SUNDAY).minusWeeks(1)
+        .format(DateTimeFormatter.ISO_LOCAL_DATE)
 }
