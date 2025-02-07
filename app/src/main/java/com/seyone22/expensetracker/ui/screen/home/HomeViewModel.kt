@@ -8,9 +8,12 @@ import com.seyone22.expensetracker.data.model.TransactionWithDetails
 import com.seyone22.expensetracker.data.repository.account.AccountsRepository
 import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.seyone22.expensetracker.data.repository.metadata.MetadataRepository
+import com.seyone22.expensetracker.data.repository.transaction.BalanceResult
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
-import com.seyone22.expensetracker.utils.getCurrentWeekNumber
+import com.seyone22.expensetracker.utils.getEndOfCurrentWeek
+import com.seyone22.expensetracker.utils.getStartOfCurrentWeek
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -28,14 +31,15 @@ class HomeViewModel(
     private val metadataRepository: MetadataRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository
 ) : BaseViewModel() {
-
     // Flow for different transaction types (expenses, income, total)
     private val expensesFlow = transactionsRepository.getTotalBalanceByCode("Withdrawal")
     private val incomeFlow = transactionsRepository.getTotalBalanceByCode("Deposit")
     private val totalFlow = transactionsRepository.getTotalBalance()
 
-    // Direct access from frontend composable
-    val expensesByWeekFlow = transactionsRepository.getTotalExpensesForWeek(getCurrentWeekNumber())
+    // Flow for expenses per day for the current week
+    private val _expensesByWeekFlow = MutableStateFlow<List<BalanceResult>>(emptyList())
+    val expensesByWeekFlow: StateFlow<List<BalanceResult>> = _expensesByWeekFlow
+
 
     // Combine flows for expenses, income, and total into one flow
     private val totalsFlow =
@@ -43,10 +47,21 @@ class HomeViewModel(
             Totals(expenses, income, total)
         }
 
+    // Function to fetch Transactions for the week
+    suspend fun fetchTransactionsForWeek(
+        startDate: String = getStartOfCurrentWeek(),
+        endDate: String = getEndOfCurrentWeek()
+    ) {
+        val entries = transactionsRepository.getExpensesForDateRange(startDate, endDate)
+        _expensesByWeekFlow.value = entries.firstOrNull() ?: emptyList()
+    }
+
     // Home UI state, includes account details and transactions
     val accountsUiState: StateFlow<HomeUiState> = combine(
-        accountsRepository.getAllAccountsStream(), transactionsRepository.getAllTransactionsStream()
-    ) { accounts, transactions ->
+        accountsRepository.getAllAccountsStream(),
+        transactionsRepository.getAllTransactionsStream(),
+        expensesByWeekFlow
+    ) { accounts, transactions, expensesByWeek ->
         // Retrieve account balances and create a list of account-summary pairs
         val transformedList = accounts.map { account ->
             val balance = transactionsRepository.getBalanceByAccountId().firstOrNull()
@@ -57,7 +72,8 @@ class HomeViewModel(
         // Return the HomeUiState with both the transformed account list and transactions
         HomeUiState(
             accountList = transformedList,
-            transactionSample = transactions.take(5) // Adjust how many transactions you want to show as a sample
+            transactionSample = transactions.take(5),
+            expensesByWeek = expensesByWeek
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(TIMEOUT_MILLIS), HomeUiState())
 
@@ -101,7 +117,8 @@ class HomeViewModel(
 data class HomeUiState(
     val accountList: List<Pair<Account, Double>> = emptyList(), // Account info with balance
     val grandTotal: Double = 0.0, // Total balance for all accounts
-    val transactionSample: List<TransactionWithDetails> = emptyList() // List of transaction details
+    val transactionSample: List<TransactionWithDetails> = emptyList(), // List of transaction details
+    val expensesByWeek: List<BalanceResult> = emptyList()
 )
 
 /**

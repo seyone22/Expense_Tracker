@@ -42,14 +42,15 @@ import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.shape.Corner
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.seyone22.expensetracker.data.model.CurrencyFormat
-import com.seyone22.expensetracker.data.repository.transaction.ExpensePerDay
+import com.seyone22.expensetracker.data.repository.transaction.BalanceResult
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 
 @Composable
 fun MySpending(
-    expensesByWeek: List<ExpensePerDay>,
+    expensesByWeek: List<BalanceResult>,
     baseCurrencyInfo: CurrencyFormat,
     modifier: Modifier = Modifier
 ) {
@@ -57,31 +58,33 @@ fun MySpending(
     val seriesState = remember { mutableStateOf(List(7) { 0.0 }) }
 
     // Sum up the total expenses from the list
-    val expenseSUM = expensesByWeek.sumOf { it.totalExpense }
+    val expenseSUM = expensesByWeek.sumOf { it.balance }
 
     val modelProducer = remember { CartesianChartModelProducer() }
+
     LaunchedEffect(expensesByWeek) {
         withContext(Dispatchers.Default) {
-            if (expensesByWeek.isNotEmpty()) {
-                // Create a mutable list of 7 zeros
-                val updatedSeries = MutableList(7) { 0.0 }
-                // Update only the correct indices based on the data from expensesByWeek
-                expensesByWeek.forEach { (day, expense) ->
-                    val dayIndex = day.toIntOrNull()
+            // Create a mutable list of 7 zeros
+            val updatedSeries = MutableList(7) { 0.0 }
 
-                    if (dayIndex != null && dayIndex in 0..6) {
-                        updatedSeries[dayIndex] = expense
-                    }
+            expensesByWeek.forEach { (_, balance, date) ->
+                val dayIndex = date?.let {
+                    (LocalDate.parse(it).dayOfWeek.value - 1) % 7  // Ensure correct day index
                 }
 
-                // Update seriesState with the updated series
-                seriesState.value = updatedSeries
+                if (dayIndex != null && dayIndex in 0..6) {
+                    updatedSeries[dayIndex] = balance
+                }
             }
 
-            modelProducer.runTransaction {
-                columnSeries {
-                    series(y = seriesState.value)
-                }
+            withContext(Dispatchers.Main) {
+                seriesState.value = updatedSeries
+            }
+        }
+
+        modelProducer.runTransaction {
+            columnSeries {
+                series(y = seriesState.value)
             }
         }
     }
@@ -139,7 +142,7 @@ fun MySpending(
                             )
                         )
                     ), bottomAxis = HorizontalAxis.rememberBottom(
-                        guideline = null, line = null,
+                        guideline = null, line = null, valueFormatter = bottomAxisValueFormatter
                     ), marker = rememberDefaultCartesianMarker(
                         label = rememberTextComponent(
                             color = MaterialTheme.colorScheme.onSurface,
@@ -154,12 +157,11 @@ fun MySpending(
                     )
                 ),
                 modelProducer = modelProducer,
-
                 )
         }
     }
 }
 
 private val bottomAxisValueFormatter = CartesianValueFormatter { _, x, _ ->
-    "SMTWTFS"[x.toInt()].toString()
+    "MTWTFSS"[x.toInt()].toString()
 }
