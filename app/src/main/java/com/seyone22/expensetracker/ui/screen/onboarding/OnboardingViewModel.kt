@@ -123,7 +123,7 @@ class OnboardingViewModel(
 }
 
 data class CurrencyList(
-    val currenciesList: List<CurrencyFormat> = listOf(),
+    val currenciesList: List<CurrencyFormat> = emptyList(),
 )
 
 data class MetadataUiState(
