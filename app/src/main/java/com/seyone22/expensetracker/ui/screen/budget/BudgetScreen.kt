@@ -1,10 +1,6 @@
 package com.seyone22.expensetracker.ui.screen.budget
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,15 +8,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -107,7 +103,6 @@ fun BudgetScreen(
     }) {
         LazyColumn(
             modifier = Modifier.padding(it),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             val yearBudgets = sortedBudgets.filter { !it.budgetYearName.contains("-") }
                 .sortedBy { it.budgetYearName } // Ensure years are sorted
@@ -143,37 +138,25 @@ fun BudgetScreen(
 fun BudgetCard(
     budgetYear: BudgetYear, isYearBudget: Boolean, navigateToScreen: (screen: String) -> Unit
 ) {
-    Card(
+    ListItem(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp, 0.dp)
+            .height(64.dp)
             .clickable { navigateToScreen("${BudgetDetailDestination.route}/${budgetYear.budgetYearId}") },
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                modifier = Modifier.height(24.dp),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    fontWeight = if (isYearBudget) {
-                        FontWeight.Bold
-                    } else {
-                        FontWeight.Normal
-                    }, text = budgetYear.budgetYearName
-                )
-            }
-            Box(
-                modifier = Modifier, contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Filled.ChevronRight, "", modifier = Modifier.size(24.dp)
-                )
-            }
+        headlineContent = {
+            Text(
+                fontWeight = if (isYearBudget) {
+                    FontWeight.Bold
+                } else {
+                    FontWeight.Normal
+                }, text = budgetYear.budgetYearName
+            )
+        },
+        trailingContent = {
+            Icon(
+                Icons.Filled.ChevronRight, "", modifier = Modifier.size(24.dp)
+            )
         }
-    }
+    )
+    HorizontalDivider()
 }
