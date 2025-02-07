@@ -1,5 +1,6 @@
 package com.seyone22.expensetracker.ui.screen.home
 
+import android.util.Log
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
@@ -10,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -51,7 +53,12 @@ fun HomeScreen(
 
     // Collect the filtered totals (you can pass "All" or "Current Month" as the filter)
     val totals by viewModel.getFilteredTotal("All").collectAsState(initial = Totals())
-    val expensesByWeek by viewModel.expensesByWeekFlow.collectAsState(initial = emptyList())
+
+    LaunchedEffect(Unit) {
+        viewModel.fetchTransactionsForWeek()
+    }
+
+    Log.d("TAG", "HomeScreen Test: ${accountsUiState.expensesByWeek}")
 
     // Code block to get the current currency's detail.
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -97,7 +104,7 @@ fun HomeScreen(
             item {
                 MySpending(
                     modifier = Modifier.padding(16.dp, 0.dp),
-                    expensesByWeek = expensesByWeek,
+                    expensesByWeek = accountsUiState.expensesByWeek,
                     baseCurrencyInfo = baseCurrency ?: CurrencyFormat(),
 
                     )
