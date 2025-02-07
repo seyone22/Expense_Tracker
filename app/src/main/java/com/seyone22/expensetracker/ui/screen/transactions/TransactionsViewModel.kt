@@ -103,6 +103,6 @@ class TransactionsViewModel(
 }
 
 data class AccountDetailTransactionUiState(
-    val transactions: List<TransactionWithDetails> = listOf(),
-    val billsDeposits: List<BillsDepositWithDetails> = listOf()
+    val transactions: List<TransactionWithDetails> = emptyList(),
+    val billsDeposits: List<BillsDepositWithDetails> = emptyList()
 )
