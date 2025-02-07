@@ -73,7 +73,7 @@ fun EntityScreen(
     val entityUiState: EntitiesUiState by viewModel.entitiesUiState.collectAsState(EntitiesUiState())
 
     // separate state
-    val activeCurrencies by viewModel.activeCurrenciesFlow.collectAsState(listOf())
+    val activeCurrencies by viewModel.activeCurrenciesFlow.collectAsState(emptyList())
 
     val pagerState = rememberPagerState(pageCount = { 3 })
     Scaffold(

@@ -216,14 +216,14 @@ class EntityViewModel(
  * Ui State for EntitiesScreen
  */
 data class EntitiesUiState(
-    val categoriesParent: List<Category> = listOf(),
-    val categoriesSub: List<Category> = listOf(),
-    val payeesList: List<Payee> = listOf(),
+    val categoriesParent: List<Category> = emptyList(),
+    val categoriesSub: List<Category> = emptyList(),
+    val payeesList: List<Payee> = emptyList(),
     val currenciesList: Pair<List<CurrencyFormat>, List<CurrencyHistory>?> = Pair(
-        listOf(),
-        listOf()
+        emptyList(),
+        emptyList()
     ),
-    val activeCurrencies: List<Int> = listOf()
+    val activeCurrencies: List<Int> = emptyList()
 )
 
 // Enum for entity types
