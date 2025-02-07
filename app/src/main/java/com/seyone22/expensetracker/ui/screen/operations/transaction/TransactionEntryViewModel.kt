@@ -146,11 +146,11 @@ data class TransactionUiState(
     val billsDepositsDetails: BillsDepositsDetails = BillsDepositsDetails(),
     val isEntryValid: Boolean = false,
     val isRecurringEntryValid: Boolean = false,
-    val accountsList: List<Account> = listOf(),
-    val categoriesList: List<Category> = listOf(),
-    val payeesList: List<Payee> = listOf(),
-    val tagList: List<Tag> = listOf(),
-    val tagLinkList: List<TagLink> = listOf()
+    val accountsList: List<Account> = emptyList(),
+    val categoriesList: List<Category> = emptyList(),
+    val payeesList: List<Payee> = emptyList(),
+    val tagList: List<Tag> = emptyList(),
+    val tagLinkList: List<TagLink> = emptyList()
 )
 
 //Data class for AccountDetails
