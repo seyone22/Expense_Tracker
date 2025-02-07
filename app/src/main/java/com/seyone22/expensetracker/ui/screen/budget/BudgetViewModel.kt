@@ -1,6 +1,5 @@
 package com.seyone22.expensetracker.ui.screen.budget
 
-import androidx.lifecycle.viewModelScope
 import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.model.BudgetEntry
 import com.seyone22.expensetracker.data.model.BudgetYear
@@ -16,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 
 /**
  * ViewModel to retrieve all items in the Room database.
@@ -50,12 +48,10 @@ class BudgetViewModel(
     }
 
     // Function to fetch Budget Entries for a specific Budget Year
-    fun fetchBudgetEntriesFor(budgetYearId: Int) {
+    suspend fun fetchBudgetEntriesFor(budgetYearId: Int) {
         // Fetch the budget entries from the repository and update the StateFlow
-        viewModelScope.launch {
-            val entries = budgetEntryRepository.getBudgetEntriesForBudgetYear(budgetYearId)
-            _budgetEntriesFlow.value = entries.firstOrNull() ?: listOf()
-        }
+        val entries = budgetEntryRepository.getBudgetEntriesForBudgetYear(budgetYearId)
+        _budgetEntriesFlow.value = entries.firstOrNull() ?: emptyList()
     }
 
     suspend fun addBudgetYear(year: String, month: Int?, baseBudget: BudgetYear) {
@@ -67,9 +63,9 @@ class BudgetViewModel(
 
 //Data class for BudgetUiState
 data class BudgetUiState(
-    val categories: List<Category> = listOf(),
-    val transactions: List<TransactionWithDetails> = listOf(),
-    val budgetEntries: List<BudgetEntry> = listOf(),
-    val budgetYears: List<BudgetYear> = listOf(),
+    val categories: List<Category> = emptyList(),
+    val transactions: List<TransactionWithDetails> = emptyList(),
+    val budgetEntries: List<BudgetEntry> = emptyList(),
+    val budgetYears: List<BudgetYear> = emptyList(),
     val selectedBudgetYear: BudgetYear? = null
 )
