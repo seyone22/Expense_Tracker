@@ -58,7 +58,7 @@ class ReportViewModel(
         return if (categoryId != null) {
             transactionsRepository.getAllTransactionsByCategory(categoryId).first()
         } else {
-            return listOf()
+            return emptyList()
         }
     }
 
