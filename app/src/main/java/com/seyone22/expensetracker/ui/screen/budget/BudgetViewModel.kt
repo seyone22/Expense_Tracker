@@ -69,7 +69,6 @@ class BudgetViewModel(
     }
 }
 
-
 //Data class for BudgetUiState
 data class BudgetUiState(
     val categories: List<Category> = emptyList(),

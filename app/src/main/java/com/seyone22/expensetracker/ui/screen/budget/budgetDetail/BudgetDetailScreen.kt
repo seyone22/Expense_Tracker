@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavController
 import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.data.model.BudgetEntry
 import com.seyone22.expensetracker.data.model.Category
@@ -64,6 +64,7 @@ fun BudgetDetailScreen(
     modifier: Modifier = Modifier,
     backStackEntry: Int,
     navigateToScreen: (screen: String) -> Unit,
+    navController: NavController,
     viewModel: BudgetDetailViewModel = viewModel(factory = AppViewModelProvider.Factory),
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
@@ -92,7 +93,7 @@ fun BudgetDetailScreen(
     }, topBar = {
         ExpenseTopBar(
             selectedActivity = BudgetDetailDestination.route,
-            navController = rememberNavController(),
+            navController = navController,
             type = "Left",
             hasNavigation = true
         )
