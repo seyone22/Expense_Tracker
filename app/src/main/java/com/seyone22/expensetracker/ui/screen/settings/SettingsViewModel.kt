@@ -1,6 +1,7 @@
 package com.seyone22.expensetracker.ui.screen.settings
 
 import android.util.Log
+import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
 import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
@@ -125,6 +126,7 @@ class SettingsViewModel(
 
     fun getMonthlyRates(baseCurrencyId: Int) {
         viewModelScope.launch {
+            SnackbarManager.showMessage("Updating Currency Formats...", SnackbarDuration.Long)
             try {
                 val onlineData = withContext(Dispatchers.IO) {
                     InfoEuroApi.retrofitService.getMonthlyRates()
