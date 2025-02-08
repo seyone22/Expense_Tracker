@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.Checklist
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.ImportExport
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Palette
@@ -77,7 +78,7 @@ fun SettingsScreen(
                 action = { navigateToScreen("SettingsDetail/Appearance") })
             SettingsListItem(settingName = "Fetch Data",
                 settingSubtext = "Update Exchange Rates",
-                settingIcon = Icons.Outlined.Palette,
+                settingIcon = Icons.Outlined.Download,
                 action = { navigateToScreen("SettingsDetail/Data") })
             SettingsListItem(settingName = "Privacy and Security",
                 settingSubtext = "App lock, Secure Screen",

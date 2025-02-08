@@ -49,17 +49,6 @@ class SettingsViewModel(
     private val baseCurrencyIdFlow: Flow<Metadata?> =
         metadataRepository.getMetadataByNameStream("BASECURRENCYID")
 
-    private val requireUnlockFlow: Flow<Metadata?> =
-        metadataRepository.getMetadataByNameStream("REQUIREUNLOCK")
-
-    private val secureScreenFlow: Flow<Metadata?> =
-        metadataRepository.getMetadataByNameStream("SECURESCREEN")
-
-    val securityObject: Flow<SecurityObject> =
-        combine(requireUnlockFlow, secureScreenFlow) { r, s ->
-            SecurityObject(r?.infoValue.toBoolean(), s?.infoValue.toBoolean())
-        }
-
     // Combine the flows and calculate the totals
     val metadataList: Flow<List<Metadata?>> =
         combine(usernameFlow, baseCurrencyIdFlow) { username, basecurrencyid ->
@@ -126,24 +115,6 @@ class SettingsViewModel(
         metadataRepository.updateMetadata(
             Metadata(6, "USERNAME", newName)
         )
-    }
-
-    suspend fun getRequireUnlock(): Boolean {
-        return metadataRepository.getMetadataByNameStream("REQUIREUNLOCK")
-            .firstOrNull()?.infoValue.toString().toBoolean()
-    }
-
-    suspend fun setRequireUnlock(value: Boolean) {
-        metadataRepository.insertMetadata(Metadata(100, "REQUIREUNLOCK", value.toString()))
-    }
-
-    suspend fun getSecureScreen(): Boolean {
-        return metadataRepository.getMetadataByNameStream("SECURESCREEN")
-            .firstOrNull()?.infoValue.toString().toBoolean()
-    }
-
-    suspend fun setSecureScreen(value: Boolean) {
-        metadataRepository.insertMetadata(Metadata(101, "SECURESCREEN", value.toString()))
     }
 
     suspend fun changeCurrency(newCurrency: Int) {
@@ -229,8 +200,3 @@ class SettingsViewModel(
         }
     }
 }
-
-data class SecurityObject(
-    var requireUnlock: Boolean = false,
-    var secureScreen: Boolean = false
-)
