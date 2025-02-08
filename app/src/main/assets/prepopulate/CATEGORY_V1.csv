@@ -1,0 +1,57 @@
+1,Bills,1,-1
+2,Telephone,1,1
+3,Electricity,1,1
+4,Gas,1,1
+5,Internet,1,1
+6,Rent,1,1
+7,Cable TV,1,1
+8,Water,1,1
+9,Food,1,-1
+10,Groceries,1,9
+11,Dining out,1,9
+12,Leisure,1,-1
+13,Movies,1,12
+14,Video Rental,1,12
+15,Magazines,1,12
+16,Automobile,1,-1
+17,Maintenance,1,16
+18,Gas,1,16
+19,Parking,1,16
+20,Registration,1,16
+21,Education,1,-1
+22,Books,1,21
+23,Tuition,1,21
+24,Others,1,21
+25,Homeneeds,1,-1
+26,Clothing,1,25
+27,Furnishing,1,25
+28,Others,1,25
+29,Healthcare,1,-1
+30,Health,1,29
+31,Dental,1,29
+32,Eyecare,1,29
+33,Physician,1,29
+34,Prescriptions,1,29
+35,Insurance,1,-1
+36,Auto,1,35
+37,Life,1,35
+38,Home,1,35
+39,Health,1,35
+40,Vacation,1,-1
+41,Travel,1,40
+42,Lodging,1,40
+43,Sightseeing,1,40
+44,Taxes,1,-1
+45,Income Tax,1,44
+46,House Tax,1,44
+47,Water Tax,1,44
+48,Others,1,44
+49,Miscellaneous,1,-1
+50,Gifts,1,-1
+51,Income,1,-1
+52,Salary,1,51
+53,Reimbursement/Refunds,1,51
+54,Investment Income,1,51
+55,Other Income,1,-1
+56,Other Expenses,1,-1
+57,Transfer,1,-1

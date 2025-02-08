@@ -7,20 +7,21 @@ plugins {
 }
 
 android {
-    namespace = "com.example.expensetracker"
-    compileSdk = 34
+    namespace = "com.seyone22.expensetracker"
+    compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.expensetracker"
+        applicationId = "com.seyone22.expenses"
         minSdk = 28
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 4
+        versionName = "0.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
+        versionNameSuffix = "-alpha"
     }
 
     buildTypes {
@@ -43,7 +44,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     packaging {
         resources {
@@ -53,76 +54,96 @@ android {
 }
 
 dependencies {
-// AndroidX Core
-    implementation("androidx.core:core-ktx:1.12.0")
 
-// AndroidX Lifecycle
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    // AndroidX Core
+    implementation(libs.androidx.core.ktx)
 
-// AndroidX Activity Compose
-    implementation("androidx.activity:activity-compose:1.8.2")
+    // AndroidX Lifecycle
+    implementation(libs.androidx.lifecycle.runtime.ktx)
 
-// AndroidX Compose
-    implementation(platform("androidx.compose:compose-bom:2023.10.01"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
+    // AndroidX Activity Compose
+    implementation(libs.androidx.activity.compose)
 
-// AndroidX Compose Material3
-    implementation("androidx.compose.material3:material3:1.2.0")
+    // AndroidX Compose
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
 
-// JUnit
-    testImplementation("junit:junit:4.13.2")
+    // AndroidX Compose Material3
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.lifecycle.process)
 
-// AndroidX Test
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.10.01"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    // JUnit
+    testImplementation(libs.junit)
 
-// AndroidX Compose Debug
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // AndroidX Test
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
 
-// AndroidX Compose Material Icons Extended
-    implementation("androidx.compose.material:material-icons-extended:1.6.2")
+    // AndroidX Compose Debug
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
-// AndroidX Navigation Compose
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    // AndroidX Compose Material Icons Extended
+    implementation(libs.androidx.material.icons.extended)
 
-// AndroidX Compose Material3 Adaptive Navigation Suite
-    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.0.0-alpha04")
+    // AndroidX Navigation Compose
+    implementation(libs.androidx.navigation.compose)
 
-// AndroidX Compose Material3 Window Size Class Android
-    implementation("androidx.compose.material3:material3-window-size-class-android:1.2.0")
+    // AndroidX Compose Material3 Adaptive Navigation Suite
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
 
-// AndroidX Room
-    implementation("androidx.room:room-runtime:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-ktx:2.6.1")
+    // AndroidX Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
 
-// AndroidX Preferences DataStore
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    // AndroidX Preferences DataStore
+    implementation(libs.androidx.datastore.preferences)
 
-// AndroidX Lifecycle ViewModel Compose
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    // AndroidX Lifecycle ViewModel Compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
 
-// Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    // Retrofit
+    implementation(libs.retrofit)
 
-// Retrofit with Kotlin Serialization Converter
-    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
-    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    // Retrofit with Kotlin Serialization Converter
+    implementation(libs.retrofit.kotlinx.serialization.converter)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
 
-// Kotlinx Serialization JSON
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    // Kotlinx Serialization JSON
+    implementation(libs.kotlinx.serialization.json)
 
-    implementation("androidx.window:window:1.2.0")
+    // AndroidX Window
+    implementation(libs.androidx.window)
 
-    implementation("com.github.tehras:charts:0.2.4-alpha")
+    // Vico Charts - M3 Compose
+    implementation(libs.vico.compose.m3)
 
-    // For `compose`. Creates a `ChartStyle` based on an M3 Material Theme.
-    implementation("com.patrykandpatrick.vico:compose-m3:1.14.0")
+    // Workers
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // Biometrics
+    implementation(libs.androidx.biometric.ktx)
+
+    // Permission handling with accompanist
+    implementation(libs.accompanist.permissions)
+
+    // Coil image library
+    implementation(libs.coil.compose)
+
+    // Tehras charts
+    implementation(libs.charts)
+
+    // AndroidX Compose Material3 Window Size Class Android
+    implementation("androidx.compose.material3:material3-window-size-class-android:1.3.1")
+
+    implementation("androidx.activity:activity-ktx:1.10.0") // Latest version
 }

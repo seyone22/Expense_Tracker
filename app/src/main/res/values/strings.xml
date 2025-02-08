@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Expense Tracker</string>
-    <string name="app_version">v0.3.2-alpha</string>
-    <string name="release_date">03/22/2024</string>
-    <string name="release_time">00:00</string>
+    <string name="app_version">v0.4.0-alpha</string>
+    <string name="release_date">02/02/2025</string>
+    <string name="release_time">02:02</string>
 
 
     <string-array name="activities">
@@ -12,5 +12,10 @@
         <item>Entries</item>
         <item>Reports</item>
     </string-array>
+
+    <string name="biometric_prompt_title_text">Unlock with Biometrics</string>
+    <string name="biometric_prompt_subtitle_text">Use your fingerprint or face recognition</string>
+    <string name="biometric_prompt_description_text">To proceed, authenticate using your registered biometric credentials.</string>
+    <string name="biometric_prompt_use_password_instead_text">Use Password Instead</string>
 </resources>
 
