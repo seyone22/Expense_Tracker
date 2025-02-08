@@ -41,6 +41,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.seyone22.expensetracker.R
+import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Metadata
 import com.seyone22.expensetracker.ui.AppViewModelProvider
@@ -477,12 +479,18 @@ fun SecuritySettingsList(
             cryptoManager = cryptoManager
         )
     }
+    val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
+    // Checks if secure screen is enabled
+    val isSecureScreenEnabled by sharedViewModel.isSecureScreenEnabled.collectAsState()
+
+    LaunchedEffect(Unit) {
+        sharedViewModel.getSecureScreenSetting(context!!)
+    }
 
     // Check if biometric authentication is available on the device
     val isBiometricAvailable = remember { BiometricHelper.isBiometricAvailable(activity) }
     val requireUnlock = remember { mutableStateOf(screenLockManager.isScreenLockEnabled()) }
-
-    val secureScreen = remember { mutableStateOf(false) }
 
     BiometricHelper.checkBiometricStatus(context = context)
 
@@ -515,10 +523,10 @@ fun SecuritySettingsList(
         })
         SettingsToggleListItem(settingName = "Secure screen",
             settingSubtext = "Hides app contents when switching apps, and blocks screenshots",
-            toggle = secureScreen.value,
+            toggle = isSecureScreenEnabled,
             enabled = isBiometricAvailable,
             onToggleChange = { newValue ->
-                biometricLauncher.launch(Unit)
+                sharedViewModel.saveSecureScreenSetting(context, newValue)
             })
     }
 }
@@ -527,31 +535,6 @@ fun SecuritySettingsList(
 fun ImportExportSettingsList(
     viewModel: SettingsViewModel, scope: CoroutineScope = rememberCoroutineScope()
 ) {
-    val securityObject by viewModel.securityObject.collectAsState(initial = SecurityObject())
-    Log.d("TAG", "INITIAL SecuritySettingsList: $securityObject")
-
-    val x: Boolean by remember { mutableStateOf(securityObject.requireUnlock) }
-
     Column {
-        SettingsToggleListItem(
-            settingName = "Require Unlock",
-            toggle = x,
-            onToggleChange = { newValue ->
-                securityObject.requireUnlock = newValue
-                scope.launch {
-                    viewModel.setRequireUnlock(value = securityObject.requireUnlock)
-                }
-            },
-        )
-        SettingsListItem(settingName = "Lock when idle", settingSubtext = "", action = {
-
-        })
-        SettingsToggleListItem(
-            settingName = "Secure screen",
-            settingSubtext = "Hides app contents when switching apps, and blocks screenshots",
-            toggle = securityObject.secureScreen,
-            onToggleChange = { newValue ->
-            },
-        )
     }
 }
