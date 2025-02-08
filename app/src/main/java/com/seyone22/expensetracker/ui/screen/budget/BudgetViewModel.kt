@@ -55,8 +55,17 @@ class BudgetViewModel(
     }
 
     suspend fun addBudgetYear(year: String, month: Int?, baseBudget: BudgetYear) {
-        val yearString = year + if (month != null) "-${String.format("%02d", month)}" else ""
-        budgetYearRepository.insertBudgetYear(BudgetYear(0, yearString))
+        // Check if the year budget already exists
+        val yearExists = budgetYearRepository.getBudgetYearByName(year).firstOrNull() != null
+
+        // Gets the year string, which will include month if it's a month budget
+        val yearString = if (month != null) "$year-${"%02d".format(month)}" else year
+        // Check if the month budget already exists
+        val monthExists = budgetYearRepository.getBudgetYearByName(yearString).firstOrNull() != null
+
+        // Make the budgets
+        if (!yearExists) budgetYearRepository.insertBudgetYear(BudgetYear(0, year))
+        if (!monthExists) budgetYearRepository.insertBudgetYear(BudgetYear(0, yearString))
     }
 }
 
