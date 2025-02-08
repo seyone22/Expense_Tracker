@@ -455,22 +455,42 @@ fun TransactionEntryForm(
                 expanded = categoryExpanded,
                 onDismissRequest = { categoryExpanded = false },
             ) {
-                transactionUiState.categoriesList.forEach { category ->
+                val parentCategories =
+                    transactionUiState.categoriesList.filter { it.parentId == -1 }
+                val childCategoriesMap =
+                    transactionUiState.categoriesList.filter { it.parentId != -1 }
+                        .groupBy { it.parentId } // Group children by parentId
+
+
+                for (parent in parentCategories) {
                     DropdownMenuItem(text = {
                         Row {
-                            if (category.parentId != -1) {
-                                Spacer(modifier = Modifier.width(16.dp))
-                            }
-                            Text(removeTrPrefix(category.categName))
+                            Text(removeTrPrefix(parent.categName))
                         }
                     }, onClick = {
-                        currentCategory = category
+                        currentCategory = parent
                         onValueChange(
-                            transactionDetails.copy(categoryId = category.categId.toString()),
+                            transactionDetails.copy(categoryId = parent.categId.toString()),
                             viewModel.transactionUiState.value.billsDepositsDetails
                         )
                         categoryExpanded = false
                     })
+
+                    childCategoriesMap[parent.categId]?.forEach { child ->
+                        DropdownMenuItem(text = {
+                            Row {
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(removeTrPrefix(child.categName))
+                            }
+                        }, onClick = {
+                            currentCategory = child
+                            onValueChange(
+                                transactionDetails.copy(categoryId = child.categId.toString()),
+                                viewModel.transactionUiState.value.billsDepositsDetails
+                            )
+                            categoryExpanded = false
+                        })
+                    }
                 }
             }
         }
