@@ -112,7 +112,7 @@ fun ExpenseNavHost(
         // Routes to budget destinations
         composable(route = BudgetsDestination.route) {
             BudgetScreen(
-                navigateToScreen = { screen -> navController.navigate(screen) },
+                navigateToScreen = { screen -> navController.navigate(screen) }
             )
         }
         composable(
@@ -133,6 +133,7 @@ fun ExpenseNavHost(
             BudgetDetailScreen(
                 backStackEntry = it.arguments?.getInt("budgetYearId") ?: -1,
                 navigateToScreen = { screen -> navController.navigate(screen) },
+                navController = navController
             )
         }
 
