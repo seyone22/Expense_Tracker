@@ -41,7 +41,6 @@ fun NetWorth(
             style = MaterialTheme.typography.displayMedium,
             value = totals.total,
             currency = baseCurrencyInfo,
-            defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
         )
         Text(
             text = "Net Worth",
@@ -94,7 +93,6 @@ fun NetWorth(
                         style = MaterialTheme.typography.headlineSmall,
                         value = totals.income,
                         currency = baseCurrencyInfo,
-                        defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -135,7 +133,6 @@ fun NetWorth(
                         style = MaterialTheme.typography.headlineSmall,
                         value = totals.expenses,
                         currency = baseCurrencyInfo,
-                        defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }

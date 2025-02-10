@@ -38,7 +38,7 @@ fun FormattedCurrency(
     value: Double,
     currency: CurrencyFormat,
     type: TransactionType = TransactionType.NEUTRAL,
-    defaultColor: Color = MaterialTheme.colorScheme.onBackground
+    defaultColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     val formattedValue = DecimalFormat("#,###.00").format(value) // Add comma separators
     val textColor = if ((type == TransactionType.DEBIT) or (value < 0)) {

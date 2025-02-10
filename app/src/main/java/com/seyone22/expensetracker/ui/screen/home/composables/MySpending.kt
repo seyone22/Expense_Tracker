@@ -133,7 +133,6 @@ fun MySpending(
                     style = MaterialTheme.typography.headlineMedium,
                     value = currentWeekSum,
                     currency = baseCurrencyInfo,
-                    defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 val changeColor =
                     if (percentageChange <= 0) Color(0xff50b381) else Color(0xffd9534f)

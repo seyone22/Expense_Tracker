@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -97,7 +96,6 @@ fun TransactionList(
                             } else {
                                 TransactionType.DEBIT
                             },
-                            defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     },
                     leadingContent = {
