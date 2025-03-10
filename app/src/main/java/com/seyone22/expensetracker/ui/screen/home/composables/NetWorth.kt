@@ -57,47 +57,7 @@ fun NetWorth(
             modifier = Modifier.fillMaxWidth() // Make the row take up the full width
         ) {
             // First Card
-            OutlinedCard(
-                modifier = Modifier.weight(1f) // This makes the card take equal space
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                ) {
 
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp) // Square container size
-                            .background(
-                                MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp)
-                            ), // Background with rounded corners
-                        contentAlignment = Alignment.Center // Centers the icon inside the box
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.NorthEast,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(36.dp) // Icon size
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "Income",
-                        fontStyle = FontStyle.Italic,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Color.Gray
-                    )
-
-                    FormattedCurrency(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        style = MaterialTheme.typography.headlineSmall,
-                        value = totals.income,
-                        currency = baseCurrencyInfo,
-                    )
-                }
-            }
-
-            // Second Card
             OutlinedCard(
                 modifier = Modifier.weight(1f) // This makes the card take equal space
             ) {
@@ -113,7 +73,7 @@ fun NetWorth(
                         contentAlignment = Alignment.Center // Centers the icon inside the box
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.SouthWest,
+                            imageVector = Icons.Outlined.NorthEast,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onError, // Set the icon color to white
                             modifier = Modifier.size(36.dp) // Icon size
@@ -132,6 +92,46 @@ fun NetWorth(
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                         style = MaterialTheme.typography.headlineSmall,
                         value = totals.expenses,
+                        currency = baseCurrencyInfo,
+                    )
+                }
+            }
+            // Second Card
+            OutlinedCard(
+                modifier = Modifier.weight(1f) // This makes the card take equal space
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                ) {
+
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp) // Square container size
+                            .background(
+                                MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(8.dp)
+                            ), // Background with rounded corners
+                        contentAlignment = Alignment.Center // Centers the icon inside the box
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.SouthWest,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(36.dp) // Icon size
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Income",
+                        fontStyle = FontStyle.Italic,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Color.Gray
+                    )
+
+                    FormattedCurrency(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        style = MaterialTheme.typography.headlineSmall,
+                        value = totals.income,
                         currency = baseCurrencyInfo,
                     )
                 }

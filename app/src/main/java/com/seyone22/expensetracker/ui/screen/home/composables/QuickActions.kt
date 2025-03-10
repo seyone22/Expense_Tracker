@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.home.HomeViewModel
 import com.seyone22.expensetracker.ui.screen.operations.account.AccountEntryDestination
@@ -40,7 +42,7 @@ data class QuickAction(
     val title: String,
     val icon: ImageVector,
     val destination: NavigationDestination,
-    val color: Color
+    val color: Color,
 )
 
 @Composable
@@ -50,7 +52,19 @@ fun QuickActions(
     viewModel: HomeViewModel,
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
+    val currentDialog by viewModel.currentDialog
+
+    currentDialog?.let {
+        GenericDialog(dialogAction = it, onDismiss = { viewModel.dismissDialog() })
+    }
+
     val actions = listOf(
+        QuickAction(
+            "Account",
+            Icons.Filled.AccountBalanceWallet,
+            AccountEntryDestination,
+            MaterialTheme.colorScheme.tertiaryContainer
+        ),
         QuickAction(
             "Deposit",
             Icons.Filled.ArrowDownward,
@@ -68,12 +82,6 @@ fun QuickActions(
             Icons.AutoMirrored.Filled.CompareArrows,
             TransactionEntryDestination,
             MaterialTheme.colorScheme.primaryContainer
-        ),
-        QuickAction(
-            "Account",
-            Icons.Filled.AccountBalanceWallet,
-            AccountEntryDestination,
-            MaterialTheme.colorScheme.tertiaryContainer
         ),
         QuickAction(
             "Payee",
