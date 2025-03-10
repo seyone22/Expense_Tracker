@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -130,6 +131,98 @@ fun TransactionList(
                     fontStyle = FontStyle.Italic,
                     color = Color.Gray,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TransactionListScroll(
+    modifier: Modifier = Modifier,
+    transactions: List<TransactionWithDetails>,
+    longClicked: (Transaction) -> Unit,
+    viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    showFilter: Boolean = true,
+) {
+    val haptics = LocalHapticFeedback.current
+    var filteredTransactions by remember { mutableStateOf(transactions) }
+
+    // Use derivedStateOf to update filteredTransactions when transactions change
+    val derivedFilteredTransactions by remember(transactions) {
+        derivedStateOf {
+            transactions // Apply your filtering logic here if needed
+        }
+    }
+    LaunchedEffect(transactions) {
+        filteredTransactions = transactions
+    }
+
+    LazyColumn(modifier = modifier) {
+        if (showFilter) {
+            item {
+                SortBar(periodSortAction = { sortCase ->
+                    filteredTransactions = filterTransactions(
+                        transactions = transactions, filterOption = sortCase
+                    )
+                })
+            }
+        }
+
+        if (filteredTransactions.isNotEmpty()) {
+            // Iterate over the list of filtered transactions
+            filteredTransactions.forEachIndexed { index, transaction ->
+                item {
+                    ListItem(headlineContent = {
+                        Text(text = transaction.payeeName ?: "Transfer")
+                    }, supportingContent = {
+                        Text(text = removeTrPrefix(transaction.categName))
+                    }, trailingContent = {
+                        var currencyFormat by remember { mutableStateOf(CurrencyFormat()) }
+
+                        LaunchedEffect(transaction.accountId) {
+                            val currencyFormatFunction =
+                                viewModel.getAccountFromId(transaction.accountId)
+                                    ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
+                            currencyFormat = currencyFormatFunction!!
+                        }
+
+                        FormattedCurrency(
+                            value = transaction.transAmount,
+                            currency = currencyFormat,
+                            type = if ((transaction.transCode == "Deposit") || (transaction.toAccountId != -1)) {
+                                TransactionType.CREDIT
+                            } else {
+                                TransactionType.DEBIT
+                            },
+                        )
+                    }, leadingContent = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = getAbbreviatedMonthName(
+                                    transaction.transDate!!.substring(5, 7).toInt()
+                                )
+                            )
+                            Text(text = transaction.transDate.substring(8, 10))
+                        }
+                    }, modifier = Modifier.combinedClickable(onClick = {}, onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        longClicked(transaction.toTransaction())
+                    }, onLongClickLabel = " "
+                    )
+                    )
+                }
+                item { HorizontalDivider() }
+            }
+        } else {
+            item {
+                Text(
+                    text = "Nothing to show here!",
+                    fontStyle = FontStyle.Italic,
+                    color = Color.Gray,
                 )
             }
         }
