@@ -452,6 +452,8 @@ fun DataSettingsList(
     metadata: List<Metadata?>,
     viewModel: SettingsViewModel,
 ) {
+    val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
     Column {
         SettingsListItem(
             settingName = "Update Currency Formats",
@@ -459,7 +461,7 @@ fun DataSettingsList(
             action = {
                 metadata.find { it?.infoName == "BASECURRENCYID" }?.infoValue?.toIntOrNull()
                     ?.let { baseCurrencyId ->
-                        viewModel.getMonthlyRates(baseCurrencyId)
+                        sharedViewModel.getMonthlyRates()
                     }
             }
         )
