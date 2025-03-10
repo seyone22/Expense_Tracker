@@ -1,6 +1,5 @@
 package com.seyone22.expensetracker.ui.screen.home
 
-import android.util.Log
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
@@ -58,8 +57,6 @@ fun HomeScreen(
         viewModel.fetchTransactionsForWeek()
     }
 
-    Log.d("TAG", "HomeScreen Test: ${accountsUiState.expensesByWeek}")
-
     // Code block to get the current currency's detail.
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val baseCurrency by sharedViewModel.baseCurrencyFlow.collectAsState(initial = CurrencyFormat())
@@ -74,14 +71,11 @@ fun HomeScreen(
     if (!isUsed) {
         navigateToScreen(OnboardingDestination.route)
     }
-    Scaffold(
-        bottomBar = {
-            ExpenseNavBar(
-                currentActivity = HomeDestination.route,
-                navigateToScreen = navigateToScreen
-            )
-        }
-    ) {
+    Scaffold(bottomBar = {
+        ExpenseNavBar(
+            currentActivity = HomeDestination.route, navigateToScreen = navigateToScreen
+        )
+    }) {
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 320.dp),
             modifier = modifier

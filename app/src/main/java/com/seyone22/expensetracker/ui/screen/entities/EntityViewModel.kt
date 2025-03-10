@@ -13,7 +13,6 @@ import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.CurrencyHistory
 import com.seyone22.expensetracker.data.model.InfoEuroCurrencyHistoryResponse
 import com.seyone22.expensetracker.data.model.Payee
-import com.seyone22.expensetracker.data.model.toCategory
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.seyone22.expensetracker.data.repository.currencyHistory.CurrencyHistoryRepository
@@ -74,15 +73,21 @@ class EntityViewModel(
         private set
     var selectedCategory by mutableStateOf(Category())
 
-    suspend fun saveCategory() {
-        if (validateCategoryInput()) {
-            categoriesRepository.insertCategory(categoryUiState.categoryDetails.toCategory())
+    suspend fun saveCategory(category: Category) {
+        if (category.categName != null) {
+            Log.d("TAG", "saveCategory: $category")
+
+            try {
+                categoriesRepository.insertCategory(category)
+            } catch (e: Exception) {
+                Log.d("TAG", "saveCategory: $e")
+            }
         }
     }
 
-    suspend fun editCategory() {
-        if (validateCategoryInput()) {
-            categoriesRepository.updateCategory(categoryUiState.categoryDetails.toCategory())
+    suspend fun editCategory(category: Category) {
+        if (category.categName != null) {
+            categoriesRepository.updateCategory(category)
         }
     }
 
