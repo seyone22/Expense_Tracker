@@ -129,7 +129,8 @@ object AppViewModelProvider {
         initializer {
             SharedViewModel(
                 expenseApplication().container.metadataRepository,
-                expenseApplication().container.currenciesRepository
+                expenseApplication().container.currenciesRepository,
+                expenseApplication().container.currencyHistoryRepository,
             )
         }
     }
