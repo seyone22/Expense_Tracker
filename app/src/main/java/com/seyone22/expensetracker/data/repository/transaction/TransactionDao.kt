@@ -132,15 +132,15 @@ interface TransactionDao {
     WHERE 
         transCode = :transCode 
         AND CHECKINGACCOUNT_V1.status LIKE :status 
-        AND strftime('%m', CHECKINGACCOUNT_V1.transDate) = :month 
         AND strftime('%Y', CHECKINGACCOUNT_V1.transDate) = :year
+        AND (:month IS NULL OR strftime('%m', CHECKINGACCOUNT_V1.transDate) = :month)
     """
     )
     fun getTotalBalanceByCode(
         transCode: String,
         status: String,
-        month: Int,
-        year: Int
+        month: String?,
+        year: String
     ): Flow<Double>
 
     @Query(
@@ -153,7 +153,7 @@ interface TransactionDao {
     JOIN CURRENCYFORMATS_V1 
         ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId 
     WHERE 
-        categoryId = :categId 
+        CHECKINGACCOUNT_V1.categoryId = :categId 
         AND CHECKINGACCOUNT_V1.status LIKE :status 
         AND strftime('%Y', CHECKINGACCOUNT_V1.transDate) = :year
         AND (:month IS NULL OR strftime('%m', CHECKINGACCOUNT_V1.transDate) = :month)
@@ -162,8 +162,8 @@ interface TransactionDao {
     fun getTotalBalanceByCategory(
         categId: Int,
         status: String,
-        month: Int?,
-        year: Int
+        month: String?,
+        year: String
     ): Flow<Double>
 
     @Query(
