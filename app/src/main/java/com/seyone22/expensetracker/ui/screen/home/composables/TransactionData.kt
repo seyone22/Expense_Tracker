@@ -49,7 +49,7 @@ fun TransactionData(
         TransactionList(
             transactions = accountsUiState.transactionSample,
             longClicked = { },
-            showFilter = false
+            showFilter = false,
         )
     }
 }
