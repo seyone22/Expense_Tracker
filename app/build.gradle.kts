@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
 
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
 }
 
 android {
@@ -108,7 +108,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
 
     // Retrofit
     implementation(libs.retrofit)
@@ -145,5 +144,5 @@ dependencies {
     // AndroidX Compose Material3 Window Size Class Android
     implementation("androidx.compose.material3:material3-window-size-class-android:1.3.1")
 
-    implementation("androidx.activity:activity-ktx:1.10.0") // Latest version
+    implementation(libs.androidx.activity.ktx) // Latest version
 }
