@@ -49,5 +49,7 @@ fun BudgetCard(
             )
         }
     )
-    HorizontalDivider()
+    if (false) {
+        HorizontalDivider()
+    }
 }
