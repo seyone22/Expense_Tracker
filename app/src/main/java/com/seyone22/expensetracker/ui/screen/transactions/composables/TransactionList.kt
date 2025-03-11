@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -126,8 +129,7 @@ fun TransactionList(
                             coroutineScope.launch {
                                 viewModel.deleteTransaction(transaction)
                             }
-                        },
-                        itemName = "this transaction"
+                        }, itemName = "this transaction"
                     )
                 )
             }
@@ -221,6 +223,34 @@ fun TransactionList(
                     Icon(Icons.Default.Check, contentDescription = "Edit")
                     Spacer(modifier = Modifier.width(16.dp))
                     Text("Reconcile transaction", style = MaterialTheme.typography.bodyLarge)
+                }
+
+
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { editTransaction() }
+                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = "Edit")
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text("Duplicate", style = MaterialTheme.typography.bodyLarge)
+                }
+
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { editTransaction() }
+                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Edit")
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text("Move to...", style = MaterialTheme.typography.bodyLarge)
+                }
+
+                Row(modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { editTransaction() }
+                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Share, contentDescription = "Edit")
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text("Share", style = MaterialTheme.typography.bodyLarge)
                 }
 
                 Row(modifier = Modifier
