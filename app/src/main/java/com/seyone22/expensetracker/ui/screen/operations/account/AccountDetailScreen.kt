@@ -49,7 +49,12 @@ fun AccountDetailScreen(
         ExpenseTopBar(
             selectedActivity = AccountDetailDestination.route,
             navController = navController,
-            hasNavigation = true
+            hasNavigation = true,
+            dropdownOptions = listOf(
+                "Edit" to { navController.navigate("Edit Account") },
+                "Delete" to { navController.navigate("Delete Account") },
+                "Make Favourite" to { }
+            )
         )
     }) {
         Column(
