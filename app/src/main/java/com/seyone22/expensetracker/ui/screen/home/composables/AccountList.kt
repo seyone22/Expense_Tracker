@@ -1,6 +1,7 @@
 package com.seyone22.expensetracker.ui.screen.home.composables
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,8 +15,9 @@ fun AccountList(
     navigateToScreen: (screen: String) -> Unit,
 ) {
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        item { Spacer(modifier = Modifier) }
         items(accountList.size) { index ->
             val accountPair = accountList[index]
             AccountCard(
@@ -23,5 +25,6 @@ fun AccountList(
                 navigateToScreen = navigateToScreen,
             )
         }
+        item { Spacer(modifier = Modifier) }
     }
 }

@@ -112,7 +112,7 @@ fun HomeScreen(
             }
             item {
                 AccountData(
-                    modifier = modifier.padding(16.dp, 0.dp, 0.dp, 0.dp),
+                    modifier = modifier.padding(0.dp),
                     accountsUiState = accountsUiState,
                     navigateToScreen = navigateToScreen,
                 )
