@@ -6,11 +6,17 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.seyone22.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
+import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Metadata
+import com.seyone22.expensetracker.data.model.Payee
+import com.seyone22.expensetracker.data.model.Tag
+import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.seyone22.expensetracker.data.repository.currencyHistory.CurrencyHistoryRepository
 import com.seyone22.expensetracker.data.repository.metadata.MetadataRepository
+import com.seyone22.expensetracker.data.repository.payee.PayeesRepository
+import com.seyone22.expensetracker.data.repository.tag.TagsRepository
 import com.seyone22.expensetracker.utils.CryptoManager
 import com.seyone22.expensetracker.utils.SnackbarManager
 import com.seyone22.expensetracker.utils.updateCurrencyFormatsAndHistory
@@ -28,12 +34,21 @@ import kotlinx.coroutines.withContext
 class SharedViewModel(
     private val metadataRepository: MetadataRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository,
-    private val currencyHistoryRepository: CurrencyHistoryRepository
+    private val currencyHistoryRepository: CurrencyHistoryRepository,
+    private val categoriesRepository: CategoriesRepository,
+    private val payeesRepository: PayeesRepository,
+    private val tagsRepository: TagsRepository
 ) : ViewModel() {
+    val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
+    val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllPayeesStream()
+    val tagsFlow: Flow<List<Tag>> = tagsRepository.getAllTagsStream()
+    val currenciesFlow: Flow<List<CurrencyFormat>> =
+        currencyFormatsRepository.getAllCurrencyFormatsStream()
+
     private val _isSecureScreenEnabled = MutableStateFlow(false)
     val isSecureScreenEnabled: StateFlow<Boolean> = _isSecureScreenEnabled
 
-    val baseCurrencyIdFlow: Flow<Metadata?> =
+    private val baseCurrencyIdFlow: Flow<Metadata?> =
         metadataRepository.getMetadataByNameStream("BASECURRENCYID")
 
     // Flow to retrieve and convert "ISUSED" metadata to a boolean
