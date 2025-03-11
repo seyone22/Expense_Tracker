@@ -34,6 +34,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.dialogs.AddEditCategoryDialogAction
+import com.seyone22.expensetracker.ui.common.dialogs.AddEditCurrencyDialogAction
+import com.seyone22.expensetracker.ui.common.dialogs.AddEditPayeeDialogAction
+import com.seyone22.expensetracker.ui.common.dialogs.AddEditTagDialogAction
 import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.entities.EntityViewModel
@@ -137,8 +140,57 @@ fun QuickActions(
                                             entityViewModel.editCategory(category)
                                         }
                                     },
-                                    transactionViewModel = transactionViewModel,
-                                    entityViewModel = entityViewModel
+                                )
+                            )
+                        }
+
+                        "Payee" -> {
+                            viewModel.showDialog(
+                                AddEditPayeeDialogAction(
+                                    onAdd = { payee ->
+                                        coroutineScope.launch {
+                                            entityViewModel.savePayee(payee)
+                                        }
+                                    },
+                                    onEdit = { payee ->
+                                        coroutineScope.launch {
+                                            entityViewModel.editPayee(payee)
+                                        }
+                                    },
+                                )
+                            )
+                        }
+
+                        "Tag" -> {
+                            viewModel.showDialog(
+                                AddEditTagDialogAction(
+                                    onAdd = { tag ->
+                                        coroutineScope.launch {
+                                            entityViewModel.saveTag(tag)
+                                        }
+                                    },
+                                    onEdit = { tag ->
+                                        coroutineScope.launch {
+                                            entityViewModel.editTag(tag)
+                                        }
+                                    }
+                                )
+                            )
+                        }
+
+                        "Currency" -> {
+                            viewModel.showDialog(
+                                AddEditCurrencyDialogAction(
+                                    onAdd = { currency ->
+                                        coroutineScope.launch {
+                                            entityViewModel.saveCurrency(currency)
+                                        }
+                                    },
+                                    onEdit = { currency ->
+                                        coroutineScope.launch {
+                                            entityViewModel.editCurrency(currency)
+                                        }
+                                    }
                                 )
                             )
                         }
