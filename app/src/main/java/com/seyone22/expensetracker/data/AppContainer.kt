@@ -21,6 +21,8 @@ import com.seyone22.expensetracker.data.repository.payee.OfflinePayeesRepository
 import com.seyone22.expensetracker.data.repository.payee.PayeesRepository
 import com.seyone22.expensetracker.data.repository.report.OfflineReportsRepository
 import com.seyone22.expensetracker.data.repository.report.ReportsRepository
+import com.seyone22.expensetracker.data.repository.tag.OfflineTagsRepository
+import com.seyone22.expensetracker.data.repository.tag.TagsRepository
 import com.seyone22.expensetracker.data.repository.transaction.OfflineTransactionsRepository
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
 
@@ -36,6 +38,7 @@ interface AppContainer {
     val reportsRepository: ReportsRepository
     val budgetEntryRepository: BudgetEntryRepository
     val budgetYearRepository: BudgetYearRepository
+    val tagsRepository: TagsRepository
 }
 /**
  * [AppContainer] implementation that provides instance of OfflineItemsRepository
@@ -76,5 +79,8 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
     override val budgetYearRepository: BudgetYearRepository by lazy {
         OfflineBudgetYearRepository(MMEXDatabase.getDatabase(context).budgetYearDao())
+    }
+    override val tagsRepository: TagsRepository by lazy {
+        OfflineTagsRepository(MMEXDatabase.getDatabase(context).tagDao())
     }
 }
