@@ -29,14 +29,13 @@ import com.seyone22.expensetracker.SelectedObjects
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.ExpenseTopBar
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
-import com.seyone22.expensetracker.ui.screen.entities.EntitiesDestination
 import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.seyone22.expensetracker.ui.screen.transactions.composables.ScheduledTransactionList
 import com.seyone22.expensetracker.ui.screen.transactions.composables.TransactionList
 import kotlinx.coroutines.launch
 
 object TransactionsDestination : NavigationDestination {
-    override val route = "Entries"
+    override val route = "Transactions"
     override val titleRes = R.string.app_name
     override val routeId = 3
 }
@@ -60,10 +59,11 @@ fun TransactionsScreen(
     val pagerState = rememberPagerState(pageCount = { 2 })
     Scaffold(topBar = {
         ExpenseTopBar(
-            selectedActivity = EntitiesDestination.route,
+            selectedActivity = TransactionsDestination.route,
             type = "Left",
             navController = navController,
-            hasNavigation = false
+            hasNavigation = true,
+            hasNavBarAction = false
         )
     }) {
         Column(

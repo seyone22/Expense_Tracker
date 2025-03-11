@@ -105,7 +105,7 @@ fun HomeScreen(
             }
             item {
                 QuickActions(
-                    modifier = modifier.padding(16.dp, 0.dp, 0.dp, 0.dp),
+                    modifier = modifier.padding(0.dp),
                     navigateToScreen = navigateToScreen,
                     viewModel = viewModel
                 )

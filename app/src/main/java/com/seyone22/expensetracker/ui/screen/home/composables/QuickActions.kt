@@ -5,9 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
@@ -117,6 +119,9 @@ fun QuickActions(
         modifier = modifier.padding(top = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        item {
+            Spacer(modifier = Modifier.width(0.dp))
+        }
         items(actions.size) { index ->
             Card(modifier = Modifier
                 .size(100.dp)
@@ -219,6 +224,9 @@ fun QuickActions(
                     }
                 }
             }
+        }
+        item {
+            Spacer(modifier = Modifier.width(0.dp))
         }
     }
 }
