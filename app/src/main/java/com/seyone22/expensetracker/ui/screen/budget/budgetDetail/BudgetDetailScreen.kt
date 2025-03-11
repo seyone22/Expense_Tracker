@@ -324,7 +324,7 @@ private fun BudgetCategoryItem(
         expenseForCategory = viewModel.getExpensesForCategory(category.categId, selectedBudgetYear)
     }
 
-    if (budgetItem != null) {
+    if (budgetItem != null || expenseForCategory != 0.0) {
         BudgetItemCard(modifier = Modifier.padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
             category = category,
             budgetItem = budgetItem,
