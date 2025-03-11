@@ -83,7 +83,8 @@ fun EntityScreen(
                 selectedActivity = EntitiesDestination.route,
                 type = "Left",
                 navController = navController,
-                hasNavigation = false
+                hasNavigation = true,
+                hasNavBarAction = false
             )
         }
     ) {
