@@ -1,6 +1,5 @@
 package com.seyone22.expensetracker.ui.common.dialogs
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -10,6 +9,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,17 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.Category
-import com.seyone22.expensetracker.ui.screen.entities.EntityViewModel
-import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
+import com.seyone22.expensetracker.ui.AppViewModelProvider
 
 
 class AddEditCategoryDialogAction(
     private val onAdd: (Category) -> Unit,
     private val onEdit: (Category) -> Unit,
     initialEntry: Category? = null,
-    private val transactionViewModel: TransactionEntryViewModel,
-    private val entityViewModel: EntityViewModel // Pass this instead of initializing in dialog
 ) : DialogAction {
     private val existingEntry = initialEntry
 
@@ -42,10 +41,7 @@ class AddEditCategoryDialogAction(
 
     private var categorySelected by mutableStateOf(
         initialEntry ?: Category(
-            categId = 0,
-            parentId = -1,
-            categName = "",
-            active = 1
+            categId = 0, parentId = -1, categName = "", active = 1
         )
     )
     private var categoryParent by mutableStateOf<Category?>(null)
@@ -53,37 +49,35 @@ class AddEditCategoryDialogAction(
 
     @OptIn(ExperimentalMaterial3Api::class)
     override val content: @Composable () -> Unit = {
+        // Code block to get the current currency's detail.
+        val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
+        val categoriesList by sharedViewModel.categoriesFlow.collectAsState(initial = listOf())
+
         val focusManager = LocalFocusManager.current
-        val transactionUiState by transactionViewModel.transactionUiState.collectAsState()
 
         // Set categoryParent correctly when initialEntry exists
         LaunchedEffect(initialEntry) {
             if (initialEntry != null) {
-                categoryParent =
-                    transactionUiState.categoriesList.find { it.categId == initialEntry.parentId }
+                categoryParent = categoriesList.find { it.categId == initialEntry.parentId }
             }
         }
 
         Column(
-            modifier = Modifier
-                .padding(16.dp, 8.dp),
+            modifier = Modifier.padding(16.dp, 8.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge
+                text = title, style = MaterialTheme.typography.titleLarge
             )
 
             // Parent Category Dropdown
-            ExposedDropdownMenuBox(
-                expanded = categoryExpanded,
-                onExpandedChange = { categoryExpanded = !categoryExpanded }
-            ) {
+            ExposedDropdownMenuBox(expanded = categoryExpanded,
+                onExpandedChange = { categoryExpanded = it }) {
                 OutlinedTextField(
                     modifier = Modifier
                         .padding(0.dp, 8.dp)
-                        .clickable { categoryExpanded = true },
+                        .menuAnchor(MenuAnchorType.PrimaryEditable, true),
                     value = categoryParent?.categName ?: "None",
                     readOnly = true,
                     onValueChange = {},
@@ -96,16 +90,12 @@ class AddEditCategoryDialogAction(
                     expanded = categoryExpanded,
                     onDismissRequest = { categoryExpanded = false },
                 ) {
-                    transactionUiState.categoriesList.forEach { category ->
-                        DropdownMenuItem(
-                            text = { Text(category.categName) },
-                            onClick = {
-                                categoryParent = category
-                                categorySelected =
-                                    categorySelected.copy(parentId = category.categId)
-                                categoryExpanded = false
-                            }
-                        )
+                    categoriesList.forEach { category ->
+                        DropdownMenuItem(text = { Text(category.categName) }, onClick = {
+                            categoryParent = category
+                            categorySelected = categorySelected.copy(parentId = category.categId)
+                            categoryExpanded = false
+                        })
                     }
                 }
             }
