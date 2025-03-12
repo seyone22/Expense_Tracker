@@ -36,8 +36,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,11 +51,15 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.Category
+import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionStatus
+import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.removeTrPrefix
 import com.seyone22.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.seyone22.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
@@ -74,12 +80,15 @@ fun TransactionEntryForm(
     modifier: Modifier = Modifier,
     transactionDetails: TransactionDetails,
     transactionUiState: TransactionUiState,
-    onValueChange: (TransactionDetails, BillsDepositsDetails) -> Unit,
+    onValueChange: (TransactionDetails, BillsDepositsDetails, Double) -> Unit,
     viewModel: TransactionEntryViewModel,
     coroutineScope: CoroutineScope,
     edit: Boolean,
     focusManager: FocusManager = LocalFocusManager.current
 ) {
+    // Code block to get the current currency's detail.
+    val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
     var statusExpanded by remember { mutableStateOf(false) }
     var typeExpanded by remember { mutableStateOf(false) }
     var accountExpanded by remember { mutableStateOf(false) }
@@ -101,6 +110,25 @@ fun TransactionEntryForm(
     var currentPayee by remember { mutableStateOf(Payee()) }
     var currentCategory by remember { mutableStateOf(Category()) }
     var currentToAccount by remember { mutableStateOf(Account()) }
+    var currentAdvancedAmount by remember { mutableDoubleStateOf(0.0) }
+
+    var currentCurrency: CurrencyFormat? by remember { mutableStateOf(null) }
+    var currentCurrencyAdvanced: CurrencyFormat? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(currentAccount, currentToAccount) {
+        coroutineScope.launch {
+            if (transactionDetails.accountId.isNotBlank()) {
+                currentCurrency = sharedViewModel.getCurrencyById(currentAccount.currencyId)
+            }
+            if (transactionDetails.toAccountId.isNotBlank()) {
+                currentCurrencyAdvanced =
+                    sharedViewModel.getCurrencyById(currentToAccount.currencyId)
+            }
+            Log.d("TAG", "Datum: $currentCurrency")
+            Log.d("TAG", "Datum: $currentCurrencyAdvanced")
+        }
+    }
+
 
     if (edit) {
         coroutineScope.launch {
@@ -136,7 +164,8 @@ fun TransactionEntryForm(
             onValueChange = {
                 onValueChange(
                     transactionDetails.copy(transDate = it),
-                    viewModel.transactionUiState.value.billsDepositsDetails
+                    viewModel.transactionUiState.value.billsDepositsDetails,
+                    currentAdvancedAmount
                 )
             },
             label = { Text("Date of Transaction *") },
@@ -159,7 +188,8 @@ fun TransactionEntryForm(
                 onValueChange = {
                     onValueChange(
                         transactionDetails.copy(status = it),
-                        viewModel.transactionUiState.value.billsDepositsDetails
+                        viewModel.transactionUiState.value.billsDepositsDetails,
+                        currentAdvancedAmount
                     )
                 },
                 label = { Text("Transaction Status *") },
@@ -180,25 +210,14 @@ fun TransactionEntryForm(
                     DropdownMenuItem(text = { Text(transactionStatus.displayName) }, onClick = {
                         onValueChange(
                             transactionDetails.copy(status = transactionStatus.displayName),
-                            viewModel.transactionUiState.value.billsDepositsDetails
+                            viewModel.transactionUiState.value.billsDepositsDetails,
+                            currentAdvancedAmount
                         )
                         statusExpanded = false
                     })
                 }
             }
         }
-
-        OutlinedTextField(value = transactionDetails.transAmount,
-            onValueChange = {
-                onValueChange(
-                    transactionDetails.copy(transAmount = it),
-                    viewModel.transactionUiState.value.billsDepositsDetails
-                )
-            },
-            label = { Text("Amount *") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-        )
 
         // Transaction Type (transCode) Dropdown
         ExposedDropdownMenuBox(
@@ -212,10 +231,19 @@ fun TransactionEntryForm(
                 value = transactionDetails.transCode,
                 readOnly = true,
                 onValueChange = {
-                    onValueChange(
-                        transactionDetails.copy(transCode = it),
-                        viewModel.transactionUiState.value.billsDepositsDetails
-                    )
+                    if (it == TransactionCode.TRANSFER.displayName) {
+                        onValueChange(
+                            transactionDetails.copy(payeeId = "-1", transCode = it),
+                            viewModel.transactionUiState.value.billsDepositsDetails,
+                            currentAdvancedAmount
+                        )
+                    } else {
+                        onValueChange(
+                            transactionDetails.copy(toAccountId = "-1", transCode = it),
+                            viewModel.transactionUiState.value.billsDepositsDetails,
+                            currentAdvancedAmount
+                        )
+                    }
                 },
                 label = { Text("Transaction Type *") },
                 singleLine = true,
@@ -235,7 +263,8 @@ fun TransactionEntryForm(
                     DropdownMenuItem(text = { Text(transCode.displayName) }, onClick = {
                         onValueChange(
                             transactionDetails.copy(transCode = transCode.displayName),
-                            viewModel.transactionUiState.value.billsDepositsDetails
+                            viewModel.transactionUiState.value.billsDepositsDetails,
+                            currentAdvancedAmount
                         )
                         typeExpanded = false
                     })
@@ -257,7 +286,8 @@ fun TransactionEntryForm(
                 onValueChange = {
                     onValueChange(
                         transactionDetails.copy(accountId = it),
-                        viewModel.transactionUiState.value.billsDepositsDetails
+                        viewModel.transactionUiState.value.billsDepositsDetails,
+                        currentAdvancedAmount
                     )
                 },
                 label = {
@@ -288,7 +318,8 @@ fun TransactionEntryForm(
                     DropdownMenuItem(text = { Text(account.accountName) }, onClick = {
                         onValueChange(
                             transactionDetails.copy(accountId = account.accountId.toString()),
-                            viewModel.transactionUiState.value.billsDepositsDetails
+                            viewModel.transactionUiState.value.billsDepositsDetails,
+                            currentAdvancedAmount
                         )
                         currentAccount = account
                         accountExpanded = false
@@ -372,11 +403,13 @@ fun TransactionEntryForm(
                                     currentPayee = payee
                                     onValueChange(
                                         transactionDetails.copy(toAccountId = "-1"),
-                                        viewModel.transactionUiState.value.billsDepositsDetails
+                                        viewModel.transactionUiState.value.billsDepositsDetails,
+                                        currentAdvancedAmount
                                     )
                                     onValueChange(
                                         transactionDetails.copy(payeeId = currentPayee.payeeId.toString()),
-                                        viewModel.transactionUiState.value.billsDepositsDetails
+                                        viewModel.transactionUiState.value.billsDepositsDetails,
+                                        currentAdvancedAmount
                                     )
                                     Log.d(
                                         "DEBUG", "TransactionEntryForm: $transactionDetails"
@@ -392,11 +425,13 @@ fun TransactionEntryForm(
                                 DropdownMenuItem(text = { Text(account.accountName) }, onClick = {
                                     onValueChange(
                                         transactionDetails.copy(payeeId = "-1"),
-                                        viewModel.transactionUiState.value.billsDepositsDetails
+                                        viewModel.transactionUiState.value.billsDepositsDetails,
+                                        currentAdvancedAmount
                                     )
                                     onValueChange(
                                         transactionDetails.copy(toAccountId = account.accountId.toString()),
-                                        viewModel.transactionUiState.value.billsDepositsDetails
+                                        viewModel.transactionUiState.value.billsDepositsDetails,
+                                        currentAdvancedAmount
                                     )
                                     currentToAccount = account
                                     payeeExpanded = false
@@ -422,6 +457,53 @@ fun TransactionEntryForm(
             }
         }
 
+        OutlinedTextField(
+            modifier = Modifier.padding(bottom = 16.dp),
+            value = transactionDetails.transAmount,
+            onValueChange = {
+                Log.d("TAG", "TransactionEntryForm: $currentCurrency")
+                Log.d("TAG", "TransactionEntryForm: $currentCurrencyAdvanced")
+
+                if (transactionDetails.transCode == TransactionCode.TRANSFER.displayName && currentCurrency != null && currentCurrencyAdvanced != null && it.isNotEmpty()) {
+                    Log.d("TAG", "TransactionEntryForm: I'm here")
+
+                    if (currentCurrency?.currencyId != currentCurrencyAdvanced?.currencyId) {
+                        currentAdvancedAmount =
+                            it.toDouble() * (currentCurrency?.baseConvRate!! * currentCurrencyAdvanced?.baseConvRate!!)
+                    } else {
+                        currentAdvancedAmount = it.toDouble()
+                    }
+                }
+                onValueChange(
+                    transactionDetails.copy(transAmount = it),
+                    viewModel.transactionUiState.value.billsDepositsDetails,
+                    currentAdvancedAmount
+                )
+            },
+            label = { Text("Amount*") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+        )
+
+        if (transactionDetails.transCode == TransactionCode.TRANSFER.displayName) {
+            OutlinedTextField(
+                value = currentAdvancedAmount.toString(),
+                onValueChange = {
+                    onValueChange(
+                        transactionDetails,
+                        viewModel.transactionUiState.value.billsDepositsDetails,
+                        it.toDouble()
+                    )
+                    currentAdvancedAmount = it.toDouble()
+
+
+                },
+                label = { Text("Deposit amount*") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            )
+        }
+
         // Transaction Categories
         ExposedDropdownMenuBox(expanded = categoryExpanded, onExpandedChange = {
             categoryExpanded = !categoryExpanded
@@ -438,7 +520,8 @@ fun TransactionEntryForm(
                 onValueChange = {
                     onValueChange(
                         transactionDetails.copy(categoryId = it),
-                        viewModel.transactionUiState.value.billsDepositsDetails
+                        viewModel.transactionUiState.value.billsDepositsDetails,
+                        currentAdvancedAmount
                     )
                 },
                 label = { Text("Transaction Category *") },
@@ -471,7 +554,8 @@ fun TransactionEntryForm(
                         currentCategory = parent
                         onValueChange(
                             transactionDetails.copy(categoryId = parent.categId.toString()),
-                            viewModel.transactionUiState.value.billsDepositsDetails
+                            viewModel.transactionUiState.value.billsDepositsDetails,
+                            currentAdvancedAmount
                         )
                         categoryExpanded = false
                     })
@@ -486,7 +570,8 @@ fun TransactionEntryForm(
                             currentCategory = child
                             onValueChange(
                                 transactionDetails.copy(categoryId = child.categId.toString()),
-                                viewModel.transactionUiState.value.billsDepositsDetails
+                                viewModel.transactionUiState.value.billsDepositsDetails,
+                                currentAdvancedAmount
                             )
                             categoryExpanded = false
                         })
@@ -561,7 +646,8 @@ fun TransactionEntryForm(
             onValueChange = {
                 onValueChange(
                     transactionDetails.copy(transactionNumber = it),
-                    viewModel.transactionUiState.value.billsDepositsDetails
+                    viewModel.transactionUiState.value.billsDepositsDetails,
+                    currentAdvancedAmount
                 )
             },
             label = { Text("Number") },
@@ -572,7 +658,8 @@ fun TransactionEntryForm(
         OutlinedTextField(value = transactionDetails.notes, onValueChange = {
             onValueChange(
                 transactionDetails.copy(notes = it),
-                viewModel.transactionUiState.value.billsDepositsDetails
+                viewModel.transactionUiState.value.billsDepositsDetails,
+                currentAdvancedAmount
             )
         }, label = { Text("Notes") })
 
@@ -580,7 +667,8 @@ fun TransactionEntryForm(
             onValueChange = {
                 onValueChange(
                     transactionDetails.copy(color = it),
-                    viewModel.transactionUiState.value.billsDepositsDetails
+                    viewModel.transactionUiState.value.billsDepositsDetails,
+                    currentAdvancedAmount
                 )
             },
             label = { Text("Color") },
@@ -620,7 +708,8 @@ fun TransactionEntryForm(
 
                         onValueChange(
                             transactionDetails.copy(transDate = dateFormat.format(date)),
-                            viewModel.transactionUiState.value.billsDepositsDetails
+                            viewModel.transactionUiState.value.billsDepositsDetails,
+                            currentAdvancedAmount
                         )
                     }, enabled = confirmEnabled.value
                 ) {
