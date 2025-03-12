@@ -54,7 +54,7 @@ interface AccountDao {
 
         SELECT 
             toAccountId AS accountId, 
-            SUM(transAmount) AS balanceChange 
+            SUM(toTransAmount) AS balanceChange 
         FROM CHECKINGACCOUNT_V1 
         WHERE transCode = 'Transfer' 
           AND DATE(transDate) <= COALESCE(:date, DATE('now')) -- Use provided date or current date
