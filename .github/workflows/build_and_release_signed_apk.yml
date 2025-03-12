@@ -77,7 +77,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Signed APK
+          name: Expense Tracker Release APK
           path: "${{ github.workspace }}/Expense Tracker v${{ env.VERSION_NAME }}.apk"
           retention-days: 4
 
