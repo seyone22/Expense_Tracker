@@ -35,7 +35,7 @@ class AccountDetailViewModel(
         getTransactions()
     }
 
-    suspend fun refreshAccount() {
+    private suspend fun refreshAccount() {
         val accountId = _accountId.value
         val last7Days = (0..6).map {
             LocalDate.now().minusDays(it.toLong()).format(DateTimeFormatter.ISO_LOCAL_DATE)
@@ -60,7 +60,7 @@ class AccountDetailViewModel(
         }
     }
 
-    suspend fun getTransactions() {
+    private suspend fun getTransactions() {
         val accountId = _accountId.value
         val transactions =
             transactionsRepository.getTransactionsFromAccount(accountId).firstOrNull()
