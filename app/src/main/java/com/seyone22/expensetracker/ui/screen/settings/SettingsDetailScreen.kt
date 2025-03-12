@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CatchingPokemon
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -344,12 +345,12 @@ fun AboutList() {
             .fillMaxWidth()
             .padding(0.dp, 24.dp)
     ) {
-        Icon(
-            imageVector = Icons.Filled.CatchingPokemon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(100.dp)
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            contentDescription = "Example image",
+            modifier = Modifier.size(180.dp)
         )
+
     }
     HorizontalDivider()
     Column {
@@ -362,6 +363,54 @@ fun AboutList() {
                 } | ${stringResource(id = R.string.release_time)})"
             )
         }, modifier = Modifier.clickable { })
+        ListItem(headlineContent = { Text(text = "Check for updates") },
+            modifier = Modifier.clickable { })
+        ListItem(headlineContent = { Text(text = "What's new") },
+            modifier = Modifier.clickable { })
+        ListItem(headlineContent = { Text(text = "Open Source licenses") },
+            modifier = Modifier.clickable { })
+        ListItem(headlineContent = { Text(text = "Privacy Policy") },
+            modifier = Modifier.clickable { })
+        ListItem(headlineContent = {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+//                IconButton(onClick = { openUrl("https://example.com") }) {
+//                    Icon(
+//                        imageVector = Icons.Default.Language, // Website Icon
+//                        contentDescription = "Website",
+//                        tint = Color.Blue
+//                    )
+//                }
+//
+//                IconButton(onClick = { openUrl("https://discord.com/invite/example") }) {
+//                    Icon(
+//                        painter = painterResource(id = R.drawable.ic_discord), // Custom drawable
+//                        contentDescription = "Discord",
+//                        tint = Color(0xFF5865F2) // Discord Blue
+//                    )
+//                }
+//
+//                IconButton(onClick = { openUrl("https://bsky.app/profile/example.bsky.social") }) {
+//                    Icon(
+//                        painter = painterResource(id = R.drawable.ic_bluesky), // Custom drawable
+//                        contentDescription = "Bluesky",
+//                        tint = Color.Black
+//                    )
+//                }
+//
+//                IconButton(onClick = { openUrl("https://github.com/example") }) {
+//                    Icon(
+//                        imageVector = Icons.Default.GitHub, // Use a GitHub icon vector
+//                        contentDescription = "GitHub",
+//                        tint = Color.Black
+//                    )
+//                }
+            }
+        },
+            modifier = Modifier.clickable { })
+
     }
 }
 

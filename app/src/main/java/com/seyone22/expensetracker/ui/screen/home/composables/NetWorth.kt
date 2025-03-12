@@ -90,7 +90,7 @@ fun NetWorth(
                     )
                     FormattedCurrency(
                         modifier = Modifier.align(Alignment.CenterHorizontally),
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.titleLarge,
                         value = totals.expenses,
                         currency = baseCurrencyInfo,
                     )
@@ -130,7 +130,7 @@ fun NetWorth(
 
                     FormattedCurrency(
                         modifier = Modifier.align(Alignment.CenterHorizontally),
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.titleLarge,
                         value = totals.income,
                         currency = baseCurrencyInfo,
                     )

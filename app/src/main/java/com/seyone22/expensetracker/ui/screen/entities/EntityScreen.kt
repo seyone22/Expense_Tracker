@@ -44,6 +44,7 @@ import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.entities.composables.CategoryList
 import com.seyone22.expensetracker.ui.screen.entities.composables.CurrenciesList
 import com.seyone22.expensetracker.ui.screen.entities.composables.PayeeList
+import com.seyone22.expensetracker.ui.screen.entities.composables.TagList
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -69,20 +70,21 @@ fun EntityScreen(
 
     var state by remember { mutableIntStateOf(0) }
 
-    val titles = listOf("Categories", "Payees", "Currencies")
+    val titles = listOf("Categories", "Payees", "Currencies", "Tags")
     val entityUiState: EntitiesUiState by viewModel.entitiesUiState.collectAsState(EntitiesUiState())
 
     // separate state
     val activeCurrencies by viewModel.activeCurrenciesFlow.collectAsState(emptyList())
 
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 4 })
     Scaffold(
         topBar = {
             ExpenseTopBar(
                 selectedActivity = EntitiesDestination.route,
                 type = "Left",
                 navController = navController,
-                hasNavigation = false
+                hasNavigation = true,
+                hasNavBarAction = false
             )
         }
     ) {
@@ -195,6 +197,13 @@ fun EntityScreen(
                             },
                         )
                     }
+                }
+                3 -> {
+                    state = pagerState.currentPage
+                    TagList(
+                        viewModel = viewModel,
+                        coroutineScope = coroutineScope,
+                    )
                 }
             }
         }

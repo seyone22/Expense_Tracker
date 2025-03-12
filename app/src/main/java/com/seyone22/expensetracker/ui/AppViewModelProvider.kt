@@ -36,7 +36,8 @@ object AppViewModelProvider {
                 expenseApplication().container.categoriesRepository,
                 expenseApplication().container.payeesRepository,
                 expenseApplication().container.currenciesRepository,
-                expenseApplication().container.currencyHistoryRepository
+                expenseApplication().container.currencyHistoryRepository,
+                expenseApplication().container.tagsRepository
             )
         }
         initializer {
@@ -131,6 +132,9 @@ object AppViewModelProvider {
                 expenseApplication().container.metadataRepository,
                 expenseApplication().container.currenciesRepository,
                 expenseApplication().container.currencyHistoryRepository,
+                expenseApplication().container.categoriesRepository,
+                expenseApplication().container.payeesRepository,
+                expenseApplication().container.tagsRepository
             )
         }
     }

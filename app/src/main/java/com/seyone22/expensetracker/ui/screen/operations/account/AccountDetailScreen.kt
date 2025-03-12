@@ -11,10 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -25,8 +22,6 @@ import com.seyone22.expensetracker.ui.common.ExpenseTopBar
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.operations.account.composables.AccountDetailCard
 import com.seyone22.expensetracker.ui.screen.operations.account.composables.AccountHistoryGraph
-import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionDetails
-import com.seyone22.expensetracker.ui.screen.operations.transaction.toTransactionDetails
 import com.seyone22.expensetracker.ui.screen.transactions.composables.TransactionList
 import kotlinx.coroutines.CoroutineScope
 
@@ -50,16 +45,16 @@ fun AccountDetailScreen(
     LaunchedEffect(Unit, accountDetailUiState.account.currencyId) {
         viewModel.setAccountId(backStackEntry.toInt())
     }
-
-    // Variables to handle transaction selection for editing and such
-    var isSelected by remember { mutableStateOf(false) }
-    var selectedTransaction by remember { mutableStateOf(TransactionDetails()) }
-
     Scaffold(topBar = {
         ExpenseTopBar(
             selectedActivity = AccountDetailDestination.route,
             navController = navController,
-            hasNavigation = true
+            hasNavigation = true,
+            dropdownOptions = listOf(
+                "Edit" to { navController.navigate("Edit Account") },
+                "Delete" to { navController.navigate("Delete Account") },
+                "Make Favourite" to { }
+            )
         )
     }) {
         Column(
@@ -89,11 +84,8 @@ fun AccountDetailScreen(
             TransactionList(
                 modifier = modifier,
                 transactions = accountDetailUiState.transactions,
-                longClicked = { selected ->
-                    isSelected = !isSelected
-                    selectedTransaction = selected.toTransactionDetails()
-                },
                 showFilter = false,
+                forAccountId = accountDetailUiState.account.accountId
             )
         }
     }

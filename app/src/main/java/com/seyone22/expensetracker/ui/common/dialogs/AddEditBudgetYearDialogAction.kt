@@ -5,9 +5,13 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Checkbox
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,10 +42,26 @@ class AddEditBudgetYearDialogAction(
     override val content: @Composable () -> Unit = {
         Column {
             // Checkbox for "Budget for Month"
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(checked = _isBudgetForMonthChecked,
-                    onCheckedChange = { _isBudgetForMonthChecked = it })
-                Text("Budget for Month")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Budget Type")
+                SingleChoiceSegmentedButtonRow {
+                    SegmentedButton(
+                        selected = !_isBudgetForMonthChecked,
+                        onClick = { _isBudgetForMonthChecked = false },
+                        label = { Text("Year") },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                    )
+                    SegmentedButton(
+                        selected = _isBudgetForMonthChecked,
+                        onClick = { _isBudgetForMonthChecked = true },
+                        label = { Text("Month") },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                    )
+                }
             }
 
             // Date Picker (Year Selection Only)
@@ -151,7 +171,7 @@ fun BaseBudgetDropdown(
         items = listOf(BudgetYear(-1, "None")) + availableBudgets,
         selectedItem = BudgetYear(-1, "None"),
         onItemSelected = { onBaseBudgetSelected(it) },
-        label = "Base Budget",
+        label = "Base Budget on",
         modifier = modifier,
         itemToString = { it.budgetYearName }
     )

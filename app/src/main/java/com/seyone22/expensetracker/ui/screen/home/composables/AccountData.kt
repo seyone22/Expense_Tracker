@@ -21,11 +21,12 @@ fun AccountData(
     navigateToScreen: (screen: String) -> Unit,
 ) {
     Column(
-        modifier = modifier.padding(0.dp, 24.dp, 0.dp, 0.dp),
+        modifier = modifier.padding(0.dp),
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(start = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

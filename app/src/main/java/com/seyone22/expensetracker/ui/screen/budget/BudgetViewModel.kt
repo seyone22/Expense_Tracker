@@ -63,9 +63,16 @@ class BudgetViewModel(
         // Check if the month budget already exists
         val monthExists = budgetYearRepository.getBudgetYearByName(yearString).firstOrNull() != null
 
-        // Make the budgets
+        // Ensure the budget year exists
         if (!yearExists) budgetYearRepository.insertBudgetYear(BudgetYear(0, year))
-        if (!monthExists) budgetYearRepository.insertBudgetYear(BudgetYear(0, yearString))
+        else showSnackbar("Budget year already exists")
+
+        // Ensure the budget month exists if a month is provided
+        month?.let {
+            if (!monthExists) budgetYearRepository.insertBudgetYear(BudgetYear(0, yearString))
+            else showSnackbar("Budget month already exists")
+        }
+
     }
 }
 

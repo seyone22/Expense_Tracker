@@ -5,9 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
@@ -31,12 +33,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.seyone22.expensetracker.ui.AppViewModelProvider
+import com.seyone22.expensetracker.ui.common.dialogs.AddEditCategoryDialogAction
+import com.seyone22.expensetracker.ui.common.dialogs.AddEditCurrencyDialogAction
+import com.seyone22.expensetracker.ui.common.dialogs.AddEditPayeeDialogAction
+import com.seyone22.expensetracker.ui.common.dialogs.AddEditTagDialogAction
 import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
+import com.seyone22.expensetracker.ui.screen.entities.EntityViewModel
 import com.seyone22.expensetracker.ui.screen.home.HomeViewModel
 import com.seyone22.expensetracker.ui.screen.operations.account.AccountEntryDestination
 import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryDestination
+import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 data class QuickAction(
     val title: String,
@@ -50,6 +61,8 @@ fun QuickActions(
     modifier: Modifier,
     navigateToScreen: (screen: String) -> Unit,
     viewModel: HomeViewModel,
+    entityViewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    transactionViewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
     val currentDialog by viewModel.currentDialog
@@ -64,44 +77,37 @@ fun QuickActions(
             Icons.Filled.AccountBalanceWallet,
             AccountEntryDestination,
             MaterialTheme.colorScheme.tertiaryContainer
-        ),
-        QuickAction(
+        ), QuickAction(
             "Deposit",
             Icons.Filled.ArrowDownward,
             TransactionEntryDestination,
             MaterialTheme.colorScheme.primaryContainer
-        ),
-        QuickAction(
+        ), QuickAction(
             "Withdraw",
             Icons.Filled.ArrowUpward,
             TransactionEntryDestination,
             MaterialTheme.colorScheme.primaryContainer
-        ),
-        QuickAction(
+        ), QuickAction(
             "Transfer",
             Icons.AutoMirrored.Filled.CompareArrows,
             TransactionEntryDestination,
             MaterialTheme.colorScheme.primaryContainer
-        ),
-        QuickAction(
+        ), QuickAction(
             "Payee",
             Icons.Filled.Person,
             TransactionEntryDestination,
             MaterialTheme.colorScheme.inversePrimary
-        ),
-        QuickAction(
+        ), QuickAction(
             "Category",
             Icons.Filled.Bookmark,
             TransactionEntryDestination,
             MaterialTheme.colorScheme.inversePrimary
-        ),
-        QuickAction(
+        ), QuickAction(
             "Tag",
             Icons.Filled.Tag,
             TransactionEntryDestination,
             MaterialTheme.colorScheme.inversePrimary
-        ),
-        QuickAction(
+        ), QuickAction(
             "Currency",
             Icons.Filled.CurrencyYen,
             TransactionEntryDestination,
@@ -113,24 +119,86 @@ fun QuickActions(
         modifier = modifier.padding(top = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        item {
+            Spacer(modifier = Modifier.width(0.dp))
+        }
         items(actions.size) { index ->
             Card(modifier = Modifier
                 .size(100.dp)
+
                 .clickable {
-                    if (actions[index].title == "Deposit" || actions[index].title == "Withdraw" || actions[index].title == "Transfer" || actions[index].title == "Account") {
-                        navigateToScreen(actions[index].destination.route)
-                    } else {
-                        /*                        viewModel.showDialog(
-                                                    AddEditBudgetYearDialogAction(
-                                                        onAdd = { year, month, baseBudget ->
-                                                            // month is nullable
-                                                            coroutineScope.launch {
+                    when (actions[index].title) {
+                        "Deposit", "Withdraw", "Transfer", "Account" -> {
+                            navigateToScreen(actions[index].destination.route)
+                        }
 
-                                                            }
+                        "Category" -> {
+                            viewModel.showDialog(
+                                AddEditCategoryDialogAction(
+                                    onAdd = { category ->
+                                        coroutineScope.launch {
+                                            entityViewModel.saveCategory(category)
+                                        }
+                                    },
+                                    onEdit = { category ->
+                                        coroutineScope.launch {
+                                            entityViewModel.editCategory(category)
+                                        }
+                                    },
+                                )
+                            )
+                        }
 
-                                                        }, availableBudgets = null`
-                                                    )
-                                                )*/
+                        "Payee" -> {
+                            viewModel.showDialog(
+                                AddEditPayeeDialogAction(
+                                    onAdd = { payee ->
+                                        coroutineScope.launch {
+                                            entityViewModel.savePayee(payee)
+                                        }
+                                    },
+                                    onEdit = { payee ->
+                                        coroutineScope.launch {
+                                            entityViewModel.editPayee(payee)
+                                        }
+                                    },
+                                )
+                            )
+                        }
+
+                        "Tag" -> {
+                            viewModel.showDialog(
+                                AddEditTagDialogAction(
+                                    onAdd = { tag ->
+                                        coroutineScope.launch {
+                                            entityViewModel.saveTag(tag)
+                                        }
+                                    },
+                                    onEdit = { tag ->
+                                        coroutineScope.launch {
+                                            entityViewModel.editTag(tag)
+                                        }
+                                    }
+                                )
+                            )
+                        }
+
+                        "Currency" -> {
+                            viewModel.showDialog(
+                                AddEditCurrencyDialogAction(
+                                    onAdd = { currency ->
+                                        coroutineScope.launch {
+                                            entityViewModel.saveCurrency(currency)
+                                        }
+                                    },
+                                    onEdit = { currency ->
+                                        coroutineScope.launch {
+                                            entityViewModel.editCurrency(currency)
+                                        }
+                                    }
+                                )
+                            )
+                        }
                     }
                 }) {
                 Box(
@@ -156,6 +224,9 @@ fun QuickActions(
                     }
                 }
             }
+        }
+        item {
+            Spacer(modifier = Modifier.width(0.dp))
         }
     }
 }

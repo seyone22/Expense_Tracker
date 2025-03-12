@@ -21,7 +21,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -29,18 +28,14 @@ import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.SelectedObjects
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.ExpenseTopBar
-import com.seyone22.expensetracker.ui.common.dialogs.EditTransactionDialogAction
-import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
-import com.seyone22.expensetracker.ui.screen.entities.EntitiesDestination
 import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
-import com.seyone22.expensetracker.ui.screen.operations.transaction.toTransactionDetails
 import com.seyone22.expensetracker.ui.screen.transactions.composables.ScheduledTransactionList
-import com.seyone22.expensetracker.ui.screen.transactions.composables.TransactionListScroll
+import com.seyone22.expensetracker.ui.screen.transactions.composables.TransactionList
 import kotlinx.coroutines.launch
 
 object TransactionsDestination : NavigationDestination {
-    override val route = "Entries"
+    override val route = "Transactions"
     override val titleRes = R.string.app_name
     override val routeId = 3
 }
@@ -55,13 +50,7 @@ fun TransactionsScreen(
 ) {
     val transactionsUiState by viewModel.transactionsUiState.collectAsState()
 
-    val currentDialog by viewModel.currentDialog
-    currentDialog?.let {
-        GenericDialog(dialogAction = it, onDismiss = { viewModel.dismissDialog() })
-    }
-
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     var state by remember { mutableIntStateOf(0) }
 
@@ -70,10 +59,11 @@ fun TransactionsScreen(
     val pagerState = rememberPagerState(pageCount = { 2 })
     Scaffold(topBar = {
         ExpenseTopBar(
-            selectedActivity = EntitiesDestination.route,
+            selectedActivity = TransactionsDestination.route,
             type = "Left",
             navController = navController,
-            hasNavigation = false
+            hasNavigation = true,
+            hasNavBarAction = false
         )
     }) {
         Column(
@@ -109,26 +99,12 @@ fun TransactionsScreen(
                         val transactionUiState by entryViewModel.transactionUiState.collectAsState()
 
                         state = pagerState.currentPage
-                        TransactionListScroll(
-
+                        TransactionList(
+                            useLazyColumn = true,
                             transactions = transactionsUiState.transactions,
-                            longClicked = { selected ->
-                                viewModel.showDialog(
-                                    EditTransactionDialogAction(
-                                        onEdit = { transactionDetails ->
-                                            coroutineScope.launch {
-                                                viewModel.editTransaction(transactionDetails)
-                                            }
-                                        },
-                                        initialTransaction = selected.toTransactionDetails(),
-                                        viewModel = entryViewModel,
-                                        coroutineScope = coroutineScope,
-                                        transactionUiState = transactionUiState
-                                    )
-                                )
-                            },
                             viewModel = viewModel,
-                            showFilter = true
+                            showFilter = true,
+                            forAccountId = -1
                         )
                     }
 

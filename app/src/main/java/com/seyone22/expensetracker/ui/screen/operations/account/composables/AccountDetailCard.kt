@@ -1,19 +1,11 @@
 package com.seyone22.expensetracker.ui.screen.operations.account.composables
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -74,26 +66,6 @@ fun AccountDetailCard(
                     text = accountDetailUiState.account.accountType + " Account",
                     style = MaterialTheme.typography.titleMedium
                 )
-            }
-            IconButton(onClick = { expanded = true }, modifier = Modifier.weight(1f)) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = null,
-                    Modifier.size(24.dp, 24.dp)
-                )
-            }
-            // DropdownMenu
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.background(MaterialTheme.colorScheme.background)
-            ) {
-                DropdownMenuItem(onClick = {
-                    expanded = !expanded
-                }, text = { Text(text = "Edit") })
-                DropdownMenuItem(onClick = {
-                    expanded = !expanded
-                }, text = { Text(text = "Delete") })
             }
         }
     }
