@@ -49,6 +49,7 @@ fun TransactionData(
         TransactionList(
             transactions = accountsUiState.transactionSample,
             showFilter = false,
+            forAccountId = -1
         )
     }
 }
