@@ -49,10 +49,13 @@ jobs:
         id: version
         run: echo "VERSION_NAME=$(grep VERSION_NAME gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
 
+      - name: Debug - List all APK files
+        run: find app/build/outputs/ -name "*.apk"
+
       - name: Rename APK file
         run: |
           VERSION_STRING="${{ env.VERSION_NAME }}"
-          APK_FILE="app/release/app-release.apk"
+          APK_FILE="app/build/outputs/apk/release/app-release.apk"
           NEW_APK_NAME="Expense Tracker v${VERSION_STRING}.apk"
           mv "$APK_FILE" "$APK_FILE/../../$NEW_APK_NAME"
 
