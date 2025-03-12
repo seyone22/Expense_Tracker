@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-    if: github.event.ref == 'refs/heads/master' && github.event.pusher.branch == 'dev'
     runs-on: ubuntu-latest
 
     steps:
