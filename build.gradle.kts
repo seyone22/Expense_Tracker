@@ -5,10 +5,3 @@ plugins {
     id("com.google.devtools.ksp") version "1.9.24-1.0.20" apply false
 }
 val sourceCompatibility by extra(JavaVersion.VERSION_17)
-
-tasks.register("printVersionName") {
-    doLast {
-        val versionName = project.version.toString()
-        println(versionName)
-    }
-}
