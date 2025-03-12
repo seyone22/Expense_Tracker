@@ -85,6 +85,7 @@ fun AccountDetailScreen(
                 modifier = modifier,
                 transactions = accountDetailUiState.transactions,
                 showFilter = false,
+                forAccountId = accountDetailUiState.account.accountId
             )
         }
     }
