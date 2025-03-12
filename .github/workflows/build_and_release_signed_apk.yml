@@ -56,8 +56,16 @@ jobs:
         run: |
           VERSION_STRING="${{ env.VERSION_NAME }}"
           APK_FILE="app/build/outputs/apk/release/app-release-unsigned-signed.apk"
-          NEW_APK_NAME="Expense Tracker v${VERSION_STRING}.apk"
-          mv "$APK_FILE" "$APK_FILE/../../$NEW_APK_NAME"
+      
+          if [ ! -f "$APK_FILE" ]; then
+            echo "Error: APK not found at $APK_FILE"
+            exit 1
+          fi
+      
+          NEW_APK_NAME="${{ github.workspace }}/Expense Tracker v${VERSION_STRING}.apk"
+          mv "$APK_FILE" "$NEW_APK_NAME"
+          echo "APK renamed to $NEW_APK_NAME"
+
 
       - name: Check if APK exists
         run: |
