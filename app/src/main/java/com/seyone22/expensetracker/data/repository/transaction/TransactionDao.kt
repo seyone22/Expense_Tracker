@@ -72,33 +72,34 @@ interface TransactionDao {
     @Query(
         """
     SELECT 
-        a.accountId, 
-        a.initialBalance + COALESCE(SUM(subquery.balanceChange), 0) AS balance 
-    FROM ACCOUNTLIST_V1 a 
+        al.accountId, 
+        al.initialBalance + COALESCE(SUM(subquery.balanceChange), 0) AS balance 
+    FROM ACCOUNTLIST_V1 al
     LEFT JOIN ( 
         SELECT 
             accountId, 
-            SUM(
-                CASE 
-                    WHEN transCode = 'Deposit' THEN transAmount 
-                    WHEN transCode = 'Withdrawal' OR transCode = 'Transfer' THEN -transAmount 
-                    ELSE 0 
-                END
-            ) AS balanceChange 
-        FROM CHECKINGACCOUNT_V1 
+        SUM(
+            CASE 
+                WHEN c.transCode = 'Deposit' THEN c.transAmount  
+                WHEN c.transCode = 'Withdrawal' THEN -c.transAmount
+                WHEN c.transCode = 'Transfer' THEN -c.transAmount
+                ELSE 0
+            END
+        ) AS balanceChange 
+        FROM CHECKINGACCOUNT_V1 c
         GROUP BY accountId 
 
         UNION ALL 
 
         SELECT 
             toAccountId AS accountId, 
-            SUM(transAmount) AS balanceChange 
+            SUM(toTransAmount) AS balanceChange 
         FROM CHECKINGACCOUNT_V1 
         WHERE transCode = 'Transfer' 
         GROUP BY toAccountId 
     ) AS subquery 
-    ON a.accountId = subquery.accountId 
-    GROUP BY a.accountId, a.initialBalance
+    ON al.accountId = subquery.accountId 
+    GROUP BY al.accountId, al.initialBalance
     """
     )
     fun getAllAccountBalances(): Flow<List<BalanceResult>>
@@ -107,15 +108,22 @@ interface TransactionDao {
     @Query(
         """
     SELECT 
-        SUM(transAmount * baseConvRate) AS totalWithdrawal 
-    FROM CHECKINGACCOUNT_V1 
-    JOIN ACCOUNTLIST_V1 
-        ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId 
-    JOIN CURRENCYFORMATS_V1 
-        ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId 
+        SUM(
+            CASE 
+                WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate 
+                WHEN c.transCode = 'Withdrawal' THEN -c.transAmount * cf.baseConvRate
+                WHEN c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate
+                ELSE 0
+            END
+        ) AS totalWithdrawal 
+FROM CHECKINGACCOUNT_V1 c
+    JOIN ACCOUNTLIST_V1 al
+        ON c.accountId = al.accountId 
+    JOIN CURRENCYFORMATS_V1 cf
+        ON al.currencyId = cf.currencyId 
     WHERE 
         transCode = :transCode 
-        AND CHECKINGACCOUNT_V1.status LIKE :status
+        AND c.status LIKE :status
     """
     )
     fun getTotalBalanceByCode(transCode: String, status: String): Flow<Double>
@@ -123,47 +131,61 @@ interface TransactionDao {
     @Query(
         """
     SELECT 
-        SUM(transAmount * baseConvRate) AS totalWithdrawal 
-    FROM CHECKINGACCOUNT_V1 
-    JOIN ACCOUNTLIST_V1 
-        ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId 
-    JOIN CURRENCYFORMATS_V1 
-        ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId 
+        SUM(
+            CASE 
+                WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate 
+                WHEN c.transCode = 'Withdrawal' THEN -c.transAmount * cf.baseConvRate
+                WHEN c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate
+                ELSE 0
+            END
+        ) AS totalWithdrawal 
+FROM CHECKINGACCOUNT_V1 c
+    JOIN ACCOUNTLIST_V1 al
+        ON c.accountId = al.accountId 
+    JOIN CURRENCYFORMATS_V1 cf
+        ON al.currencyId = cf.currencyId 
     WHERE 
         transCode = :transCode 
-        AND CHECKINGACCOUNT_V1.status LIKE :status 
-        AND strftime('%m', CHECKINGACCOUNT_V1.transDate) = :month 
-        AND strftime('%Y', CHECKINGACCOUNT_V1.transDate) = :year
+        AND c.status LIKE :status 
+        AND strftime('%Y', c.transDate) = :year
+        AND (:month IS NULL OR strftime('%m', c.transDate) = :month)
     """
     )
     fun getTotalBalanceByCode(
         transCode: String,
         status: String,
-        month: Int,
-        year: Int
+        month: String?,
+        year: String
     ): Flow<Double>
 
     @Query(
         """
     SELECT 
-        SUM(transAmount * baseConvRate) AS totalWithdrawal 
-    FROM CHECKINGACCOUNT_V1 
-    JOIN ACCOUNTLIST_V1 
-        ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId 
-    JOIN CURRENCYFORMATS_V1 
-        ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId 
+        SUM(
+            CASE
+                WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate
+                WHEN c.transCode = 'Withdrawal' THEN -c.transAmount * cf.baseConvRate
+                WHEN c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate
+                ELSE 0
+            END
+        ) AS totalWithdrawal 
+    FROM CHECKINGACCOUNT_V1 c
+    JOIN ACCOUNTLIST_V1 al
+        ON c.accountId = al.accountId 
+    JOIN CURRENCYFORMATS_V1  cf
+        ON al.currencyId = cf.currencyId 
     WHERE 
-        categoryId = :categId 
-        AND CHECKINGACCOUNT_V1.status LIKE :status 
-        AND strftime('%Y', CHECKINGACCOUNT_V1.transDate) = :year
-        AND (:month IS NULL OR strftime('%m', CHECKINGACCOUNT_V1.transDate) = :month)
+        c.categoryId = :categId 
+        AND c.status LIKE :status 
+        AND strftime('%Y', c.transDate) = :year
+        AND (:month IS NULL OR strftime('%m', c.transDate) = :month)
     """
     )
     fun getTotalBalanceByCategory(
         categId: Int,
         status: String,
-        month: Int?,
-        year: Int
+        month: String?,
+        year: String
     ): Flow<Double>
 
     @Query(
@@ -172,8 +194,9 @@ interface TransactionDao {
         SUM(
             CASE 
                 WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate 
-                WHEN c.transCode = 'Withdrawal' OR c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate 
-                ELSE 0 
+                WHEN c.transCode = 'Withdrawal' THEN -c.transAmount * cf.baseConvRate
+                WHEN c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate
+                ELSE 0
             END
         ) AS totalTransactionBalance 
     FROM CHECKINGACCOUNT_V1 c 
@@ -190,8 +213,9 @@ interface TransactionDao {
         SUM(
             CASE 
                 WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate 
-                WHEN c.transCode = 'Withdrawal' OR c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate 
-                ELSE 0 
+                WHEN c.transCode = 'Withdrawal' THEN -c.transAmount * cf.baseConvRate
+                WHEN c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate
+                ELSE 0
             END
         ) AS totalTransactionBalance 
     FROM CHECKINGACCOUNT_V1 c 
@@ -221,13 +245,20 @@ interface TransactionDao {
         """
         SELECT 
             (strftime('%w', transDate) + 6) % 7 AS dayOfWeek, 
-            SUM(transAmount * baseConvRate) AS totalExpense 
-        FROM CHECKINGACCOUNT_V1 
-        JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId 
-        JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId
+        SUM(
+            CASE 
+                WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate 
+                WHEN c.transCode = 'Withdrawal' THEN -c.transAmount * cf.baseConvRate
+                WHEN c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate
+                ELSE 0
+            END
+        ) AS totalExpense
+        FROM CHECKINGACCOUNT_V1  c
+        JOIN ACCOUNTLIST_V1 al ON c.accountId = al.accountId 
+        JOIN CURRENCYFORMATS_V1 cf ON al.currencyId = cf.currencyId
         WHERE
-            CHECKINGACCOUNT_V1.transCode = 'Withdrawal'
-            AND CHECKINGACCOUNT_V1.transDate = :weekNumber
+            c.transCode = 'Withdrawal'
+            AND c.transDate = :weekNumber
         GROUP BY dayOfWeek
         ORDER BY dayOfWeek       
         """
@@ -238,13 +269,19 @@ interface TransactionDao {
         """
     SELECT 
         transDate AS dateIndex,
-        SUM(transAmount * baseConvRate) AS balance
-    FROM CHECKINGACCOUNT_V1
-    JOIN ACCOUNTLIST_V1 ON CHECKINGACCOUNT_V1.accountId = ACCOUNTLIST_V1.accountId
-    JOIN CURRENCYFORMATS_V1 ON ACCOUNTLIST_V1.currencyId = CURRENCYFORMATS_V1.currencyId
+        SUM(
+            CASE 
+                WHEN c.transCode = 'Deposit' THEN c.transAmount * cf.baseConvRate 
+                WHEN c.transCode = 'Withdrawal' THEN -c.transAmount * cf.baseConvRate
+                WHEN c.transCode = 'Transfer' THEN -c.transAmount * cf.baseConvRate
+                ELSE 0
+            END
+        ) AS balance     FROM CHECKINGACCOUNT_V1 c
+    JOIN ACCOUNTLIST_V1 al ON c.accountId = al.accountId
+    JOIN CURRENCYFORMATS_V1 cf ON al.currencyId = cf.currencyId
     WHERE 
         transDate BETWEEN date(:startDate) AND date(:endDate)
-        AND CHECKINGACCOUNT_V1.transCode = 'Withdrawal'
+        AND c.transCode = 'Withdrawal'
     GROUP BY transDate
     ORDER BY transDate
     """

@@ -90,16 +90,16 @@ class HomeViewModel(
     fun getFilteredTotal(filter: String): Flow<Totals> {
         return when (filter) {
             "Current Month" -> {
-                val currentMonth = LocalDate.now().monthValue
-                val currentYear = LocalDate.now().year
+                val currentYear = LocalDate.now().year.toString()
+                val monthString = LocalDate.now().monthValue.toString().padStart(2, '0')
                 val newExpensesFlow = transactionsRepository.getTotalBalanceByCodeAndDate(
-                    "Withdrawal", month = currentMonth, year = currentYear
+                    "Withdrawal", month = monthString, year = currentYear
                 )
                 val newIncomeFlow = transactionsRepository.getTotalBalanceByCodeAndDate(
-                    "Deposit", month = currentMonth, year = currentYear
+                    "Deposit", month = monthString, year = currentYear
                 )
                 val newTotalFlow =
-                    transactionsRepository.getTotalBalanceByDate("Total", currentMonth, currentYear)
+                    transactionsRepository.getTotalBalanceByDate("Total", monthString, currentYear)
 
                 combine(newExpensesFlow, newIncomeFlow, newTotalFlow) { expenses, income, total ->
                     Totals(expenses, income, total)

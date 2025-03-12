@@ -13,17 +13,16 @@ import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.CurrencyHistory
 import com.seyone22.expensetracker.data.model.InfoEuroCurrencyHistoryResponse
 import com.seyone22.expensetracker.data.model.Payee
-import com.seyone22.expensetracker.data.model.toCategory
+import com.seyone22.expensetracker.data.model.Tag
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.seyone22.expensetracker.data.repository.currencyHistory.CurrencyHistoryRepository
 import com.seyone22.expensetracker.data.repository.payee.PayeesRepository
+import com.seyone22.expensetracker.data.repository.tag.TagsRepository
 import com.seyone22.expensetracker.ui.screen.operations.entity.currency.CurrencyDetails
 import com.seyone22.expensetracker.ui.screen.operations.entity.currency.CurrencyUiState
-import com.seyone22.expensetracker.ui.screen.operations.entity.currency.toCurrency
 import com.seyone22.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.seyone22.expensetracker.ui.screen.operations.entity.payee.PayeeUiState
-import com.seyone22.expensetracker.ui.screen.operations.entity.payee.toPayee
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -39,7 +38,8 @@ class EntityViewModel(
     private val categoriesRepository: CategoriesRepository,
     private val payeesRepository: PayeesRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository,
-    private val currencyHistoryRepository: CurrencyHistoryRepository
+    private val currencyHistoryRepository: CurrencyHistoryRepository,
+    private val tagsRepository: TagsRepository
 ) : ViewModel() {
 
     // Flows for each type of entity
@@ -74,15 +74,21 @@ class EntityViewModel(
         private set
     var selectedCategory by mutableStateOf(Category())
 
-    suspend fun saveCategory() {
-        if (validateCategoryInput()) {
-            categoriesRepository.insertCategory(categoryUiState.categoryDetails.toCategory())
+    suspend fun saveCategory(category: Category) {
+        if (category.categName != null) {
+            Log.d("TAG", "saveCategory: $category")
+
+            try {
+                categoriesRepository.insertCategory(category)
+            } catch (e: Exception) {
+                Log.d("TAG", "saveCategory: $e")
+            }
         }
     }
 
-    suspend fun editCategory() {
-        if (validateCategoryInput()) {
-            categoriesRepository.updateCategory(categoryUiState.categoryDetails.toCategory())
+    suspend fun editCategory(category: Category) {
+        if (category.categName != null) {
+            categoriesRepository.updateCategory(category)
         }
     }
 
@@ -97,11 +103,9 @@ class EntityViewModel(
     }
 
     fun updateCategoryState(categoryDetails: CategoryDetails) {
-        categoryUiState =
-            CategoryUiState(
-                categoryDetails = categoryDetails,
-                isEntryValid = validateCategoryInput(categoryDetails)
-            )
+        categoryUiState = CategoryUiState(
+            categoryDetails = categoryDetails, isEntryValid = validateCategoryInput(categoryDetails)
+        )
     }
 
     // Payee state and operations
@@ -109,15 +113,27 @@ class EntityViewModel(
         private set
     var selectedPayee by mutableStateOf(Payee())
 
-    suspend fun savePayee() {
+    suspend fun savePayee(payee: Payee) {
         if (validatePayeeInput()) {
-            payeesRepository.insertPayee(payeeUiState.payeeDetails.toPayee())
+            payeesRepository.insertPayee(payee)
         }
     }
 
-    suspend fun editPayee() {
+    suspend fun editPayee(payee: Payee) {
         if (validatePayeeInput()) {
-            payeesRepository.updatePayee(payeeUiState.payeeDetails.toPayee())
+            payeesRepository.updatePayee(payee)
+        }
+    }
+
+    suspend fun saveTag(tag: Tag) {
+        if (tag.tagName.isNotBlank()) {
+            tagsRepository.insertTag(tag)
+        }
+    }
+
+    suspend fun editTag(tag: Tag) {
+        if (tag.tagName.isNotBlank()) {
+            tagsRepository.insertTag(tag)
         }
     }
 
@@ -132,11 +148,9 @@ class EntityViewModel(
     }
 
     fun updatePayeeState(payeeDetails: PayeeDetails) {
-        payeeUiState =
-            PayeeUiState(
-                payeeDetails = payeeDetails,
-                isEntryValid = validatePayeeInput(payeeDetails)
-            )
+        payeeUiState = PayeeUiState(
+            payeeDetails = payeeDetails, isEntryValid = validatePayeeInput(payeeDetails)
+        )
     }
 
     // Currency state and operations
@@ -144,15 +158,15 @@ class EntityViewModel(
         private set
     var selectedCurrency by mutableStateOf(CurrencyFormat())
 
-    suspend fun saveCurrency() {
-        if (validateCurrencyInput()) {
-            currencyFormatsRepository.insertCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
+    suspend fun saveCurrency(currency: CurrencyFormat) {
+        if (currency.currencyName.isNotBlank() && currency.currency_symbol.isNotBlank()) {
+            currencyFormatsRepository.insertCurrencyFormat(currency)
         }
     }
 
-    suspend fun editCurrency() {
-        if (validateCurrencyInput()) {
-            currencyFormatsRepository.updateCurrencyFormat(currencyUiState.currencyDetails.toCurrency())
+    suspend fun editCurrency(currency: CurrencyFormat) {
+        if (currency.currencyName.isNotBlank() && currency.currency_symbol.isNotBlank()) {
+            currencyFormatsRepository.updateCurrencyFormat(currency)
         }
     }
 
@@ -167,11 +181,9 @@ class EntityViewModel(
     }
 
     fun updateCurrencyState(currencyDetails: CurrencyDetails) {
-        currencyUiState =
-            CurrencyUiState(
-                currencyDetails = currencyDetails,
-                isEntryValid = validateCurrencyInput(currencyDetails)
-            )
+        currencyUiState = CurrencyUiState(
+            currencyDetails = currencyDetails, isEntryValid = validateCurrencyInput(currencyDetails)
+        )
     }
 
     suspend fun getNameOfCategory(categId: Int): Category {
@@ -184,11 +196,9 @@ class EntityViewModel(
         val onlineData = getCurrencyHistory(currencySymbol)
 
         return if (!onlineData.isNullOrEmpty()) {
-            val data: Map<LocalDate, Float> = onlineData
-                .associate {
+            val data: Map<LocalDate, Float> = onlineData.associate {
                     LocalDate.parse(
-                        it.dateStart,
-                        DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                        it.dateStart, DateTimeFormatter.ofPattern("dd/MM/yyyy")
                     ) to it.amount.toFloat()
                 }
             data
@@ -220,15 +230,12 @@ data class EntitiesUiState(
     val categoriesSub: List<Category> = emptyList(),
     val payeesList: List<Payee> = emptyList(),
     val currenciesList: Pair<List<CurrencyFormat>, List<CurrencyHistory>?> = Pair(
-        emptyList(),
-        emptyList()
+        emptyList(), emptyList()
     ),
     val activeCurrencies: List<Int> = emptyList()
 )
 
 // Enum for entity types
 enum class Entity(val displayName: String, val pluralDisplayName: String) {
-    CATEGORY("Category", "Categories"),
-    PAYEE("Payee", "Payees"),
-    CURRENCY("Currency", "Currencies")
+    CATEGORY("Category", "Categories"), PAYEE("Payee", "Payees"), CURRENCY("Currency", "Currencies")
 }

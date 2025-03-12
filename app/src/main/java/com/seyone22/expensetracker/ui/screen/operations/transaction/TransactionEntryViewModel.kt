@@ -62,8 +62,14 @@ class TransactionEntryViewModel(
 
     fun updateUiState(
         transactionDetails: TransactionDetails? = null,
-        billsDepositsDetails: BillsDepositsDetails? = null
+        billsDepositsDetails: BillsDepositsDetails? = null,
+        advancedAmount: Double? = null
     ) {
+        if (advancedAmount != null) {
+            _transactionUiState.value =
+                _transactionUiState.value.copy(advancedAmount = advancedAmount)
+        }
+
         _transactionUiState.value =
             _transactionUiState.value.copy(transactionDetails = transactionDetails
                 ?: _transactionUiState.value.transactionDetails,
@@ -77,7 +83,17 @@ class TransactionEntryViewModel(
 
     suspend fun saveTransaction() {
         if (validateInput()) {
-            transactionsRepository.insertTransaction(transactionUiState.value.transactionDetails.toTransaction())
+            if (transactionUiState.value.transactionDetails.transCode == TransactionCode.TRANSFER.displayName) {
+                transactionsRepository.insertTransaction(
+                    transactionUiState.value.transactionDetails.toTransaction()
+                        .copy(toTransAmount = transactionUiState.value.advancedAmount)
+                )
+            } else {
+                transactionsRepository.insertTransaction(
+                    transactionUiState.value.transactionDetails.toTransaction()
+                        .copy(toTransAmount = transactionUiState.value.transactionDetails.transAmount.toDouble())
+                )
+            }
         }
     }
 
@@ -144,6 +160,8 @@ class TransactionEntryViewModel(
 data class TransactionUiState(
     val transactionDetails: TransactionDetails = TransactionDetails(),
     val billsDepositsDetails: BillsDepositsDetails = BillsDepositsDetails(),
+    val advancedAmount: Double = 0.0,
+
     val isEntryValid: Boolean = false,
     val isRecurringEntryValid: Boolean = false,
     val accountsList: List<Account> = emptyList(),

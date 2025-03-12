@@ -30,9 +30,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.ExpenseNavBar
+import com.seyone22.expensetracker.ui.common.ExpenseTopBar
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 
 object SettingsDestination : NavigationDestination {
@@ -50,6 +52,14 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     Scaffold(
+        topBar = {
+            ExpenseTopBar(
+                type = "Center",
+                selectedActivity = "More",
+                navController = rememberNavController(),
+                hasNavBarAction = false
+            )
+        },
         bottomBar = {
             ExpenseNavBar(
                 currentActivity = SettingsDestination.route, navigateToScreen = navigateToScreen

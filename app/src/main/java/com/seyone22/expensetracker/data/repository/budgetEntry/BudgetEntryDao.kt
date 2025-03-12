@@ -19,7 +19,11 @@ interface BudgetEntryDao {
     @Delete
     suspend fun delete(entry: BudgetEntry)
 
-    @Query("SELECT * FROM BUDGETTABLE_V1 WHERE active = 1")
+    @Query(
+        "SELECT * FROM BUDGETTABLE_V1 " +
+
+                "WHERE active = 1"
+    )
     fun getActiveBudgetEntries(): Flow<List<BudgetEntry>>
 
     @Query("SELECT * FROM BUDGETTABLE_V1 WHERE active = 1 AND budgetYearId = :budgetYearId")
@@ -27,6 +31,5 @@ interface BudgetEntryDao {
 
     @Query("SELECT * FROM BUDGETTABLE_V1 WHERE active = 1 AND budgetEntryId = :budgetEntryId")
     fun getBudgetEntryById(budgetEntryId: Int): Flow<BudgetEntry>
-
-
 }
+

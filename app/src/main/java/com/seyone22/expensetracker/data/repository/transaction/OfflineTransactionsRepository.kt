@@ -2,6 +2,7 @@ package com.seyone22.expensetracker.data.repository.transaction
 
 import android.util.Log
 import com.seyone22.expensetracker.data.model.Transaction
+import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -47,29 +48,32 @@ class OfflineTransactionsRepository(private val transactionDao: TransactionDao) 
     override fun getTotalBalanceByCodeAndDate(
         transactionCode: String,
         status: String,
-        month: Int,
-        year: Int
+        month: String?,
+        year: String
     ): Flow<Double> =
         transactionDao.getTotalBalanceByCode(transactionCode, status, month, year)
 
     override fun getTotalBalanceByCategoryAndDate(
         categId: Int,
         status: String,
-        month: Int?,
-        year: Int
+        month: String?,
+        year: String
     ): Flow<Double> =
         transactionDao.getTotalBalanceByCategory(categId, status, month, year)
 
+    // TODO: Incorporate Assets, Liabilities, Stocks & Shares
+    // Withdrawals are already negative!!
     override fun getTotalBalance(status: String): Flow<Double> {
         return combine(
-            transactionDao.getTotalTransactionBalance(status),
+            transactionDao.getTotalBalanceByCode(TransactionCode.DEPOSIT.displayName, status),
+            transactionDao.getTotalBalanceByCode(TransactionCode.WITHDRAWAL.displayName, status),
             transactionDao.getSumOfInitialBalances()
-        ) { transBal, initBal ->
-            transBal + initBal
+        ) { deposits, withdrawals, initBals ->
+            initBals + (deposits + withdrawals)
         }
     }
 
-    override fun getTotalBalanceByDate(status: String, month: Int, year: Int): Flow<Double> {
+    override fun getTotalBalanceByDate(status: String, month: String, year: String): Flow<Double> {
         return combine(
             transactionDao.getTotalTransactionBalance(status),
             transactionDao.getSumOfInitialBalances()

@@ -43,9 +43,7 @@ fun EditTransactionDialog(
     edit: Boolean = false
 ) {
     val viewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
     val transactionUiState by viewModel.transactionUiState.collectAsState()
-
     val coroutineScope = rememberCoroutineScope()
 
     val focusManager = LocalFocusManager.current
@@ -98,8 +96,9 @@ fun EditTransactionDialog(
                         transactionDetails = transactionSelected,
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
-                        onValueChange = { transactionDetails, _ ->
+                        onValueChange = { transactionDetails, _, _ ->
                             transactionSelected = transactionDetails
+
                         },
                         edit = true,
                         transactionUiState = transactionUiState

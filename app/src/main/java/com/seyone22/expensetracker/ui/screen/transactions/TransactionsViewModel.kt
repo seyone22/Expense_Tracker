@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.BillsDepositWithDetails
 import com.seyone22.expensetracker.data.model.CurrencyFormat
@@ -34,7 +34,7 @@ class TransactionsViewModel(
     private val billsDepositsRepository: BillsDepositsRepository,
     private val accountsRepository: AccountsRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository,
-) : ViewModel() {
+) : BaseViewModel() {
     var transactionUiState by mutableStateOf(TransactionUiState())
 
     private val transactionsFlow = transactionsRepository.getAllTransactionsStream()
