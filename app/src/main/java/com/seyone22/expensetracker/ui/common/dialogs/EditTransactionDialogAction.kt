@@ -56,7 +56,7 @@ class EditTransactionDialogAction(
                     transactionDetails = _selectedTransaction,
                     viewModel = viewModel,
                     coroutineScope = coroutineScope,
-                    onValueChange = { transactionDetails, _ ->
+                    onValueChange = { transactionDetails, _, _ ->
                         _selectedTransaction = transactionDetails
                     },
                     edit = true,
