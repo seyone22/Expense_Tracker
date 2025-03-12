@@ -29,14 +29,14 @@ jobs:
 
               # Building and signing App
       - name: Build Android APK
-        run: cd android && ./gradlew assembleRelease 
+        run: ./gradlew assembleRelease 
   
       - name: Sign ABB
         uses: r0adkll/sign-android-release@v1
         # ID used to access action output
         id: sign_app
         with:
-          releaseDirectory: android/app/build/outputs/apk/release
+          releaseDirectory: app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
