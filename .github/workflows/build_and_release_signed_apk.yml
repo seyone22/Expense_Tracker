@@ -31,16 +31,19 @@ jobs:
       - name: Build Android APK
         run: ./gradlew assembleRelease 
   
-      - name: Sign ABB
+      - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         # ID used to access action output
         id: sign_app
         with:
-          releaseDirectory: app/build/outputs/apk/release
+          releaseDirectory: app/release
           signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          # override default build-tools version (35.0.0) -- optional
+          BUILD_TOOLS_VERSION: "35.0.0"
 
       - name: Get Version Name
         id: version
