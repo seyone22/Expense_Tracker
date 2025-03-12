@@ -110,7 +110,7 @@ fun TransactionEntryForm(
     var currentPayee by remember { mutableStateOf(Payee()) }
     var currentCategory by remember { mutableStateOf(Category()) }
     var currentToAccount by remember { mutableStateOf(Account()) }
-    var currentAdvancedAmount by remember { mutableDoubleStateOf(0.0) }
+    var currentAdvancedAmount by remember { mutableDoubleStateOf(if (transactionDetails.transCode == TransactionCode.TRANSFER.displayName) transactionDetails.toTransAmount.toDouble() else 0.0) }
 
     var currentCurrency: CurrencyFormat? by remember { mutableStateOf(null) }
     var currentCurrencyAdvanced: CurrencyFormat? by remember { mutableStateOf(null) }
