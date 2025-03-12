@@ -55,7 +55,7 @@ jobs:
       - name: Rename APK file
         run: |
           VERSION_STRING="${{ env.VERSION_NAME }}"
-          APK_FILE="app/build/outputs/apk/release/app-release.apk"
+          APK_FILE="app/build/outputs/apk/release/app-release-unsigned-signed.apk"
           NEW_APK_NAME="Expense Tracker v${VERSION_STRING}.apk"
           mv "$APK_FILE" "$APK_FILE/../../$NEW_APK_NAME"
 
