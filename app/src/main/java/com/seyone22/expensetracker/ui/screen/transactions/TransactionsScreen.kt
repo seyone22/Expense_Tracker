@@ -103,7 +103,8 @@ fun TransactionsScreen(
                             useLazyColumn = true,
                             transactions = transactionsUiState.transactions,
                             viewModel = viewModel,
-                            showFilter = true
+                            showFilter = true,
+                            forAccountId = -1
                         )
                     }
 
