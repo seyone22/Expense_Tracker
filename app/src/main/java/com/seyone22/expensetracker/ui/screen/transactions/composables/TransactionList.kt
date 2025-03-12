@@ -42,8 +42,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Transaction
+import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
 import com.seyone22.expensetracker.data.model.toTransaction
 import com.seyone22.expensetracker.ui.AppViewModelProvider
@@ -68,7 +70,8 @@ fun TransactionList(
     transactions: List<TransactionWithDetails>,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     showFilter: Boolean = true,
-    useLazyColumn: Boolean = false // Determines whether to use LazyColumn or Column
+    useLazyColumn: Boolean = false, // Determines whether to use LazyColumn or Column
+    forAccountId: Int
 ) {
     val haptics = LocalHapticFeedback.current
     var filteredTransactions by remember { mutableStateOf(transactions) }
@@ -152,7 +155,8 @@ fun TransactionList(
                         transaction = filteredTransactions[index],
                         haptics = haptics,
                         longClicked = { openBottomSheet(it) },
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        forAccountId = forAccountId
                     )
                     HorizontalDivider()
                 }
@@ -180,7 +184,8 @@ fun TransactionList(
                         transaction = transaction,
                         haptics = haptics,
                         longClicked = { openBottomSheet(it) },
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        forAccountId = forAccountId
                     )
                     HorizontalDivider()
                 }
@@ -273,21 +278,39 @@ private fun TransactionItem(
     transaction: TransactionWithDetails,
     haptics: HapticFeedback,
     longClicked: (Transaction) -> Unit,
-    viewModel: TransactionsViewModel
+    viewModel: TransactionsViewModel,
+    forAccountId: Int
 ) {
-    ListItem(headlineContent = { Text(text = transaction.payeeName ?: "Transfer") },
+    var toAccount: Account? by remember { mutableStateOf(null) }
+    var currencyFormat: CurrencyFormat? by remember { mutableStateOf(null) }
+
+    if (transaction.transCode == TransactionCode.TRANSFER.displayName && forAccountId != transaction.accountId) {
+        LaunchedEffect(transaction.toAccountId) {
+            toAccount = viewModel.getAccountFromId(transaction.toAccountId ?: 0)
+
+            currencyFormat = viewModel.getCurrencyFormatById(toAccount?.currencyId ?: 0)
+
+        }
+    } else {
+        LaunchedEffect(transaction.accountId) {
+            currencyFormat = viewModel.getAccountFromId(transaction.accountId)
+                ?.let { viewModel.getCurrencyFormatById(it.currencyId) } ?: CurrencyFormat()
+        }
+    }
+
+    ListItem(
+        headlineContent = {
+            Text(
+                text = transaction.payeeName ?: "Transfer -> ${transaction.toAccountId}"
+            )
+        },
         supportingContent = { Text(text = removeTrPrefix(transaction.categName)) },
         trailingContent = {
-            var currencyFormat by remember { mutableStateOf(CurrencyFormat()) }
-
-            LaunchedEffect(transaction.accountId) {
-                currencyFormat = viewModel.getAccountFromId(transaction.accountId)
-                    ?.let { viewModel.getCurrencyFormatById(it.currencyId) } ?: CurrencyFormat()
-            }
 
             FormattedCurrency(
-                value = transaction.transAmount,
-                currency = currencyFormat,
+                value = if (transaction.transCode == TransactionCode.TRANSFER.displayName && forAccountId != transaction.accountId) transaction.toTransAmount
+                    ?: 0.0 else transaction.transAmount,
+                currency = currencyFormat ?: CurrencyFormat(),
                 type = if (transaction.transCode == "Deposit" || transaction.toAccountId != -1) TransactionType.CREDIT else TransactionType.DEBIT
             )
         },
