@@ -47,7 +47,7 @@ jobs:
 
       - name: Get Version Name
         id: version
-        run: echo "VERSION_NAME=$(./gradlew -q printVersionName)" >> $GITHUB_ENV
+        run: echo "VERSION_NAME=$(grep VERSION_NAME gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
 
       - name: Rename APK file
         run: |
@@ -69,7 +69,6 @@ jobs:
           name: Signed APK
           path: ${{steps.sign_app.outputs.signedReleaseFile}}
           retention-days: 4
-
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
