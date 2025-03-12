@@ -27,13 +27,20 @@ jobs:
       - name: Grant execute permission for Gradlew
         run: chmod +x ./gradlew
 
-      - name: Build Signed APK
-        run: |
-          ./gradlew assembleRelease --stacktrace \
-            -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
-            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
-            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
-            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+              # Building and signing App
+      - name: Build Android APK
+        run: cd android && ./gradlew assembleRelease 
+  
+      - name: Sign ABB
+        uses: r0adkll/sign-android-release@v1
+        # ID used to access action output
+        id: sign_app
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
 
       - name: Get Version Name
         id: version
@@ -52,6 +59,14 @@ jobs:
             echo "APK file not found!"
             exit 1
           fi
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Signed APK
+          path: ${{steps.sign_app.outputs.signedReleaseFile}}
+          retention-days: 4
+
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
