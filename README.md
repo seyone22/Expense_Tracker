@@ -28,18 +28,18 @@ Expense Tracker currently offers the following features:
   Union InfoEuro system for monthly updates.
 
 <div style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <img src="assets/Screenshot_20240212_120717.png" alt="Settings" width="300" style="margin: 10px;">
-    <img src="assets/Screenshot_20240212_120812.png" alt="Categories" width="300" style="margin: 10px;">
-    <img src="assets/Screenshot_20240212_120830.png" alt="Payees" width="300" style="margin: 10px;">
+    <img src="assets/Screenshot_settings.png" alt="Settings" width="200" style="margin: 10px;">
+    <img src="assets/Screenshot_entities.png" alt="Categories" width="200" style="margin: 10px;">
+    <img src="assets/Screenshot_accounts.png" alt="Settings" width="200" style="margin: 10px;"> 
 </div>
 <div style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <img src="assets/Screenshot_20240212_120835.png" alt="Settings" width="300" style="margin: 10px;">
-    <img src="assets/Screenshot_20240212_120845.png" alt="Settings" width="300" style="margin: 10px;">
-    <img src="assets/Screenshot_20240212_120857.png" alt="Settings" width="300" style="margin: 10px;">
+    <img src="assets/Screenshot_transactions.png" alt="Settings" width="200" style="margin: 10px;">
+    <img src="assets/Screenshot_home.png" alt="Settings" width="200" style="margin: 10px;">
+    <img src="assets/Screenshot_transactions.png" alt="Settings" width="200" style="margin: 10px;">
 </div>
 <div style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <img src="assets/Screenshot_20240212_120908.png" alt="Settings" width="300" style="margin: 10px;">
-    <img src="assets/Screenshot_20240212_120919.png" alt="Settings" width="300" style="margin: 10px;">
+    <img src="assets/Screenshot_reports.png" alt="Settings" width="200" style="margin: 10px;">
+    <img src="assets/Screenshot_20240212_120830.png" alt="Payees" width="200" style="margin: 10px;">
 </div>
 
 ## Installation
