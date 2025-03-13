@@ -113,7 +113,7 @@ class BudgetDetailViewModel(
 
         // Update state
         _incomeStatistics.value = totalIncome
-        _expenseStatistics.value = totalExpenses
+        _expenseStatistics.value = totalExpenses * -1
 
         Log.d(
             "BudgetDetailViewModel",
