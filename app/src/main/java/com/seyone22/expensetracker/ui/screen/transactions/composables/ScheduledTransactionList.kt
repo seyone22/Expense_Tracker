@@ -11,7 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +25,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.seyone22.expensetracker.data.model.BillsDepositWithDetails
 import com.seyone22.expensetracker.data.model.BillsDeposits
 import com.seyone22.expensetracker.data.model.CurrencyFormat
+import com.seyone22.expensetracker.data.model.TransactionCode
+import com.seyone22.expensetracker.data.model.TransactionStatus
 import com.seyone22.expensetracker.data.model.toBillsDeposit
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.FilterOption
@@ -35,8 +36,7 @@ import com.seyone22.expensetracker.ui.common.TransactionType
 import com.seyone22.expensetracker.ui.common.getAbbreviatedMonthName
 import com.seyone22.expensetracker.ui.common.removeTrPrefix
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsViewModel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import com.seyone22.expensetracker.utils.filterBillDeposits
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -46,41 +46,31 @@ fun ScheduledTransactionList(
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val haptics = LocalHapticFeedback.current
-    var filteredTransactions by remember { mutableStateOf(billsDeposits) }
-    // Use derivedStateOf to update filteredTransactions when transactions change
-    val derivedFilteredTransactions by remember(billsDeposits) {
-        derivedStateOf {
-            billsDeposits // or apply your filtering logic here
+
+    var selectedTimeFilter by remember { mutableStateOf<FilterOption?>(null) }
+    var selectedTypeFilter by remember { mutableStateOf<TransactionCode?>(null) }
+    var selectedStatusFilter by remember { mutableStateOf<TransactionStatus?>(null) }
+
+    val filteredTransactions =
+        remember(billsDeposits, selectedTimeFilter, selectedTypeFilter, selectedStatusFilter) {
+            filterBillDeposits(
+                billsDeposits,
+                selectedTimeFilter,
+                selectedTypeFilter,
+                selectedStatusFilter
+            )
         }
-    }
-    filteredTransactions = derivedFilteredTransactions
 
     Column {
         SortBar(
-            periodSortAction = { sortCase ->
-                filteredTransactions = when (sortCase) {
-                    FilterOption.ALL -> billsDeposits
-                    FilterOption.CURRENT_MONTH -> billsDeposits.filter {
-                        val transactionDate =
-                            LocalDate.parse(it.TRANSDATE, DateTimeFormatter.ISO_LOCAL_DATE)
-                        transactionDate.monthValue == LocalDate.now().monthValue
-                    }
-
-                    FilterOption.LAST_MONTH -> billsDeposits.filter {
-                        val transactionDate =
-                            LocalDate.parse(it.TRANSDATE, DateTimeFormatter.ISO_LOCAL_DATE)
-                        // Check if the transaction date is in the last month
-                        when {
-                            LocalDate.now().monthValue != 1 ->
-                                transactionDate.monthValue == LocalDate.now().monthValue - 1
-
-                            else ->
-                                transactionDate.year == LocalDate.now().year - 1 && transactionDate.monthValue == 12
-                        }
-                    }
-                    // Add more cases as needed
-                    else -> billsDeposits // No filtering for other cases
-                }
+            periodSortAction = {
+                selectedTimeFilter = it
+            },
+            typeSortAction = {
+                selectedTypeFilter = it
+            },
+            statusSortAction = {
+                selectedStatusFilter = it
             }
         )
 

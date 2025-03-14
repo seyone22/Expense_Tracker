@@ -1,5 +1,6 @@
 package com.seyone22.expensetracker.ui.screen.transactions.composables
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -46,9 +47,11 @@ import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.TransactionCode
+import com.seyone22.expensetracker.data.model.TransactionStatus
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
 import com.seyone22.expensetracker.data.model.toTransaction
 import com.seyone22.expensetracker.ui.AppViewModelProvider
+import com.seyone22.expensetracker.ui.common.FilterOption
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
 import com.seyone22.expensetracker.ui.common.SortBar
 import com.seyone22.expensetracker.ui.common.TransactionType
@@ -74,11 +77,23 @@ fun TransactionList(
     forAccountId: Int
 ) {
     val haptics = LocalHapticFeedback.current
-    var filteredTransactions by remember { mutableStateOf(transactions) }
 
-    LaunchedEffect(transactions) {
-        filteredTransactions = transactions
+    var selectedTimeFilter by remember { mutableStateOf<FilterOption?>(null) }
+    var selectedTypeFilter by remember { mutableStateOf<TransactionCode?>(null) }
+    var selectedStatusFilter by remember { mutableStateOf<TransactionStatus?>(null) }
+
+    val filteredTransactions =
+        remember(transactions, selectedTimeFilter, selectedTypeFilter, selectedStatusFilter) {
+            filterTransactions(
+                transactions,
+                selectedTimeFilter,
+                selectedTypeFilter,
+                selectedStatusFilter
+            )
     }
+
+    Log.d("TAG", "TransactionList txns: $transactions")
+    Log.d("TAG", "TransactionList filt: $filteredTransactions")
 
     val coroutineScope = rememberCoroutineScope()
     val entryViewModel: TransactionEntryViewModel =
@@ -144,9 +159,15 @@ fun TransactionList(
         LazyColumn(modifier = modifier) {
             if (showFilter) {
                 item {
-                    SortBar { sortCase ->
-                        filteredTransactions = filterTransactions(transactions, sortCase)
-                    }
+                    SortBar(
+                        periodSortAction = {
+                            selectedTimeFilter = it
+                        },
+                        typeSortAction = {
+                            selectedTypeFilter = it
+                        },
+                        statusSortAction = { selectedStatusFilter = it }
+                    )
                 }
             }
             if (filteredTransactions.isNotEmpty()) {
@@ -174,9 +195,15 @@ fun TransactionList(
     } else {
         Column(modifier = modifier) {
             if (showFilter) {
-                SortBar { sortCase ->
-                    filteredTransactions = filterTransactions(transactions, sortCase)
-                }
+                SortBar(
+                    periodSortAction = {
+                        selectedTimeFilter = it
+                    },
+                    typeSortAction = {
+                        selectedTypeFilter = it
+                    },
+                    statusSortAction = { selectedStatusFilter = it }
+                )
             }
             if (filteredTransactions.isNotEmpty()) {
                 filteredTransactions.forEach { transaction ->
