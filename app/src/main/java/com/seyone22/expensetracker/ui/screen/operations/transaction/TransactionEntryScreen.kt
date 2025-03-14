@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -143,6 +144,9 @@ fun TransactionEntryScreen(
                         .padding(padding),
                 ) {
                     TransactionEntryForm(
+                        modifier = Modifier
+                            .focusGroup()
+                            .padding(48.dp, 0.dp),
                         transactionDetails = transactionUiState.transactionDetails,
                         transactionUiState = transactionUiState,
                         onValueChange = viewModel::updateUiState,
@@ -151,6 +155,9 @@ fun TransactionEntryScreen(
                         edit = false
                     )
                     EditableTransactionForm(
+                        modifier = Modifier
+                            .focusGroup()
+                            .padding(48.dp, 0.dp),
                         editableTransactionDetails = transactionUiState.billsDepositsDetails,
                         onValueChange = viewModel::updateUiState,
                         viewModel = viewModel,

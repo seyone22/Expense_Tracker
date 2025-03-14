@@ -66,7 +66,6 @@ fun QuickActions(
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
     val currentDialog by viewModel.currentDialog
-
     currentDialog?.let {
         GenericDialog(dialogAction = it, onDismiss = { viewModel.dismissDialog() })
     }
