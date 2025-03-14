@@ -82,7 +82,7 @@ fun QuickActions(
             TransactionEntryDestination,
             MaterialTheme.colorScheme.primaryContainer
         ), QuickAction(
-            "Withdraw",
+            "Withdrawal",
             Icons.Filled.ArrowUpward,
             TransactionEntryDestination,
             MaterialTheme.colorScheme.primaryContainer
@@ -127,8 +127,12 @@ fun QuickActions(
 
                 .clickable {
                     when (actions[index].title) {
-                        "Deposit", "Withdraw", "Transfer", "Account" -> {
+                        "Account" -> {
                             navigateToScreen(actions[index].destination.route)
+                        }
+
+                        "Deposit", "Withdrawal", "Transfer" -> {
+                            navigateToScreen(actions[index].destination.route + "/${actions[index].title}")
                         }
 
                         "Category" -> {
