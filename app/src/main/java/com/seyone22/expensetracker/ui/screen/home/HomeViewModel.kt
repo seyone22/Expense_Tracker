@@ -44,7 +44,7 @@ class HomeViewModel(
     // Combine flows for expenses, income, and total into one flow
     private val totalsFlow =
         combine(expensesFlow, incomeFlow, totalFlow) { expenses, income, total ->
-            Totals(expenses, income, total)
+            Totals(expenses * -1, income, total)
         }
 
     // Function to fetch Transactions for the week
@@ -73,7 +73,7 @@ class HomeViewModel(
         HomeUiState(
             accountList = transformedList,
             transactionSample = transactions.take(5),
-            expensesByWeek = expensesByWeek
+            expensesByWeek = expensesByWeek.map { it.copy(balance = it.balance * -1) }
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(TIMEOUT_MILLIS), HomeUiState())
 

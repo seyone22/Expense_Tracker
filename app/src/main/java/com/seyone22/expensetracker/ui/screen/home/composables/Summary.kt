@@ -24,8 +24,6 @@ import com.github.tehras.charts.piechart.PieChartData
 import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 import com.github.tehras.charts.piechart.renderer.SimpleSliceDrawer
 import com.seyone22.expensetracker.data.model.CurrencyFormat
-import com.seyone22.expensetracker.ui.common.FilterOption
-import com.seyone22.expensetracker.ui.common.SortBar
 import com.seyone22.expensetracker.ui.screen.home.Totals
 import kotlinx.coroutines.flow.Flow
 
@@ -65,14 +63,6 @@ fun Summary(
                     .align(Alignment.TopEnd)
                     .padding(0.dp)
             ) {
-                SortBar(periodSortAction = { sortCase ->
-                    currentFilter = when (sortCase) {
-                        FilterOption.ALL -> "All"
-                        FilterOption.CURRENT_MONTH -> "Current Month"
-                        // Add more cases as needed
-                        else -> "All" // Default filter for other cases
-                    }
-                })
             }
             PieChart(
                 pieChartData = PieChartData(

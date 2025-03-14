@@ -2,12 +2,12 @@ package com.seyone22.expensetracker.ui.screen.operations.transaction.composables
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -67,39 +68,45 @@ fun EditableTransactionForm(
 
     var statusExpanded by remember { mutableStateOf(false) }
 
+    val interactionSource = remember { MutableInteractionSource() }
 
     Column(
-        modifier = modifier
-            .focusGroup()
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.padding(top = 16.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(
-            modifier = modifier
-                .padding(0.dp, 8.dp)
-                .width(310.dp),
-        ) {
-            TextButton(
-                onClick = {
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
                     showRecurringFields = !showRecurringFields
                     setRecurring()
                 },
-            ) {
-                Text(
-                    text = "Recurring Transaction",
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
-            }
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Recurring Transaction",
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Switch(
+                checked = showRecurringFields,
+                onCheckedChange = {
+                    showRecurringFields = it
+                    setRecurring()
+                }
+            )
         }
 
         if (showRecurringFields) {
             // Due date
-            OutlinedTextField(modifier = modifier
-                .padding(0.dp, 8.dp)
-                .clickable(enabled = true) {
-                    openDateDueDialog = true
-                },
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(enabled = true) {
+                        openDateDueDialog = true
+                    },
                 enabled = false,
                 colors = OutlinedTextFieldDefaults.colors(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
@@ -128,8 +135,8 @@ fun EditableTransactionForm(
                 expanded = statusExpanded,
                 onExpandedChange = { statusExpanded = !statusExpanded }) {
                 OutlinedTextField(
-                    modifier = modifier
-                        .padding(0.dp, 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .clickable(enabled = true) { statusExpanded = true }
                         .menuAnchor(MenuAnchorType.PrimaryEditable, true),
                     value = editableTransactionDetails.REPEATS,
@@ -169,8 +176,7 @@ fun EditableTransactionForm(
             // Automatic Execute
             Row(
                 modifier = Modifier
-                    .padding(0.dp, 8.dp)
-                    .width(310.dp),
+                    .fillMaxWidth()
             ) {
                 Checkbox(
                     checked = allowAutomaticExecute,
@@ -187,8 +193,7 @@ fun EditableTransactionForm(
             // Notify me to confirm execution
             Row(
                 modifier = Modifier
-                    .padding(0.dp, 8.dp)
-                    .width(310.dp),
+                    .fillMaxWidth()
             ) {
                 Checkbox(
                     checked = promptUserConfirmation, onCheckedChange = {
@@ -202,7 +207,9 @@ fun EditableTransactionForm(
                 )
             }
 
-            OutlinedTextField(value = editableTransactionDetails.NUMOCCURRENCES,
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = editableTransactionDetails.NUMOCCURRENCES,
                 onValueChange = {
                     onValueChange(
                         viewModel.transactionUiState.value.transactionDetails,
