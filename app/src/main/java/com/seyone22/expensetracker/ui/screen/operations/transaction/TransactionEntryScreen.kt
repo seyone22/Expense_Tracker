@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,12 +59,21 @@ fun TransactionEntryScreen(
     onNavigateUp: () -> Unit = {},
     canNavigateBack: Boolean = true,
     viewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
+    transactionType: String
 ) {
     val transactionUiState by viewModel.transactionUiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     var recurring by remember { mutableStateOf(false) }
+
+    LaunchedEffect(transactionType) {
+        viewModel.updateUiState(
+            viewModel.transactionUiState.value.transactionDetails.copy(transCode = transactionType),
+            viewModel.transactionUiState.value.billsDepositsDetails,
+            0.0
+        )
+    }
 
     Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = {
         TopAppBar(colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -143,7 +154,10 @@ fun TransactionEntryScreen(
                         .padding(padding),
                 ) {
                     TransactionEntryForm(
-                        transactionDetails = transactionUiState.transactionDetails,
+                        modifier = Modifier
+                            .focusGroup()
+                            .padding(48.dp, 0.dp),
+                        transactionDetails = transactionUiState.transactionDetails.copy(transCode = transactionType),
                         transactionUiState = transactionUiState,
                         onValueChange = viewModel::updateUiState,
                         viewModel = viewModel,
@@ -151,6 +165,9 @@ fun TransactionEntryScreen(
                         edit = false
                     )
                     EditableTransactionForm(
+                        modifier = Modifier
+                            .focusGroup()
+                            .padding(48.dp, 0.dp),
                         editableTransactionDetails = transactionUiState.billsDepositsDetails,
                         onValueChange = viewModel::updateUiState,
                         viewModel = viewModel,

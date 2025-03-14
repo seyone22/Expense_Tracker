@@ -116,14 +116,13 @@ interface TransactionDao {
                 ELSE 0
             END
         ) AS totalWithdrawal 
-FROM CHECKINGACCOUNT_V1 c
+    FROM CHECKINGACCOUNT_V1 c
     JOIN ACCOUNTLIST_V1 al
         ON c.accountId = al.accountId 
     JOIN CURRENCYFORMATS_V1 cf
         ON al.currencyId = cf.currencyId 
     WHERE 
-        transCode = :transCode 
-        AND c.status LIKE :status
+        transCode = :transCode AND c.status LIKE :status
     """
     )
     fun getTotalBalanceByCode(transCode: String, status: String): Flow<Double>

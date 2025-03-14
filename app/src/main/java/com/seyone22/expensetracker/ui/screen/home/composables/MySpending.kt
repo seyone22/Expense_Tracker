@@ -137,7 +137,7 @@ fun MySpending(
                 val changeColor =
                     if (percentageChange <= 0) Color(0xff50b381) else Color(0xffd9534f)
                 val changeIcon =
-                    if (percentageChange <= 0) Icons.Outlined.ArrowDropUp else Icons.Outlined.ArrowDropDown
+                    if (percentageChange <= 0) Icons.Outlined.ArrowDropDown else Icons.Outlined.ArrowDropUp
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically

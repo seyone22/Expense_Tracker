@@ -3,8 +3,8 @@ package com.seyone22.expensetracker.ui.screen.operations.transaction
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.BillsDeposits
 import com.seyone22.expensetracker.data.model.Category
@@ -37,7 +37,7 @@ class TransactionEntryViewModel(
     private val payeesRepository: PayeesRepository,
     private val categoriesRepository: CategoriesRepository,
     private val billsDepositsRepository: BillsDepositsRepository
-) : ViewModel() {
+) : BaseViewModel() {
     private val _transactionUiState = MutableStateFlow(TransactionUiState())
     val transactionUiState: StateFlow<TransactionUiState> get() = _transactionUiState
 
@@ -58,6 +58,22 @@ class TransactionEntryViewModel(
 
     companion object {
         const val TIMEOUT_MILLIS = 5_000L
+    }
+
+    fun updatePayeesList() {
+        viewModelScope.launch {
+            _transactionUiState.value = _transactionUiState.value.copy(
+                payeesList = payeesRepository.getAllPayeesStream().first()
+            )
+        }
+    }
+
+    fun updateCategoriesList() {
+        viewModelScope.launch {
+            _transactionUiState.value = _transactionUiState.value.copy(
+                categoriesList = categoriesRepository.getAllCategoriesStream().first()
+            )
+        }
     }
 
     fun updateUiState(

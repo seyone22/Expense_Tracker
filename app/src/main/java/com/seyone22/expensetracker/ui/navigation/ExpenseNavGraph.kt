@@ -162,8 +162,13 @@ fun ExpenseNavHost(
                 backStackEntry = it.arguments?.getString("accountId") ?: "-1"
             )
         }
-        composable(route = TransactionEntryDestination.route) {
-            TransactionEntryScreen(navigateBack = { navController.popBackStack() },
+        composable(route = TransactionEntryDestination.route + "/{transactionType}") { backStackEntry ->
+            val transactionType =
+                backStackEntry.arguments?.getString("transactionType") ?: "Unknown"
+
+            TransactionEntryScreen(
+                transactionType = transactionType,
+                navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() })
         }
         composable(route = ReportEntryDestination.route) {
