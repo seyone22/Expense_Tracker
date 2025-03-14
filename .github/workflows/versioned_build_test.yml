@@ -1,50 +1,42 @@
-name: Dev Test
+name: Versioned Build Test
 
 on:
   push:
-    branches: [ "dev" ] # Trigger on pushes to the 'dev' branch
-  pull_request:
-    branches: [ "dev" ] # Trigger on pull requests to the 'dev' branch
-  workflow_dispatch: # Allow manual triggering of the workflow
+    branches:
+      - "v*" # Matches any branch that starts with 'v'
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up JDK for Gradle
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17' # Ensure this matches the JDK version your project uses
+          java-version: '17'
           distribution: 'temurin'
           cache: gradle
 
-      # Step 3: Cache Gradle dependencies
       - name: Cache Gradle dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # Step 4: Grant execute permissions to Gradlew
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # Step 5: Build the project
       - name: Build with Gradle
-        run: ./gradlew assembleDebug # Use 'assembleRelease' if you're building a release APK
+        run: ./gradlew assembleDebug
 
-      # Step 6: Run lint checks (optional)
       - name: Run Android Lint
         run: ./gradlew lint
 
-      # Step 7: Run tests (optional)
       - name: Run Unit Tests
         run: ./gradlew testDebugUnitTest

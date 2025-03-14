@@ -1,0 +1,93 @@
+name: Build and Release Signed APK
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch: # Allow manual triggering of the workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d -w 0 > keystore.jks
+
+      - name: Grant execute permission for Gradlew
+        run: chmod +x ./gradlew
+
+              # Building and signing App
+      - name: Build Android APK
+        run: ./gradlew assembleRelease 
+  
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        # ID used to access action output
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          # override default build-tools version (35.0.0) -- optional
+          BUILD_TOOLS_VERSION: "35.0.0"
+
+      - name: Get Version Name
+        id: version
+        run: echo "VERSION_NAME=$(grep VERSION_NAME gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
+
+      - name: Debug - List all APK files
+        run: find app/build/outputs/ -name "*.apk"
+
+      - name: Rename APK file
+        run: |
+          VERSION_STRING="${{ env.VERSION_NAME }}"
+          APK_FILE="${{ steps.sign_app.outputs.signedReleaseFile }}"
+    
+          if [ ! -f "$APK_FILE" ]; then
+            echo "Error: APK not found at $APK_FILE"
+            exit 1
+          fi
+      
+          NEW_APK_NAME="${{ github.workspace }}/Expense Tracker v${VERSION_STRING}.apk"
+          mv "$APK_FILE" "$NEW_APK_NAME"
+          echo "APK renamed to $NEW_APK_NAME"
+
+
+      - name: Check if APK exists
+        run: |
+          if [ ! -f "${{ github.workspace }}/Expense Tracker v${{ env.VERSION_NAME }}.apk" ]; then
+            echo "APK file not found!"
+            exit 1
+          fi
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Expense Tracker Release APK
+          path: "${{ github.workspace }}/Expense Tracker v${{ env.VERSION_NAME }}.apk"
+          retention-days: 4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION_NAME }}
+          name: Release v${{ env.VERSION_NAME }}
+          draft: false
+          prerelease: true
+          files: ${{ github.workspace }}/Expense Tracker v${{ env.VERSION_NAME }}.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
