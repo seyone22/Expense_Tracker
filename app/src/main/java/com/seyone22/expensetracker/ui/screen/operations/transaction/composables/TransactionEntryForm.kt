@@ -57,6 +57,7 @@ import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionStatus
 import com.seyone22.expensetracker.ui.AppViewModelProvider
+import com.seyone22.expensetracker.ui.common.dialogs.AddEditCategoryDialogAction
 import com.seyone22.expensetracker.ui.common.dialogs.AddEditPayeeDialogAction
 import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.common.removeTrPrefix
@@ -141,8 +142,7 @@ fun TransactionEntryForm(
     }
 
     Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Transaction Type (transCode) Dropdown
         SingleChoiceSegmentedButtonRow(
@@ -160,8 +160,7 @@ fun TransactionEntryForm(
                     },
                     label = { Text(transactionCode.displayName) },
                     shape = SegmentedButtonDefaults.itemShape(
-                        index = index,
-                        count = enumValues<TransactionCode>().size
+                        index = index, count = enumValues<TransactionCode>().size
                     )
                 )
             }
@@ -420,11 +419,13 @@ fun TransactionEntryForm(
                             onAdd = { payee ->
                                 coroutineScope.launch {
                                     entityViewModel.savePayee(payee)
+                                    viewModel.updatePayeesList()
                                 }
                             },
                             onEdit = { payee ->
                                 coroutineScope.launch {
                                     entityViewModel.editPayee(payee)
+                                    viewModel.updatePayeesList()
                                 }
                             },
                         )
@@ -487,78 +488,110 @@ fun TransactionEntryForm(
         }
 
         // Transaction Categories
-        ExposedDropdownMenuBox(expanded = categoryExpanded, onExpandedChange = {
-            categoryExpanded = !categoryExpanded
-        }) {
-            OutlinedTextField(
-                modifier = Modifier
-                    .clickable(enabled = true) {
-                        categoryExpanded = true
-                    }
-                    .menuAnchor(MenuAnchorType.PrimaryEditable, true)
-                    .fillMaxWidth(),
-                value = removeTrPrefix(currentCategory.categName),
-                readOnly = true,
-                onValueChange = {
-                    onValueChange(
-                        transactionDetails.copy(categoryId = it),
-                        viewModel.transactionUiState.value.billsDepositsDetails,
-                        currentAdvancedAmount
-                    )
-                },
-                label = { Text("Transaction Category *") },
-                singleLine = true,
-                keyboardActions = KeyboardActions(onDone = {
-                    focusManager.moveFocus(
-                        FocusDirection.Next
-                    )
-                }),
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
-            )
-
-            ExposedDropdownMenu(
-                expanded = categoryExpanded,
-                onDismissRequest = { categoryExpanded = false },
-            ) {
-                val parentCategories =
-                    transactionUiState.categoriesList.filter { it.parentId == -1 }
-                val childCategoriesMap =
-                    transactionUiState.categoriesList.filter { it.parentId != -1 }
-                        .groupBy { it.parentId } // Group children by parentId
-
-
-                for (parent in parentCategories) {
-                    DropdownMenuItem(text = {
-                        Row {
-                            Text(removeTrPrefix(parent.categName))
+        Row(
+            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
+        ) {
+            ExposedDropdownMenuBox(expanded = categoryExpanded, onExpandedChange = {
+                categoryExpanded = !categoryExpanded
+            }) {
+                OutlinedTextField(
+                    modifier = Modifier
+                        .clickable(enabled = true) {
+                            categoryExpanded = true
                         }
-                    }, onClick = {
-                        currentCategory = parent
+                        .menuAnchor(MenuAnchorType.PrimaryEditable, true),
+                    value = removeTrPrefix(currentCategory.categName),
+                    readOnly = true,
+                    onValueChange = {
                         onValueChange(
-                            transactionDetails.copy(categoryId = parent.categId.toString()),
+                            transactionDetails.copy(categoryId = it),
                             viewModel.transactionUiState.value.billsDepositsDetails,
                             currentAdvancedAmount
                         )
-                        categoryExpanded = false
-                    })
+                    },
+                    label = { Text("Transaction Category *") },
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.moveFocus(
+                            FocusDirection.Next
+                        )
+                    }),
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                )
 
-                    childCategoriesMap[parent.categId]?.forEach { child ->
+                ExposedDropdownMenu(
+                    expanded = categoryExpanded,
+                    onDismissRequest = { categoryExpanded = false },
+                ) {
+                    val parentCategories =
+                        transactionUiState.categoriesList.filter { it.parentId == -1 }
+                    val childCategoriesMap =
+                        transactionUiState.categoriesList.filter { it.parentId != -1 }
+                            .groupBy { it.parentId } // Group children by parentId
+
+
+                    for (parent in parentCategories) {
                         DropdownMenuItem(text = {
                             Row {
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text(removeTrPrefix(child.categName))
+                                Text(removeTrPrefix(parent.categName))
                             }
                         }, onClick = {
-                            currentCategory = child
+                            currentCategory = parent
                             onValueChange(
-                                transactionDetails.copy(categoryId = child.categId.toString()),
+                                transactionDetails.copy(categoryId = parent.categId.toString()),
                                 viewModel.transactionUiState.value.billsDepositsDetails,
                                 currentAdvancedAmount
                             )
                             categoryExpanded = false
                         })
+
+                        childCategoriesMap[parent.categId]?.forEach { child ->
+                            DropdownMenuItem(text = {
+                                Row {
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    Text(removeTrPrefix(child.categName))
+                                }
+                            }, onClick = {
+                                currentCategory = child
+                                onValueChange(
+                                    transactionDetails.copy(categoryId = child.categId.toString()),
+                                    viewModel.transactionUiState.value.billsDepositsDetails,
+                                    currentAdvancedAmount
+                                )
+                                categoryExpanded = false
+                            })
+                        }
                     }
                 }
+            }
+            IconButton(
+                modifier = Modifier
+                    .height(40.dp)
+                    .width(40.dp)
+                    .padding(10.dp, 10.dp, 0.dp, 0.dp),
+                onClick = {
+                    viewModel.showDialog(
+                        AddEditCategoryDialogAction(
+                            onAdd = { category ->
+                                coroutineScope.launch {
+                                    entityViewModel.saveCategory(category)
+                                    viewModel.updateCategoriesList()
+                                }
+                            },
+                            onEdit = { category ->
+                                coroutineScope.launch {
+                                    entityViewModel.editCategory(category)
+                                    viewModel.updateCategoriesList()
+                                }
+                            },
+                        )
+                    )
+                },
+                enabled = (transactionDetails.transCode != TransactionCode.TRANSFER.displayName)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add, contentDescription = "Add"
+                )
             }
         }
 
@@ -639,15 +672,16 @@ fun TransactionEntryForm(
             singleLine = true
         )
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = transactionDetails.notes, onValueChange = {
-            onValueChange(
-                transactionDetails.copy(notes = it),
-                viewModel.transactionUiState.value.billsDepositsDetails,
-                currentAdvancedAmount
-            )
-        }, label = { Text("Notes") })
+        OutlinedTextField(modifier = Modifier.fillMaxWidth(),
+            value = transactionDetails.notes,
+            onValueChange = {
+                onValueChange(
+                    transactionDetails.copy(notes = it),
+                    viewModel.transactionUiState.value.billsDepositsDetails,
+                    currentAdvancedAmount
+                )
+            },
+            label = { Text("Notes") })
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),

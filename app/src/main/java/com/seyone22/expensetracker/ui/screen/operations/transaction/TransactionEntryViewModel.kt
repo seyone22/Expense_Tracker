@@ -60,6 +60,22 @@ class TransactionEntryViewModel(
         const val TIMEOUT_MILLIS = 5_000L
     }
 
+    fun updatePayeesList() {
+        viewModelScope.launch {
+            _transactionUiState.value = _transactionUiState.value.copy(
+                payeesList = payeesRepository.getAllPayeesStream().first()
+            )
+        }
+    }
+
+    fun updateCategoriesList() {
+        viewModelScope.launch {
+            _transactionUiState.value = _transactionUiState.value.copy(
+                categoriesList = categoriesRepository.getAllCategoriesStream().first()
+            )
+        }
+    }
+
     fun updateUiState(
         transactionDetails: TransactionDetails? = null,
         billsDepositsDetails: BillsDepositsDetails? = null,

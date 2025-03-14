@@ -114,13 +114,13 @@ class EntityViewModel(
     var selectedPayee by mutableStateOf(Payee())
 
     suspend fun savePayee(payee: Payee) {
-        if (validatePayeeInput()) {
+        if (payee.payeeName.isNotBlank()) {
             payeesRepository.insertPayee(payee)
         }
     }
 
     suspend fun editPayee(payee: Payee) {
-        if (validatePayeeInput()) {
+        if (payee.payeeName.isNotBlank()) {
             payeesRepository.updatePayee(payee)
         }
     }
