@@ -369,12 +369,10 @@ fun TransactionEntryForm(
                                 DropdownMenuItem(text = { Text(payee.payeeName) }, onClick = {
                                     currentPayee = payee
                                     onValueChange(
-                                        transactionDetails.copy(toAccountId = "-1"),
-                                        viewModel.transactionUiState.value.billsDepositsDetails,
-                                        currentAdvancedAmount
-                                    )
-                                    onValueChange(
-                                        transactionDetails.copy(payeeId = currentPayee.payeeId.toString()),
+                                        transactionDetails.copy(
+                                            toAccountId = "-1",
+                                            payeeId = currentPayee.payeeId.toString()
+                                        ),
                                         viewModel.transactionUiState.value.billsDepositsDetails,
                                         currentAdvancedAmount
                                     )
@@ -391,12 +389,10 @@ fun TransactionEntryForm(
                                 Log.d("DEBUG", "TransactionEntryForm: Executes! $account")
                                 DropdownMenuItem(text = { Text(account.accountName) }, onClick = {
                                     onValueChange(
-                                        transactionDetails.copy(payeeId = "-1"),
-                                        viewModel.transactionUiState.value.billsDepositsDetails,
-                                        currentAdvancedAmount
-                                    )
-                                    onValueChange(
-                                        transactionDetails.copy(toAccountId = account.accountId.toString()),
+                                        transactionDetails.copy(
+                                            payeeId = "-1",
+                                            toAccountId = account.accountId.toString()
+                                        ),
                                         viewModel.transactionUiState.value.billsDepositsDetails,
                                         currentAdvancedAmount
                                     )
@@ -420,6 +416,15 @@ fun TransactionEntryForm(
                                 coroutineScope.launch {
                                     entityViewModel.savePayee(payee)
                                     viewModel.updatePayeesList()
+                                    currentPayee = payee
+                                    onValueChange(
+                                        transactionDetails.copy(
+                                            toAccountId = "-1",
+                                            payeeId = currentPayee.payeeId.toString()
+                                        ),
+                                        viewModel.transactionUiState.value.billsDepositsDetails,
+                                        currentAdvancedAmount
+                                    )
                                 }
                             },
                             onEdit = { payee ->
@@ -576,6 +581,12 @@ fun TransactionEntryForm(
                                 coroutineScope.launch {
                                     entityViewModel.saveCategory(category)
                                     viewModel.updateCategoriesList()
+                                    currentCategory = category
+                                    onValueChange(
+                                        transactionDetails.copy(categoryId = category.categId.toString()),
+                                        viewModel.transactionUiState.value.billsDepositsDetails,
+                                        currentAdvancedAmount
+                                    )
                                 }
                             },
                             onEdit = { category ->
