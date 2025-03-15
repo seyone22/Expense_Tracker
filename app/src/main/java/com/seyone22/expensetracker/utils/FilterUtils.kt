@@ -1,6 +1,6 @@
 package com.seyone22.expensetracker.utils
 
-import android.util.Log
+import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.BillsDepositWithDetails
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionStatus
@@ -13,7 +13,8 @@ fun filterTransactions(
     transactions: List<TransactionWithDetails>,
     timeFilter: FilterOption?,
     typeFilter: TransactionCode?,
-    selectedStatusFilter: TransactionStatus?
+    statusFilter: TransactionStatus?,
+    accountFilter: Account?,
 ): List<TransactionWithDetails> {
     val now = LocalDate.now()
 
@@ -49,14 +50,16 @@ fun filterTransactions(
 
         FilterOption.LAST_3_MONTHS -> transactions.filter {
             val transactionDate = LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
-            transactionDate.isAfter(now.minusMonths(3).withDayOfMonth(1).minusDays(1)) &&
-                    transactionDate.isBefore(now.plusDays(1))
+            transactionDate.isAfter(
+                now.minusMonths(3).withDayOfMonth(1).minusDays(1)
+            ) && transactionDate.isBefore(now.plusDays(1))
         }
 
         FilterOption.LAST_12_MONTHS -> transactions.filter {
             val transactionDate = LocalDate.parse(it.transDate, DateTimeFormatter.ISO_LOCAL_DATE)
-            transactionDate.isAfter(now.minusYears(1).withDayOfMonth(1).minusDays(1)) &&
-                    transactionDate.isBefore(now.plusDays(1))
+            transactionDate.isAfter(
+                now.minusYears(1).withDayOfMonth(1).minusDays(1)
+            ) && transactionDate.isBefore(now.plusDays(1))
         }
 
         FilterOption.CURRENT_YEAR -> transactions.filter {
@@ -82,8 +85,9 @@ fun filterTransactions(
                 LocalDate.of(now.year, 4, 1)
             }
             val endOfFinancialYear = startOfFinancialYear.plusYears(1).minusDays(1)
-            transactionDate.isAfter(startOfFinancialYear.minusDays(1)) &&
-                    transactionDate.isBefore(endOfFinancialYear.plusDays(1))
+            transactionDate.isAfter(startOfFinancialYear.minusDays(1)) && transactionDate.isBefore(
+                endOfFinancialYear.plusDays(1)
+            )
         }
 
         FilterOption.CURRENT_FINANCIAL_YEAR_TO_DATE -> transactions.filter {
@@ -106,8 +110,9 @@ fun filterTransactions(
                 LocalDate.of(now.year - 1, 4, 1)
             }
             val endOfLastFinancialYear = startOfLastFinancialYear.plusYears(1).minusDays(1)
-            transactionDate.isAfter(startOfLastFinancialYear.minusDays(1)) &&
-                    transactionDate.isBefore(endOfLastFinancialYear.plusDays(1))
+            transactionDate.isAfter(startOfLastFinancialYear.minusDays(1)) && transactionDate.isBefore(
+                endOfLastFinancialYear.plusDays(1)
+            )
         }
 
         FilterOption.OVER_TIME -> transactions // No filtering, return all transactions
@@ -128,25 +133,28 @@ fun filterTransactions(
     }
 
     //Apply status based filtering
-    val statusFilteredTransactions = if (selectedStatusFilter != null) {
-        typeFilteredTransactions.filter { it.status == selectedStatusFilter.displayName }
+    val statusFilteredTransactions = if (statusFilter != null) {
+        typeFilteredTransactions.filter { it.status == statusFilter.displayName }
     } else {
         typeFilteredTransactions
     }
 
-    Log.d("TAG", "filterTransactions: Page load!")
-    Log.d("TAG", "filterTransactions: $transactions")
-    Log.d("TAG", "filterTransactions: $timeFilteredTransactions")
-    Log.d("TAG", "filterTransactions: $typeFilteredTransactions")
+    // Apply account based filtering
+    val accountFilteredTransactions = if (accountFilter != null) {
+        statusFilteredTransactions.filter { it.accountId == accountFilter.accountId }
+    } else {
+        statusFilteredTransactions
+    }
 
-    return statusFilteredTransactions
+    return accountFilteredTransactions
 }
 
 fun filterBillDeposits(
     transactions: List<BillsDepositWithDetails>,
     timeFilter: FilterOption?,
     typeFilter: TransactionCode?,
-    selectedStatusFilter: TransactionStatus?
+    statusFilter: TransactionStatus?,
+    accountFilter: Account?,
 ): List<BillsDepositWithDetails> {
     val now = LocalDate.now()
 
@@ -182,14 +190,16 @@ fun filterBillDeposits(
 
         FilterOption.LAST_3_MONTHS -> transactions.filter {
             val transactionDate = LocalDate.parse(it.TRANSDATE, DateTimeFormatter.ISO_LOCAL_DATE)
-            transactionDate.isAfter(now.minusMonths(3).withDayOfMonth(1).minusDays(1)) &&
-                    transactionDate.isBefore(now.plusDays(1))
+            transactionDate.isAfter(
+                now.minusMonths(3).withDayOfMonth(1).minusDays(1)
+            ) && transactionDate.isBefore(now.plusDays(1))
         }
 
         FilterOption.LAST_12_MONTHS -> transactions.filter {
             val transactionDate = LocalDate.parse(it.TRANSDATE, DateTimeFormatter.ISO_LOCAL_DATE)
-            transactionDate.isAfter(now.minusYears(1).withDayOfMonth(1).minusDays(1)) &&
-                    transactionDate.isBefore(now.plusDays(1))
+            transactionDate.isAfter(
+                now.minusYears(1).withDayOfMonth(1).minusDays(1)
+            ) && transactionDate.isBefore(now.plusDays(1))
         }
 
         FilterOption.CURRENT_YEAR -> transactions.filter {
@@ -215,8 +225,9 @@ fun filterBillDeposits(
                 LocalDate.of(now.year, 4, 1)
             }
             val endOfFinancialYear = startOfFinancialYear.plusYears(1).minusDays(1)
-            transactionDate.isAfter(startOfFinancialYear.minusDays(1)) &&
-                    transactionDate.isBefore(endOfFinancialYear.plusDays(1))
+            transactionDate.isAfter(startOfFinancialYear.minusDays(1)) && transactionDate.isBefore(
+                endOfFinancialYear.plusDays(1)
+            )
         }
 
         FilterOption.CURRENT_FINANCIAL_YEAR_TO_DATE -> transactions.filter {
@@ -239,8 +250,9 @@ fun filterBillDeposits(
                 LocalDate.of(now.year - 1, 4, 1)
             }
             val endOfLastFinancialYear = startOfLastFinancialYear.plusYears(1).minusDays(1)
-            transactionDate.isAfter(startOfLastFinancialYear.minusDays(1)) &&
-                    transactionDate.isBefore(endOfLastFinancialYear.plusDays(1))
+            transactionDate.isAfter(startOfLastFinancialYear.minusDays(1)) && transactionDate.isBefore(
+                endOfLastFinancialYear.plusDays(1)
+            )
         }
 
         FilterOption.OVER_TIME -> transactions // No filtering, return all transactions
@@ -260,7 +272,19 @@ fun filterBillDeposits(
         timeFilteredTransactions
     }
 
-    //Apply some other filtering
+    //Apply status based filtering
+    val statusFilteredTransactions = if (statusFilter != null) {
+        typeFilteredTransactions.filter { it.STATUS == statusFilter.displayName }
+    } else {
+        typeFilteredTransactions
+    }
 
-    return typeFilteredTransactions
+    // Apply account based filtering
+    val accountFilteredTransactions = if (accountFilter != null) {
+        statusFilteredTransactions.filter { it.ACCOUNTID == accountFilter.accountId }
+    } else {
+        statusFilteredTransactions
+    }
+
+    return accountFilteredTransactions
 }
