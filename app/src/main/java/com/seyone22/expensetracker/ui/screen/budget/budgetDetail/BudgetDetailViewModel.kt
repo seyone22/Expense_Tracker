@@ -43,7 +43,10 @@ class BudgetDetailViewModel(
     private val _categoriesFlow: Flow<List<Category>> =
         categoriesRepository.getAllCategoriesStream()
     private val _transactionsFlow: Flow<List<TransactionWithDetails>> =
-        transactionsRepository.getAllTransactionsStream()
+        transactionsRepository.getAllTransactionsStream(
+            sortField = "TransDate",
+            sortDirection = "DESC"
+        )
 
     // Mutable StateFlow to store budget entries
     private val _budgetEntriesFlow = MutableStateFlow<List<BudgetEntry>>(emptyList())

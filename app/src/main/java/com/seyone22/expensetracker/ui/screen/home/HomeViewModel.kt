@@ -59,7 +59,10 @@ class HomeViewModel(
     // Home UI state, includes account details and transactions
     val accountsUiState: StateFlow<HomeUiState> = combine(
         accountsRepository.getAllAccountsStream(),
-        transactionsRepository.getAllTransactionsStream(),
+        transactionsRepository.getAllTransactionsStream(
+            sortDirection = "DESC",
+            sortField = "TransDate"
+        ),
         expensesByWeekFlow
     ) { accounts, transactions, expensesByWeek ->
         // Retrieve account balances and create a list of account-summary pairs

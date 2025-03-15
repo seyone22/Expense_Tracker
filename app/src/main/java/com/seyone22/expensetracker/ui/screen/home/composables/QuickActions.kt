@@ -220,7 +220,7 @@ fun QuickActions(
                             modifier = Modifier.size(36.dp)
                         )
                         Text(
-                            text = actions[index].title,
+                            text = if (actions[index].title == "Withdrawal") "Withdraw" else actions[index].title,
                             modifier = Modifier.padding(8.dp),
                             textAlign = TextAlign.Center
                         )

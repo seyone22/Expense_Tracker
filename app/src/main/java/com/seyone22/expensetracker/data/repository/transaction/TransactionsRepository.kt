@@ -5,7 +5,10 @@ import com.seyone22.expensetracker.data.model.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
 
 interface TransactionsRepository {
-    fun getAllTransactionsStream(): Flow<List<TransactionWithDetails>>
+    fun getAllTransactionsStream(
+        sortField: String,
+        sortDirection: String
+    ): Flow<List<TransactionWithDetails>>
     fun getTransactionStream(transId: Int): Flow<Transaction?>
     fun getTransactionsFromAccount(accountId: Int): Flow<List<TransactionWithDetails>>
     fun getAllTransactionsByToAccount(toAccountId: Int): List<Transaction>

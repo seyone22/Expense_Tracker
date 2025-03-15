@@ -111,6 +111,8 @@ fun TransactionEntryForm(
 
     var openTransactionDateDialog by remember { mutableStateOf(false) }
 
+    val currentTransactionDetails by remember { mutableStateOf(transactionDetails) }
+
     var currentAccount by remember { mutableStateOf(Account()) }
     var currentPayee by remember { mutableStateOf(Payee()) }
     var currentCategory by remember { mutableStateOf(Category()) }
@@ -158,7 +160,11 @@ fun TransactionEntryForm(
                             currentAdvancedAmount
                         )
                     },
-                    label = { Text(transactionCode.displayName) },
+                    label = {
+                        if (transactionCode.displayName == TransactionCode.WITHDRAWAL.displayName) Text(
+                            "Withdraw"
+                        ) else Text(transactionCode.displayName)
+                    },
                     shape = SegmentedButtonDefaults.itemShape(
                         index = index, count = enumValues<TransactionCode>().size
                     )

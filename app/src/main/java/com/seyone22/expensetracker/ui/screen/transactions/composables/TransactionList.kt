@@ -1,6 +1,5 @@
 package com.seyone22.expensetracker.ui.screen.transactions.composables
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -43,8 +42,11 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.Account
+import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.data.model.CurrencyFormat
+import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionStatus
@@ -54,6 +56,7 @@ import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.FilterOption
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
 import com.seyone22.expensetracker.ui.common.SortBar
+import com.seyone22.expensetracker.ui.common.SortOption
 import com.seyone22.expensetracker.ui.common.TransactionType
 import com.seyone22.expensetracker.ui.common.dialogs.DeleteItemDialogAction
 import com.seyone22.expensetracker.ui.common.dialogs.EditTransactionDialogAction
@@ -70,30 +73,51 @@ import kotlinx.coroutines.launch
 @Composable
 fun TransactionList(
     modifier: Modifier = Modifier,
-    transactions: List<TransactionWithDetails>,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     showFilter: Boolean = true,
     useLazyColumn: Boolean = false, // Determines whether to use LazyColumn or Column
-    forAccountId: Int
+    forAccountId: Int,
+    count: Int? = null
 ) {
+    val transactionsUiState by viewModel.transactionsUiState.collectAsState()
+
     val haptics = LocalHapticFeedback.current
 
     var selectedTimeFilter by remember { mutableStateOf<FilterOption?>(null) }
     var selectedTypeFilter by remember { mutableStateOf<TransactionCode?>(null) }
     var selectedStatusFilter by remember { mutableStateOf<TransactionStatus?>(null) }
+    var selectedAccountFilter by remember { mutableStateOf<Account?>(null) }
+    var selectedPayeeFilter by remember { mutableStateOf<Payee?>(null) }
+    var selectedCategoryFilter by remember { mutableStateOf<Category?>(null) }
 
-    val filteredTransactions =
-        remember(transactions, selectedTimeFilter, selectedTypeFilter, selectedStatusFilter) {
-            filterTransactions(
-                transactions,
-                selectedTimeFilter,
-                selectedTypeFilter,
-                selectedStatusFilter
-            )
+    var selectedSort by remember { mutableStateOf<SortOption>(SortOption.default) }
+
+    val filteredTransactions = remember(
+        transactionsUiState.transactions,
+        selectedTimeFilter,
+        selectedTypeFilter,
+        selectedStatusFilter,
+        selectedAccountFilter,
+        selectedPayeeFilter,
+        selectedCategoryFilter,
+        selectedSort
+    ) {
+        viewModel.sortTransactions(selectedSort)
+
+        if (forAccountId != -1) {
+            selectedAccountFilter = Account(accountId = forAccountId)
+        }
+
+        filterTransactions(
+            transactionsUiState.transactions,
+            selectedTimeFilter,
+            selectedTypeFilter,
+            selectedStatusFilter,
+            selectedPayeeFilter,
+            selectedCategoryFilter,
+            selectedAccountFilter,
+        )
     }
-
-    Log.d("TAG", "TransactionList txns: $transactions")
-    Log.d("TAG", "TransactionList filt: $filteredTransactions")
 
     val coroutineScope = rememberCoroutineScope()
     val entryViewModel: TransactionEntryViewModel =
@@ -159,15 +183,17 @@ fun TransactionList(
         LazyColumn(modifier = modifier) {
             if (showFilter) {
                 item {
-                    SortBar(
-                        periodSortAction = {
-                            selectedTimeFilter = it
-                        },
-                        typeSortAction = {
+                    SortBar(periodFilterAction = {
+                        selectedTimeFilter = it
+                    },
+                        typeFilterAction = {
                             selectedTypeFilter = it
                         },
-                        statusSortAction = { selectedStatusFilter = it }
-                    )
+                        statusFilterAction = { selectedStatusFilter = it },
+                        accountFilterAction = { selectedAccountFilter = it },
+                        payeeFilterAction = { selectedPayeeFilter = it },
+                        categoryFilterAction = { selectedCategoryFilter = it },
+                        sortAction = { selectedSort = it })
                 }
             }
             if (filteredTransactions.isNotEmpty()) {
@@ -196,17 +222,23 @@ fun TransactionList(
         Column(modifier = modifier) {
             if (showFilter) {
                 SortBar(
-                    periodSortAction = {
+                    periodFilterAction = {
                         selectedTimeFilter = it
                     },
-                    typeSortAction = {
+                    typeFilterAction = {
                         selectedTypeFilter = it
                     },
-                    statusSortAction = { selectedStatusFilter = it }
+                    statusFilterAction = { selectedStatusFilter = it },
+                    accountFilterAction = { selectedAccountFilter = it },
+                    payeeFilterAction = { selectedPayeeFilter = it },
+                    categoryFilterAction = { selectedCategoryFilter = it },
+                    sortAction = { selectedSort = it }
+
                 )
             }
             if (filteredTransactions.isNotEmpty()) {
-                filteredTransactions.forEach { transaction ->
+                filteredTransactions.take(count ?: filteredTransactions.size)
+                    .forEach { transaction ->
                     TransactionItem(
                         transaction = transaction,
                         haptics = haptics,
@@ -308,6 +340,9 @@ private fun TransactionItem(
     viewModel: TransactionsViewModel,
     forAccountId: Int
 ) {
+    val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
+
     var toAccount: Account? by remember { mutableStateOf(null) }
     var currencyFormat: CurrencyFormat? by remember { mutableStateOf(null) }
 
@@ -315,20 +350,20 @@ private fun TransactionItem(
         LaunchedEffect(transaction.toAccountId) {
             toAccount = viewModel.getAccountFromId(transaction.toAccountId ?: 0)
 
-            currencyFormat = viewModel.getCurrencyFormatById(toAccount?.currencyId ?: 0)
+            currencyFormat = sharedViewModel.getCurrencyById(toAccount?.currencyId ?: 0)
 
         }
     } else {
         LaunchedEffect(transaction.accountId) {
             currencyFormat = viewModel.getAccountFromId(transaction.accountId)
-                ?.let { viewModel.getCurrencyFormatById(it.currencyId) } ?: CurrencyFormat()
+                ?.let { sharedViewModel.getCurrencyById(it.currencyId) } ?: CurrencyFormat()
         }
     }
 
     ListItem(
         headlineContent = {
             Text(
-                text = transaction.payeeName ?: "Transfer -> ${transaction.toAccountId}"
+                text = transaction.payeeName ?: "Transfer -> ${toAccount?.accountName}"
             )
         },
         supportingContent = { Text(text = removeTrPrefix(transaction.categName)) },

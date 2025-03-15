@@ -5,7 +5,9 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Update
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
@@ -25,11 +27,8 @@ interface TransactionDao {
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE transId = :transId")
     fun getTransaction(transId: Int): Flow<Transaction>
 
-    // DOES NOT ACCOUNT FOR CUSTOM CATEGORIES
-    @Query(
-        "SELECT " + "    CHECKINGACCOUNT_V1.*, " + "    PAYEE_V1.payeeName AS payeeName, " + "    CATEGORY_V1.categName AS categName " + "FROM " + "    CHECKINGACCOUNT_V1 " + "LEFT OUTER JOIN " + "    PAYEE_V1 ON CHECKINGACCOUNT_V1.payeeId = PAYEE_V1.payeeId " + "LEFT OUTER JOIN " + "    CATEGORY_V1 ON CHECKINGACCOUNT_V1.categoryId = CATEGORY_V1.categId "
-    )
-    fun getAllTransactions(): Flow<List<TransactionWithDetails>>
+    @RawQuery(observedEntities = [Transaction::class])
+    fun getAllTransactions(query: SupportSQLiteQuery): Flow<List<TransactionWithDetails>>
 
     @Query(
         "SELECT " + "    CHECKINGACCOUNT_V1.*, " + "    PAYEE_V1.payeeName AS payeeName, " + "    CATEGORY_V1.categName AS categName " + "FROM " + "    CHECKINGACCOUNT_V1 " + "LEFT OUTER JOIN " + "    PAYEE_V1 ON CHECKINGACCOUNT_V1.payeeId = PAYEE_V1.payeeId " + "INNER JOIN " + "    CATEGORY_V1 ON CHECKINGACCOUNT_V1.categoryId = CATEGORY_V1.categId " + "WHERE " + "    CHECKINGACCOUNT_V1.accountId = :accountId OR CHECKINGACCOUNT_V1.toAccountId = :accountId"
@@ -151,10 +150,7 @@ FROM CHECKINGACCOUNT_V1 c
     """
     )
     fun getTotalBalanceByCode(
-        transCode: String,
-        status: String,
-        month: String?,
-        year: String
+        transCode: String, status: String, month: String?, year: String
     ): Flow<Double>
 
     @Query(
@@ -181,10 +177,7 @@ FROM CHECKINGACCOUNT_V1 c
     """
     )
     fun getTotalBalanceByCategory(
-        categId: Int,
-        status: String,
-        month: String?,
-        year: String
+        categId: Int, status: String, month: String?, year: String
     ): Flow<Double>
 
     @Query(

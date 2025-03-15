@@ -45,7 +45,6 @@ object AppViewModelProvider {
                 expenseApplication().container.transactionsRepository,
                 expenseApplication().container.billsDepositsRepository,
                 expenseApplication().container.accountsRepository,
-                expenseApplication().container.currenciesRepository
             )
         }
         initializer {
@@ -130,6 +129,7 @@ object AppViewModelProvider {
         initializer {
             SharedViewModel(
                 expenseApplication().container.metadataRepository,
+                expenseApplication().container.accountsRepository,
                 expenseApplication().container.currenciesRepository,
                 expenseApplication().container.currencyHistoryRepository,
                 expenseApplication().container.categoriesRepository,
