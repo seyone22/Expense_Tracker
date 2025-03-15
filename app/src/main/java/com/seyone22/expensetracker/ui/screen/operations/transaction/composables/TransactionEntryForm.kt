@@ -158,7 +158,11 @@ fun TransactionEntryForm(
                             currentAdvancedAmount
                         )
                     },
-                    label = { Text(transactionCode.displayName) },
+                    label = {
+                        if (transactionCode.displayName == TransactionCode.WITHDRAWAL.displayName) Text(
+                            "Withdraw"
+                        ) else Text(transactionCode.displayName)
+                    },
                     shape = SegmentedButtonDefaults.itemShape(
                         index = index, count = enumValues<TransactionCode>().size
                     )
