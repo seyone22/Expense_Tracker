@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,7 +23,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontStyle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.seyone22.expensetracker.data.model.BillsDepositWithDetails
+import com.seyone22.expensetracker.SharedViewModel
+import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.BillsDeposits
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.TransactionCode
@@ -32,6 +34,7 @@ import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.FilterOption
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
 import com.seyone22.expensetracker.ui.common.SortBar
+import com.seyone22.expensetracker.ui.common.SortOption
 import com.seyone22.expensetracker.ui.common.TransactionType
 import com.seyone22.expensetracker.ui.common.getAbbreviatedMonthName
 import com.seyone22.expensetracker.ui.common.removeTrPrefix
@@ -41,37 +44,53 @@ import com.seyone22.expensetracker.utils.filterBillDeposits
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScheduledTransactionList(
-    billsDeposits: List<BillsDepositWithDetails>,
     longClicked: (BillsDeposits) -> Unit,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val transactionsUiState by viewModel.transactionsUiState.collectAsState()
+    val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
+
     val haptics = LocalHapticFeedback.current
 
     var selectedTimeFilter by remember { mutableStateOf<FilterOption?>(null) }
     var selectedTypeFilter by remember { mutableStateOf<TransactionCode?>(null) }
     var selectedStatusFilter by remember { mutableStateOf<TransactionStatus?>(null) }
+    var selectedAccountFilter by remember { mutableStateOf<Account?>(null) }
+    var selectedSort by remember { mutableStateOf<SortOption>(SortOption.default) }
 
     val filteredTransactions =
-        remember(billsDeposits, selectedTimeFilter, selectedTypeFilter, selectedStatusFilter) {
+        remember(
+            transactionsUiState.billsDeposits,
+            selectedTimeFilter,
+            selectedTypeFilter,
+            selectedStatusFilter,
+            selectedAccountFilter,
+            selectedSort
+        ) {
             filterBillDeposits(
-                billsDeposits,
+                transactionsUiState.billsDeposits,
                 selectedTimeFilter,
                 selectedTypeFilter,
-                selectedStatusFilter
+                selectedStatusFilter,
+                selectedAccountFilter,
             )
         }
 
     Column {
         SortBar(
-            periodSortAction = {
+            periodFilterAction = {
                 selectedTimeFilter = it
             },
-            typeSortAction = {
+            typeFilterAction = {
                 selectedTypeFilter = it
             },
-            statusSortAction = {
+            statusFilterAction = {
                 selectedStatusFilter = it
-            }
+            },
+            accountFilterAction = {
+                selectedAccountFilter = it
+            },
+            sortAction = { selectedSort = it }
         )
 
         if (filteredTransactions.isNotEmpty()) {
@@ -92,7 +111,7 @@ fun ScheduledTransactionList(
                             LaunchedEffect(filteredTransactions[it].ACCOUNTID) {
                                 val currencyFormatFunction =
                                     viewModel.getAccountFromId(filteredTransactions[it].ACCOUNTID)
-                                        ?.let { it1 -> viewModel.getCurrencyFormatById(it1.currencyId) }
+                                        ?.let { it1 -> sharedViewModel.getCurrencyById(it1.currencyId) }
                                 currencyFormat = currencyFormatFunction!!
                             }
 
