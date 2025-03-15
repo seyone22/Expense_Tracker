@@ -48,8 +48,6 @@ fun TransactionsScreen(
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     navController: NavHostController,
 ) {
-    val transactionsUiState by viewModel.transactionsUiState.collectAsState()
-
     val coroutineScope = rememberCoroutineScope()
 
     var state by remember { mutableIntStateOf(0) }
@@ -101,7 +99,6 @@ fun TransactionsScreen(
                         state = pagerState.currentPage
                         TransactionList(
                             useLazyColumn = true,
-                            transactions = transactionsUiState.transactions,
                             viewModel = viewModel,
                             showFilter = true,
                             forAccountId = -1
@@ -111,7 +108,6 @@ fun TransactionsScreen(
                     1 -> {
                         state = pagerState.currentPage
                         ScheduledTransactionList(
-                            billsDeposits = transactionsUiState.billsDeposits,
                             longClicked = { selected ->
                                 val selObj = SelectedObjects(billsDeposits = selected)
                             },
