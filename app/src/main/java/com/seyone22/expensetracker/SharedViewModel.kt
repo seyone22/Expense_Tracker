@@ -6,11 +6,13 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.seyone22.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
+import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Metadata
 import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.Tag
+import com.seyone22.expensetracker.data.repository.account.AccountsRepository
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.seyone22.expensetracker.data.repository.currencyHistory.CurrencyHistoryRepository
@@ -33,6 +35,7 @@ import kotlinx.coroutines.withContext
 
 class SharedViewModel(
     private val metadataRepository: MetadataRepository,
+    private val accountsRepository: AccountsRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository,
     private val currencyHistoryRepository: CurrencyHistoryRepository,
     private val categoriesRepository: CategoriesRepository,
@@ -44,6 +47,8 @@ class SharedViewModel(
     val tagsFlow: Flow<List<Tag>> = tagsRepository.getAllTagsStream()
     val currenciesFlow: Flow<List<CurrencyFormat>> =
         currencyFormatsRepository.getAllCurrencyFormatsStream()
+    val accounts: Flow<List<Account>> =
+        accountsRepository.getAllActiveAccountsStream()
 
     private val _isSecureScreenEnabled = MutableStateFlow(false)
     val isSecureScreenEnabled: StateFlow<Boolean> = _isSecureScreenEnabled
