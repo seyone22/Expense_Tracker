@@ -1,6 +1,7 @@
 package com.seyone22.expensetracker.data.repository.transaction
 
 import android.util.Log
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
@@ -9,8 +10,36 @@ import kotlinx.coroutines.flow.combine
 
 class OfflineTransactionsRepository(private val transactionDao: TransactionDao) :
     TransactionsRepository {
-    override fun getAllTransactionsStream(): Flow<List<TransactionWithDetails>> =
-        transactionDao.getAllTransactions()
+    override fun getAllTransactionsStream(
+        sortField: String,
+        sortDirection: String
+    ): Flow<List<TransactionWithDetails>> {
+        val validSortFields =
+            listOf("transDate", "amount", "payeeName", "categName") // Allowed columns
+        val validSortDirections = listOf("ASC", "DESC")
+
+        val sanitizedSortField = if (sortField in validSortFields) sortField else "transDate"
+        val sanitizedSortDirection =
+            if (sortDirection in validSortDirections) sortDirection else "ASC"
+
+        val query = SimpleSQLiteQuery(
+            """
+        SELECT 
+            CHECKINGACCOUNT_V1.*,
+            PAYEE_V1.payeeName AS payeeName, 
+            CATEGORY_V1.categName AS categName 
+        FROM CHECKINGACCOUNT_V1 
+        LEFT OUTER JOIN PAYEE_V1 
+            ON CHECKINGACCOUNT_V1.payeeId = PAYEE_V1.payeeId 
+        LEFT OUTER JOIN CATEGORY_V1 
+            ON CHECKINGACCOUNT_V1.categoryId = CATEGORY_V1.categId
+        ORDER BY $sanitizedSortField $sanitizedSortDirection
+        """.trimIndent()
+        )
+
+        return transactionDao.getAllTransactions(query)
+    }
+
 
     override fun getTransactionStream(transId: Int): Flow<Transaction?> =
         transactionDao.getTransaction(transId)
