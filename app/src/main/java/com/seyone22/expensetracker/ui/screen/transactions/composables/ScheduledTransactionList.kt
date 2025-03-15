@@ -26,7 +26,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.BillsDeposits
+import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.data.model.CurrencyFormat
+import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionStatus
 import com.seyone22.expensetracker.data.model.toBillsDeposit
@@ -56,6 +58,9 @@ fun ScheduledTransactionList(
     var selectedTypeFilter by remember { mutableStateOf<TransactionCode?>(null) }
     var selectedStatusFilter by remember { mutableStateOf<TransactionStatus?>(null) }
     var selectedAccountFilter by remember { mutableStateOf<Account?>(null) }
+    var selectedPayeeFilter by remember { mutableStateOf<Payee?>(null) }
+    var selectedCategoryFilter by remember { mutableStateOf<Category?>(null) }
+
     var selectedSort by remember { mutableStateOf<SortOption>(SortOption.default) }
 
     val filteredTransactions =
@@ -72,6 +77,8 @@ fun ScheduledTransactionList(
                 selectedTimeFilter,
                 selectedTypeFilter,
                 selectedStatusFilter,
+                selectedPayeeFilter,
+                selectedCategoryFilter,
                 selectedAccountFilter,
             )
         }
@@ -89,6 +96,12 @@ fun ScheduledTransactionList(
             },
             accountFilterAction = {
                 selectedAccountFilter = it
+            },
+            payeeFilterAction = {
+                selectedPayeeFilter = it
+            },
+            categoryFilterAction = {
+                selectedCategoryFilter = it
             },
             sortAction = { selectedSort = it }
         )

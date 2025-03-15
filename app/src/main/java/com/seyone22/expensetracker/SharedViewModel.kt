@@ -47,7 +47,7 @@ class SharedViewModel(
     val tagsFlow: Flow<List<Tag>> = tagsRepository.getAllTagsStream()
     val currenciesFlow: Flow<List<CurrencyFormat>> =
         currencyFormatsRepository.getAllCurrencyFormatsStream()
-    val accounts: Flow<List<Account>> =
+    val accountsFlow: Flow<List<Account>> =
         accountsRepository.getAllActiveAccountsStream()
 
     private val _isSecureScreenEnabled = MutableStateFlow(false)

@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.Account
+import com.seyone22.expensetracker.data.model.Category
+import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionStatus
 import com.seyone22.expensetracker.ui.AppViewModelProvider
@@ -41,14 +43,20 @@ fun SortBar(
     typeFilterAction: (TransactionCode?) -> Unit,
     statusFilterAction: (TransactionStatus?) -> Unit,
     accountFilterAction: (Account?) -> Unit,
+    payeeFilterAction: (Payee?) -> Unit,
+    categoryFilterAction: (Category?) -> Unit,
     sortAction: (SortOption) -> Unit
 ) {
     // Code block to get a list of accounts.
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
     var accountsList = emptyList<Account>()
+    var payeesList = emptyList<Payee>()
+    var categoriesList = emptyList<Category>()
 
     LaunchedEffect(sharedViewModel) {
-        accountsList = sharedViewModel.accounts.firstOrNull()!!
+        accountsList = sharedViewModel.accountsFlow.firstOrNull()!!
+        payeesList = sharedViewModel.payeesFlow.firstOrNull()!!
+        categoriesList = sharedViewModel.categoriesFlow.firstOrNull()!!
     }
 
     var timePeriodExpanded by remember { mutableStateOf(false) }
@@ -62,6 +70,12 @@ fun SortBar(
 
     var accountExpanded by remember { mutableStateOf(false) }
     var selectedAccountFilter by remember { mutableStateOf<Account?>(null) }
+
+    var payeeExpanded by remember { mutableStateOf(false) }
+    var selectedPayeeFilter by remember { mutableStateOf<Payee?>(null) }
+
+    var categoryExpanded by remember { mutableStateOf(false) }
+    var selectedCategoryFilter by remember { mutableStateOf<Category?>(null) }
 
     var sortExpanded by remember { mutableStateOf(false) }
     var selectedSort by remember { mutableStateOf(SortOption.default) }
@@ -259,6 +273,99 @@ fun SortBar(
             }
         }
 
+        // Filter by Payee
+        Column(
+            modifier = Modifier,
+        ) {
+            // TextButton with an icon
+            FilterChip(onClick = {
+                payeeExpanded = true
+            }, selected = (selectedPayeeFilter != null), label = {
+                if (selectedPayeeFilter != null) {
+                    Text(selectedPayeeFilter!!.payeeName)
+                } else {
+                    Text("Payee")
+                }
+            }, trailingIcon = {
+                if (selectedPayeeFilter == null) {
+                    Icon(
+                        imageVector = if (payeeExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
+                        contentDescription = "Sort"
+                    )
+                } else {
+                    Icon(imageVector = Icons.Default.Close,
+                        contentDescription = "Sort",
+                        modifier = Modifier.clickable {
+                            selectedPayeeFilter = null
+                            payeeFilterAction(selectedPayeeFilter)
+                        })
+                }
+            }, modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
+            )
+
+            // DropdownMenu
+            DropdownMenu(
+                expanded = payeeExpanded,
+                onDismissRequest = { payeeExpanded = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.background)
+            ) {
+                payeesList.forEachIndexed { index, payee ->
+                    DropdownMenuItem(onClick = {
+                        selectedPayeeFilter = payee
+                        payeeExpanded = false
+                        // Perform Sort action
+                        payeeFilterAction(payee)
+                    }, text = { Text(text = payee.payeeName) })
+                }
+            }
+        }
+
+        // Filter by Category
+        Column(
+            modifier = Modifier,
+        ) {
+            // TextButton with an icon
+            FilterChip(onClick = {
+                categoryExpanded = true
+            }, selected = (selectedCategoryFilter != null), label = {
+                if (selectedCategoryFilter != null) {
+                    Text(selectedCategoryFilter!!.categName)
+                } else {
+                    Text("Category")
+                }
+            }, trailingIcon = {
+                if (selectedCategoryFilter == null) {
+                    Icon(
+                        imageVector = if (categoryExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
+                        contentDescription = "Sort"
+                    )
+                } else {
+                    Icon(imageVector = Icons.Default.Close,
+                        contentDescription = "Sort",
+                        modifier = Modifier.clickable {
+                            selectedCategoryFilter = null
+                            categoryFilterAction(selectedCategoryFilter)
+                        })
+                }
+            }, modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
+            )
+
+            // DropdownMenu
+            DropdownMenu(
+                expanded = categoryExpanded,
+                onDismissRequest = { categoryExpanded = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.background)
+            ) {
+                categoriesList.forEachIndexed { index, category ->
+                    DropdownMenuItem(onClick = {
+                        selectedCategoryFilter = category
+                        categoryExpanded = false
+                        // Perform Sort action
+                        categoryFilterAction(category)
+                    }, text = { Text(text = category.categName) })
+                }
+            }
+        }
 
         // Sort
         Column(
@@ -317,7 +424,9 @@ data class SortOption(val key: String, val order: String, val displayName: Strin
             SortOption("transAmount", "ASC", "Amount"),
             SortOption("transCode", "ASC", "Type"),
             SortOption("status", "ASC", "Status"),
-            SortOption("account", "ASC", "Account")
+            SortOption("account", "ASC", "Account"),
+            SortOption("payee", "ASC", "Payee"),
+            SortOption("category", "ASC", "Category"),
         )
     }
 }

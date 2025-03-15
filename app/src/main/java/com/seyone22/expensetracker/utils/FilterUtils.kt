@@ -2,6 +2,8 @@ package com.seyone22.expensetracker.utils
 
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.BillsDepositWithDetails
+import com.seyone22.expensetracker.data.model.Category
+import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionStatus
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
@@ -14,6 +16,8 @@ fun filterTransactions(
     timeFilter: FilterOption?,
     typeFilter: TransactionCode?,
     statusFilter: TransactionStatus?,
+    payeeFilter: Payee?,
+    categoryFilter: Category?,
     accountFilter: Account?,
 ): List<TransactionWithDetails> {
     val now = LocalDate.now()
@@ -146,7 +150,21 @@ fun filterTransactions(
         statusFilteredTransactions
     }
 
-    return accountFilteredTransactions
+    // Apply payee based filtering
+    val payeeFilteredTransactions = if (payeeFilter != null) {
+        accountFilteredTransactions.filter { it.payeeId == payeeFilter.payeeId }
+    } else {
+        accountFilteredTransactions
+    }
+
+    // Apply account based filtering
+    val categoryFilteredTransactions = if (categoryFilter != null) {
+        payeeFilteredTransactions.filter { it.categoryId == categoryFilter.categId }
+    } else {
+        payeeFilteredTransactions
+    }
+
+    return categoryFilteredTransactions
 }
 
 fun filterBillDeposits(
@@ -154,6 +172,8 @@ fun filterBillDeposits(
     timeFilter: FilterOption?,
     typeFilter: TransactionCode?,
     statusFilter: TransactionStatus?,
+    payeeFilter: Payee?,
+    categoryFilter: Category?,
     accountFilter: Account?,
 ): List<BillsDepositWithDetails> {
     val now = LocalDate.now()
