@@ -46,7 +46,8 @@ fun TransactionData(
 
         TransactionList(
             showFilter = false,
-            forAccountId = -1
+            forAccountId = -1,
+            count = 5,
         )
     }
 }

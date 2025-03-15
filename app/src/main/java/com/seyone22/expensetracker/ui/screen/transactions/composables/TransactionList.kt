@@ -76,7 +76,8 @@ fun TransactionList(
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     showFilter: Boolean = true,
     useLazyColumn: Boolean = false, // Determines whether to use LazyColumn or Column
-    forAccountId: Int
+    forAccountId: Int,
+    count: Int? = null
 ) {
     val transactionsUiState by viewModel.transactionsUiState.collectAsState()
 
@@ -236,7 +237,8 @@ fun TransactionList(
                 )
             }
             if (filteredTransactions.isNotEmpty()) {
-                filteredTransactions.forEach { transaction ->
+                filteredTransactions.take(count ?: filteredTransactions.size)
+                    .forEach { transaction ->
                     TransactionItem(
                         transaction = transaction,
                         haptics = haptics,
