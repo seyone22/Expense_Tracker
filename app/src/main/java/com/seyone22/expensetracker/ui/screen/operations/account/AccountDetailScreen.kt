@@ -83,9 +83,8 @@ fun AccountDetailScreen(
             // List of transactions for this account
             TransactionList(
                 modifier = modifier,
-                transactions = accountDetailUiState.transactions,
                 showFilter = false,
-                forAccountId = accountDetailUiState.account.accountId
+                forAccountId = backStackEntry.toInt()
             )
         }
     }
