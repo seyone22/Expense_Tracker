@@ -29,7 +29,10 @@ class BudgetViewModel(
     // Flow for categories and transactions
     private val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
     private val transactionsFlow: Flow<List<TransactionWithDetails>> =
-        transactionsRepository.getAllTransactionsStream()
+        transactionsRepository.getAllTransactionsStream(
+            sortField = "TransDate",
+            sortDirection = "DESC"
+        )
     private val budgetYearsFlow: Flow<List<BudgetYear>> = budgetYearRepository.getAllBudgetYears()
 
     // Mutable StateFlow to store budget entries
