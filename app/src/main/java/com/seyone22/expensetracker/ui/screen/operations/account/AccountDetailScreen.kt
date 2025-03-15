@@ -1,9 +1,8 @@
 package com.seyone22.expensetracker.ui.screen.operations.account
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -50,42 +49,46 @@ fun AccountDetailScreen(
             selectedActivity = AccountDetailDestination.route,
             navController = navController,
             hasNavigation = true,
-            dropdownOptions = listOf(
-                "Edit" to { navController.navigate("Edit Account") },
+            dropdownOptions = listOf("Edit" to { navController.navigate("Edit Account") },
                 "Delete" to { navController.navigate("Delete Account") },
-                "Make Favourite" to { }
-            )
+                "Make Favourite" to { })
         )
     }) {
-        Column(
+        LazyColumn(
             modifier = modifier
                 .padding(it)
-                .padding(16.dp, 0.dp)
+                .padding(16.dp, 0.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AccountHistoryGraph(
-                modifier = modifier,
-                accountDetailUiState = accountDetailUiState,
-            )
+            item {
+                AccountHistoryGraph(
+                    modifier = modifier,
+                    accountDetailUiState = accountDetailUiState,
+                )
+            }
 
-            AccountDetailCard(
-                modifier = modifier,
-                accountDetailUiState = accountDetailUiState,
-            )
+            item {
+                AccountDetailCard(
+                    modifier = modifier,
+                    accountDetailUiState = accountDetailUiState,
+                )
+            }
 
-            Spacer(Modifier.height(32.dp))
+            item {
+                // Title text for the transactions area
+                Text(
+                    text = "Recent Transactions",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
 
-            // Title text for the transactions area
-            Text(
-                text = "Recent Transactions",
-                style = MaterialTheme.typography.headlineSmall
-            )
-
-            // List of transactions for this account
-            TransactionList(
-                modifier = modifier,
-                showFilter = false,
-                forAccountId = backStackEntry.toInt()
-            )
+            item {
+                // List of transactions for this account
+                TransactionList(
+                    modifier = modifier, showFilter = false, forAccountId = backStackEntry.toInt()
+                )
+            }
         }
     }
 }
