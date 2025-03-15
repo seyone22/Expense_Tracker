@@ -363,7 +363,7 @@ private fun TransactionItem(
     ListItem(
         headlineContent = {
             Text(
-                text = transaction.payeeName ?: "Transfer -> ${transaction.toAccountId}"
+                text = transaction.payeeName ?: "Transfer -> ${toAccount?.accountName}"
             )
         },
         supportingContent = { Text(text = removeTrPrefix(transaction.categName)) },
