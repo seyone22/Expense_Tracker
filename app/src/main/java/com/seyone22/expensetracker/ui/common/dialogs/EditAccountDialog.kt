@@ -27,7 +27,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.ui.screen.operations.account.AccountDetails
-import com.seyone22.expensetracker.ui.screen.operations.account.AccountEntryForm
+import com.seyone22.expensetracker.ui.screen.operations.account.composables.AccountEntryForm
 import com.seyone22.expensetracker.ui.screen.operations.account.toAccountDetails
 
 @SuppressLint("UnrememberedMutableState")
