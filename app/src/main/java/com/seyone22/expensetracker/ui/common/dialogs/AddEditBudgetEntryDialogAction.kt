@@ -1,13 +1,15 @@
 package com.seyone22.expensetracker.ui.common.dialogs
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,16 +43,27 @@ class AddEditBudgetEntryDialogAction(
 
     override val content: @Composable () -> Unit = {
         Log.d("TAG", ": $existingEntry")
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
 
             // Type Picker (Expense / Income)
-            TypePicker(
-                selectedType = _selectedType,
-                onTypeSelected = { _selectedType = it },
+            SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
+            ) {
+                SegmentedButton(
+                    selected = _selectedType == "Expense",
+                    onClick = { _selectedType = "Expense" },
+                    label = { Text("Expense") },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                )
+                SegmentedButton(
+                    selected = _selectedType == "Income",
+                    onClick = { _selectedType = "Income" },
+                    label = { Text("Income") },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                )
+            }
 
             // Frequency Picker
             FrequencyPicker(
@@ -58,8 +71,6 @@ class AddEditBudgetEntryDialogAction(
                 onFrequencySelected = { _selectedFrequency = it },
                 modifier = Modifier.fillMaxWidth()
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             // Amount Input Field
             OutlinedTextField(
@@ -69,8 +80,6 @@ class AddEditBudgetEntryDialogAction(
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             // Notes Input Field
             OutlinedTextField(
@@ -98,9 +107,7 @@ class AddEditBudgetEntryDialogAction(
             budgetYearId = existingEntry?.budgetYearId
                 ?: thisBudgetYearId, // Adjust based on your actual data model
             categId = thisCategId, // Adjust based on your actual data model
-            period = _selectedFrequency,
-            amount = amountValue,
-            notes = _notes
+            period = _selectedFrequency, amount = amountValue, notes = _notes
         )
 
         if (existingEntry == null) {
@@ -114,22 +121,6 @@ class AddEditBudgetEntryDialogAction(
         // Handle cancel action if needed
     }
 }
-
-@Composable
-fun TypePicker(
-    selectedType: String, onTypeSelected: (String) -> Unit, modifier: Modifier = Modifier
-) {
-    val types = listOf("Expense", "Income")
-
-    DropdownSelector(
-        items = types,
-        selectedItem = selectedType,
-        onItemSelected = { sel -> onTypeSelected(sel) },
-        label = "Select Type",
-        modifier = modifier
-    )
-}
-
 
 @Composable
 fun FrequencyPicker(

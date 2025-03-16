@@ -63,7 +63,6 @@ fun HomeScreen(
     val isUsed by sharedViewModel.isUsedFlow.collectAsState(initial = true)
 
     val currentDialog by viewModel.currentDialog
-
     currentDialog?.let {
         GenericDialog(dialogAction = it, onDismiss = { viewModel.dismissDialog() })
     }

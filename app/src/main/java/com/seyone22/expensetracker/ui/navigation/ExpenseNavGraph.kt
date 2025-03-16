@@ -111,9 +111,7 @@ fun ExpenseNavHost(
         }
         // Routes to budget destinations
         composable(route = BudgetsDestination.route) {
-            BudgetScreen(
-                navigateToScreen = { screen -> navController.navigate(screen) }
-            )
+            BudgetScreen(navigateToScreen = { screen -> navController.navigate(screen) })
         }
         composable(
             route = BudgetDetailDestination.route + "/{budgetYearId}",
@@ -138,7 +136,7 @@ fun ExpenseNavHost(
         }
 
         // Routes to pages for CRUD operations
-        composable(route = AccountEntryDestination.route, enterTransition = {
+        composable(route = AccountEntryDestination.route + "/{accountId}", enterTransition = {
             slideInHorizontally(animationSpec = tween(500),
                 initialOffsetX = { fullWidth -> fullWidth } // Slide in from the right
             ) + fadeIn(animationSpec = tween(500))
@@ -146,11 +144,16 @@ fun ExpenseNavHost(
             slideOutHorizontally(animationSpec = tween(500),
                 targetOffsetX = { fullWidth -> fullWidth } // Slide out to the right
             ) + fadeOut(animationSpec = tween(500))
-        }) {
+        }) { backStackEntry ->
+            val accountId: String? =
+                if (backStackEntry.arguments?.getString("accountId") == "") null else backStackEntry.arguments?.getString(
+                    "accountId"
+                )
             AccountEntryScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() },
                 navigateToScreen = { screen -> navController.navigate(screen) },
+                accountId = accountId
             )
         }
         composable(
