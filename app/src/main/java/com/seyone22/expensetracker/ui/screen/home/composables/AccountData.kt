@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.seyone22.expensetracker.ui.screen.home.HomeUiState
+import com.seyone22.expensetracker.ui.screen.home.allAccounts.AllAccountsDestination
 
 @Composable
 fun AccountData(
@@ -36,7 +37,7 @@ fun AccountData(
             )
             TextButton(
                 onClick = {
-                    navigateToScreen("Add Account")
+                    navigateToScreen(AllAccountsDestination.route)
                 },
             ) {
                 Text(

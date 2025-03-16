@@ -128,7 +128,7 @@ fun QuickActions(
                 .clickable {
                     when (actions[index].title) {
                         "Account" -> {
-                            navigateToScreen(actions[index].destination.route)
+                            navigateToScreen(actions[index].destination.route + "/${""}")
                         }
 
                         "Deposit", "Withdrawal", "Transfer" -> {

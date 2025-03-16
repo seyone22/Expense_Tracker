@@ -32,6 +32,7 @@ import com.seyone22.expensetracker.utils.TransactionType
 import com.seyone22.expensetracker.utils.convertBudgetValue
 import com.seyone22.expensetracker.utils.formatCurrency
 import com.seyone22.expensetracker.utils.getValueWithType
+import kotlin.math.absoluteValue
 
 @Composable
 fun BudgetItemCard(
@@ -45,7 +46,10 @@ fun BudgetItemCard(
 ) {
     val actualValueForPeriod = convertBudgetValue(budgetItem, targetPeriod)
     val actualValue = getValueWithType(actualValueForPeriod)
-    val ratio = expenseForCategory.coerceAtLeast(1.0) / (actualValue?.first ?: 1.0)
+    val ratio =
+        if (expenseForCategory == 0.0 || actualValue?.first == 0.0) 0.0 else (expenseForCategory.absoluteValue.coerceAtLeast(
+            1.0
+        ) / (actualValue?.first?.absoluteValue ?: 1.0))
 
     Card(
         modifier = modifier
@@ -70,7 +74,7 @@ fun BudgetItemCard(
                 )
                 Text(
                     "${
-                        (ratio * 100).coerceIn(0.0..1000.0).toInt()
+                        (ratio * 100).coerceIn(0.0..999.0).toInt()
                     }%"
                 )
             }

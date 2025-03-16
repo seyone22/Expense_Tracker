@@ -17,6 +17,9 @@ class OfflineAccountsRepository(private val accountDao: AccountDao) : AccountsRe
         accountDao.getAccountBalance(accountId, date)
 
     override suspend fun insertAccount(account: Account) = accountDao.insert(account)
-    override suspend fun deleteAccount(account: Account) = accountDao.delete(account)
+    override suspend fun deleteAccount(account: Account) {
+        accountDao.deleteTransactionsForAccount(account.accountId)
+        accountDao.delete(account)
+    }
     override suspend fun updateAccount(account: Account) = accountDao.update(account)
 }

@@ -167,7 +167,7 @@ private fun IncomeExpenseSummary(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 FormattedCurrency(
-                    value = estimatedIncome - estimatedExpenses,
+                    value = estimatedIncome + estimatedExpenses, //expenses is negative!!
                     currency = currencyFormat ?: CurrencyFormat(),
                     style = TextStyle(
                         fontSize = 28.sp
