@@ -55,6 +55,7 @@ fun AccountEntryForm(
     modifier: Modifier = Modifier,
     accountDetails: AccountDetails,
     onValueChange: (AccountDetails) -> Unit,
+    accountId: String?,
 ) {
     var accountTypeExpanded by remember { mutableStateOf(false) }
     var baseCurrencyExpanded by remember { mutableStateOf(false) }
@@ -72,6 +73,9 @@ fun AccountEntryForm(
 
     LaunchedEffect(baseCurrencyId) {
         onValueChange(accountDetails.copy(currencyId = baseCurrencyId.toString()))
+        if (accountId != null) {
+            viewModel.setAccount(accountId)
+        }
     }
 
     Column(

@@ -42,6 +42,7 @@ fun AccountEntryScreen(
     canNavigateBack: Boolean = true,
     navigateToScreen: (screen: String) -> Unit,
     viewModel: AccountEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    accountId: String?,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -65,14 +66,18 @@ fun AccountEntryScreen(
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        viewModel.saveAccount()
+                        if (accountId == null) {
+                            viewModel.saveAccount()
+                        } else {
+                            viewModel.editAccount()
+                        }
                         navigateToScreen(HomeDestination.route)
                     }
                 },
                 modifier = modifier.padding(0.dp, 0.dp, 8.dp, 0.dp),
                 enabled = viewModel.accountUiState.isEntryValid
             ) {
-                Text(text = "Create")
+                Text(text = if (accountId == null) "Create" else "Update")
             }
         })
 
@@ -90,6 +95,7 @@ fun AccountEntryScreen(
                     accountDetails = viewModel.accountUiState.accountDetails,
                     onValueChange = viewModel::updateUiState,
                     modifier = Modifier,
+                    accountId = accountId
                 )
             }
         }
