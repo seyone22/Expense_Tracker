@@ -15,7 +15,7 @@ object AllAccountsDestination : NavigationDestination {
 }
 
 @Composable
-fun AllAccounts(
+fun AllAccountScreen(
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
     navigateToScreen: (screen: String) -> Unit,

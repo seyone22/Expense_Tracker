@@ -18,11 +18,14 @@ import androidx.navigation.NavController
 import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.ExpenseTopBar
+import com.seyone22.expensetracker.ui.common.dialogs.DeleteItemDialogAction
+import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.operations.account.composables.AccountDetailCard
 import com.seyone22.expensetracker.ui.screen.operations.account.composables.AccountHistoryGraph
 import com.seyone22.expensetracker.ui.screen.transactions.composables.TransactionList
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 object AccountDetailDestination : NavigationDestination {
     override val route = "Account Details"
@@ -41,6 +44,11 @@ fun AccountDetailScreen(
     // Viewmodel and UI States
     val accountDetailUiState by viewModel.accountDetailUiState.collectAsState()
 
+    val currentDialog by viewModel.currentDialog
+    currentDialog?.let {
+        GenericDialog(dialogAction = it, onDismiss = { viewModel.dismissDialog() })
+    }
+
     LaunchedEffect(Unit, accountDetailUiState.account.currencyId) {
         viewModel.setAccountId(backStackEntry.toInt())
     }
@@ -49,8 +57,21 @@ fun AccountDetailScreen(
             selectedActivity = AccountDetailDestination.route,
             navController = navController,
             hasNavigation = true,
-            dropdownOptions = listOf("Edit" to { navController.navigate("Edit Account") },
-                "Delete" to { navController.navigate("Delete Account") },
+            dropdownOptions = listOf(
+                "Edit" to { navController.navigate(AccountEntryDestination.route + "/$backStackEntry") },
+                "Delete" to {
+                    viewModel.showDialog(
+                        DeleteItemDialogAction(
+                            onAdd = {
+                                coroutineScope.launch {
+                                    viewModel.deleteAccount(accountDetailUiState.account)
+                                    navController.popBackStack()
+                                }
+                            },
+                            itemName = accountDetailUiState.account.accountName
+                        )
+                    )
+                },
                 "Make Favourite" to { })
         )
     }) {
