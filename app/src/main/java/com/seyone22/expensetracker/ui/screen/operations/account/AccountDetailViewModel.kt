@@ -5,7 +5,6 @@ import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
-import com.seyone22.expensetracker.data.model.toTransaction
 import com.seyone22.expensetracker.data.repository.account.AccountsRepository
 import com.seyone22.expensetracker.data.repository.transaction.BalanceResult
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
@@ -48,8 +47,9 @@ class AccountDetailViewModel(
             BalanceResult(accountId, balanceForDate?.balance ?: 0.0, date)
         }
 
-        val lastBalance = (balanceHistoryForLast7Days.lastOrNull()?.balance
-            ?.plus(account?.initialBalance ?: 0.0)) ?: 0.0
+        val lastBalance =
+            (balanceHistoryForLast7Days.lastOrNull()?.balance?.plus(account?.initialBalance ?: 0.0))
+                ?: 0.0
 
         _accountDetailUiState.update {
             it.copy(
@@ -67,7 +67,7 @@ class AccountDetailViewModel(
                 ?: emptyList()
 
         _accountDetailUiState.update { it.copy(transactions = transactions) }
-            Log.d("DEBUG", "getTransactions: AccountId is $accountId")
+        Log.d("DEBUG", "getTransactions: AccountId is $accountId")
     }
 
     suspend fun deleteTransaction(transaction: Transaction): Boolean {
@@ -104,14 +104,9 @@ class AccountDetailViewModel(
         }
     }
 
-    suspend fun deleteAccount(
-        account: Account, transactions: List<TransactionWithDetails>
-    ): Boolean {
+    suspend fun deleteAccount(account: Account): Boolean {
         return try {
             accountsRepository.deleteAccount(account)
-            transactions.forEach {
-                transactionsRepository.deleteTransaction(it.toTransaction())
-            }
             true
         } catch (e: Exception) {
             e.printStackTrace()

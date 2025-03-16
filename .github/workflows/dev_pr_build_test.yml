@@ -1,8 +1,6 @@
-name: Dev Test
+name: Dev PR Build Test
 
 on:
-  push:
-    branches: [ "dev" ] # Trigger on pushes to the 'dev' branch
   pull_request:
     branches: [ "dev" ] # Trigger on pull requests to the 'dev' branch
   workflow_dispatch: # Allow manual triggering of the workflow

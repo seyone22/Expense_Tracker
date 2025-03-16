@@ -65,4 +65,7 @@ interface AccountDao {
     """
     )
     fun getAccountBalance(accountId: Int, date: String? = null): Flow<BalanceResult>
+
+    @Query("DELETE FROM CHECKINGACCOUNT_V1 WHERE accountId = :accountId")
+    suspend fun deleteTransactionsForAccount(accountId: Int)
 }

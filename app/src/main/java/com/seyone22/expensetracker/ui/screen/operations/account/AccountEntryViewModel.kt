@@ -70,12 +70,28 @@ class AccountEntryViewModel(
         }
     }
 
+    suspend fun editAccount() {
+        if (validateInput()) {
+            accountsRepository.updateAccount(accountUiState.accountDetails.toAccount())
+        }
+    }
+
     private fun validateInput(uiState: AccountDetails = accountUiState.accountDetails): Boolean {
         Log.d("DEBUG", "validateInput: Validation Begins!")
         Log.d("DEBUG", uiState.accountName)
         return with(uiState) {
             accountName.isNotBlank() && (initialDate?.isNotBlank() ?: false)
         }
+    }
+
+    suspend fun setAccount(accountId: String) {
+        accountsRepository.getAccountStream(accountId.toInt())
+            .collect { account ->
+                accountUiState = AccountUiState(
+                    accountDetails = account!!.toAccountDetails(),
+                    isEntryValid = validateInput(account.toAccountDetails())
+                )
+            }
     }
 
     companion object {
