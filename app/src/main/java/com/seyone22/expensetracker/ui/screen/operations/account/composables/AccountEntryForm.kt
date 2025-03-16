@@ -3,12 +3,13 @@ package com.seyone22.expensetracker.ui.screen.operations.account.composables
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -19,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -75,14 +77,15 @@ fun AccountEntryForm(
     Column(
         modifier = modifier
             .focusGroup()
-            .padding(0.dp, 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxWidth(0.75f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         ExposedDropdownMenuBox(expanded = baseCurrencyExpanded,
             onExpandedChange = { baseCurrencyExpanded = !baseCurrencyExpanded }) {
             OutlinedTextField(
                 modifier = Modifier
-                    .padding(0.dp, 8.dp)
+                    .fillMaxWidth()
                     .clickable(enabled = true) { baseCurrencyExpanded = true }
                     .menuAnchor(MenuAnchorType.PrimaryEditable, true),
                 value = (currencyList.currenciesList.find { it.currencyId == accountDetails.currencyId.toInt() })?.currencyName
@@ -110,7 +113,7 @@ fun AccountEntryForm(
             onExpandedChange = { accountTypeExpanded = !accountTypeExpanded }) {
             OutlinedTextField(
                 modifier = Modifier
-                    .padding(0.dp, 8.dp)
+                    .fillMaxWidth()
                     .clickable(enabled = true) { accountTypeExpanded = true }
                     .menuAnchor(MenuAnchorType.PrimaryEditable, true),
                 value = accountDetails.accountType,
@@ -137,7 +140,8 @@ fun AccountEntryForm(
         }
 
         OutlinedTextField(
-            modifier = Modifier.padding(0.dp, 8.dp),
+            modifier = Modifier.fillMaxWidth(),
+
             value = accountDetails.accountName,
             onValueChange = { onValueChange(accountDetails.copy(accountName = it)) },
             label = { Text("Account Name *") },
@@ -146,7 +150,7 @@ fun AccountEntryForm(
         )
 
         OutlinedTextField(
-            modifier = Modifier.padding(0.dp, 8.dp),
+            modifier = Modifier.fillMaxWidth(),
             value = accountDetails.initialBalance.toString(),
             onValueChange = { onValueChange(accountDetails.copy(initialBalance = it)) },
             label = { Text("Initial Balance *") },
@@ -157,7 +161,7 @@ fun AccountEntryForm(
 
         OutlinedTextField(
             modifier = Modifier
-                .padding(0.dp, 8.dp)
+                .fillMaxWidth()
                 .clickable(enabled = true) {
                     openInitialDateDialog = true
                 },
@@ -180,16 +184,17 @@ fun AccountEntryForm(
         )
 
         OutlinedTextField(
-            modifier = Modifier.padding(0.dp, 8.dp),
+            modifier = Modifier.fillMaxWidth(),
             value = accountDetails.notes.toString(),
             onValueChange = { onValueChange(accountDetails.copy(notes = it)) },
             label = { Text("Notes") },
+            singleLine = false,
             keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
         )
 
         if (!showMore) {
             TextButton(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     showMore = !showMore
                 }
@@ -199,8 +204,15 @@ fun AccountEntryForm(
         }
 
         if (showMore) {
+            Text(
+                text = "Other Details",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 32.dp)
+            )
+
+
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 value = accountDetails.accountNum.toString(),
                 onValueChange = { onValueChange(accountDetails.copy(accountNum = it)) },
                 label = { Text("Account Number") },
@@ -209,7 +221,7 @@ fun AccountEntryForm(
                 keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
             )
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 value = accountDetails.heldAt.toString(),
                 onValueChange = { onValueChange(accountDetails.copy(heldAt = it)) },
                 label = { Text("Held At") },
@@ -217,7 +229,7 @@ fun AccountEntryForm(
                 keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
             )
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 value = accountDetails.website.toString(),
                 onValueChange = { onValueChange(accountDetails.copy(website = it)) },
                 label = { Text("Website") },
@@ -225,7 +237,7 @@ fun AccountEntryForm(
                 keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
             )
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 value = accountDetails.contactInfo.toString(),
                 onValueChange = { onValueChange(accountDetails.copy(contactInfo = it)) },
                 label = { Text("Contact Information") },
@@ -234,7 +246,7 @@ fun AccountEntryForm(
             )
 
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 value = accountDetails.accessInfo.toString(),
                 onValueChange = { onValueChange(accountDetails.copy(accessInfo = it)) },
                 label = { Text("Access Information") },
@@ -242,25 +254,33 @@ fun AccountEntryForm(
                 keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
             )
 
-            Text("Statement")
+            Text(
+                text = "Statement",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 32.dp)
+            )
 
             Row(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Checkbox(
+                Text(
+                    text = "Statement Locked",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier
+                        .align(CenterVertically)
+                )
+                Switch(
                     checked = accountDetails.statementLocked.toBoolean(),
                     onCheckedChange = { onValueChange(accountDetails.copy(statementLocked = it.toString())) },
                 )
-                Text(
-                    text = "Statement Locked",
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.align(CenterVertically)
-                )
+
             }
 
             OutlinedTextField(
                 modifier = Modifier
-                    .padding(0.dp, 8.dp)
+                    .fillMaxWidth()
+
                     .clickable(enabled = true) {
                         openStatementDateDialog = true
                     },
@@ -283,7 +303,7 @@ fun AccountEntryForm(
             )
 
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 value = accountDetails.minimumBalance.toString(),
                 onValueChange = { onValueChange(accountDetails.copy(minimumBalance = it)) },
                 label = { Text("Minimum Balance") },
@@ -292,10 +312,14 @@ fun AccountEntryForm(
                 keyboardActions = KeyboardActions(onDone = { focusManager.moveFocus(FocusDirection.Next) })
             )
 
-            Text("Credit")
+            Text(
+                text = "Credit",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 32.dp)
+            )
 
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 value = accountDetails.creditLimit.toString(),
                 onValueChange = { onValueChange(accountDetails.copy(creditLimit = it)) },
                 label = { Text("Credit Limit") },
@@ -305,7 +329,7 @@ fun AccountEntryForm(
 
             )
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 value = accountDetails.interestRate.toString(),
                 onValueChange = { onValueChange(accountDetails.copy(interestRate = it)) },
                 label = { Text("Interest Rate") },
@@ -316,7 +340,8 @@ fun AccountEntryForm(
 
             OutlinedTextField(
                 modifier = Modifier
-                    .padding(0.dp, 8.dp)
+                    .fillMaxWidth()
+
                     .clickable(enabled = true) {
                         openPaymentDueDateDialog = true
                     },
@@ -339,7 +364,7 @@ fun AccountEntryForm(
             )
 
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier.fillMaxWidth(),
                 value = accountDetails.minimumPayment.toString(),
                 onValueChange = { onValueChange(accountDetails.copy(minimumPayment = it)) },
                 label = { Text("Minimum Payment") },
