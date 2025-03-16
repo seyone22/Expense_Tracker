@@ -365,7 +365,7 @@ fun AboutList() {
         }, modifier = Modifier.clickable { })
         ListItem(headlineContent = { Text(text = "Database Version") }, supportingContent = {
             Text(
-                text = "${stringResource(id = R.string.database_version)})"
+                text = stringResource(id = R.string.database_version)
             )
         }, modifier = Modifier.clickable { })
         ListItem(headlineContent = { Text(text = "Check for updates") },
