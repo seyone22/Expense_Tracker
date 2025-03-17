@@ -86,7 +86,7 @@ jobs:
 
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/') && github.repository == 'seyone22/Expense_Tracker'
-        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v2.0.4
+        uses: softprops/action-gh-release@ab50eebb6488051c6788d97fa95232267c6a4e23 # v2.0.4
         with:
           tag_name: ${{ env.VERSION_TAG }}
           name: Expense Tracker ${{ env.VERSION_TAG }}
