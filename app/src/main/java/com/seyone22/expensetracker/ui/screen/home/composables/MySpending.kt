@@ -123,7 +123,7 @@ fun MySpending(
             .padding(top = 16.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.Bottom
+            modifier = Modifier.padding(16.dp),
         ) {
             Column(
                 modifier = Modifier.weight(1f)

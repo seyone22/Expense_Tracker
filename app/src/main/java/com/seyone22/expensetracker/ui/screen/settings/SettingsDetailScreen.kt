@@ -52,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -78,6 +79,7 @@ object SettingsDetailDestination : NavigationDestination {
     override val route = "SettingsDetail"
     override val titleRes = R.string.app_name
     override val routeId = 15
+    override val icon = null
 }
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -347,7 +349,8 @@ fun AboutList() {
     ) {
         Image(
             painter = painterResource(id = R.drawable.logo),
-            contentDescription = "Example image",
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
+            contentDescription = "App Logo",
             modifier = Modifier.size(180.dp)
         )
 

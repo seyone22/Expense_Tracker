@@ -7,7 +7,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.seyone22.expensetracker.ExpenseApplication
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.ui.screen.budget.BudgetViewModel
-import com.seyone22.expensetracker.ui.screen.budget.budgetDetail.BudgetDetailViewModel
+import com.seyone22.expensetracker.ui.screen.budget.panes.BudgetDetailViewModel
 import com.seyone22.expensetracker.ui.screen.entities.EntityViewModel
 import com.seyone22.expensetracker.ui.screen.home.HomeViewModel
 import com.seyone22.expensetracker.ui.screen.onboarding.OnboardingViewModel
@@ -131,6 +131,8 @@ object AppViewModelProvider {
                 expenseApplication().container.metadataRepository,
                 expenseApplication().container.accountsRepository,
                 expenseApplication().container.currenciesRepository,
+                expenseApplication().container.transactionsRepository,
+                expenseApplication().container.billsDepositsRepository,
                 expenseApplication().container.currencyHistoryRepository,
                 expenseApplication().container.categoriesRepository,
                 expenseApplication().container.payeesRepository,

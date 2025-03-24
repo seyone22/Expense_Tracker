@@ -16,12 +16,14 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -147,7 +149,8 @@ fun TransactionEntryForm(
     }
 
     Column(
-        modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Transaction Type (transCode) Dropdown
@@ -210,49 +213,25 @@ fun TransactionEntryForm(
         LazyRow(
             modifier = Modifier.fillMaxWidth()
         ) {
-
-        }
-
-        ExposedDropdownMenuBox(
-            expanded = statusExpanded,
-            onExpandedChange = { statusExpanded = !statusExpanded }) {
-            OutlinedTextField(
-                modifier = Modifier
-                    .clickable(enabled = true) { statusExpanded = true }
-                    .menuAnchor(MenuAnchorType.PrimaryEditable, true)
-                    .fillMaxWidth(),
-                value = transactionDetails.status,
-                readOnly = true,
-                onValueChange = {
-                    onValueChange(
-                        transactionDetails.copy(status = it),
-                        viewModel.transactionUiState.value.billsDepositsDetails,
-                        currentAdvancedAmount
+            TransactionStatus.entries.forEach { transactionStatus ->
+                item {
+                    FilterChip(
+                        selected = transactionDetails.status == transactionStatus.displayName,
+                        leadingIcon = {
+                            if (transactionDetails.status == transactionStatus.displayName) {
+                                Icon(Icons.Filled.Check, "")
+                            }
+                        },
+                        onClick = {
+                            onValueChange(
+                                transactionDetails.copy(status = transactionStatus.displayName),
+                                viewModel.transactionUiState.value.billsDepositsDetails,
+                                currentAdvancedAmount
+                            )
+                        },
+                        label = { Text(transactionStatus.displayName) },
+                        modifier = Modifier.padding(horizontal = 4.dp)
                     )
-                },
-                label = { Text("Transaction Status *") },
-                singleLine = true,
-                keyboardActions = KeyboardActions(onDone = {
-                    focusManager.moveFocus(
-                        FocusDirection.Next
-                    )
-                }),
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusExpanded) },
-            )
-
-            ExposedDropdownMenu(
-                expanded = statusExpanded,
-                onDismissRequest = { statusExpanded = false },
-            ) {
-                enumValues<TransactionStatus>().forEach { transactionStatus ->
-                    DropdownMenuItem(text = { Text(transactionStatus.displayName) }, onClick = {
-                        onValueChange(
-                            transactionDetails.copy(status = transactionStatus.displayName),
-                            viewModel.transactionUiState.value.billsDepositsDetails,
-                            currentAdvancedAmount
-                        )
-                        statusExpanded = false
-                    })
                 }
             }
         }

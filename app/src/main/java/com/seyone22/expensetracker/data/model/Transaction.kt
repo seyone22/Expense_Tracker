@@ -32,11 +32,11 @@ data class Transaction(
 )
 
 enum class TransactionStatus(val displayName: String) {
+    U("Unreconciled"),
     R("Reconciled"),
     V("Void"),
     F("Follow Up"),
     D("Duplicate"),
-    U("Unreconciled")
 }
 
 enum class TransactionCode(val displayName: String) {

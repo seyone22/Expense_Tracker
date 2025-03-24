@@ -38,6 +38,7 @@ object CategoryEntryDestination : NavigationDestination {
     override val route = "EnterCategory"
     override val titleRes = R.string.app_name
     override val routeId = 15
+    override val icon = null
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
