@@ -51,7 +51,7 @@ import java.util.Locale
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditableTransactionForm(
+fun ScheduledTransactionEntryForm(
     modifier: Modifier = Modifier,
     editableTransactionDetails: BillsDepositsDetails,
     onValueChange: (TransactionDetails, BillsDepositsDetails) -> Unit,

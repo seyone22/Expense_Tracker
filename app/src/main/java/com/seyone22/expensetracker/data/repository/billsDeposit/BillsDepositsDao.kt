@@ -33,5 +33,22 @@ interface BillsDepositsDao {
                 "LEFT OUTER JOIN " +
                 "    CATEGORY_V1 ON BILLSDEPOSITS_V1.CATEGID = CATEGORY_V1.categId "
     )
-    fun getAllTransactions(): Flow<List<BillsDepositWithDetails>>
+    fun getAllBillsDeposits(): Flow<List<BillsDepositWithDetails>>
+
+    @Query(
+        "SELECT " +
+                "    BILLSDEPOSITS_V1.*, " +
+                "    PAYEE_V1.payeeName AS payeeName, " +
+                "    CATEGORY_V1.categName AS categName " +
+                "FROM " +
+                "    BILLSDEPOSITS_V1 " +
+                "LEFT OUTER JOIN " +
+                "    PAYEE_V1 ON BILLSDEPOSITS_V1.PAYEEID = PAYEE_V1.payeeId " +
+                "LEFT OUTER JOIN " +
+                "    CATEGORY_V1 ON BILLSDEPOSITS_V1.CATEGID = CATEGORY_V1.categId " +
+                "WHERE " +
+                "    BILLSDEPOSITS_V1.NEXTOCCURRENCEDATE <= CURRENT_TIMESTAMP AND " +
+                "    BILLSDEPOSITS_V1.numOccurrences > 0"
+    )
+    fun getPastDueBillsDeposits(): Flow<List<BillsDepositWithDetails>>
 }

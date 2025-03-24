@@ -39,6 +39,7 @@ object CurrencyEntryDestination : NavigationDestination {
     override val route = "EnterCurrency"
     override val titleRes = R.string.app_name
     override val routeId = 16
+    override val icon = null
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

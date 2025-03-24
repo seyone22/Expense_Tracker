@@ -11,6 +11,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -29,9 +31,12 @@ fun PayeeList(
     list: List<Payee>,
     coroutineScope: CoroutineScope,
     longClicked: (Payee) -> Unit,
-    viewModel: EntityViewModel
+    viewModel: EntityViewModel,
+    onClicked: (Int) -> Unit = {},
+    isSelected: Boolean,
 ) {
     val haptics = LocalHapticFeedback.current
+    val selectedEntity by viewModel.selectedEntity.collectAsState()
 
     LazyColumn {
         items(list, key = { it.payeeId }) {
@@ -49,15 +54,18 @@ fun PayeeList(
                 },
                 trailingContent = {
                     Icon(
-                        Icons.Filled.ChevronRight,
-                        contentDescription = null
+                        Icons.Filled.ChevronRight, contentDescription = null
                     )
                 },
-                modifier = Modifier.combinedClickable(onClick = {}, onLongClick = {
+                modifier = Modifier.combinedClickable(onClick = {
+                    viewModel.setSelectedEntity(it)
+                    onClicked(it.payeeId)
+                }, onLongClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     longClicked(it)
                 }, onLongClickLabel = "  "
-                )
+                ),
+                tonalElevation = if (selectedEntity == it && isSelected) 200.dp else 0.dp
             )
             HorizontalDivider()
 

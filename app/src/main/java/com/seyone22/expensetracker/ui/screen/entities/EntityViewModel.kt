@@ -25,6 +25,8 @@ import com.seyone22.expensetracker.ui.screen.operations.entity.payee.PayeeDetail
 import com.seyone22.expensetracker.ui.screen.operations.entity.payee.PayeeUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -41,6 +43,17 @@ class EntityViewModel(
     private val currencyHistoryRepository: CurrencyHistoryRepository,
     private val tagsRepository: TagsRepository
 ) : ViewModel() {
+    private val _selectedEntity = MutableStateFlow<Any?>(null)
+    val selectedEntity = _selectedEntity.asStateFlow()
+
+    fun setSelectedEntity(entity: Any) {
+        _selectedEntity.value = entity
+    }
+
+    fun getSelectedEntity(): Any {
+        return selectedEntity
+    }
+
 
     // Flows for each type of entity
     private val categoriesParentFlow: Flow<List<Category>> =

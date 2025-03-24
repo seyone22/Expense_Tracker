@@ -1,4 +1,4 @@
-package com.seyone22.expensetracker.ui.screen.budget.budgetDetail
+package com.seyone22.expensetracker.ui.screen.budget.panes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +12,9 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -31,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.Category
@@ -51,13 +55,16 @@ object BudgetDetailDestination : NavigationDestination {
     override val route = "Budget Detail"
     override val titleRes = R.string.app_name
     override val routeId = 88
+    override val icon = null
 }
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun BudgetDetailScreen(
+fun BudgetDetailPane(
     modifier: Modifier = Modifier,
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
     backStackEntry: Int,
-    navigateToScreen: (screen: String) -> Unit,
+    scaffoldNavigator: ThreePaneScaffoldNavigator<Int>,
     navController: NavController,
     viewModel: BudgetDetailViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
@@ -65,6 +72,7 @@ fun BudgetDetailScreen(
     val currentDialog by viewModel.currentDialog
 
     val showOnlyActive = remember { mutableStateOf(false) }
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 
     // Code block to get the current currency's detail.
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -83,16 +91,17 @@ fun BudgetDetailScreen(
     Scaffold(topBar = {
         ExpenseTopBar(
             selectedActivity = "Details for ${budgetDetailUiState.selectedBudgetYear?.budgetYearName}",
+            type = "Left",
+            hasNavBarAction = true,
+            navBarBackAction = { coroutineScope.launch { scaffoldNavigator.navigateBack() } },
+            navController = navController,
+            hasNavigation = (windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT),
             dropdownOptions = listOf(
                 (if (showOnlyActive.value) "Show all Entries" else "Show only Active") to {
                     showOnlyActive.value = !showOnlyActive.value
                 },
                 "Delete Budget" to { /* action for option 1 */ },
-            ),
-            navController = navController,
-            type = "Left",
-            hasNavBarAction = true,
-            hasNavigation = true
+            )
         )
     }) { paddingValues ->
         if (baseCurrency != null) {
@@ -147,8 +156,7 @@ private fun BudgetDetailContent(
 
 @Composable
 private fun IncomeExpenseSummary(
-    currencyFormat: CurrencyFormat?,
-    viewModel: BudgetDetailViewModel
+    currencyFormat: CurrencyFormat?, viewModel: BudgetDetailViewModel
 ) {
     val income by viewModel.incomeStatistics.collectAsState()
     val expenses by viewModel.expenseStatistics.collectAsState()
@@ -160,19 +168,20 @@ private fun IncomeExpenseSummary(
         modifier = Modifier.padding(horizontal = 16.dp),
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(vertical = 24.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 FormattedCurrency(
-                    value = estimatedIncome - estimatedExpenses,
+                    value = estimatedIncome + estimatedExpenses,
                     currency = currencyFormat ?: CurrencyFormat(),
                     style = TextStyle(
                         fontSize = 28.sp
                     ),
-                    modifier = Modifier.padding(top = 32.dp, bottom = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
                 )
                 Text(
                     text = "Left to budget", style = TextStyle(
@@ -285,20 +294,12 @@ private fun ParentCategoryItem(
     })
 
     BudgetCategoryItem(
-        parent,
-        currencyFormat,
-        viewModel,
-        backStackEntry,
-        showOnlyActive = showOnlyActive
+        parent, currencyFormat, viewModel, backStackEntry, showOnlyActive = showOnlyActive
     )
 
     childCategoriesMap[parent.categId]?.forEach { child ->
         BudgetCategoryItem(
-            child,
-            currencyFormat,
-            viewModel,
-            backStackEntry,
-            showOnlyActive = showOnlyActive
+            child, currencyFormat, viewModel, backStackEntry, showOnlyActive = showOnlyActive
         )
     }
 }
@@ -349,23 +350,19 @@ private fun BudgetCategoryItem(
     } else {
         if (!showOnlyActive.value) {
             UnsetBudgetItemCard(modifier = Modifier.padding(
-                bottom = 8.dp,
-                start = 16.dp,
-                end = 16.dp
-            ),
-                category = category,
-                cardClickAction = {
-                    viewModel.showDialog(
-                        AddEditBudgetEntryDialogAction(
-                            onAdd = { budgetEntry ->
-                                coroutineScope.launch {
-                                    viewModel.addBudgetEntry(budgetEntry)
-                                    viewModel.fetchBudgetEntriesFor(backStackEntry)
-                                }
-                            }, categId = category.categId, budgetYearId = backStackEntry
-                        )
+                bottom = 8.dp, start = 16.dp, end = 16.dp
+            ), category = category, cardClickAction = {
+                viewModel.showDialog(
+                    AddEditBudgetEntryDialogAction(
+                        onAdd = { budgetEntry ->
+                            coroutineScope.launch {
+                                viewModel.addBudgetEntry(budgetEntry)
+                                viewModel.fetchBudgetEntriesFor(backStackEntry)
+                            }
+                        }, categId = category.categId, budgetYearId = backStackEntry
                     )
-                })
+                )
+            })
         }
     }
 }

@@ -18,11 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.seyone22.expensetracker.data.model.BudgetYear
-import com.seyone22.expensetracker.ui.screen.budget.budgetDetail.BudgetDetailDestination
+import com.seyone22.expensetracker.ui.screen.budget.panes.BudgetDetailDestination
 
 @Composable
 fun BudgetCard(
-    budgetYear: BudgetYear, isYearBudget: Boolean, navigateToScreen: (screen: String) -> Unit
+    budgetYear: BudgetYear,
+    isYearBudget: Boolean,
+    navigateToScreen: (screen: String) -> Unit,
+    isSelected: Boolean
 ) {
     ListItem(
         modifier = Modifier
@@ -47,7 +50,8 @@ fun BudgetCard(
             Icon(
                 Icons.Filled.ChevronRight, "", modifier = Modifier.size(24.dp)
             )
-        }
+        },
+        tonalElevation = if (isSelected) 200.dp else 0.dp
     )
     if (false) {
         HorizontalDivider()
