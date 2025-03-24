@@ -39,7 +39,7 @@ import com.seyone22.expensetracker.ui.common.askNotificationPermissions
 import com.seyone22.expensetracker.ui.common.scheduleWorkByDayCount
 import com.seyone22.expensetracker.ui.common.scheduleWorkByMonthCount
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
-import com.seyone22.expensetracker.ui.screen.operations.transaction.composables.EditableTransactionForm
+import com.seyone22.expensetracker.ui.screen.operations.transaction.composables.ScheduledTransactionEntryForm
 import com.seyone22.expensetracker.ui.screen.operations.transaction.composables.TransactionEntryForm
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -48,6 +48,7 @@ object TransactionEntryDestination : NavigationDestination {
     override val route = "TransactionEntry"
     override val titleRes = R.string.app_name
     override val routeId = 11
+    override val icon = null
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -164,7 +165,7 @@ fun TransactionEntryScreen(
                         coroutineScope = coroutineScope,
                         edit = false
                     )
-                    EditableTransactionForm(
+                    ScheduledTransactionEntryForm(
                         modifier = Modifier
                             .focusGroup()
                             .padding(48.dp, 0.dp),

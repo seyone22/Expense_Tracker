@@ -1,4 +1,4 @@
-package com.seyone22.expensetracker.ui.screen.budget.budgetDetail
+package com.seyone22.expensetracker.ui.screen.budget.panes
 
 import android.util.Log
 import com.seyone22.expensetracker.BaseViewModel

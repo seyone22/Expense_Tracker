@@ -10,4 +10,5 @@ interface BillsDepositsRepository {
     suspend fun updateBillsDeposit(billsDeposits: BillsDeposits)
 
     fun getAllTransactionsStream(): Flow<List<BillsDepositWithDetails>>
+    fun getPastDueBillsDeposits(): Flow<List<BillsDepositWithDetails>>
 }

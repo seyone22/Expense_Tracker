@@ -17,6 +17,8 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -38,74 +40,69 @@ fun CurrenciesList(
     list: Pair<List<CurrencyFormat>, List<CurrencyHistory>?>,
     coroutineScope: CoroutineScope,
     longClicked: (CurrencyFormat) -> Unit,
-    onClicked: (String) -> Unit,
-    viewModel: EntityViewModel
+    viewModel: EntityViewModel,
+    onClicked: (Int) -> Unit = {},
+    isSelected: Boolean,
 ) {
     val haptics = LocalHapticFeedback.current
+    val selectedEntity by viewModel.selectedEntity.collectAsState()
 
     LazyColumn {
         items(list.first, key = { it.currencyId }) {
             val x = list.second?.find { historyEntry -> historyEntry.currencyId == it.currencyId }
-            ListItem(
-                headlineContent = {
-                    Row {
-                        FormattedCurrency(
-                            value = it.baseConvRate,
-                            currency = CurrencyFormat(),
-                            defaultColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                        if (x != null) {
-                            val difference = x.currValue.minus(it.baseConvRate)
-                            if (x.currValue > it.baseConvRate) {
-                                // Red down triangle and difference in red
-                                Icon(
-                                    imageVector = Icons.Filled.ArrowDownward,
-                                    contentDescription = null,
-                                    tint = Color.Red,
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
-                                Text(
-                                    text = String.format("%.2f", difference),
-                                    color = Color.Red,
-                                    fontSize = 16.sp,
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
-                            } else if (x.currValue < it.baseConvRate) {
-                                // Green up triangle and difference in green
-                                Icon(
-                                    imageVector = Icons.Filled.ArrowUpward,
-                                    contentDescription = null,
-                                    tint = Color.Green,
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
-                                Text(
-                                    text = String.format("%.2f", -difference),
-                                    color = Color.Green,
-                                    fontSize = 16.sp,
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
-                            }
-                            // If the values are the same (to 2 decimal places), nothing is shown
-                        }
-                    }
-                },
-                overlineContent = { Text(removeTrPrefix(it.currencyName)) },
-                leadingContent = {
-                    Text(
-                        text = it.currency_symbol,
-                        modifier = Modifier.requiredWidth(48.dp)
+            ListItem(headlineContent = {
+                Row {
+                    FormattedCurrency(
+                        value = it.baseConvRate,
+                        currency = CurrencyFormat(),
+                        defaultColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
-                },
-                modifier = Modifier.combinedClickable(
-                    onClick = {
-                        onClicked(it.currency_symbol)
-                    },
-                    onLongClick = {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        longClicked(it)
-                    },
-                    onLongClickLabel = "  "
+                    if (x != null) {
+                        val difference = x.currValue.minus(it.baseConvRate)
+                        if (x.currValue > it.baseConvRate) {
+                            // Red down triangle and difference in red
+                            Icon(
+                                imageVector = Icons.Filled.ArrowDownward,
+                                contentDescription = null,
+                                tint = Color.Red,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
+                            Text(
+                                text = String.format("%.2f", difference),
+                                color = Color.Red,
+                                fontSize = 16.sp,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
+                        } else if (x.currValue < it.baseConvRate) {
+                            // Green up triangle and difference in green
+                            Icon(
+                                imageVector = Icons.Filled.ArrowUpward,
+                                contentDescription = null,
+                                tint = Color.Green,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
+                            Text(
+                                text = String.format("%.2f", -difference),
+                                color = Color.Green,
+                                fontSize = 16.sp,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
+                        }
+                        // If the values are the same (to 2 decimal places), nothing is shown
+                    }
+                }
+            }, overlineContent = { Text(removeTrPrefix(it.currencyName)) }, leadingContent = {
+                Text(
+                    text = it.currency_symbol, modifier = Modifier.requiredWidth(48.dp)
                 )
+            }, modifier = Modifier.combinedClickable(onClick = {
+                viewModel.setSelectedEntity(it)
+                onClicked(it.currencyId)
+            }, onLongClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                longClicked(it)
+            }, onLongClickLabel = "  "
+            ), tonalElevation = if (selectedEntity == it && isSelected) 200.dp else 0.dp
             )
             HorizontalDivider()
         }

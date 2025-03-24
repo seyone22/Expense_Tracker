@@ -49,6 +49,7 @@ object OnboardingDestination : NavigationDestination {
     override val route = "Onboarding"
     override val titleRes = R.string.app_name
     override val routeId = 0
+    override val icon = null
 }
 
 @Composable

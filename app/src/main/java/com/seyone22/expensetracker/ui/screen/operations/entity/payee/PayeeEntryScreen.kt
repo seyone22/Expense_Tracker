@@ -45,6 +45,7 @@ object PayeeEntryDestination : NavigationDestination {
     override val route = "EnterPayee"
     override val titleRes = R.string.app_name
     override val routeId = 17
+    override val icon = null
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

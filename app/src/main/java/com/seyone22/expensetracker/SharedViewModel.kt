@@ -7,18 +7,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.seyone22.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
 import com.seyone22.expensetracker.data.model.Account
+import com.seyone22.expensetracker.data.model.BillsDepositWithDetails
+import com.seyone22.expensetracker.data.model.BillsDeposits
 import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Metadata
 import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.Tag
+import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.repository.account.AccountsRepository
+import com.seyone22.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.seyone22.expensetracker.data.repository.currencyHistory.CurrencyHistoryRepository
 import com.seyone22.expensetracker.data.repository.metadata.MetadataRepository
 import com.seyone22.expensetracker.data.repository.payee.PayeesRepository
 import com.seyone22.expensetracker.data.repository.tag.TagsRepository
+import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
 import com.seyone22.expensetracker.utils.CryptoManager
 import com.seyone22.expensetracker.utils.SnackbarManager
 import com.seyone22.expensetracker.utils.updateCurrencyFormatsAndHistory
@@ -37,6 +42,8 @@ class SharedViewModel(
     private val metadataRepository: MetadataRepository,
     private val accountsRepository: AccountsRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository,
+    private val transactionsRepository: TransactionsRepository,
+    private val billsDepositsRepository: BillsDepositsRepository,
     private val currencyHistoryRepository: CurrencyHistoryRepository,
     private val categoriesRepository: CategoriesRepository,
     private val payeesRepository: PayeesRepository,
@@ -45,6 +52,8 @@ class SharedViewModel(
     val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
     val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllPayeesStream()
     val tagsFlow: Flow<List<Tag>> = tagsRepository.getAllTagsStream()
+    val pastDueBillDepositsFlow: Flow<List<BillsDepositWithDetails>> =
+        billsDepositsRepository.getPastDueBillsDeposits()
     val currenciesFlow: Flow<List<CurrencyFormat>> =
         currencyFormatsRepository.getAllCurrencyFormatsStream()
     val accountsFlow: Flow<List<Account>> =
@@ -83,6 +92,14 @@ class SharedViewModel(
     suspend fun getCurrencyById(currencyId: Int): CurrencyFormat? {
         val stream = currencyFormatsRepository.getCurrencyFormatStream(currencyId)
         return stream.firstOrNull()
+    }
+
+    suspend fun insertTransaction(transaction: Transaction) {
+        transactionsRepository.insertTransaction(transaction)
+    }
+
+    suspend fun insertBillsDeposit(billsDeposit: BillsDeposits) {
+        billsDepositsRepository.insertBillsDeposit(billsDeposit)
     }
 
     fun saveSecureScreenSetting(context: Context?, isSecure: Boolean) {

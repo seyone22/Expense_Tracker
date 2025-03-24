@@ -2,11 +2,9 @@
 
 ![GitHub License](https://img.shields.io/github/license/seyone22/Expense_Tracker)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/seyone22/Expense_Tracker)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/seyone22/Expense_Tracker/dev_test.yml?label=build%3A%20Dev)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/seyone22/Expense_Tracker/build_push.yml?label=build%3A%20Master)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/seyone22/Expense_Tracker/dev_pr_build_test.yml?label=build%3A%20Dev)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/seyone22/Expense_Tracker/build_and_release_signed_apk.yml?label=Release)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/eb10603b1a9b4a9483c099a5767da56d)](https://app.codacy.com/gh/seyone22/Expense_Tracker/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-
-
 
 Expense Tracker is a personal finance application for Android, designed to help users manage their
 expenses efficiently. It draws inspiration from the popular Money Manager EX project but offers a
@@ -40,6 +38,9 @@ Expense Tracker currently offers the following features:
 <div style="display: flex; flex-wrap: wrap; justify-content: center;">
     <img src="assets/Screenshot_reports.png" alt="Settings" width="200" style="margin: 10px;">
     <img src="assets/Screenshot_20240212_120830.png" alt="Payees" width="200" style="margin: 10px;">
+</div>
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <img src="assets/tablet_ui.png" alt="Tablet UI" width="400" style="margin: 10px;">
 </div>
 
 ## Installation

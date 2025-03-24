@@ -32,11 +32,14 @@ import com.patrykandpatrick.vico.compose.common.shape.markerCorneredShape
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.shape.Corner
 import com.seyone22.expensetracker.ui.screen.operations.account.AccountDetailUiState
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun AccountHistoryGraph(
@@ -93,7 +96,7 @@ fun AccountHistoryGraph(
                 ),
                 startAxis = VerticalAxis.rememberStart(),
                 bottomAxis = HorizontalAxis.rememberBottom(
-
+                    valueFormatter = bottomAxisValueFormatter
                 ), marker = rememberDefaultCartesianMarker(
                     label = rememberTextComponent(
                         color = MaterialTheme.colorScheme.onSurface,
@@ -112,3 +115,20 @@ fun AccountHistoryGraph(
             )
     }
 }
+
+
+private val bottomAxisValueFormatter = CartesianValueFormatter { _, x, _ ->
+    try {
+        // Get today's date
+        val today = LocalDate.now()
+
+        // Calculate the date by subtracting x days from today
+        val date = today.minusDays((6 - x).toLong())
+
+        // Format the date as MM/dd
+        date.format(DateTimeFormatter.ofPattern("MM/dd"))
+    } catch (e: Exception) {
+        "" // Fallback in case of errors
+    }
+}
+

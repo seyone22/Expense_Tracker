@@ -38,6 +38,7 @@ object TransactionsDestination : NavigationDestination {
     override val route = "Transactions"
     override val titleRes = R.string.app_name
     override val routeId = 3
+    override val icon = null
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,9 +60,9 @@ fun TransactionsScreen(
         ExpenseTopBar(
             selectedActivity = TransactionsDestination.route,
             type = "Left",
+            hasNavBarAction = false,
             navController = navController,
-            hasNavigation = true,
-            hasNavBarAction = false
+            hasNavigation = true
         )
     }) {
         Column(
