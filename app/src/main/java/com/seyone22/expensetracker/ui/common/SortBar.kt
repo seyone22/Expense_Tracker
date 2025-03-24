@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,52 +34,50 @@ import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionStatus
 import com.seyone22.expensetracker.ui.AppViewModelProvider
+import com.seyone22.expensetracker.ui.screen.transactions.TransactionsViewModel
+import com.seyone22.expensetracker.ui.screen.transactions.composables.TransactionFilters
 import kotlinx.coroutines.flow.firstOrNull
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SortBar(
     modifier: Modifier = Modifier,
-    periodFilterAction: (FilterOption?) -> Unit,
-    typeFilterAction: (TransactionCode?) -> Unit,
-    statusFilterAction: (TransactionStatus?) -> Unit,
-    accountFilterAction: (Account?) -> Unit,
-    payeeFilterAction: (Payee?) -> Unit,
-    categoryFilterAction: (Category?) -> Unit,
-    sortAction: (SortOption) -> Unit
-) {
+    viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+
+    ) {
     // Code block to get a list of accounts.
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
     var accountsList = emptyList<Account>()
     var payeesList = emptyList<Payee>()
     var categoriesList = emptyList<Category>()
 
-    LaunchedEffect(sharedViewModel) {
+    LaunchedEffect(Unit) {
         accountsList = sharedViewModel.accountsFlow.firstOrNull()!!
         payeesList = sharedViewModel.payeesFlow.firstOrNull()!!
         categoriesList = sharedViewModel.categoriesFlow.firstOrNull()!!
     }
 
+    val filters by viewModel.filters.collectAsState()
+    val sortOption by viewModel.sortOption.collectAsState()
+
+    // Dropdown expansion states
     var timePeriodExpanded by remember { mutableStateOf(false) }
-    var selectedTimePeriodFilter by remember { mutableStateOf<FilterOption?>(null) }
-
     var typeExpanded by remember { mutableStateOf(false) }
-    var selectedTypeFilter by remember { mutableStateOf<TransactionCode?>(null) }
-
     var statusExpanded by remember { mutableStateOf(false) }
-    var selectedStatusFilter by remember { mutableStateOf<TransactionStatus?>(null) }
-
     var accountExpanded by remember { mutableStateOf(false) }
-    var selectedAccountFilter by remember { mutableStateOf<Account?>(null) }
-
     var payeeExpanded by remember { mutableStateOf(false) }
-    var selectedPayeeFilter by remember { mutableStateOf<Payee?>(null) }
-
     var categoryExpanded by remember { mutableStateOf(false) }
-    var selectedCategoryFilter by remember { mutableStateOf<Category?>(null) }
 
     var sortExpanded by remember { mutableStateOf(false) }
-    var selectedSort by remember { mutableStateOf(SortOption.default) }
+
+    fun onFilterChange(newFilters: TransactionFilters) {
+        viewModel.setFilters(newFilters)
+    }
+
+    // Sort options UI
+    fun onSortChange(newSortOption: SortOption) {
+        viewModel.setSortOption(newSortOption)
+    }
 
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
@@ -90,14 +89,14 @@ fun SortBar(
             // TextButton with an icon
             FilterChip(onClick = {
                 timePeriodExpanded = true
-            }, selected = selectedTimePeriodFilter != null, label = {
-                if (selectedTimePeriodFilter != null) {
-                    Text(selectedTimePeriodFilter!!.displayName)
+            }, selected = filters.timeFilter != null, label = {
+                if (filters.timeFilter != null) {
+                    Text(filters.timeFilter!!.displayName)
                 } else {
                     Text("Time Period")
                 }
             }, trailingIcon = {
-                if (selectedTimePeriodFilter == null) {
+                if (filters.timeFilter == null) {
                     Icon(
                         imageVector = if (typeExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
                         contentDescription = "Sort"
@@ -106,8 +105,7 @@ fun SortBar(
                     Icon(imageVector = Icons.Default.Close,
                         contentDescription = "Sort",
                         modifier = Modifier.clickable {
-                            selectedTimePeriodFilter = null
-                            periodFilterAction(selectedTimePeriodFilter)
+                            onFilterChange(filters.copy(timeFilter = null))
                         })
                 }
             }, modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
@@ -119,12 +117,11 @@ fun SortBar(
                 onDismissRequest = { timePeriodExpanded = false },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             ) {
-                FilterOption.entries.forEachIndexed { index, filterOption ->
+                TimeRangeFilter.entries.forEachIndexed { index, filterOption ->
                     DropdownMenuItem(onClick = {
-                        selectedTimePeriodFilter = filterOption
                         timePeriodExpanded = false
                         // Perform Sort action
-                        periodFilterAction(filterOption)
+                        onFilterChange(filters.copy(timeFilter = filterOption))
                     }, text = { Text(text = filterOption.displayName) })
                 }
             }
@@ -139,14 +136,14 @@ fun SortBar(
             // TextButton with an icon
             FilterChip(onClick = {
                 typeExpanded = true
-            }, selected = (selectedTypeFilter != null), label = {
-                if (selectedTypeFilter != null) {
-                    Text(selectedTypeFilter!!.displayName)
+            }, selected = (filters.typeFilter != null), label = {
+                if (filters.typeFilter != null) {
+                    Text(filters.typeFilter!!.displayName)
                 } else {
                     Text("Type")
                 }
             }, trailingIcon = {
-                if (selectedTypeFilter == null) {
+                if (filters.typeFilter == null) {
                     Icon(
                         imageVector = if (typeExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
                         contentDescription = "Sort"
@@ -155,8 +152,7 @@ fun SortBar(
                     Icon(imageVector = Icons.Default.Close,
                         contentDescription = "Sort",
                         modifier = Modifier.clickable {
-                            selectedTypeFilter = null
-                            typeFilterAction(selectedTypeFilter)
+                            onFilterChange(filters.copy(typeFilter = null))
                         })
                 }
             }, modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
@@ -170,9 +166,8 @@ fun SortBar(
             ) {
                 TransactionCode.entries.forEachIndexed { index, transactionCode ->
                     DropdownMenuItem(onClick = {
-                        selectedTypeFilter = transactionCode
                         typeExpanded = false
-                        typeFilterAction(transactionCode)
+                        onFilterChange(filters.copy(typeFilter = transactionCode))
                     }, text = { Text(text = transactionCode.displayName) })
                 }
             }
@@ -186,14 +181,14 @@ fun SortBar(
             // TextButton with an icon
             FilterChip(onClick = {
                 statusExpanded = true
-            }, selected = (selectedStatusFilter != null), label = {
-                if (selectedStatusFilter != null) {
-                    Text(selectedStatusFilter!!.displayName)
+            }, selected = (filters.statusFilter != null), label = {
+                if (filters.statusFilter != null) {
+                    Text(filters.statusFilter!!.displayName)
                 } else {
                     Text("Status")
                 }
             }, trailingIcon = {
-                if (selectedStatusFilter == null) {
+                if (filters.statusFilter == null) {
                     Icon(
                         imageVector = if (statusExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
                         contentDescription = "Sort"
@@ -202,8 +197,7 @@ fun SortBar(
                     Icon(imageVector = Icons.Default.Close,
                         contentDescription = "Sort",
                         modifier = Modifier.clickable {
-                            selectedStatusFilter = null
-                            statusFilterAction(selectedStatusFilter)
+                            onFilterChange(filters.copy(statusFilter = null))
                         })
                 }
             }, modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
@@ -217,10 +211,9 @@ fun SortBar(
             ) {
                 TransactionStatus.entries.forEachIndexed { index, transactionStatus ->
                     DropdownMenuItem(onClick = {
-                        selectedStatusFilter = transactionStatus
                         statusExpanded = false
                         // Perform Sort action
-                        statusFilterAction(transactionStatus)
+                        onFilterChange(filters.copy(statusFilter = transactionStatus))
                     }, text = { Text(text = transactionStatus.displayName) })
                 }
             }
@@ -233,14 +226,14 @@ fun SortBar(
             // TextButton with an icon
             FilterChip(onClick = {
                 accountExpanded = true
-            }, selected = (selectedAccountFilter != null), label = {
-                if (selectedAccountFilter != null) {
-                    Text(selectedAccountFilter!!.accountName)
+            }, selected = (filters.accountFilter != null), label = {
+                if (filters.accountFilter != null) {
+                    Text(filters.accountFilter!!.accountName)
                 } else {
                     Text("Account")
                 }
             }, trailingIcon = {
-                if (selectedAccountFilter == null) {
+                if (filters.accountFilter == null) {
                     Icon(
                         imageVector = if (accountExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
                         contentDescription = "Sort"
@@ -249,8 +242,7 @@ fun SortBar(
                     Icon(imageVector = Icons.Default.Close,
                         contentDescription = "Sort",
                         modifier = Modifier.clickable {
-                            selectedAccountFilter = null
-                            accountFilterAction(selectedAccountFilter)
+                            onFilterChange(filters.copy(accountFilter = null))
                         })
                 }
             }, modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
@@ -264,10 +256,9 @@ fun SortBar(
             ) {
                 accountsList.forEachIndexed { index, account ->
                     DropdownMenuItem(onClick = {
-                        selectedAccountFilter = account
                         accountExpanded = false
                         // Perform Sort action
-                        accountFilterAction(account)
+                        onFilterChange(filters.copy(accountFilter = account))
                     }, text = { Text(text = account.accountName) })
                 }
             }
@@ -280,14 +271,14 @@ fun SortBar(
             // TextButton with an icon
             FilterChip(onClick = {
                 payeeExpanded = true
-            }, selected = (selectedPayeeFilter != null), label = {
-                if (selectedPayeeFilter != null) {
-                    Text(selectedPayeeFilter!!.payeeName)
+            }, selected = (filters.payeeFilter != null), label = {
+                if (filters.payeeFilter != null) {
+                    Text(filters.payeeFilter!!.payeeName)
                 } else {
                     Text("Payee")
                 }
             }, trailingIcon = {
-                if (selectedPayeeFilter == null) {
+                if (filters.payeeFilter == null) {
                     Icon(
                         imageVector = if (payeeExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
                         contentDescription = "Sort"
@@ -296,8 +287,7 @@ fun SortBar(
                     Icon(imageVector = Icons.Default.Close,
                         contentDescription = "Sort",
                         modifier = Modifier.clickable {
-                            selectedPayeeFilter = null
-                            payeeFilterAction(selectedPayeeFilter)
+                            onFilterChange(filters.copy(payeeFilter = null))
                         })
                 }
             }, modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
@@ -311,10 +301,9 @@ fun SortBar(
             ) {
                 payeesList.forEachIndexed { index, payee ->
                     DropdownMenuItem(onClick = {
-                        selectedPayeeFilter = payee
                         payeeExpanded = false
                         // Perform Sort action
-                        payeeFilterAction(payee)
+                        onFilterChange(filters.copy(payeeFilter = payee))
                     }, text = { Text(text = payee.payeeName) })
                 }
             }
@@ -327,14 +316,14 @@ fun SortBar(
             // TextButton with an icon
             FilterChip(onClick = {
                 categoryExpanded = true
-            }, selected = (selectedCategoryFilter != null), label = {
-                if (selectedCategoryFilter != null) {
-                    Text(selectedCategoryFilter!!.categName)
+            }, selected = (filters.categoryFilter != null), label = {
+                if (filters.categoryFilter != null) {
+                    Text(filters.categoryFilter!!.categName)
                 } else {
                     Text("Category")
                 }
             }, trailingIcon = {
-                if (selectedCategoryFilter == null) {
+                if (filters.categoryFilter == null) {
                     Icon(
                         imageVector = if (categoryExpanded) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
                         contentDescription = "Sort"
@@ -343,8 +332,7 @@ fun SortBar(
                     Icon(imageVector = Icons.Default.Close,
                         contentDescription = "Sort",
                         modifier = Modifier.clickable {
-                            selectedCategoryFilter = null
-                            categoryFilterAction(selectedCategoryFilter)
+                            onFilterChange(filters.copy(categoryFilter = null))
                         })
                 }
             }, modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
@@ -358,10 +346,9 @@ fun SortBar(
             ) {
                 categoriesList.forEachIndexed { index, category ->
                     DropdownMenuItem(onClick = {
-                        selectedCategoryFilter = category
                         categoryExpanded = false
                         // Perform Sort action
-                        categoryFilterAction(category)
+                        onFilterChange(filters.copy(categoryFilter = category))
                     }, text = { Text(text = category.categName) })
                 }
             }
@@ -375,11 +362,10 @@ fun SortBar(
             FilterChip(onClick = {
                 sortExpanded = true
             }, selected = true, label = {
-                Text(selectedSort.displayName + " " + selectedSort.order)
+                Text(sortOption.displayName + " " + sortOption.order)
             }, leadingIcon = {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Sort,
-                    contentDescription = "Sort"
+                    imageVector = Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort"
                 )
             }, modifier = Modifier.padding(8.dp, 0.dp, 0.dp, 0.dp)
             )
@@ -393,13 +379,12 @@ fun SortBar(
                 SortOption.options.forEach { option ->
                     DropdownMenuItem(
                         onClick = {
-                            selectedSort = if (selectedSort.key == option.key) {
-                                selectedSort.toggleOrder()
+                            if (sortOption.key == option.key) {
+                                onSortChange(option.toggleOrder())
                             } else {
-                                option
+                                onSortChange(option)
                             }
                             sortExpanded = false
-                            sortAction(selectedSort)
                         },
                         text = { Text(text = option.displayName) },
                     )
@@ -431,7 +416,7 @@ data class SortOption(val key: String, val order: String, val displayName: Strin
     }
 }
 
-enum class FilterOption(val displayName: String) {
+enum class TimeRangeFilter(val displayName: String) {
     CURRENT_MONTH("Current Month"), CURRENT_MONTH_TO_DATE("Current Month to Date"), LAST_MONTH(
         "Last Month"
     ),

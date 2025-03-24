@@ -31,9 +31,12 @@ import java.util.Locale
 fun TagList(
     modifier: Modifier = Modifier,
     coroutineScope: CoroutineScope,
-    viewModel: EntityViewModel
+    viewModel: EntityViewModel,
+    onClicked: (Int) -> Unit = {},
+    isSelected: Boolean,
 ) {
     val haptics = LocalHapticFeedback.current
+    val selectedEntity by viewModel.selectedEntity.collectAsState()
 
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val tagsList by sharedViewModel.tagsFlow.collectAsState(initial = listOf())
@@ -42,27 +45,25 @@ fun TagList(
 
     LazyColumn {
         items(list, key = { it.tagId }) {
-
-            ListItem(headlineContent = { Text(it.tagName) },
-                leadingContent = {
-                    ProfileAvatarWithFallback(
-                        size = 44.dp,
-                        fontSize = 22.sp,
-                        initial = it.tagName[0].toString().uppercase(
-                            Locale.ROOT
-                        ),
-                    )
-                },
-                trailingContent = {
-                    Icon(
-                        Icons.Filled.ChevronRight,
-                        contentDescription = null
-                    )
-                },
-                modifier = Modifier.combinedClickable(onClick = {}, onLongClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                }, onLongClickLabel = "  "
+            ListItem(headlineContent = { Text(it.tagName) }, leadingContent = {
+                ProfileAvatarWithFallback(
+                    size = 44.dp,
+                    fontSize = 22.sp,
+                    initial = it.tagName[0].toString().uppercase(
+                        Locale.ROOT
+                    ),
                 )
+            }, trailingContent = {
+                Icon(
+                    Icons.Filled.ChevronRight, contentDescription = null
+                )
+            }, modifier = Modifier.combinedClickable(onClick = {
+                viewModel.setSelectedEntity(it)
+                onClicked(it.tagId)
+            }, onLongClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            }, onLongClickLabel = "  "
+            ), tonalElevation = if (selectedEntity == it && isSelected) 200.dp else 0.dp
             )
             HorizontalDivider()
 

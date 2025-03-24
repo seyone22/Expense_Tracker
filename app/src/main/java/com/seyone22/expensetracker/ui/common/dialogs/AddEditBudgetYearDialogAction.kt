@@ -8,7 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.seyone22.expensetracker.data.model.BudgetYear
 import com.seyone22.expensetracker.ui.common.inputs.DropdownSelector
 import java.time.LocalDate
@@ -40,10 +41,12 @@ class AddEditBudgetYearDialogAction(
     override val message = null
 
     override val content: @Composable () -> Unit = {
-        Column {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             // Checkbox for "Budget for Month"
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.width(270.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -84,15 +87,13 @@ class AddEditBudgetYearDialogAction(
             }
 
             // Dropdown for Base Budget Selection
-            BaseBudgetDropdown(
-                availableBudgets = availableBudgets,
+            BaseBudgetDropdown(availableBudgets = availableBudgets,
                 selectedBaseBudget = _selectedBaseBudget,
                 onBaseBudgetSelected = {
                     if (it != null) {
                         _selectedBaseBudget = it
                     }
-                }
-            )
+                })
         }
     }
 
@@ -101,9 +102,7 @@ class AddEditBudgetYearDialogAction(
         val month =
             if (_isBudgetForMonthChecked) _budgetMonth.monthValue else null  // Set month only if checked
         onAdd(
-            _budgetYear.year.toString(),
-            month,
-            _selectedBaseBudget
+            _budgetYear.year.toString(), month, _selectedBaseBudget
         )  // Pass year, month (nullable), and base budget
     }
 
@@ -167,14 +166,12 @@ fun BaseBudgetDropdown(
     onBaseBudgetSelected: (BudgetYear?) -> Unit, // Nullable BudgetYear
     modifier: Modifier = Modifier
 ) {
-    DropdownSelector(
-        items = listOf(BudgetYear(-1, "None")) + availableBudgets,
+    DropdownSelector(items = listOf(BudgetYear(-1, "None")) + availableBudgets,
         selectedItem = BudgetYear(-1, "None"),
         onItemSelected = { onBaseBudgetSelected(it) },
         label = "Base Budget on",
         modifier = modifier,
-        itemToString = { it.budgetYearName }
-    )
+        itemToString = { it.budgetYearName })
 }
 
 

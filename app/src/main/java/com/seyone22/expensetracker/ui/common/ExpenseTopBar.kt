@@ -30,8 +30,9 @@ fun ExpenseTopBar(
     hasNavBarAction: Boolean = true,
     navBarAction: () -> Unit = {},
     navController: NavController,
+    navBarBackAction: () -> Unit = { navController.navigateUp() },
     hasNavigation: Boolean = false,
-    dropdownOptions: List<Pair<String, () -> Unit>> = listOf() // Accept a list of options and their corresponding actions
+    dropdownOptions: List<Pair<String, () -> Unit>> = listOf() // Accept a list of options and their corresponding actions){}
 ) {
     val titleString: String = (selectedActivity ?: "Expenses").split("/").first()
 
@@ -43,7 +44,7 @@ fun ExpenseTopBar(
             Text(titleString)
         }, navigationIcon = {
             if (selectedActivity!!.contains(AccountDetailDestination.route)) {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(onClick = navBarBackAction) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Go Back"
@@ -73,7 +74,7 @@ fun ExpenseTopBar(
     } else if (type == "Left") {
         TopAppBar(title = { Text(titleString) }, navigationIcon = {
             if (hasNavigation) {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(onClick = navBarBackAction) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Go Back"

@@ -16,5 +16,8 @@ class OfflineBillsDepositsRepository(private val billsDepositsDao: BillsDeposits
         billsDepositsDao.update(billsDeposits)
 
     override fun getAllTransactionsStream(): Flow<List<BillsDepositWithDetails>> =
-        billsDepositsDao.getAllTransactions()
+        billsDepositsDao.getAllBillsDeposits()
+
+    override fun getPastDueBillsDeposits(): Flow<List<BillsDepositWithDetails>> =
+        billsDepositsDao.getPastDueBillsDeposits()
 }

@@ -31,6 +31,7 @@ import com.seyone22.expensetracker.ui.theme.LocalTheme
 import com.seyone22.expensetracker.utils.BiometricPromptActivityResultContract
 import com.seyone22.expensetracker.utils.CryptoManager
 import com.seyone22.expensetracker.utils.ScreenLockManager
+import com.seyone22.expensetracker.utils.TransactionStartupManager
 import kotlinx.coroutines.flow.collectLatest
 
 @ExperimentalMaterial3WindowSizeClassApi
@@ -38,6 +39,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var sharedViewModel: SharedViewModel
     private lateinit var cryptoManager: CryptoManager // Assuming you have a CryptoManager instance
     private lateinit var screenLockManager: ScreenLockManager
+    private lateinit var transactionStartupManager: TransactionStartupManager
+
 
     // Create an ActivityResultLauncher to launch biometric authentication
     private val biometricAuthLauncher =
@@ -63,6 +66,9 @@ class MainActivity : ComponentActivity() {
 
         // Observe app lifecycle globally
         ProcessLifecycleOwner.get().lifecycle.addObserver(screenLockManager)
+
+        // Check for past due transactions
+        transactionStartupManager = TransactionStartupManager(sharedViewModel)
 
         setContent {
             val windowSize = calculateWindowSizeClass(this)

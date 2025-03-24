@@ -11,16 +11,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -95,6 +98,8 @@ fun TransactionEntryForm(
         GenericDialog(dialogAction = it, onDismiss = { viewModel.dismissDialog() })
     }
 
+    var showMore by remember { mutableStateOf(false) }
+
     var statusExpanded by remember { mutableStateOf(false) }
     var typeExpanded by remember { mutableStateOf(false) }
     var accountExpanded by remember { mutableStateOf(false) }
@@ -144,7 +149,9 @@ fun TransactionEntryForm(
     }
 
     Column(
-        modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Transaction Type (transCode) Dropdown
         SingleChoiceSegmentedButtonRow(
@@ -203,46 +210,28 @@ fun TransactionEntryForm(
         )
 
         // Transaction Status Dropdown
-        ExposedDropdownMenuBox(
-            expanded = statusExpanded,
-            onExpandedChange = { statusExpanded = !statusExpanded }) {
-            OutlinedTextField(
-                modifier = Modifier
-                    .clickable(enabled = true) { statusExpanded = true }
-                    .menuAnchor(MenuAnchorType.PrimaryEditable, true)
-                    .fillMaxWidth(),
-                value = transactionDetails.status,
-                readOnly = true,
-                onValueChange = {
-                    onValueChange(
-                        transactionDetails.copy(status = it),
-                        viewModel.transactionUiState.value.billsDepositsDetails,
-                        currentAdvancedAmount
+        LazyRow(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TransactionStatus.entries.forEach { transactionStatus ->
+                item {
+                    FilterChip(
+                        selected = transactionDetails.status == transactionStatus.displayName,
+                        leadingIcon = {
+                            if (transactionDetails.status == transactionStatus.displayName) {
+                                Icon(Icons.Filled.Check, "")
+                            }
+                        },
+                        onClick = {
+                            onValueChange(
+                                transactionDetails.copy(status = transactionStatus.displayName),
+                                viewModel.transactionUiState.value.billsDepositsDetails,
+                                currentAdvancedAmount
+                            )
+                        },
+                        label = { Text(transactionStatus.displayName) },
+                        modifier = Modifier.padding(horizontal = 4.dp)
                     )
-                },
-                label = { Text("Transaction Status *") },
-                singleLine = true,
-                keyboardActions = KeyboardActions(onDone = {
-                    focusManager.moveFocus(
-                        FocusDirection.Next
-                    )
-                }),
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = statusExpanded) },
-            )
-
-            ExposedDropdownMenu(
-                expanded = statusExpanded,
-                onDismissRequest = { statusExpanded = false },
-            ) {
-                enumValues<TransactionStatus>().forEach { transactionStatus ->
-                    DropdownMenuItem(text = { Text(transactionStatus.displayName) }, onClick = {
-                        onValueChange(
-                            transactionDetails.copy(status = transactionStatus.displayName),
-                            viewModel.transactionUiState.value.billsDepositsDetails,
-                            currentAdvancedAmount
-                        )
-                        statusExpanded = false
-                    })
                 }
             }
         }
@@ -674,46 +663,52 @@ fun TransactionEntryForm(
                     }
                 }*/
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = transactionDetails.transactionNumber,
-            onValueChange = {
-                onValueChange(
-                    transactionDetails.copy(transactionNumber = it),
-                    viewModel.transactionUiState.value.billsDepositsDetails,
-                    currentAdvancedAmount
-                )
-            },
-            label = { Text("Number") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            singleLine = true
-        )
+        if (!showMore) {
+            TextButton(onClick = { showMore = !showMore }) {
+                Text(text = "Show more fields")
+            }
+        } else {
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = transactionDetails.transactionNumber,
+                onValueChange = {
+                    onValueChange(
+                        transactionDetails.copy(transactionNumber = it),
+                        viewModel.transactionUiState.value.billsDepositsDetails,
+                        currentAdvancedAmount
+                    )
+                },
+                label = { Text("Number") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                singleLine = true
+            )
 
-        OutlinedTextField(modifier = Modifier.fillMaxWidth(),
-            value = transactionDetails.notes,
-            onValueChange = {
-                onValueChange(
-                    transactionDetails.copy(notes = it),
-                    viewModel.transactionUiState.value.billsDepositsDetails,
-                    currentAdvancedAmount
-                )
-            },
-            label = { Text("Notes") })
+            OutlinedTextField(modifier = Modifier.fillMaxWidth(),
+                value = transactionDetails.notes,
+                onValueChange = {
+                    onValueChange(
+                        transactionDetails.copy(notes = it),
+                        viewModel.transactionUiState.value.billsDepositsDetails,
+                        currentAdvancedAmount
+                    )
+                },
+                label = { Text("Notes") })
 
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = transactionDetails.color,
-            onValueChange = {
-                onValueChange(
-                    transactionDetails.copy(color = it),
-                    viewModel.transactionUiState.value.billsDepositsDetails,
-                    currentAdvancedAmount
-                )
-            },
-            label = { Text("Color") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-        )
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = transactionDetails.color,
+                onValueChange = {
+                    onValueChange(
+                        transactionDetails.copy(color = it),
+                        viewModel.transactionUiState.value.billsDepositsDetails,
+                        currentAdvancedAmount
+                    )
+                },
+                label = { Text("Color") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+        }
     }
 
     if (openTransactionDateDialog) {
