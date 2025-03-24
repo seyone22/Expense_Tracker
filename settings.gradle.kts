@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "Expense Tracker"
 include(":app")
 include(":expensetracker")
+include(":wear")
