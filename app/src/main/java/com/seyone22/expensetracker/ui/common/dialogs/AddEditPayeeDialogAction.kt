@@ -42,12 +42,12 @@ class AddEditPayeeDialogAction(
         val focusManager = LocalFocusManager.current
 
         Column(
-            modifier = Modifier.padding(16.dp, 0.dp),
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(8.dp, 0.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier,
                 value = payeeSelected.payeeName,
                 onValueChange = {
                     payeeSelected = payeeSelected.copy(payeeName = it)
@@ -62,7 +62,7 @@ class AddEditPayeeDialogAction(
             )
             // We're obviously not including last used category -_-
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier,
                 value = payeeSelected.number,
                 onValueChange = {
                     payeeSelected = payeeSelected.copy(number = it)
@@ -77,7 +77,7 @@ class AddEditPayeeDialogAction(
                 })
             )
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier,
                 value = payeeSelected.website,
                 onValueChange = {
                     payeeSelected = payeeSelected.copy(website = it)
@@ -91,7 +91,7 @@ class AddEditPayeeDialogAction(
                 })
             )
             OutlinedTextField(
-                modifier = Modifier.padding(0.dp, 8.dp),
+                modifier = Modifier,
                 value = payeeSelected.notes,
                 onValueChange = {
                     payeeSelected = payeeSelected.copy(notes = it)
@@ -105,7 +105,7 @@ class AddEditPayeeDialogAction(
                 })
             )
             Row(
-                modifier = Modifier.padding(0.dp, 8.dp)
+                modifier = Modifier
             ) {
                 Checkbox(
                     checked = payeeSelected.active == 1,
