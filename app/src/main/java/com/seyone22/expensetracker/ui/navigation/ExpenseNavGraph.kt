@@ -192,6 +192,7 @@ fun ExpenseNavHost(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() },
                 navigateToScreen = { screen -> navController.navigate(screen) },
+                accountId = ""
             )
         }
         composable(
