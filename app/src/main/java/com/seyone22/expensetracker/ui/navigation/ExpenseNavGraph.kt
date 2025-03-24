@@ -179,7 +179,9 @@ fun ExpenseNavHost(
 
 
         // Routes to pages for CRUD operations
-        composable(route = AccountEntryDestination.route, enterTransition = {
+        composable(route = AccountEntryDestination.route + "/{accountId}",
+            arguments = listOf(navArgument("accountId") { type = NavType.StringType }),
+            enterTransition = {
             slideInHorizontally(animationSpec = tween(500),
                 initialOffsetX = { fullWidth -> fullWidth } // Slide in from the right
             ) + fadeIn(animationSpec = tween(500))
@@ -192,7 +194,9 @@ fun ExpenseNavHost(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() },
                 navigateToScreen = { screen -> navController.navigate(screen) },
-                accountId = ""
+                accountId = if (it.arguments?.getString("accountId") == "") null else it.arguments?.getString(
+                    "accountId"
+                )
             )
         }
         composable(
