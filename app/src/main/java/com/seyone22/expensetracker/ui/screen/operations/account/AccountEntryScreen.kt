@@ -63,6 +63,7 @@ object AccountEntryDestination : NavigationDestination {
     override val route = "EnterAccount"
     override val titleRes = R.string.app_name
     override val routeId = 12
+    override val icon = null
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -28,6 +28,7 @@ object AccountDetailDestination : NavigationDestination {
     override val route = "Account Details"
     override val titleRes = R.string.app_name
     override val routeId = 13
+    override val icon = null
 }
 
 @Composable
