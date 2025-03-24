@@ -54,7 +54,6 @@ android {
 }
 
 dependencies {
-
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
 
@@ -95,6 +94,9 @@ dependencies {
 
     // AndroidX Compose Material3 Adaptive Navigation Suite
     implementation(libs.androidx.material3.adaptive.navigation.suite)
+    implementation("androidx.compose.material3.adaptive:adaptive:1.2.0-alpha01")
+    implementation("androidx.compose.material3.adaptive:adaptive-layout:1.2.0-alpha01")
+    implementation("androidx.compose.material3.adaptive:adaptive-navigation:1.2.0-alpha01")
 
     // AndroidX Room
     implementation(libs.androidx.room.runtime)
