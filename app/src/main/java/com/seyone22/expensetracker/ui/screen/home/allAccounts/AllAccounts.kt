@@ -12,6 +12,7 @@ object AllAccountsDestination : NavigationDestination {
     override val route = "All Accounts"
     override val titleRes = R.string.app_name
     override val routeId = 32
+    override val icon = null
 }
 
 @Composable
