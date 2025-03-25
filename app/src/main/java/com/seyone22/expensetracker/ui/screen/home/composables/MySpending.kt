@@ -175,7 +175,10 @@ fun MySpending(
                             )
                         )
                     ), bottomAxis = HorizontalAxis.rememberBottom(
-                        guideline = null, line = null, valueFormatter = bottomAxisValueFormatter
+                        guideline = null, line = null, valueFormatter = bottomAxisValueFormatter,
+                        label = rememberTextComponent(
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
                     ), marker = rememberDefaultCartesianMarker(
                         label = rememberTextComponent(
                             color = MaterialTheme.colorScheme.onSurface,

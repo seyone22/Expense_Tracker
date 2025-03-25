@@ -441,8 +441,7 @@ fun AppearanceSettingsList(
             ) {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(275.dp)
+                        .height(280.dp)
                         .padding(16.dp),
                     shape = RoundedCornerShape(16.dp),
                 ) {
@@ -454,33 +453,42 @@ fun AppearanceSettingsList(
                         Text(
                             text = "Theme",
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(0.dp, 8.dp)
+                            modifier = Modifier.padding(16.dp, 16.dp)
                         )
-                        Row {
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             RadioButton(enabled = true, selected = (selectedTheme == 0), onClick = {
                                 selectedTheme = 0
                                 coroutineScope.launch { viewModel.setTheme(selectedTheme) }
-                                onToggleDarkTheme(selectedTheme)
                             })
                             Text(text = "Light")
                         }
-                        Row {
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             RadioButton(enabled = true, selected = (selectedTheme == 1), onClick = {
                                 selectedTheme = 1
                                 coroutineScope.launch { viewModel.setTheme(selectedTheme) }
-                                onToggleDarkTheme(selectedTheme)
                             })
                             Text(text = "Dark")
                         }
-                        Row {
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             RadioButton(enabled = true, selected = (selectedTheme == 2), onClick = {
                                 selectedTheme = 2
                                 coroutineScope.launch { viewModel.setTheme(selectedTheme) }
-                                onToggleDarkTheme(selectedTheme)
                             })
                             Text(text = "System Default")
                         }
-                        Row {
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             RadioButton(enabled = true,
                                 selected = (selectedTheme == 3),
                                 onClick = { selectedTheme = 3 })

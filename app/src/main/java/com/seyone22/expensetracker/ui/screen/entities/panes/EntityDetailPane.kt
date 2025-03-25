@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -147,60 +148,76 @@ fun EntityDetailPane(
     }
 
     if (entity != null) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.statusBars),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            ExpenseTopBar(
-                selectedActivity = "Details",
-                type = "Left",
-                hasNavBarAction = false,
-                navBarBackAction = { coroutineScope.launch { scaffoldNavigator.navigateBack() } },
-                navController = navController,
-                hasNavigation = (windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT),
-            )
+            item {
+                ExpenseTopBar(
+                    selectedActivity = "Details",
+                    type = "Left",
+                    hasNavBarAction = false,
+                    navBarBackAction = { coroutineScope.launch { scaffoldNavigator.navigateBack() } },
+                    navController = navController,
+                    hasNavigation = (windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT),
+                )
+            }
 
             if (transactions.isNotEmpty()) {
-                Box {
-                    CartesianChartHost(
-                        modifier = Modifier.fillMaxWidth(),
-                        chart = rememberCartesianChart(
-                            rememberColumnCartesianLayer(
-                                columnProvider = ColumnCartesianLayer.ColumnProvider.series(
-                                    rememberLineComponent(
-                                        fill = fill(Color(MaterialTheme.colorScheme.primary.toArgb())),
-                                        thickness = 8.dp,
-                                        shape = CorneredShape.rounded(allPercent = 16),
+                item {
+                    Box {
+                        CartesianChartHost(
+                            modifier = Modifier.fillMaxWidth(),
+                            chart = rememberCartesianChart(
+                                rememberColumnCartesianLayer(
+                                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                                        rememberLineComponent(
+                                            fill = fill(Color(MaterialTheme.colorScheme.primary.toArgb())),
+                                            thickness = 8.dp,
+                                            shape = CorneredShape.rounded(allPercent = 16),
+                                        )
+                                    )
+                                ), startAxis = VerticalAxis.rememberStart(
+                                    label = rememberTextComponent(
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    ),
+
+
+                                    ), bottomAxis = HorizontalAxis.rememberBottom(
+                                    guideline = null,
+                                    valueFormatter = bottomAxisValueFormatter,
+                                    label = rememberTextComponent(
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                ), marker = rememberDefaultCartesianMarker(
+                                    label = rememberTextComponent(
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textAlignment = Layout.Alignment.ALIGN_CENTER,
+                                        padding = dimensions(8.dp, 4.dp),
+                                        background = rememberShapeComponent(
+                                            fill = fill(MaterialTheme.colorScheme.surfaceBright),
+                                            shape = markerCorneredShape(Corner.Sharp),
+                                        ),
+                                        minWidth = TextComponent.MinWidth.fixed(40f),
                                     )
                                 )
                             ),
-                            startAxis = VerticalAxis.rememberStart(),
-                            bottomAxis = HorizontalAxis.rememberBottom(
-                                guideline = null, valueFormatter = bottomAxisValueFormatter
-                            ), marker = rememberDefaultCartesianMarker(
-                                label = rememberTextComponent(
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    textAlignment = Layout.Alignment.ALIGN_CENTER,
-                                    padding = dimensions(8.dp, 4.dp),
-                                    background = rememberShapeComponent(
-                                        fill = fill(MaterialTheme.colorScheme.surfaceBright),
-                                        shape = markerCorneredShape(Corner.Sharp),
-                                    ),
-                                    minWidth = TextComponent.MinWidth.fixed(40f),
-                                )
-                            )
-                        ),
-                        modelProducer = modelProducer,
+                            modelProducer = modelProducer,
 
-                        )
+                            )
+                    }
                 }
 
-                TransactionList()
+                item {
+                    TransactionList()
+                }
             } else {
-                Text("No transactions found")
+                item {
+                    Text("No transactions found")
+                }
             }
         }
     } else {
