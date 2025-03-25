@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -27,7 +28,6 @@ import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
 import com.seyone22.expensetracker.ui.common.TransactionType
 import com.seyone22.expensetracker.ui.common.getAbbreviatedMonthName
-import com.seyone22.expensetracker.ui.common.removeTrPrefix
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -44,6 +44,10 @@ fun TransactionItem(
 
     var toAccount: Account? by remember { mutableStateOf(null) }
     var currencyFormat: CurrencyFormat? by remember { mutableStateOf(null) }
+
+    val clarifiedName by produceState(initialValue = "") {
+        value = viewModel.getClarifiedName(transaction.categoryId ?: -1)
+    }
 
     if (transaction.transCode == TransactionCode.TRANSFER.displayName && forAccountId != transaction.accountId) {
         LaunchedEffect(transaction.toAccountId) {
@@ -65,9 +69,8 @@ fun TransactionItem(
                 text = transaction.payeeName ?: "Transfer -> ${toAccount?.accountName}"
             )
         },
-        supportingContent = { Text(text = removeTrPrefix(transaction.categName)) },
+        supportingContent = { Text(text = clarifiedName) },
         trailingContent = {
-
             FormattedCurrency(
                 value = if (transaction.transCode == TransactionCode.TRANSFER.displayName && forAccountId != transaction.accountId) transaction.toTransAmount
                     ?: 0.0 else transaction.transAmount,

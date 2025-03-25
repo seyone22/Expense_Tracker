@@ -13,6 +13,7 @@ import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
 import com.seyone22.expensetracker.data.repository.account.AccountsRepository
 import com.seyone22.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
+import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
 import com.seyone22.expensetracker.ui.common.SortOption
 import com.seyone22.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
@@ -38,10 +39,12 @@ class TransactionsViewModel(
     private val transactionsRepository: TransactionsRepository,
     private val billsDepositsRepository: BillsDepositsRepository,
     private val accountsRepository: AccountsRepository,
+    private val categoriesRepository: CategoriesRepository
 ) : BaseViewModel() {
     init {
         refreshTransactions(SortOption.default)
     }
+
     var transactionUiState by mutableStateOf(TransactionUiState())
 
     // Filter and sort options
@@ -151,6 +154,14 @@ class TransactionsViewModel(
         }
     }
 
+    suspend fun getClarifiedName(categoryId: Int): String {
+        val category =
+            categoriesRepository.getCategoryByIdStream(categoryId).firstOrNull() ?: return ""
+        return category.parentId.takeIf { it != -1 }
+            ?.let { parentId ->
+                categoriesRepository.getCategoryByIdStream(parentId).firstOrNull()?.categName
+            }?.let { parentName -> "$parentName > ${category.categName}" } ?: category.categName
+    }
 
     private fun validateInput(uiState: TransactionDetails = transactionUiState.transactionDetails): Boolean {
         return listOf(

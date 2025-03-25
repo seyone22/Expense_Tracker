@@ -168,7 +168,7 @@ class TransactionEntryViewModel(
     }
 
     suspend fun getCategory(categoryId: Int): Category {
-        return categoriesRepository.getCategoriesStream(categoryId).first() ?: Category()
+        return categoriesRepository.getCategoryByIdStream(categoryId).first() ?: Category()
     }
 }
 

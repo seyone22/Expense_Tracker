@@ -200,7 +200,7 @@ class EntityViewModel(
     }
 
     suspend fun getNameOfCategory(categId: Int): Category {
-        val x = categoriesRepository.getCategoriesStream(categId)
+        val x = categoriesRepository.getCategoryByIdStream(categId)
         return x.first() ?: Category()
     }
 
