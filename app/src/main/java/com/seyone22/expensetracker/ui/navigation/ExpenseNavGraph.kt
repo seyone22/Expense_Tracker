@@ -50,8 +50,6 @@ import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionE
 import com.seyone22.expensetracker.ui.screen.report.ReportScreen
 import com.seyone22.expensetracker.ui.screen.report.ReportsDestination
 import com.seyone22.expensetracker.ui.screen.settings.SettingsDestination
-import com.seyone22.expensetracker.ui.screen.settings.SettingsDetailDestination
-import com.seyone22.expensetracker.ui.screen.settings.SettingsDetailScreen
 import com.seyone22.expensetracker.ui.screen.settings.SettingsScreen
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsDestination
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsScreen
@@ -236,25 +234,6 @@ fun ExpenseNavHost(
         composable(route = CurrencyEntryDestination.route) {
             CurrencyEntryScreen(navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() })
-        }
-        // Routes to settings screen
-
-        composable(route = SettingsDetailDestination.route + "/{setting}",
-            arguments = listOf(navArgument("setting") { type = NavType.StringType }),
-            enterTransition = {
-                slideInHorizontally(animationSpec = tween(500),
-                    initialOffsetX = { fullWidth -> fullWidth } // Slide in from the right
-                ) + fadeIn(animationSpec = tween(500))
-            },
-            exitTransition = {
-                slideOutHorizontally(animationSpec = tween(500),
-                    targetOffsetX = { fullWidth -> fullWidth } // Slide out to the right
-                ) + fadeOut(animationSpec = tween(500))
-            }) {
-            SettingsDetailScreen(navigateToScreen = { screen -> navController.navigate(screen) },
-                navigateBack = { navController.popBackStack() },
-                backStackEntry = it.arguments?.getString("setting") ?: "-1",
-                onToggleDarkTheme = { x -> onToggleDarkTheme(x) })
         }
 
         //Route to Onboarding Screen

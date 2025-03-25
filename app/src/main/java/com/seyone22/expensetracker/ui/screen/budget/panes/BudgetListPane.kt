@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -24,11 +22,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun BudgetListPane(
+    navigateToScreen: (screen: Int) -> Unit,
     budgetUiState: BudgetUiState,
     selectedBudgetId: Int,
     windowSizeClass: WindowSizeClass,
-    onSelectBudget: (Int) -> Unit,
-    scaffoldNavigator: ThreePaneScaffoldNavigator<Int>,
     viewModel: BudgetViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -78,15 +75,7 @@ fun BudgetListPane(
                     isSelected = if (windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
                         yearBudget.budgetYearId == selectedBudgetId
                     } else false,
-                    navigateToScreen = {
-                        onSelectBudget(yearBudget.budgetYearId)
-                        coroutineScope.launch {
-                            scaffoldNavigator.navigateTo(
-                                pane = ListDetailPaneScaffoldRole.Detail,
-                                contentKey = yearBudget.budgetYearId
-                            )
-                        }
-                    })
+                    navigateToScreen = { navigateToScreen(yearBudget.budgetYearId) })
             }
             monthBudgetsMap[yearBudget.budgetYearName]?.sortedBy { it.budgetYearName }
                 ?.forEach { monthBudget ->
@@ -96,15 +85,7 @@ fun BudgetListPane(
                             isSelected = if (windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
                                 monthBudget.budgetYearId == selectedBudgetId
                             } else false,
-                            navigateToScreen = {
-                                onSelectBudget(monthBudget.budgetYearId)
-                                coroutineScope.launch {
-                                    scaffoldNavigator.navigateTo(
-                                        pane = ListDetailPaneScaffoldRole.Detail,
-                                        contentKey = monthBudget.budgetYearId
-                                    )
-                                }
-                            })
+                            navigateToScreen = { navigateToScreen(monthBudget.budgetYearId) })
                     }
                 }
         }
