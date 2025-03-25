@@ -198,7 +198,7 @@ fun EntityDetailPane(
                         )
                 }
 
-                TransactionList(forAccountId = -1)
+                TransactionList()
             } else {
                 Text("No transactions found")
             }

@@ -65,7 +65,6 @@ fun TransactionList(
     entryViewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
     showFilter: Boolean = true,
     useLazyColumn: Boolean = false, // Determines whether to use LazyColumn or Column
-    forAccountId: Int,
     count: Int? = null,
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
@@ -147,7 +146,6 @@ fun TransactionList(
                         haptics = haptics,
                         longClicked = { openBottomSheet(it) },
                         viewModel = viewModel,
-                        forAccountId = forAccountId
                     )
                     HorizontalDivider()
                 }
@@ -175,7 +173,6 @@ fun TransactionList(
                             haptics = haptics,
                             longClicked = { openBottomSheet(it) },
                             viewModel = viewModel,
-                            forAccountId = forAccountId
                         )
                         HorizontalDivider()
                     }

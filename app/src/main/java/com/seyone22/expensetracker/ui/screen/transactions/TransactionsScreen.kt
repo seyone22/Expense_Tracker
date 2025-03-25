@@ -102,7 +102,6 @@ fun TransactionsScreen(
                             useLazyColumn = true,
                             viewModel = viewModel,
                             showFilter = true,
-                            forAccountId = -1
                         )
                     }
 
