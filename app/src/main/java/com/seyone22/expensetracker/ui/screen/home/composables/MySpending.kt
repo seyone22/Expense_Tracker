@@ -52,8 +52,6 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
 import com.seyone22.expensetracker.ui.screen.home.HomeViewModel
-import com.seyone22.expensetracker.utils.getEndOfPreviousWeek
-import com.seyone22.expensetracker.utils.getStartOfPreviousWeek
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -71,8 +69,8 @@ fun MySpending(
     // Observe the current week start and end dates
     val currentWeekStart = LocalDate.parse(viewModel.currentStartDate.value)
     val currentWeekEnd = LocalDate.parse(viewModel.currentEndDate.value)
-    val previousWeekStart = LocalDate.parse(getStartOfPreviousWeek())
-    val previousWeekEnd = LocalDate.parse(getEndOfPreviousWeek())
+    val previousWeekStart = LocalDate.parse(viewModel.currentStartDate.value).minusWeeks(1)
+    val previousWeekEnd = LocalDate.parse(viewModel.currentEndDate.value).minusWeeks(1)
 
     // Initialize a list of 7 zeros
     val seriesState = remember { mutableStateOf(List(7) { 0.0 }) }
@@ -82,6 +80,9 @@ fun MySpending(
     val previousWeekSum = expensesByWeek.filter { (_, _, date) ->
         date?.let { LocalDate.parse(it) in previousWeekStart..previousWeekEnd } == true
     }.sumOf { it.balance.absoluteValue * -1 }
+
+    Log.d("TAG", "MySpending: $previousWeekSum")
+
     val percentageChange = if (previousWeekSum != 0.0) {
         ((currentWeekSum.value - previousWeekSum) / previousWeekSum) * 100
     } else {
@@ -162,7 +163,7 @@ fun MySpending(
                         color = changeColor,
                         style = MaterialTheme.typography.bodySmall
                     )
-                    Text("From prev. week", style = MaterialTheme.typography.bodySmall)
+                    Text("from prev. week", style = MaterialTheme.typography.bodySmall)
 
                 }
                 Row(
