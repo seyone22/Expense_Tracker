@@ -24,17 +24,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,7 +45,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -62,6 +59,9 @@ import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Metadata
+import com.seyone22.expensetracker.managers.CryptoManager
+import com.seyone22.expensetracker.managers.ScreenLockManager
+import com.seyone22.expensetracker.managers.SnackbarManager
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.ExpenseTopBar
 import com.seyone22.expensetracker.ui.common.removeTrPrefix
@@ -71,14 +71,10 @@ import com.seyone22.expensetracker.ui.screen.settings.SettingsViewModel
 import com.seyone22.expensetracker.ui.theme.LocalTheme
 import com.seyone22.expensetracker.utils.BiometricHelper
 import com.seyone22.expensetracker.utils.BiometricPromptActivityResultContract
-import com.seyone22.expensetracker.utils.CryptoManager
-import com.seyone22.expensetracker.utils.ScreenLockManager
-import com.seyone22.expensetracker.utils.SnackbarManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.R)
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun SettingsDetailPane(
     modifier: Modifier = Modifier,
@@ -95,13 +91,6 @@ fun SettingsDetailPane(
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { data ->
-                Snackbar(
-                    snackbarData = data, actionColor = Color.Red // Customize for error messages
-                )
-            }
-        },
         topBar = {
             ExpenseTopBar(
                 selectedActivity = currentDestinationKey,
@@ -272,7 +261,8 @@ fun GeneralSettingsList(
                         text = "Select your new base currency",
                         modifier = Modifier.padding(8.dp),
                     )
-                    ExposedDropdownMenuBox(expanded = baseCurrencyExpanded,
+                    ExposedDropdownMenuBox(
+                        expanded = baseCurrencyExpanded,
                         onExpandedChange = { baseCurrencyExpanded = !baseCurrencyExpanded }) {
                         OutlinedTextField(
                             modifier = Modifier
@@ -294,7 +284,8 @@ fun GeneralSettingsList(
                             onDismissRequest = { baseCurrencyExpanded = false },
                         ) {
                             currencyList.currenciesList.forEach { currency ->
-                                DropdownMenuItem(text = { Text(removeTrPrefix(currency.currencyName)) },
+                                DropdownMenuItem(
+                                    text = { Text(removeTrPrefix(currency.currencyName)) },
                                     onClick = {
                                         newCurrency = currency
                                         baseCurrencyExpanded = false
@@ -362,12 +353,15 @@ fun AboutList() {
                 text = stringResource(id = R.string.database_version)
             )
         }, modifier = Modifier.clickable { })
-        ListItem(headlineContent = { Text(text = "Check for updates") },
+        ListItem(
+            headlineContent = { Text(text = "Check for updates") },
             modifier = Modifier.clickable { })
         ListItem(headlineContent = { Text(text = "What's new") }, modifier = Modifier.clickable { })
-        ListItem(headlineContent = { Text(text = "Open Source licenses") },
+        ListItem(
+            headlineContent = { Text(text = "Open Source licenses") },
             modifier = Modifier.clickable { })
-        ListItem(headlineContent = { Text(text = "Privacy Policy") },
+        ListItem(
+            headlineContent = { Text(text = "Privacy Policy") },
             modifier = Modifier.clickable { })
         ListItem(headlineContent = {
             Row(
@@ -489,7 +483,8 @@ fun AppearanceSettingsList(
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            RadioButton(enabled = true,
+                            RadioButton(
+                                enabled = true,
                                 selected = (selectedTheme == 3),
                                 onClick = { selectedTheme = 3 })
                             Text(text = "Midnight")
@@ -507,9 +502,11 @@ fun DataSettingsList(
     viewModel: SettingsViewModel,
 ) {
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val isLoading by sharedViewModel.isLoading.collectAsState()
 
     Column {
-        SettingsListItem(settingName = "Update Currency Formats",
+        SettingsListItem(
+            settingName = "Update Currency Formats",
             settingSubtext = "Exchange rates are updated monthly from the InfoEuro portal",
             action = {
                 metadata.find { it?.infoName == "BASECURRENCYID" }?.infoValue?.toIntOrNull()
@@ -517,6 +514,9 @@ fun DataSettingsList(
                         sharedViewModel.getMonthlyRates()
                     }
             })
+        if (isLoading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
     }
 }
 
@@ -574,7 +574,8 @@ fun SecuritySettingsList(
         SettingsListItem(settingName = "Lock when idle", settingSubtext = "", action = {
 
         })
-        SettingsToggleListItem(settingName = "Secure screen",
+        SettingsToggleListItem(
+            settingName = "Secure screen",
             settingSubtext = "Hides app contents when switching apps, and blocks screenshots",
             toggle = isSecureScreenEnabled,
             enabled = isBiometricAvailable,
