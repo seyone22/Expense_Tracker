@@ -74,9 +74,8 @@ object BiometricHelper {
         return BiometricPrompt.PromptInfo.Builder()
             .setTitle("Unlock with Biometrics")
             .setSubtitle("Use your fingerprint or face recognition")
-            .setNegativeButtonText("Negative Button Text")
             .setDescription("To proceed, authenticate using your registered biometric credentials.")
-            .setNegativeButtonText("Use Password Instead")
+            .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
             .build()
     }
 }
