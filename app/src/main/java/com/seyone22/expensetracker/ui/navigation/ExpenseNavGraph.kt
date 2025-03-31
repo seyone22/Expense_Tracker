@@ -7,7 +7,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -19,12 +23,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.seyone22.expensetracker.managers.SnackbarManager
 import com.seyone22.expensetracker.ui.screen.budget.BudgetScreen
 import com.seyone22.expensetracker.ui.screen.budget.BudgetsDestination
 import com.seyone22.expensetracker.ui.screen.entities.EntitiesDestination
@@ -243,22 +249,34 @@ fun ExpenseNavHost(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NavigationSuiteScaffoldWrapper(
     currentDestination: MainNavigationDestinations,
     navigateToScreen: (String) -> Unit,
     content: @Composable (Modifier) -> Unit
 ) {
-    NavigationSuiteScaffold(navigationSuiteItems = {
-        MainNavigationDestinations.entries.forEach { destination ->
-            item(icon = {
-                Icon(destination.navigationDestination.icon!!, "")
-            },
-                selected = destination == currentDestination,
-                onClick = { navigateToScreen(destination.navigationDestination.route) },
-                label = { Text(destination.navigationDestination.route) })
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                SnackbarManager.hostState,
+                modifier = Modifier.padding(bottom = 80.dp)
+            )
+        },
+    ) { paddingValues ->
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                MainNavigationDestinations.entries.forEach { destination ->
+                    item(
+                        icon = { Icon(destination.navigationDestination.icon!!, "") },
+                        selected = destination == currentDestination,
+                        onClick = { navigateToScreen(destination.navigationDestination.route) },
+                        label = { Text(destination.navigationDestination.route) }
+                    )
+                }
+            }
+        ) {
+            content(Modifier.padding(paddingValues))
         }
-    }) {
-        content(Modifier)
     }
 }

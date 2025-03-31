@@ -137,7 +137,8 @@ object AppViewModelProvider {
                 expenseApplication().container.currencyHistoryRepository,
                 expenseApplication().container.categoriesRepository,
                 expenseApplication().container.payeesRepository,
-                expenseApplication().container.tagsRepository
+                expenseApplication().container.tagsRepository,
+                expenseApplication().container.budgetEntryRepository
             )
         }
     }

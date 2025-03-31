@@ -3,8 +3,8 @@ package com.seyone22.expensetracker
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.seyone22.expensetracker.managers.SnackbarManager
 import com.seyone22.expensetracker.ui.common.dialogs.DialogAction
-import com.seyone22.expensetracker.utils.SnackbarManager
 import kotlinx.coroutines.launch
 
 abstract class BaseViewModel : ViewModel() {

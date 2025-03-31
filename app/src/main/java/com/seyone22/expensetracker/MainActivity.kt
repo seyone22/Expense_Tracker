@@ -22,15 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.seyone22.expensetracker.managers.CryptoManager
+import com.seyone22.expensetracker.managers.ScreenLockManager
+import com.seyone22.expensetracker.managers.TransactionStartupManager
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.screen.settings.SettingsViewModel
 import com.seyone22.expensetracker.ui.theme.DarkTheme
 import com.seyone22.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.seyone22.expensetracker.ui.theme.LocalTheme
 import com.seyone22.expensetracker.utils.BiometricPromptActivityResultContract
-import com.seyone22.expensetracker.utils.CryptoManager
-import com.seyone22.expensetracker.utils.ScreenLockManager
-import com.seyone22.expensetracker.utils.TransactionStartupManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -60,7 +60,6 @@ class MainActivity : ComponentActivity() {
 
         val cryptoManager = CryptoManager()
         screenLockManager = ScreenLockManager(this, cryptoManager, biometricAuthLauncher)
-        transactionStartupManager = TransactionStartupManager(sharedViewModel)
 
         // Observe app lifecycle globally
         ProcessLifecycleOwner.get().lifecycle.addObserver(screenLockManager)
