@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.seyone22.expensetracker.R
@@ -41,16 +42,18 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory),
     windowSizeClass: WindowWidthSizeClass,
 ) {
     val accountsUiState by viewModel.accountsUiState.collectAsState()
     val totals by viewModel.getFilteredTotal("All").collectAsState(initial = Totals())
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
-        viewModel.fetchTransactionsForWeek()
+        sharedViewModel.nukeAllWorkManagers(context = context)
     }
 
-    val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val baseCurrency by sharedViewModel.baseCurrencyFlow.collectAsState(initial = CurrencyFormat())
     val isUsed by sharedViewModel.isUsedFlow.collectAsState(initial = true)
 
@@ -86,8 +89,8 @@ fun HomeScreen(
         "MySpending" to {
             MySpending(
                 modifier = Modifier.padding(16.dp, 0.dp),
-                expensesByWeek = accountsUiState.expensesByWeek,
                 baseCurrencyInfo = baseCurrency ?: CurrencyFormat(),
+                viewModel = viewModel
             )
         },
         "QuickActions" to {

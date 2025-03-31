@@ -13,14 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.RepeatFrequency
 import com.seyone22.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
 import com.seyone22.expensetracker.utils.formatCurrency
-import com.seyone22.expensetracker.workers.RecurringTransactionWorker
 import java.text.SimpleDateFormat
 import java.time.Month
 import java.time.format.TextStyle
@@ -127,17 +123,6 @@ fun scheduleWorkByDayCount(context: Context, recurrenceDetails: BillsDepositsDet
     // Calculate the initial delay until the next occurrence date
     val currentDate = Calendar.getInstance()
     val initialDelay = nextOccurrenceDate.timeInMillis - currentDate.timeInMillis
-
-    // Create a periodic request to run every period
-    val periodicWorkRequest = PeriodicWorkRequestBuilder<RecurringTransactionWorker>(
-        repeatInterval = dayCount.toLong(), // repeatInterval is in days
-        repeatIntervalTimeUnit = TimeUnit.DAYS
-    ).setInitialDelay(initialDelay, TimeUnit.MILLISECONDS).build()
-
-    // Enqueue the work request
-    WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-        recurrenceDetails.BDID.toString(), ExistingPeriodicWorkPolicy.UPDATE, periodicWorkRequest
-    )
 }
 
 fun scheduleWorkByMonthCount(context: Context, recurrenceDetails: BillsDepositsDetails) {
@@ -157,16 +142,6 @@ fun scheduleWorkByMonthCount(context: Context, recurrenceDetails: BillsDepositsD
 
     // Calculate the repeat interval based on the month count
     val repeatInterval = TimeUnit.DAYS.toMillis(30L * monthCount)
-
-    // Create a periodic work request with initial delay and repeat interval
-    val workRequest = PeriodicWorkRequestBuilder<RecurringTransactionWorker>(
-        repeatInterval, TimeUnit.MILLISECONDS
-    ).setInitialDelay(initialDelay, TimeUnit.MILLISECONDS).build()
-
-    // Enqueue the work request
-    WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-        recurrenceDetails.BDID.toString(), ExistingPeriodicWorkPolicy.UPDATE, workRequest
-    )
 }
 
 fun calculateNextOccurrenceDate(currentDate: Calendar, monthCount: Int): Calendar {

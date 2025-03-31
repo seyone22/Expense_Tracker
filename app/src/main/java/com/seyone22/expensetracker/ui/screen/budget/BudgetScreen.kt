@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +31,8 @@ import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.budget.panes.BudgetDetailPane
 import com.seyone22.expensetracker.ui.screen.budget.panes.BudgetListPane
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 object BudgetsDestination : NavigationDestination {
     override val route = "Budgets"
@@ -42,6 +46,7 @@ object BudgetsDestination : NavigationDestination {
 fun BudgetScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
     navController: NavController = rememberNavController(),
     viewModel: BudgetViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
@@ -61,10 +66,17 @@ fun BudgetScreen(
         AnimatedPane {
             BudgetListPane(
                 budgetUiState = budgetUiState,
+                navigateToScreen = { key ->
+
+                    selectedBudgetId = key
+                    coroutineScope.launch {
+                        scaffoldNavigator.navigateTo(
+                            pane = ListDetailPaneScaffoldRole.Detail, contentKey = key
+                        )
+                    }
+                },
                 selectedBudgetId = selectedBudgetId,
                 windowSizeClass = windowSizeClass,
-                onSelectBudget = { selectedBudgetId = it },
-                scaffoldNavigator = scaffoldNavigator,
                 viewModel = viewModel
             )
         }

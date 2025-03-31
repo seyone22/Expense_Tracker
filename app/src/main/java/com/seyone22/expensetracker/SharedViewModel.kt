@@ -1,22 +1,19 @@
 package com.seyone22.expensetracker
 
 import android.content.Context
-import android.util.Log
-import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.seyone22.expensetracker.data.externalApi.infoEuroApi.InfoEuroApi
 import com.seyone22.expensetracker.data.model.Account
-import com.seyone22.expensetracker.data.model.BillsDepositWithDetails
 import com.seyone22.expensetracker.data.model.BillsDeposits
+import com.seyone22.expensetracker.data.model.BudgetEntry
 import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.data.model.CurrencyFormat
-import com.seyone22.expensetracker.data.model.Metadata
 import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.Tag
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.repository.account.AccountsRepository
 import com.seyone22.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
+import com.seyone22.expensetracker.data.repository.budgetEntry.BudgetEntryRepository
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.seyone22.expensetracker.data.repository.currencyHistory.CurrencyHistoryRepository
@@ -24,19 +21,16 @@ import com.seyone22.expensetracker.data.repository.metadata.MetadataRepository
 import com.seyone22.expensetracker.data.repository.payee.PayeesRepository
 import com.seyone22.expensetracker.data.repository.tag.TagsRepository
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
-import com.seyone22.expensetracker.utils.CryptoManager
-import com.seyone22.expensetracker.utils.SnackbarManager
-import com.seyone22.expensetracker.utils.updateCurrencyFormatsAndHistory
-import kotlinx.coroutines.Dispatchers
+import com.seyone22.expensetracker.managers.CurrencyManager
+import com.seyone22.expensetracker.managers.NotificationState
+import com.seyone22.expensetracker.managers.NotificationStateManager
+import com.seyone22.expensetracker.managers.NotificationType
+import com.seyone22.expensetracker.managers.SecurityManager
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class SharedViewModel(
     private val metadataRepository: MetadataRepository,
@@ -47,126 +41,85 @@ class SharedViewModel(
     private val currencyHistoryRepository: CurrencyHistoryRepository,
     private val categoriesRepository: CategoriesRepository,
     private val payeesRepository: PayeesRepository,
-    private val tagsRepository: TagsRepository
+    private val tagsRepository: TagsRepository,
+    private val budgetEntryRepository: BudgetEntryRepository,
 ) : ViewModel() {
+    private val notificationStateManager: NotificationStateManager = NotificationStateManager(
+        transactionsRepository, billsDepositsRepository, budgetEntryRepository
+    )
+    private val currencyManager: CurrencyManager =
+        CurrencyManager(currencyFormatsRepository, currencyHistoryRepository)
+    private val securityManager: SecurityManager = SecurityManager()
+
+    init {
+        viewModelScope.launch {
+            notificationStateManager.checkInitialConditions()
+        }
+    }
+
+    // Streams for UI
     val categoriesFlow: Flow<List<Category>> = categoriesRepository.getAllCategoriesStream()
     val payeesFlow: Flow<List<Payee>> = payeesRepository.getAllPayeesStream()
     val tagsFlow: Flow<List<Tag>> = tagsRepository.getAllTagsStream()
-    val pastDueBillDepositsFlow: Flow<List<BillsDepositWithDetails>> =
-        billsDepositsRepository.getPastDueBillsDeposits()
-    val currenciesFlow: Flow<List<CurrencyFormat>> =
-        currencyFormatsRepository.getAllCurrencyFormatsStream()
-    val accountsFlow: Flow<List<Account>> =
-        accountsRepository.getAllActiveAccountsStream()
+    val accountsFlow: Flow<List<Account>> = accountsRepository.getAllActiveAccountsStream()
 
-    private val _isSecureScreenEnabled = MutableStateFlow(false)
-    val isSecureScreenEnabled: StateFlow<Boolean> = _isSecureScreenEnabled
-
-    private val baseCurrencyIdFlow: Flow<Metadata?> =
+    val baseCurrencyFlow: Flow<CurrencyFormat?> =
         metadataRepository.getMetadataByNameStream("BASECURRENCYID")
+            .combine(currencyFormatsRepository.getAllCurrencyFormatsStream()) { baseCurrencyId, allCurrencyFormats ->
+                allCurrencyFormats.firstOrNull { it.currencyId == baseCurrencyId?.infoValue?.toInt() }
+            }
 
-    // Flow to retrieve and convert "ISUSED" metadata to a boolean
+    val isLoading: StateFlow<Boolean> = currencyManager.isUpdating
+    val isSecureScreenEnabled: StateFlow<Boolean> = securityManager.isSecureScreenEnabled
+    val notifications: StateFlow<NotificationState> get() = notificationStateManager.notifications
+
+    // New: Handle the `isUsed` flow
     val isUsedFlow: Flow<Boolean> = metadataRepository.getMetadataByNameStream("ISUSED")
         .map { metadata -> metadata?.infoValue == "TRUE" }
 
-    // Stream for currency format using the base currency ID
-    val baseCurrencyFlow: Flow<CurrencyFormat?> =
-        baseCurrencyIdFlow.combine(currencyFormatsRepository.getAllCurrencyFormatsStream()) { baseCurrencyId, allCurrencyFormats ->
-            // Use the baseCurrencyId to get the corresponding CurrencyFormat
-            allCurrencyFormats.firstOrNull { it.currencyId == baseCurrencyId?.infoValue?.toInt() }
-        }
-
-    // Initialize the ViewModel and trigger `getMonthlyRates` if `isUsed` is false
-    init {
-        // Automatically call `getMonthlyRates` when `isUsed` is false
+    // Utility Functions to interact with the repository layer
+    fun insertTransaction(transaction: Transaction) {
         viewModelScope.launch {
-            isUsedFlow.collect { isUsed ->
-                if (!isUsed) {
-                    //getMonthlyRates()
-                }
-            }
+            transactionsRepository.insertTransaction(transaction)
         }
     }
 
-    // Common functions
-    suspend fun getCurrencyById(currencyId: Int): CurrencyFormat? {
-        val stream = currencyFormatsRepository.getCurrencyFormatStream(currencyId)
-        return stream.firstOrNull()
+    fun insertBillsDeposit(billsDeposit: BillsDeposits) {
+        viewModelScope.launch {
+            billsDepositsRepository.insertBillsDeposit(billsDeposit)
+        }
     }
 
-    suspend fun insertTransaction(transaction: Transaction) {
-        transactionsRepository.insertTransaction(transaction)
+    fun insertBudgetEntry(budgetEntry: BudgetEntry) {
+        viewModelScope.launch {
+            budgetEntryRepository.insertBudgetEntry(budgetEntry)
+        }
     }
 
-    suspend fun insertBillsDeposit(billsDeposit: BillsDeposits) {
-        billsDepositsRepository.insertBillsDeposit(billsDeposit)
-    }
-
-    fun saveSecureScreenSetting(context: Context?, isSecure: Boolean) {
-        if (context == null) return
-
-        val cryptoManager = CryptoManager()
-        val cipher = cryptoManager.initEncryptionCipher("SecureScreenKey")
-
-        val encryptedData = cryptoManager.encrypt(isSecure.toString(), cipher)
-
-        Log.d("SecureScreen", "Saving secure screen setting: $isSecure")
-
-        cryptoManager.saveToPrefs(
-            encryptedData,
-            context,
-            "secure_prefs",
-            Context.MODE_PRIVATE,
-            "secure_screen"
-        )
-    }
-
-    fun getSecureScreenSetting(context: Context): Boolean {
-        val cryptoManager = CryptoManager()
-        val encryptedData = cryptoManager.getFromPrefs(
-            context,
-            "secure_prefs",
-            Context.MODE_PRIVATE,
-            "secure_screen"
-        ) ?: return false
-
-        val cipher = cryptoManager.initDecryptionCipher(
-            "SecureScreenKey",
-            encryptedData.initializationVector
-        )
-        val decryptedValue = cryptoManager.decrypt(encryptedData.ciphertext, cipher).toBoolean()
-
-        Log.d("SecureScreen", "Retrieved secure screen setting: $decryptedValue")
-
-        _isSecureScreenEnabled.value = decryptedValue
-        return decryptedValue
-    }
-
+    // Utility functions to interact with the currency repository layer
     fun getMonthlyRates() {
         viewModelScope.launch {
-            SnackbarManager.showMessage("Updating Currency Formats...", SnackbarDuration.Long)
-            try {
-                val onlineData = withContext(Dispatchers.IO) {
-                    InfoEuroApi.retrofitService.getMonthlyRates()
-                }
-
-                val baseCurrency = baseCurrencyFlow.first()
-                if (baseCurrency !== null) {
-                    updateCurrencyFormatsAndHistory(
-                        onlineData = onlineData,
-                        baseCurrency = baseCurrency,
-                        currencyFormatsRepository = currencyFormatsRepository,
-                        currencyHistoryRepository = currencyHistoryRepository
-                    )
-                }
-
-                // Show success Snackbar **after** both operations are completed
-                SnackbarManager.showMessage("Currency formats updated successfully!")
-
-            } catch (e: Exception) {
-                SnackbarManager.showMessage("Failed to update currency formats: ${e.message}")
-                Log.e("TAG", "Error updating currency formats", e)
-            }
+            currencyManager.getMonthlyRates(baseCurrencyFlow)
         }
     }
+
+    suspend fun getCurrencyById(id: Int): CurrencyFormat? {
+        return currencyManager.getCurrencyById(id)
+    }
+
+
+    // Notifications Management
+    suspend fun updateNotifications() = notificationStateManager.updateNotifications()
+    fun removeNotification(notification: NotificationType) =
+        notificationStateManager.removeNotification(notification)
+
+    // Secure Screen Settings
+    fun saveSecureScreenSetting(context: Context?, isSecure: Boolean) =
+        securityManager.saveSecureScreenSetting(context, isSecure)
+
+    fun getSecureScreenSetting(context: Context) = securityManager.getSecureScreenSetting(context)
+
+    fun nukeAllWorkManagers(context: Context) =
+        notificationStateManager.nukeAllWorkManagers(context)
 }
+

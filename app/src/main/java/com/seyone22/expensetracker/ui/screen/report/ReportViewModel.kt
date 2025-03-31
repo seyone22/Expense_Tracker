@@ -86,7 +86,7 @@ class ReportViewModel(
     }
 
     suspend fun categoryNameOf(categoryId: Int): String {
-        val category = categoriesRepository.getCategoriesStream(categoryId).first()
+        val category = categoriesRepository.getCategoryByIdStream(categoryId).first()
         return category?.categName ?: "NOT FOUND"
     }
 

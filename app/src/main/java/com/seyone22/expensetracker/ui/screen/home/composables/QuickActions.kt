@@ -122,88 +122,79 @@ fun QuickActions(
             Spacer(modifier = Modifier.width(0.dp))
         }
         items(actions.size) { index ->
-            Card(modifier = Modifier
-                .size(100.dp)
+            Card(
+                modifier = Modifier
+                    .size(100.dp)
 
-                .clickable {
-                    when (actions[index].title) {
-                        "Account" -> {
-                            navigateToScreen(actions[index].destination.route + "/${""}")
-                        }
+                    .clickable {
+                        when (actions[index].title) {
+                            "Account" -> {
+                                navigateToScreen(actions[index].destination.route + "/${""}")
+                            }
 
-                        "Deposit", "Withdrawal", "Transfer" -> {
-                            navigateToScreen(actions[index].destination.route + "/${actions[index].title}")
-                        }
+                            "Deposit", "Withdrawal", "Transfer" -> {
+                                navigateToScreen(actions[index].destination.route + "/${actions[index].title}")
+                            }
 
-                        "Category" -> {
-                            viewModel.showDialog(
-                                AddEditCategoryDialogAction(
-                                    onAdd = { category ->
-                                        coroutineScope.launch {
-                                            entityViewModel.saveCategory(category)
-                                        }
-                                    },
-                                    onEdit = { category ->
-                                        coroutineScope.launch {
-                                            entityViewModel.editCategory(category)
-                                        }
-                                    },
+                            "Category" -> {
+                                viewModel.showDialog(
+                                    AddEditCategoryDialogAction(
+                                        onAdd = { category ->
+                                            coroutineScope.launch {
+                                                entityViewModel.saveCategory(category)
+                                            }
+                                        },
+                                        onEdit = { category ->
+                                            coroutineScope.launch {
+                                                entityViewModel.editCategory(category)
+                                            }
+                                        },
+                                    )
                                 )
-                            )
-                        }
+                            }
 
-                        "Payee" -> {
-                            viewModel.showDialog(
-                                AddEditPayeeDialogAction(
-                                    onAdd = { payee ->
-                                        coroutineScope.launch {
-                                            entityViewModel.savePayee(payee)
-                                        }
-                                    },
-                                    onEdit = { payee ->
-                                        coroutineScope.launch {
-                                            entityViewModel.editPayee(payee)
-                                        }
-                                    },
+                            "Payee" -> {
+                                viewModel.showDialog(
+                                    AddEditPayeeDialogAction(
+                                        onAdd = { payee ->
+                                            coroutineScope.launch {
+                                                entityViewModel.savePayee(payee)
+                                            }
+                                        },
+                                        onEdit = { payee ->
+                                            coroutineScope.launch {
+                                                entityViewModel.editPayee(payee)
+                                            }
+                                        },
+                                    )
                                 )
-                            )
-                        }
+                            }
 
-                        "Tag" -> {
-                            viewModel.showDialog(
-                                AddEditTagDialogAction(
-                                    onAdd = { tag ->
-                                        coroutineScope.launch {
-                                            entityViewModel.saveTag(tag)
-                                        }
-                                    },
-                                    onEdit = { tag ->
-                                        coroutineScope.launch {
-                                            entityViewModel.editTag(tag)
-                                        }
+                            "Tag" -> {
+                                viewModel.showDialog(AddEditTagDialogAction(onAdd = { tag ->
+                                    coroutineScope.launch {
+                                        entityViewModel.saveTag(tag)
                                     }
-                                )
-                            )
-                        }
-
-                        "Currency" -> {
-                            viewModel.showDialog(
-                                AddEditCurrencyDialogAction(
-                                    onAdd = { currency ->
-                                        coroutineScope.launch {
-                                            entityViewModel.saveCurrency(currency)
-                                        }
-                                    },
-                                    onEdit = { currency ->
-                                        coroutineScope.launch {
-                                            entityViewModel.editCurrency(currency)
-                                        }
+                                }, onEdit = { tag ->
+                                    coroutineScope.launch {
+                                        entityViewModel.editTag(tag)
                                     }
-                                )
-                            )
+                                }))
+                            }
+
+                            "Currency" -> {
+                                viewModel.showDialog(AddEditCurrencyDialogAction(onAdd = { currency ->
+                                    coroutineScope.launch {
+                                        entityViewModel.saveCurrency(currency)
+                                    }
+                                }, onEdit = { currency ->
+                                    coroutineScope.launch {
+                                        entityViewModel.editCurrency(currency)
+                                    }
+                                }))
+                            }
                         }
-                    }
-                }) {
+                    }) {
                 Box(
                     contentAlignment = Alignment.Center, // Centers content inside the Box
                     modifier = Modifier

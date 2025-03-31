@@ -1,6 +1,5 @@
 package com.seyone22.expensetracker
 
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -23,26 +22,25 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.seyone22.expensetracker.managers.CryptoManager
+import com.seyone22.expensetracker.managers.ScreenLockManager
+import com.seyone22.expensetracker.managers.TransactionStartupManager
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.screen.settings.SettingsViewModel
 import com.seyone22.expensetracker.ui.theme.DarkTheme
 import com.seyone22.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.seyone22.expensetracker.ui.theme.LocalTheme
 import com.seyone22.expensetracker.utils.BiometricPromptActivityResultContract
-import com.seyone22.expensetracker.utils.CryptoManager
-import com.seyone22.expensetracker.utils.ScreenLockManager
-import com.seyone22.expensetracker.utils.TransactionStartupManager
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @ExperimentalMaterial3WindowSizeClassApi
 class MainActivity : ComponentActivity() {
+
     private lateinit var sharedViewModel: SharedViewModel
-    private lateinit var cryptoManager: CryptoManager // Assuming you have a CryptoManager instance
     private lateinit var screenLockManager: ScreenLockManager
     private lateinit var transactionStartupManager: TransactionStartupManager
 
-
-    // Create an ActivityResultLauncher to launch biometric authentication
     private val biometricAuthLauncher =
         registerForActivityResult(BiometricPromptActivityResultContract()) { success ->
             if (success) {
@@ -57,56 +55,48 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        cryptoManager = CryptoManager()
-        screenLockManager = ScreenLockManager(context = this, cryptoManager, biometricAuthLauncher)
-        sharedViewModel = ViewModelProvider(this, AppViewModelProvider.Factory)
-            .get(SharedViewModel::class.java)
+        sharedViewModel =
+            ViewModelProvider(this, AppViewModelProvider.Factory).get(SharedViewModel::class.java)
 
-        applySecureScreenSetting(this, sharedViewModel)
+        val cryptoManager = CryptoManager()
+        screenLockManager = ScreenLockManager(this, cryptoManager, biometricAuthLauncher)
 
         // Observe app lifecycle globally
         ProcessLifecycleOwner.get().lifecycle.addObserver(screenLockManager)
 
-        // Check for past due transactions
-        transactionStartupManager = TransactionStartupManager(sharedViewModel)
-
         setContent {
             val windowSize = calculateWindowSizeClass(this)
-            val viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+            val settingsViewModel: SettingsViewModel =
+                viewModel(factory = AppViewModelProvider.Factory)
 
-            val darkThemeState = remember { mutableStateOf(DarkTheme()) }
-            var requireUnlock by remember { mutableStateOf(false) }
+            // Use lazy initialization to prevent UI lag
+            var darkTheme by remember { mutableStateOf(DarkTheme()) }
+            var isSecureScreenEnabled by remember { mutableStateOf(false) }
 
-
+            // Start UI immediately, then update theme/security settings asynchronously
             LaunchedEffect(Unit) {
-                val currentTheme = viewModel.getCurrentTheme()
-                darkThemeState.value = currentTheme // assuming getCurrentTheme returns DarkTheme
-
-                sharedViewModel.isSecureScreenEnabled.collectLatest { enabled ->
-                    if (enabled) {
-                        window.setFlags(
-                            WindowManager.LayoutParams.FLAG_SECURE,
-                            WindowManager.LayoutParams.FLAG_SECURE
-                        )
-                    } else {
-                        window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                launch {
+                    darkTheme = settingsViewModel.getCurrentTheme()
+                }
+                launch {
+                    sharedViewModel.isSecureScreenEnabled.collectLatest { enabled ->
+                        isSecureScreenEnabled = enabled
+                        toggleSecureScreen(enabled)
                     }
                 }
             }
 
-            CompositionLocalProvider(LocalTheme provides darkThemeState.value) {
+            CompositionLocalProvider(LocalTheme provides darkTheme) {
                 ExpenseTrackerTheme(
-                    darkTheme = darkThemeState.value.isDark,
-                    midnight = darkThemeState.value.isMidnight
+                    darkTheme = darkTheme.isDark, midnight = darkTheme.isMidnight
                 ) {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         ExpenseApp(windowSizeClass = windowSize.widthSizeClass,
                             onToggleDarkTheme = { option ->
-                                darkThemeState.value = when (option) {
-                                    1 -> darkThemeState.value.copy(isDark = true)
-                                    0 -> darkThemeState.value.copy(isDark = false)
-                                    2 -> darkThemeState.value.copy(isDark = isSystemInDarkTheme())
-                                    else -> darkThemeState.value
+                                darkTheme = when (option) {
+                                    1 -> DarkTheme(isDark = true)
+                                    0 -> DarkTheme(isDark = false)
+                                    else -> DarkTheme(isDark = isSystemInDarkTheme())
                                 }
                             })
                     }
@@ -122,8 +112,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
-    // Trigger biometric unlock when the app is resumed and locked
     override fun onResume() {
         super.onResume()
         if (screenLockManager.isScreenLockEnabled() && screenLockManager.isAppLocked.value) {
@@ -131,21 +119,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun isSystemInDarkTheme(): Boolean {
-        return (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-    }
-
-    private fun applySecureScreenSetting(context: Context, sharedViewModel: SharedViewModel) {
-        if (sharedViewModel.getSecureScreenSetting(context)) {
-            // Enable secure screen (disable screenshots, hide app preview)
+    private fun toggleSecureScreen(enabled: Boolean) {
+        if (enabled) {
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE
             )
         } else {
-            // Disable secure screen (allow screenshots, show app preview)
             window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
         }
     }
 
+    private fun isSystemInDarkTheme(): Boolean {
+        return (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    }
 }
-
