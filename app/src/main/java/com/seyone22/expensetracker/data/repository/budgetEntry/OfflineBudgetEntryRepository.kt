@@ -22,4 +22,5 @@ class OfflineBudgetEntryRepository(private val budgetEntryDao: BudgetEntryDao) :
 
     override fun getBudgetEntriesForBudgetYear(budgetYearId: Int): Flow<List<BudgetEntry>> =
         budgetEntryDao.getActiveBudgetEntriesForBudgetYearId(budgetYearId)
+
 }
