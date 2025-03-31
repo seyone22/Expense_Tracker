@@ -63,7 +63,7 @@ data class TransactionWithDetails(
     val toTransAmount: Double?,
     val color: Int,
     val payeeName: String?,  // Include payeeName from PAYEE_V1, NULL when Transfer
-    val categName: String  // Include categoryName from CATEGORY_V1
+    val categName: String?  // Include categoryName from CATEGORY_V1
 )
 
 fun TransactionWithDetails.toTransaction(): Transaction {
