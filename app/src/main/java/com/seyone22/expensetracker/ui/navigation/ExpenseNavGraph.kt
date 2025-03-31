@@ -217,7 +217,7 @@ fun ExpenseNavHost(
                 backStackEntry.arguments?.getString("transactionType") ?: "Unknown"
 
             TransactionEntryScreen(
-                transactionType = transactionType,
+                txnType = transactionType,
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() })
         }

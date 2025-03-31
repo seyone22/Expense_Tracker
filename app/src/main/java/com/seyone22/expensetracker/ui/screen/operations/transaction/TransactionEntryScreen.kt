@@ -2,6 +2,7 @@ package com.seyone22.expensetracker.ui.screen.operations.transaction
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.focusGroup
@@ -61,17 +62,18 @@ fun TransactionEntryScreen(
     canNavigateBack: Boolean = true,
     viewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
     context: Context = LocalContext.current,
-    transactionType: String
+    txnType: String
 ) {
     val transactionUiState by viewModel.transactionUiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     var recurring by remember { mutableStateOf(false) }
 
-    LaunchedEffect(transactionType) {
+    LaunchedEffect(txnType) {
+        Log.d("TAG", "TransactionEntryScreen: $txnType")
         viewModel.updateUiState(
-            viewModel.transactionUiState.value.transactionDetails.copy(transCode = transactionType),
-            viewModel.transactionUiState.value.billsDepositsDetails,
+            viewModel.transactionUiState.value.transactionDetails.copy(transCode = txnType),
+            viewModel.transactionUiState.value.billsDepositsDetails.copy(TRANSCODE = txnType),
             0.0
         )
     }
@@ -158,9 +160,6 @@ fun TransactionEntryScreen(
                         modifier = Modifier
                             .focusGroup()
                             .padding(48.dp, 0.dp),
-                        transactionDetails = transactionUiState.transactionDetails.copy(transCode = transactionType),
-                        transactionUiState = transactionUiState,
-                        onValueChange = viewModel::updateUiState,
                         viewModel = viewModel,
                         coroutineScope = coroutineScope,
                         edit = false

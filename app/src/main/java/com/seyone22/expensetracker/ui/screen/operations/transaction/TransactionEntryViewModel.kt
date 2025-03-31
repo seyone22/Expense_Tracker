@@ -41,6 +41,9 @@ class TransactionEntryViewModel(
     private val _transactionUiState = MutableStateFlow(TransactionUiState())
     val transactionUiState: StateFlow<TransactionUiState> get() = _transactionUiState
 
+    private val _entityList = MutableStateFlow(EntityList())
+    val entityList: StateFlow<EntityList> get() = _entityList
+
     init {
         viewModelScope.launch {
             val accounts = accountsRepository.getAllAccountsStream().first()
@@ -48,7 +51,7 @@ class TransactionEntryViewModel(
             val categories = categoriesRepository.getAllCategoriesStream().first()
             //val tags = tagsRepository.getAllTagsStream().first()
 
-            _transactionUiState.value = TransactionUiState(
+            _entityList.value = EntityList(
                 accountsList = accounts,
                 payeesList = payees,
                 categoriesList = categories,
@@ -62,7 +65,7 @@ class TransactionEntryViewModel(
 
     fun updatePayeesList() {
         viewModelScope.launch {
-            _transactionUiState.value = _transactionUiState.value.copy(
+            _entityList.value = _entityList.value.copy(
                 payeesList = payeesRepository.getAllPayeesStream().first()
             )
         }
@@ -70,7 +73,7 @@ class TransactionEntryViewModel(
 
     fun updateCategoriesList() {
         viewModelScope.launch {
-            _transactionUiState.value = _transactionUiState.value.copy(
+            _entityList.value = _entityList.value.copy(
                 categoriesList = categoriesRepository.getAllCategoriesStream().first()
             )
         }
@@ -81,20 +84,17 @@ class TransactionEntryViewModel(
         billsDepositsDetails: BillsDepositsDetails? = null,
         advancedAmount: Double? = null
     ) {
-        if (advancedAmount != null) {
-            _transactionUiState.value =
-                _transactionUiState.value.copy(advancedAmount = advancedAmount)
-        }
-
-        _transactionUiState.value =
-            _transactionUiState.value.copy(transactionDetails = transactionDetails
-                ?: _transactionUiState.value.transactionDetails,
-                billsDepositsDetails = billsDepositsDetails
-                    ?: _transactionUiState.value.billsDepositsDetails,
-                isEntryValid = transactionDetails?.let { validateInput(it) }
-                    ?: _transactionUiState.value.isEntryValid,
-                isRecurringEntryValid = billsDepositsDetails?.let { validateRecurringInput(it) }
-                    ?: _transactionUiState.value.isRecurringEntryValid)
+        _transactionUiState.value = _transactionUiState.value.copy(
+            transactionDetails = transactionDetails ?: _transactionUiState.value.transactionDetails,
+            billsDepositsDetails = billsDepositsDetails
+                ?: _transactionUiState.value.billsDepositsDetails,
+            advancedAmount = advancedAmount
+                ?: _transactionUiState.value.advancedAmount, // ✅ Include advancedAmount in one update
+            isEntryValid = transactionDetails?.let { validateInput(it) }
+                ?: _transactionUiState.value.isEntryValid,
+            isRecurringEntryValid = billsDepositsDetails?.let { validateRecurringInput(it) }
+                ?: _transactionUiState.value.isRecurringEntryValid
+        )
     }
 
     suspend fun saveTransaction() {
@@ -180,11 +180,14 @@ data class TransactionUiState(
 
     val isEntryValid: Boolean = false,
     val isRecurringEntryValid: Boolean = false,
+    val tagLinkList: List<TagLink> = emptyList()
+)
+
+data class EntityList(
     val accountsList: List<Account> = emptyList(),
     val categoriesList: List<Category> = emptyList(),
     val payeesList: List<Payee> = emptyList(),
     val tagList: List<Tag> = emptyList(),
-    val tagLinkList: List<TagLink> = emptyList()
 )
 
 //Data class for AccountDetails
