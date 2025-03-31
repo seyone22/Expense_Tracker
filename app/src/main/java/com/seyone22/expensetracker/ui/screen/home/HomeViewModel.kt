@@ -1,5 +1,8 @@
 package com.seyone22.expensetracker.ui.screen.home
 
+import android.util.Log
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.model.Account
@@ -19,7 +22,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 /**
  * ViewModel for the Home screen, responsible for managing UI state
@@ -31,6 +37,13 @@ class HomeViewModel(
     private val metadataRepository: MetadataRepository,
     private val currencyFormatsRepository: CurrencyFormatsRepository
 ) : BaseViewModel() {
+    // State to store the current week range
+    private val _currentStartDate =
+        mutableStateOf(getStartOfPreviousWeek()) // Start of the current week
+    private val _currentEndDate = mutableStateOf(getEndOfCurrentWeek()) // End of the current week
+    val currentStartDate: State<String> get() = _currentStartDate
+    val currentEndDate: State<String> get() = _currentEndDate
+
     // Flow for different transaction types (expenses, income, total)
     private val expensesFlow = transactionsRepository.getTotalBalanceByCode("Withdrawal")
     private val incomeFlow = transactionsRepository.getTotalBalanceByCode("Deposit")
@@ -47,23 +60,64 @@ class HomeViewModel(
             Totals(expenses * -1, income, total)
         }
 
-    // Function to fetch Transactions for the week
-    suspend fun fetchTransactionsForWeek(
-        startDate: String = getStartOfPreviousWeek(),
-        endDate: String = getEndOfCurrentWeek()
-    ) {
-        val entries = transactionsRepository.getExpensesForDateRange(startDate, endDate)
+    init {
+        viewModelScope.launch {
+            fetchTransactionsForWeek()
+        }
+    }
+
+    // Function to fetch transactions for the current week
+    private suspend fun fetchTransactionsForWeek() {
+        Log.d(
+            "TAG",
+            "fetchTransactionsForWeek: ${_currentStartDate.value} ${_currentEndDate.value}"
+        )
+        val entries = transactionsRepository.getExpensesForDateRange(
+            _currentStartDate.value,
+            _currentEndDate.value
+        )
         _expensesByWeekFlow.value = entries.firstOrNull() ?: emptyList()
+    }
+
+    // Function to move to the previous week
+    fun getPreviousWeek() {
+        val currentStart = LocalDate.parse(_currentStartDate.value)
+        val newStart = currentStart.minusWeeks(1)
+        _currentStartDate.value =
+            newStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toString()
+
+        val currentEnd = LocalDate.parse(_currentEndDate.value)
+        val newEnd = currentEnd.minusWeeks(1)
+        _currentEndDate.value =
+            newEnd.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).toString()
+
+        viewModelScope.launch {
+            fetchTransactionsForWeek()
+        }
+    }
+
+    // Function to move to the next week
+    fun getNextWeek() {
+        val currentStart = LocalDate.parse(_currentStartDate.value)
+        val newStart = currentStart.plusWeeks(1)
+        _currentStartDate.value =
+            newStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toString()
+
+        val currentEnd = LocalDate.parse(_currentEndDate.value)
+        val newEnd = currentEnd.plusWeeks(1)
+        _currentEndDate.value =
+            newEnd.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY)).toString()
+
+        viewModelScope.launch {
+            fetchTransactionsForWeek()
+        }
     }
 
     // Home UI state, includes account details and transactions
     val accountsUiState: StateFlow<HomeUiState> = combine(
-        accountsRepository.getAllAccountsStream(),
-        transactionsRepository.getAllTransactionsStream(
-            sortDirection = "DESC",
-            sortField = "TransDate"
-        ),
-        expensesByWeekFlow
+        accountsRepository.getAllAccountsStream(), transactionsRepository.getAllTransactionsStream(
+            sortDirection = "DESC", sortField = "TransDate"
+        ), expensesByWeekFlow
     ) { accounts, transactions, expensesByWeek ->
         // Retrieve account balances and create a list of account-summary pairs
         val transformedList = accounts.map { account ->
@@ -76,8 +130,7 @@ class HomeViewModel(
         HomeUiState(
             accountList = transformedList,
             transactionSample = transactions.take(5),
-            expensesByWeek = expensesByWeek.map { it.copy(balance = it.balance * -1) }
-        )
+            expensesByWeek = expensesByWeek.map { it.copy(balance = it.balance * -1) })
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(TIMEOUT_MILLIS), HomeUiState())
 
     /**
