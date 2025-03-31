@@ -1,19 +1,24 @@
-package com.seyone22.expensetracker.utils
+package com.seyone22.expensetracker.managers
 
-import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.toBillsDeposit
-import kotlinx.coroutines.flow.first
+import com.seyone22.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
+import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
+import com.seyone22.expensetracker.utils.RepeatsFieldHelper
+import kotlinx.coroutines.flow.firstOrNull
 
 class TransactionStartupManager(
-    private val sharedViewModel: SharedViewModel,
+    private val billsDepositsRepository: BillsDepositsRepository,
+    private val transactionsRepository: TransactionsRepository
 ) {
     /**
      * Call this function from onResume (or onCreate) to process any past due transactions.
      */
     suspend fun processPastDueTransactions() {
         // Query for transactions that are past due (due date <= today)
-        val pastDueTransactions = sharedViewModel.pastDueBillDepositsFlow.first()
+        val pastDueTransactions = billsDepositsRepository.getPastDueBillsDeposits().firstOrNull()
+
+        if (pastDueTransactions.isNullOrEmpty()) return
 
         pastDueTransactions.forEach { billsDeposit ->
             // Decode the REPEATS field
@@ -24,7 +29,7 @@ class TransactionStartupManager(
             when {
                 // 1. Auto Execute is enabled: execute immediately
                 autoExecute -> {
-                    sharedViewModel.insertTransaction(Transaction())/*                    scaffoldState.snackbarHostState.showSnackbar(
+                    transactionsRepository.insertTransaction(Transaction())/*                    scaffoldState.snackbarHostState.showSnackbar(
                                             message = "Automatically executed scheduled transaction: ${transaction.details}",
                                             duration = SnackbarDuration.Short
                                         )*/
@@ -49,7 +54,7 @@ class TransactionStartupManager(
                                         )*/
                 }
             }
-            sharedViewModel.insertBillsDeposit(
+            billsDepositsRepository.insertBillsDeposit(
                 billsDeposit.copy(
                     NUMOCCURRENCES = ((billsDeposit.NUMOCCURRENCES ?: 1) - 1)
                 ).toBillsDeposit()

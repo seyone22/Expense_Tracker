@@ -1,13 +1,11 @@
 package com.seyone22.expensetracker.ui.common.dialogs
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,11 +25,15 @@ class EditTransactionDialogAction(
     override val title = "Edit Transaction"
     override val message = null
 
-    private var _selectedTransaction by mutableStateOf(initialTransaction)
-
+    init {
+        Log.d("TAG", "init: ")
+        viewModel.updateUiState(
+            initialTransaction, null, 0.0
+        )
+    }
 
     override fun onConfirm() {
-        onEdit(_selectedTransaction)
+        onEdit(viewModel.transactionUiState.value.transactionDetails)
     }
 
     override fun onCancel() {
@@ -48,14 +50,9 @@ class EditTransactionDialogAction(
         ) {
             item {
                 TransactionEntryForm(
-                    transactionDetails = _selectedTransaction,
                     viewModel = viewModel,
                     coroutineScope = coroutineScope,
-                    onValueChange = { transactionDetails, _, _ ->
-                        _selectedTransaction = transactionDetails
-                    },
                     edit = true,
-                    transactionUiState = transactionUiState
                 )
             }
         }

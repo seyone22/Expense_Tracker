@@ -13,7 +13,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -25,11 +24,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.seyone22.expensetracker.R
-import com.seyone22.expensetracker.SelectedObjects
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.ExpenseTopBar
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
-import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.seyone22.expensetracker.ui.screen.transactions.composables.ScheduledTransactionList
 import com.seyone22.expensetracker.ui.screen.transactions.composables.TransactionList
 import kotlinx.coroutines.launch
@@ -52,10 +49,9 @@ fun TransactionsScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var state by remember { mutableIntStateOf(0) }
-
     val titles = listOf("Transactions", "Scheduled")
-
     val pagerState = rememberPagerState(pageCount = { 2 })
+
     Scaffold(topBar = {
         ExpenseTopBar(
             selectedActivity = TransactionsDestination.route,
@@ -93,24 +89,19 @@ fun TransactionsScreen(
             ) { page ->
                 when (page) {
                     0 -> {
-                        val entryViewModel: TransactionEntryViewModel =
-                            viewModel(factory = AppViewModelProvider.Factory)
-                        val transactionUiState by entryViewModel.transactionUiState.collectAsState()
-
                         state = pagerState.currentPage
                         TransactionList(
                             useLazyColumn = true,
                             viewModel = viewModel,
                             showFilter = true,
-                            forAccountId = -1
                         )
                     }
 
                     1 -> {
                         state = pagerState.currentPage
                         ScheduledTransactionList(
-                            longClicked = { selected ->
-                                val selObj = SelectedObjects(billsDeposits = selected)
+                            longClicked = {
+
                             },
                             viewModel = viewModel
                         )

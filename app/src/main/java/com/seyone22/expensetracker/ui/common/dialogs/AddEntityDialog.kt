@@ -76,6 +76,8 @@ fun CategoryEntryDialog(
     var categoryExpanded by remember { mutableStateOf(false) }
 
     val transactionUiState: TransactionUiState by transactionViewModel.transactionUiState.collectAsState()
+    val entityList by transactionViewModel.entityList.collectAsState()
+
     Log.d("TAG", "CategoryEntryDialog: $transactionUiState")
 
     viewModel.updateCategoryState(
@@ -149,7 +151,7 @@ fun CategoryEntryDialog(
                         expanded = categoryExpanded,
                         onDismissRequest = { categoryExpanded = false },
                     ) {
-                        transactionUiState.categoriesList.forEach { category ->
+                        entityList.categoriesList.forEach { category ->
                             DropdownMenuItem(text = {
                                 Row {
                                     if (category.parentId != -1) {

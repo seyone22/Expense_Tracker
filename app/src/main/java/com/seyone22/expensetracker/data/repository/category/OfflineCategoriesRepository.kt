@@ -4,7 +4,7 @@ import com.seyone22.expensetracker.data.model.Category
 import kotlinx.coroutines.flow.Flow
 
 class OfflineCategoriesRepository(private val categoryDao: CategoryDao) : CategoriesRepository {
-    override fun getCategoriesStream(categId: Int): Flow<Category?> =
+    override fun getCategoryByIdStream(categId: Int): Flow<Category?> =
         categoryDao.getCategory(categId)
 
     override fun getAllCategoriesStream(): Flow<List<Category>> = categoryDao.getAllCategories()

@@ -4,7 +4,7 @@ import com.seyone22.expensetracker.data.model.Category
 import kotlinx.coroutines.flow.Flow
 
 interface CategoriesRepository {
-    fun getCategoriesStream(categId: Int): Flow<Category?>
+    fun getCategoryByIdStream(categId: Int): Flow<Category?>
     fun getAllCategoriesStream(): Flow<List<Category>>
     fun getAllActiveCategoriesStream(): Flow<List<Category>>
 

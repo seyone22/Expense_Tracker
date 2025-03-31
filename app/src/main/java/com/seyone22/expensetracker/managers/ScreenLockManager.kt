@@ -1,4 +1,4 @@
-package com.seyone22.expensetracker.utils
+package com.seyone22.expensetracker.managers
 
 import android.content.Context
 import android.util.Log

@@ -2,6 +2,7 @@ package com.seyone22.expensetracker.data.repository.budgetEntry
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Embedded
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -31,5 +32,13 @@ interface BudgetEntryDao {
 
     @Query("SELECT * FROM BUDGETTABLE_V1 WHERE active = 1 AND budgetEntryId = :budgetEntryId")
     fun getBudgetEntryById(budgetEntryId: Int): Flow<BudgetEntry>
+
 }
+
+data class BudgetEntryWithSpending(
+    @Embedded val budgetEntry: BudgetEntry,
+    val budgetname: String,
+    val totalSpent: Double
+)
+
 

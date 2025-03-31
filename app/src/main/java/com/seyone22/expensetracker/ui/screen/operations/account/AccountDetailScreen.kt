@@ -23,6 +23,8 @@ import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.operations.account.composables.AccountDetailCard
 import com.seyone22.expensetracker.ui.screen.operations.account.composables.AccountHistoryGraph
+import com.seyone22.expensetracker.ui.screen.transactions.TransactionsViewModel
+import com.seyone22.expensetracker.ui.screen.transactions.composables.TransactionFilters
 import com.seyone22.expensetracker.ui.screen.transactions.composables.TransactionList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -40,8 +42,10 @@ fun AccountDetailScreen(
     navController: NavController,
     backStackEntry: String,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    viewModel: AccountDetailViewModel = viewModel(factory = AppViewModelProvider.Factory)
-) {
+    viewModel: AccountDetailViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    transactionsViewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+
+    ) {
     // Viewmodel and UI States
     val accountDetailUiState by viewModel.accountDetailUiState.collectAsState()
 
@@ -52,6 +56,7 @@ fun AccountDetailScreen(
 
     LaunchedEffect(Unit, accountDetailUiState.account.currencyId) {
         viewModel.setAccountId(backStackEntry.toInt())
+        transactionsViewModel.setFilters(TransactionFilters(accountFilter = accountDetailUiState.account))
     }
     Scaffold(topBar = {
         ExpenseTopBar(
@@ -68,8 +73,7 @@ fun AccountDetailScreen(
                                     viewModel.deleteAccount(accountDetailUiState.account)
                                     navController.popBackStack()
                                 }
-                            },
-                            itemName = accountDetailUiState.account.accountName
+                            }, itemName = accountDetailUiState.account.accountName
                         )
                     )
                 },
@@ -107,9 +111,7 @@ fun AccountDetailScreen(
 
             item {
                 // List of transactions for this account
-                TransactionList(
-                    modifier = modifier, showFilter = false, forAccountId = backStackEntry.toInt()
-                )
+                TransactionList(modifier = modifier, showFilter = false)
             }
         }
     }

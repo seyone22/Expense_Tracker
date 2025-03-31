@@ -45,6 +45,7 @@ object AppViewModelProvider {
                 expenseApplication().container.transactionsRepository,
                 expenseApplication().container.billsDepositsRepository,
                 expenseApplication().container.accountsRepository,
+                expenseApplication().container.categoriesRepository
             )
         }
         initializer {
@@ -136,7 +137,8 @@ object AppViewModelProvider {
                 expenseApplication().container.currencyHistoryRepository,
                 expenseApplication().container.categoriesRepository,
                 expenseApplication().container.payeesRepository,
-                expenseApplication().container.tagsRepository
+                expenseApplication().container.tagsRepository,
+                expenseApplication().container.budgetEntryRepository
             )
         }
     }

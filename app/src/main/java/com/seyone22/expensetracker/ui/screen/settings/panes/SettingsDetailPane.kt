@@ -1,4 +1,4 @@
-package com.seyone22.expensetracker.ui.screen.settings
+package com.seyone22.expensetracker.ui.screen.settings.panes
 
 import android.app.Activity
 import android.content.Context
@@ -18,28 +18,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -51,7 +45,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -59,38 +52,36 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.window.core.layout.WindowSizeClass
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Metadata
+import com.seyone22.expensetracker.managers.CryptoManager
+import com.seyone22.expensetracker.managers.ScreenLockManager
+import com.seyone22.expensetracker.managers.SnackbarManager
 import com.seyone22.expensetracker.ui.AppViewModelProvider
+import com.seyone22.expensetracker.ui.common.ExpenseTopBar
 import com.seyone22.expensetracker.ui.common.removeTrPrefix
-import com.seyone22.expensetracker.ui.navigation.NavigationDestination
+import com.seyone22.expensetracker.ui.screen.settings.SettingsListItem
+import com.seyone22.expensetracker.ui.screen.settings.SettingsToggleListItem
+import com.seyone22.expensetracker.ui.screen.settings.SettingsViewModel
 import com.seyone22.expensetracker.ui.theme.LocalTheme
 import com.seyone22.expensetracker.utils.BiometricHelper
 import com.seyone22.expensetracker.utils.BiometricPromptActivityResultContract
-import com.seyone22.expensetracker.utils.CryptoManager
-import com.seyone22.expensetracker.utils.ScreenLockManager
-import com.seyone22.expensetracker.utils.SnackbarManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-object SettingsDetailDestination : NavigationDestination {
-    override val route = "SettingsDetail"
-    override val titleRes = R.string.app_name
-    override val routeId = 15
-    override val icon = null
-}
-
 @RequiresApi(Build.VERSION_CODES.R)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsDetailScreen(
+fun SettingsDetailPane(
     modifier: Modifier = Modifier,
-    navigateToScreen: (screen: String) -> Unit,
-    onToggleDarkTheme: (Int) -> Unit,
     navigateBack: () -> Unit,
-    backStackEntry: String,
+    navController: NavController,
+    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
+    currentDestinationKey: String,
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val metadataList by viewModel.metadataList.collectAsState(emptyList())
@@ -100,32 +91,21 @@ fun SettingsDetailScreen(
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { data ->
-                Snackbar(
-                    snackbarData = data,
-                    actionColor = Color.Red // Customize for error messages
-                )
-            }
-        },
         topBar = {
-            TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                titleContentColor = MaterialTheme.colorScheme.onSurface,
-            ), title = { Text(text = backStackEntry) }, navigationIcon = {
-                IconButton(onClick = { navigateBack() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null
-                    )
-                }
-            })
+            ExpenseTopBar(
+                selectedActivity = currentDestinationKey,
+                type = "Left",
+                hasNavBarAction = false,
+                navBarBackAction = navigateBack,
+                navController = navController,
+                hasNavigation = (windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT),
+            )
         },
     ) { innerPadding ->
         Column(
             Modifier.padding(innerPadding)
         ) {
-            when (backStackEntry) {
+            when (currentDestinationKey) {
                 "General" -> {
                     GeneralSettingsList(
                         metadata = metadataList, viewModel = viewModel
@@ -135,7 +115,7 @@ fun SettingsDetailScreen(
                 "Appearance" -> {
                     AppearanceSettingsList(
                         metadata = metadataList,
-                        onToggleDarkTheme = { onToggleDarkTheme(it) },
+                        onToggleDarkTheme = { TODO() },
                         viewModel = viewModel
                     )
                 }
@@ -281,7 +261,8 @@ fun GeneralSettingsList(
                         text = "Select your new base currency",
                         modifier = Modifier.padding(8.dp),
                     )
-                    ExposedDropdownMenuBox(expanded = baseCurrencyExpanded,
+                    ExposedDropdownMenuBox(
+                        expanded = baseCurrencyExpanded,
                         onExpandedChange = { baseCurrencyExpanded = !baseCurrencyExpanded }) {
                         OutlinedTextField(
                             modifier = Modifier
@@ -303,7 +284,8 @@ fun GeneralSettingsList(
                             onDismissRequest = { baseCurrencyExpanded = false },
                         ) {
                             currencyList.currenciesList.forEach { currency ->
-                                DropdownMenuItem(text = { Text(removeTrPrefix(currency.currencyName)) },
+                                DropdownMenuItem(
+                                    text = { Text(removeTrPrefix(currency.currencyName)) },
                                     onClick = {
                                         newCurrency = currency
                                         baseCurrencyExpanded = false
@@ -371,13 +353,15 @@ fun AboutList() {
                 text = stringResource(id = R.string.database_version)
             )
         }, modifier = Modifier.clickable { })
-        ListItem(headlineContent = { Text(text = "Check for updates") },
+        ListItem(
+            headlineContent = { Text(text = "Check for updates") },
             modifier = Modifier.clickable { })
-        ListItem(headlineContent = { Text(text = "What's new") },
+        ListItem(headlineContent = { Text(text = "What's new") }, modifier = Modifier.clickable { })
+        ListItem(
+            headlineContent = { Text(text = "Open Source licenses") },
             modifier = Modifier.clickable { })
-        ListItem(headlineContent = { Text(text = "Open Source licenses") },
-            modifier = Modifier.clickable { })
-        ListItem(headlineContent = { Text(text = "Privacy Policy") },
+        ListItem(
+            headlineContent = { Text(text = "Privacy Policy") },
             modifier = Modifier.clickable { })
         ListItem(headlineContent = {
             Row(
@@ -416,8 +400,7 @@ fun AboutList() {
 //                    )
 //                }
             }
-        },
-            modifier = Modifier.clickable { })
+        }, modifier = Modifier.clickable { })
 
     }
 }
@@ -452,8 +435,7 @@ fun AppearanceSettingsList(
             ) {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(275.dp)
+                        .height(280.dp)
                         .padding(16.dp),
                     shape = RoundedCornerShape(16.dp),
                 ) {
@@ -465,34 +447,44 @@ fun AppearanceSettingsList(
                         Text(
                             text = "Theme",
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(0.dp, 8.dp)
+                            modifier = Modifier.padding(16.dp, 16.dp)
                         )
-                        Row {
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             RadioButton(enabled = true, selected = (selectedTheme == 0), onClick = {
                                 selectedTheme = 0
                                 coroutineScope.launch { viewModel.setTheme(selectedTheme) }
-                                onToggleDarkTheme(selectedTheme)
                             })
                             Text(text = "Light")
                         }
-                        Row {
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             RadioButton(enabled = true, selected = (selectedTheme == 1), onClick = {
                                 selectedTheme = 1
                                 coroutineScope.launch { viewModel.setTheme(selectedTheme) }
-                                onToggleDarkTheme(selectedTheme)
                             })
                             Text(text = "Dark")
                         }
-                        Row {
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             RadioButton(enabled = true, selected = (selectedTheme == 2), onClick = {
                                 selectedTheme = 2
                                 coroutineScope.launch { viewModel.setTheme(selectedTheme) }
-                                onToggleDarkTheme(selectedTheme)
                             })
                             Text(text = "System Default")
                         }
-                        Row {
-                            RadioButton(enabled = true,
+                        Row(
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                enabled = true,
                                 selected = (selectedTheme == 3),
                                 onClick = { selectedTheme = 3 })
                             Text(text = "Midnight")
@@ -510,6 +502,7 @@ fun DataSettingsList(
     viewModel: SettingsViewModel,
 ) {
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val isLoading by sharedViewModel.isLoading.collectAsState()
 
     Column {
         SettingsListItem(
@@ -520,8 +513,10 @@ fun DataSettingsList(
                     ?.let { baseCurrencyId ->
                         sharedViewModel.getMonthlyRates()
                     }
-            }
-        )
+            })
+        if (isLoading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
     }
 }
 
@@ -534,8 +529,7 @@ fun SecuritySettingsList(
     val cryptoManager = remember { CryptoManager() }
     val screenLockManager = remember {
         ScreenLockManager(
-            context = context!!,
-            cryptoManager = cryptoManager
+            context = context!!, cryptoManager = cryptoManager
         )
     }
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -580,7 +574,8 @@ fun SecuritySettingsList(
         SettingsListItem(settingName = "Lock when idle", settingSubtext = "", action = {
 
         })
-        SettingsToggleListItem(settingName = "Secure screen",
+        SettingsToggleListItem(
+            settingName = "Secure screen",
             settingSubtext = "Hides app contents when switching apps, and blocks screenshots",
             toggle = isSecureScreenEnabled,
             enabled = isBiometricAvailable,
@@ -594,6 +589,5 @@ fun SecuritySettingsList(
 fun ImportExportSettingsList(
     viewModel: SettingsViewModel, scope: CoroutineScope = rememberCoroutineScope()
 ) {
-    Column {
-    }
+    Column {}
 }

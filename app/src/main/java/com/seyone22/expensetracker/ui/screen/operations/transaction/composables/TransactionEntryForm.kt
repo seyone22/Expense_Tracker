@@ -1,7 +1,6 @@
 package com.seyone22.expensetracker.ui.screen.operations.transaction.composables
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,6 +37,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -65,10 +65,7 @@ import com.seyone22.expensetracker.ui.common.dialogs.AddEditPayeeDialogAction
 import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.common.removeTrPrefix
 import com.seyone22.expensetracker.ui.screen.entities.EntityViewModel
-import com.seyone22.expensetracker.ui.screen.operations.transaction.BillsDepositsDetails
-import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
-import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -81,15 +78,15 @@ import java.util.Locale
 @Composable
 fun TransactionEntryForm(
     modifier: Modifier = Modifier,
-    transactionDetails: TransactionDetails,
-    transactionUiState: TransactionUiState,
-    onValueChange: (TransactionDetails, BillsDepositsDetails, Double) -> Unit,
     viewModel: TransactionEntryViewModel,
     entityViewModel: EntityViewModel = viewModel(factory = AppViewModelProvider.Factory),
     coroutineScope: CoroutineScope,
     edit: Boolean,
     focusManager: FocusManager = LocalFocusManager.current
 ) {
+    val transactionUiState by viewModel.transactionUiState.collectAsState()
+    val entityList by viewModel.entityList.collectAsState()
+
     // Code block to get the current currency's detail.
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
@@ -116,23 +113,21 @@ fun TransactionEntryForm(
 
     var openTransactionDateDialog by remember { mutableStateOf(false) }
 
-    val currentTransactionDetails by remember { mutableStateOf(transactionDetails) }
-
     var currentAccount by remember { mutableStateOf(Account()) }
     var currentPayee by remember { mutableStateOf(Payee()) }
     var currentCategory by remember { mutableStateOf(Category()) }
     var currentToAccount by remember { mutableStateOf(Account()) }
-    var currentAdvancedAmount by remember { mutableDoubleStateOf(if (transactionDetails.transCode == TransactionCode.TRANSFER.displayName) transactionDetails.toTransAmount.toDouble() else 0.0) }
+    var currentAdvancedAmount by remember { mutableDoubleStateOf(if (transactionUiState.transactionDetails.transCode == TransactionCode.TRANSFER.displayName) transactionUiState.transactionDetails.toTransAmount.toDouble() else 0.0) }
 
     var currentCurrency: CurrencyFormat? by remember { mutableStateOf(null) }
     var currentCurrencyAdvanced: CurrencyFormat? by remember { mutableStateOf(null) }
 
     LaunchedEffect(currentAccount, currentToAccount) {
         coroutineScope.launch {
-            if (transactionDetails.accountId.isNotBlank()) {
+            if (transactionUiState.transactionDetails.accountId.isNotBlank()) {
                 currentCurrency = sharedViewModel.getCurrencyById(currentAccount.currencyId)
             }
-            if (transactionDetails.toAccountId.isNotBlank()) {
+            if (transactionUiState.transactionDetails.toAccountId.isNotBlank()) {
                 currentCurrencyAdvanced =
                     sharedViewModel.getCurrencyById(currentToAccount.currencyId)
             }
@@ -141,10 +136,13 @@ fun TransactionEntryForm(
 
     if (edit) {
         coroutineScope.launch {
-            currentAccount = viewModel.getAccount(transactionDetails.accountId.toInt())
-            currentPayee = viewModel.getPayee(transactionDetails.payeeId.toInt())
-            currentCategory = viewModel.getCategory(transactionDetails.categoryId.toInt())
-            currentToAccount = viewModel.getAccount(transactionDetails.toAccountId.toInt())
+            currentAccount =
+                viewModel.getAccount(transactionUiState.transactionDetails.accountId.toInt())
+            currentPayee = viewModel.getPayee(transactionUiState.transactionDetails.payeeId.toInt())
+            currentCategory =
+                viewModel.getCategory(transactionUiState.transactionDetails.categoryId.toInt())
+            currentToAccount =
+                viewModel.getAccount(transactionUiState.transactionDetails.toAccountId.toInt())
         }
     }
 
@@ -159,10 +157,10 @@ fun TransactionEntryForm(
         ) {
             enumValues<TransactionCode>().forEachIndexed { index, transactionCode ->
                 SegmentedButton(
-                    selected = transactionDetails.transCode == transactionCode.displayName,
+                    selected = transactionUiState.transactionDetails.transCode == transactionCode.displayName,
                     onClick = {
-                        onValueChange(
-                            transactionDetails.copy(transCode = transactionCode.displayName),
+                        viewModel.updateUiState(
+                            transactionUiState.transactionDetails.copy(transCode = transactionCode.displayName),
                             viewModel.transactionUiState.value.billsDepositsDetails,
                             currentAdvancedAmount
                         )
@@ -180,11 +178,12 @@ fun TransactionEntryForm(
         }
 
         // Transaction Date
-        OutlinedTextField(modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = true) {
-                openTransactionDateDialog = true
-            },
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = true) {
+                    openTransactionDateDialog = true
+                },
             enabled = false,
             colors = OutlinedTextFieldDefaults.colors(
                 disabledTextColor = MaterialTheme.colorScheme.onSurface,
@@ -195,10 +194,10 @@ fun TransactionEntryForm(
                 //For Icons
                 disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
             ),
-            value = transactionDetails.transDate,
+            value = transactionUiState.transactionDetails.transDate,
             onValueChange = {
-                onValueChange(
-                    transactionDetails.copy(transDate = it),
+                viewModel.updateUiState(
+                    transactionUiState.transactionDetails.copy(transDate = it),
                     viewModel.transactionUiState.value.billsDepositsDetails,
                     currentAdvancedAmount
                 )
@@ -216,15 +215,15 @@ fun TransactionEntryForm(
             TransactionStatus.entries.forEach { transactionStatus ->
                 item {
                     FilterChip(
-                        selected = transactionDetails.status == transactionStatus.displayName,
+                        selected = transactionUiState.transactionDetails.status == transactionStatus.displayName,
                         leadingIcon = {
-                            if (transactionDetails.status == transactionStatus.displayName) {
+                            if (transactionUiState.transactionDetails.status == transactionStatus.displayName) {
                                 Icon(Icons.Filled.Check, "")
                             }
                         },
                         onClick = {
-                            onValueChange(
-                                transactionDetails.copy(status = transactionStatus.displayName),
+                            viewModel.updateUiState(
+                                transactionUiState.transactionDetails.copy(status = transactionStatus.displayName),
                                 viewModel.transactionUiState.value.billsDepositsDetails,
                                 currentAdvancedAmount
                             )
@@ -248,14 +247,14 @@ fun TransactionEntryForm(
                 value = currentAccount.accountName,
                 readOnly = true,
                 onValueChange = {
-                    onValueChange(
-                        transactionDetails.copy(accountId = it),
+                    viewModel.updateUiState(
+                        transactionUiState.transactionDetails.copy(accountId = it),
                         viewModel.transactionUiState.value.billsDepositsDetails,
                         currentAdvancedAmount
                     )
                 },
                 label = {
-                    when (transactionDetails.transCode) {
+                    when (transactionUiState.transactionDetails.transCode) {
                         TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
                             Text(text = "Account *")
                         }
@@ -278,10 +277,10 @@ fun TransactionEntryForm(
                 expanded = accountExpanded,
                 onDismissRequest = { accountExpanded = false },
             ) {
-                transactionUiState.accountsList.forEach { account ->
+                entityList.accountsList.forEach { account ->
                     DropdownMenuItem(text = { Text(account.accountName) }, onClick = {
-                        onValueChange(
-                            transactionDetails.copy(accountId = account.accountId.toString()),
+                        viewModel.updateUiState(
+                            transactionUiState.transactionDetails.copy(accountId = account.accountId.toString()),
                             viewModel.transactionUiState.value.billsDepositsDetails,
                             currentAdvancedAmount
                         )
@@ -299,7 +298,7 @@ fun TransactionEntryForm(
             // Transaction Payee/To Dropdown
             ExposedDropdownMenuBox(expanded = payeeExpanded, onExpandedChange = {
                 payeeExpanded = !payeeExpanded
-                when (transactionDetails.transCode) {
+                when (transactionUiState.transactionDetails.transCode) {
                     TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
                     }
 
@@ -311,7 +310,7 @@ fun TransactionEntryForm(
                     modifier = Modifier
                         .clickable(enabled = true) { payeeExpanded = true }
                         .menuAnchor(MenuAnchorType.PrimaryEditable, true),
-                    value = when (transactionDetails.transCode) {
+                    value = when (transactionUiState.transactionDetails.transCode) {
                         TransactionCode.WITHDRAWAL.displayName, TransactionCode.DEPOSIT.displayName -> {
                             currentPayee.payeeName
                         }
@@ -327,7 +326,7 @@ fun TransactionEntryForm(
                     readOnly = true,
                     onValueChange = { },
                     label = {
-                        when (transactionDetails.transCode) {
+                        when (transactionUiState.transactionDetails.transCode) {
                             TransactionCode.WITHDRAWAL.displayName -> {
                                 Text(text = "Payee *")
                             }
@@ -354,25 +353,18 @@ fun TransactionEntryForm(
                     expanded = payeeExpanded,
                     onDismissRequest = { payeeExpanded = false },
                 ) {
-                    when (transactionDetails.transCode) {
+                    when (transactionUiState.transactionDetails.transCode) {
                         TransactionCode.DEPOSIT.displayName, TransactionCode.WITHDRAWAL.displayName -> {
-                            Log.d(
-                                "DEBUG",
-                                "TransactionEntryForm: Executes Other! ${transactionUiState.payeesList}"
-                            )
-                            transactionUiState.payeesList.forEach { payee ->
+                            entityList.payeesList.forEach { payee ->
                                 DropdownMenuItem(text = { Text(payee.payeeName) }, onClick = {
                                     currentPayee = payee
-                                    onValueChange(
-                                        transactionDetails.copy(
+                                    viewModel.updateUiState(
+                                        transactionUiState.transactionDetails.copy(
                                             toAccountId = "-1",
                                             payeeId = currentPayee.payeeId.toString()
                                         ),
                                         viewModel.transactionUiState.value.billsDepositsDetails,
                                         currentAdvancedAmount
-                                    )
-                                    Log.d(
-                                        "DEBUG", "TransactionEntryForm: $transactionDetails"
                                     )
                                     payeeExpanded = false
                                 })
@@ -380,11 +372,10 @@ fun TransactionEntryForm(
                         }
 
                         TransactionCode.TRANSFER.displayName -> {
-                            transactionUiState.accountsList.forEach { account ->
-                                Log.d("DEBUG", "TransactionEntryForm: Executes! $account")
+                            entityList.accountsList.forEach { account ->
                                 DropdownMenuItem(text = { Text(account.accountName) }, onClick = {
-                                    onValueChange(
-                                        transactionDetails.copy(
+                                    viewModel.updateUiState(
+                                        transactionUiState.transactionDetails.copy(
                                             payeeId = "-1",
                                             toAccountId = account.accountId.toString()
                                         ),
@@ -412,8 +403,8 @@ fun TransactionEntryForm(
                                     entityViewModel.savePayee(payee)
                                     viewModel.updatePayeesList()
                                     currentPayee = payee
-                                    onValueChange(
-                                        transactionDetails.copy(
+                                    viewModel.updateUiState(
+                                        transactionUiState.transactionDetails.copy(
                                             toAccountId = "-1",
                                             payeeId = currentPayee.payeeId.toString()
                                         ),
@@ -431,7 +422,7 @@ fun TransactionEntryForm(
                         )
                     )
                 },
-                enabled = (transactionDetails.transCode != TransactionCode.TRANSFER.displayName)
+                enabled = (transactionUiState.transactionDetails.transCode != TransactionCode.TRANSFER.displayName)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add, contentDescription = "Add"
@@ -441,14 +432,9 @@ fun TransactionEntryForm(
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = transactionDetails.transAmount,
+            value = transactionUiState.transactionDetails.transAmount,
             onValueChange = {
-                Log.d("TAG", "TransactionEntryForm: $currentCurrency")
-                Log.d("TAG", "TransactionEntryForm: $currentCurrencyAdvanced")
-
-                if (transactionDetails.transCode == TransactionCode.TRANSFER.displayName && currentCurrency != null && currentCurrencyAdvanced != null && it.isNotEmpty()) {
-                    Log.d("TAG", "TransactionEntryForm: I'm here")
-
+                if (transactionUiState.transactionDetails.transCode == TransactionCode.TRANSFER.displayName && currentCurrency != null && currentCurrencyAdvanced != null && it.isNotEmpty()) {
                     if (currentCurrency?.currencyId != currentCurrencyAdvanced?.currencyId) {
                         currentAdvancedAmount =
                             it.toDouble() * (currentCurrency?.baseConvRate!! * currentCurrencyAdvanced?.baseConvRate!!)
@@ -456,8 +442,8 @@ fun TransactionEntryForm(
                         currentAdvancedAmount = it.toDouble()
                     }
                 }
-                onValueChange(
-                    transactionDetails.copy(transAmount = it),
+                viewModel.updateUiState(
+                    transactionUiState.transactionDetails.copy(transAmount = it),
                     viewModel.transactionUiState.value.billsDepositsDetails,
                     currentAdvancedAmount
                 )
@@ -467,13 +453,13 @@ fun TransactionEntryForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
         )
 
-        if (transactionDetails.transCode == TransactionCode.TRANSFER.displayName) {
+        if (transactionUiState.transactionDetails.transCode == TransactionCode.TRANSFER.displayName) {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = currentAdvancedAmount.toString(),
                 onValueChange = {
-                    onValueChange(
-                        transactionDetails,
+                    viewModel.updateUiState(
+                        transactionUiState.transactionDetails,
                         viewModel.transactionUiState.value.billsDepositsDetails,
                         it.toDouble()
                     )
@@ -503,8 +489,8 @@ fun TransactionEntryForm(
                     value = removeTrPrefix(currentCategory.categName),
                     readOnly = true,
                     onValueChange = {
-                        onValueChange(
-                            transactionDetails.copy(categoryId = it),
+                        viewModel.updateUiState(
+                            transactionUiState.transactionDetails.copy(categoryId = it),
                             viewModel.transactionUiState.value.billsDepositsDetails,
                             currentAdvancedAmount
                         )
@@ -524,9 +510,9 @@ fun TransactionEntryForm(
                     onDismissRequest = { categoryExpanded = false },
                 ) {
                     val parentCategories =
-                        transactionUiState.categoriesList.filter { it.parentId == -1 }
+                        entityList.categoriesList.filter { it.parentId == -1 }
                     val childCategoriesMap =
-                        transactionUiState.categoriesList.filter { it.parentId != -1 }
+                        entityList.categoriesList.filter { it.parentId != -1 }
                             .groupBy { it.parentId } // Group children by parentId
 
 
@@ -537,8 +523,8 @@ fun TransactionEntryForm(
                             }
                         }, onClick = {
                             currentCategory = parent
-                            onValueChange(
-                                transactionDetails.copy(categoryId = parent.categId.toString()),
+                            viewModel.updateUiState(
+                                transactionUiState.transactionDetails.copy(categoryId = parent.categId.toString()),
                                 viewModel.transactionUiState.value.billsDepositsDetails,
                                 currentAdvancedAmount
                             )
@@ -553,8 +539,8 @@ fun TransactionEntryForm(
                                 }
                             }, onClick = {
                                 currentCategory = child
-                                onValueChange(
-                                    transactionDetails.copy(categoryId = child.categId.toString()),
+                                viewModel.updateUiState(
+                                    transactionUiState.transactionDetails.copy(categoryId = child.categId.toString()),
                                     viewModel.transactionUiState.value.billsDepositsDetails,
                                     currentAdvancedAmount
                                 )
@@ -577,8 +563,8 @@ fun TransactionEntryForm(
                                     entityViewModel.saveCategory(category)
                                     viewModel.updateCategoriesList()
                                     currentCategory = category
-                                    onValueChange(
-                                        transactionDetails.copy(categoryId = category.categId.toString()),
+                                    viewModel.updateUiState(
+                                        transactionUiState.transactionDetails.copy(categoryId = category.categId.toString()),
                                         viewModel.transactionUiState.value.billsDepositsDetails,
                                         currentAdvancedAmount
                                     )
@@ -593,7 +579,7 @@ fun TransactionEntryForm(
                         )
                     )
                 },
-                enabled = (transactionDetails.transCode != TransactionCode.TRANSFER.displayName)
+                enabled = (transactionUiState.transactionDetails.transCode != TransactionCode.TRANSFER.displayName)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add, contentDescription = "Add"
@@ -670,10 +656,10 @@ fun TransactionEntryForm(
         } else {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = transactionDetails.transactionNumber,
+                value = transactionUiState.transactionDetails.transactionNumber,
                 onValueChange = {
-                    onValueChange(
-                        transactionDetails.copy(transactionNumber = it),
+                    viewModel.updateUiState(
+                        transactionUiState.transactionDetails.copy(transactionNumber = it),
                         viewModel.transactionUiState.value.billsDepositsDetails,
                         currentAdvancedAmount
                     )
@@ -683,11 +669,12 @@ fun TransactionEntryForm(
                 singleLine = true
             )
 
-            OutlinedTextField(modifier = Modifier.fillMaxWidth(),
-                value = transactionDetails.notes,
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = transactionUiState.transactionDetails.notes,
                 onValueChange = {
-                    onValueChange(
-                        transactionDetails.copy(notes = it),
+                    viewModel.updateUiState(
+                        transactionUiState.transactionDetails.copy(notes = it),
                         viewModel.transactionUiState.value.billsDepositsDetails,
                         currentAdvancedAmount
                     )
@@ -696,10 +683,10 @@ fun TransactionEntryForm(
 
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = transactionDetails.color,
+                value = transactionUiState.transactionDetails.color,
                 onValueChange = {
-                    onValueChange(
-                        transactionDetails.copy(color = it),
+                    viewModel.updateUiState(
+                        transactionUiState.transactionDetails.copy(color = it),
                         viewModel.transactionUiState.value.billsDepositsDetails,
                         currentAdvancedAmount
                     )
@@ -715,7 +702,8 @@ fun TransactionEntryForm(
         val datePickerState =
             rememberDatePickerState(initialSelectedDateMillis = Instant.now().toEpochMilli())
         val confirmEnabled = derivedStateOf { datePickerState.selectedDateMillis != null }
-        DatePickerDialog(onDismissRequest = {
+        DatePickerDialog(
+            onDismissRequest = {
             // Dismiss the dialog when the user clicks outside the dialog or on the back
             // button. If you want to disable that functionality, simply use an empty
             // onDismissRequest.
@@ -729,8 +717,12 @@ fun TransactionEntryForm(
                         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                         val date = Date(datePickerState.selectedDateMillis!!)
 
-                        onValueChange(
-                            transactionDetails.copy(transDate = dateFormat.format(date)),
+                        viewModel.updateUiState(
+                            transactionUiState.transactionDetails.copy(
+                                transDate = dateFormat.format(
+                                    date
+                                )
+                            ),
                             viewModel.transactionUiState.value.billsDepositsDetails,
                             currentAdvancedAmount
                         )
