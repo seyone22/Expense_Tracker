@@ -389,6 +389,12 @@ private fun BudgetCategoryItem(
                                 viewModel.fetchBudgetEntriesFor(backStackEntry)
                             }
                         },
+                        onAdd = { budgetEntry ->
+                            coroutineScope.launch {
+                                viewModel.addBudgetEntry(budgetEntry)
+                                viewModel.fetchBudgetEntriesFor(backStackEntry)
+                            }
+                        },
                         initialEntry = budgetItem,
                         categId = category.categId,
                         budgetYearId = backStackEntry
