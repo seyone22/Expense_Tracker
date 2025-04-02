@@ -14,8 +14,8 @@ android {
         applicationId = "com.seyone22.expenses"
         minSdk = 28
         targetSdk = 35
-        versionCode = 14
-        versionName = "0.4.11"
+        versionCode = 15
+        versionName = "0.4.12"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
