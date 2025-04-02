@@ -21,10 +21,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.CurrencyFormat
-import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
-import com.seyone22.expensetracker.data.model.toTransaction
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
 import com.seyone22.expensetracker.ui.common.TransactionType
@@ -36,7 +34,7 @@ import com.seyone22.expensetracker.ui.screen.transactions.TransactionsViewModel
 fun TransactionItem(
     transaction: TransactionWithDetails,
     haptics: HapticFeedback,
-    longClicked: (Transaction) -> Unit,
+    longClicked: (TransactionWithDetails) -> Unit,
     viewModel: TransactionsViewModel,
 ) {
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -85,7 +83,7 @@ fun TransactionItem(
         }
     }, modifier = Modifier.combinedClickable(onClick = {}, onLongClick = {
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-        longClicked(transaction.toTransaction())
+        longClicked(transaction)
     }, onLongClickLabel = " "
     )
     )

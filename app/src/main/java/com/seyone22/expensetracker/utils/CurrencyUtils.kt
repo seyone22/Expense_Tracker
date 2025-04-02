@@ -26,6 +26,8 @@ fun getValueWithType(value: Double?): Pair<Double, TransactionType>? {
 }
 
 fun formatCurrency(value: Double, currency: CurrencyFormat): String {
+
+
     // Format the number with comma separators
     val formattedValue = if (value == 0.0) "0.00" else DecimalFormat("#,###.00").format(value)
 

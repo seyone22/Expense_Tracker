@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionDetails
 import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
-import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionUiState
 import com.seyone22.expensetracker.ui.screen.operations.transaction.composables.TransactionEntryForm
 import kotlinx.coroutines.CoroutineScope
 
@@ -20,7 +19,6 @@ class EditTransactionDialogAction(
     private val initialTransaction: TransactionDetails,
     private val viewModel: TransactionEntryViewModel,
     private val coroutineScope: CoroutineScope,
-    private val transactionUiState: TransactionUiState
 ) : DialogAction {
     override val title = "Edit Transaction"
     override val message = null
