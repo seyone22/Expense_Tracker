@@ -13,7 +13,7 @@ import com.seyone22.expensetracker.data.repository.metadata.MetadataRepository
 import com.seyone22.expensetracker.data.repository.transaction.BalanceResult
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
 import com.seyone22.expensetracker.utils.getEndOfCurrentWeek
-import com.seyone22.expensetracker.utils.getStartOfPreviousWeek
+import com.seyone22.expensetracker.utils.getStartOfCurrentWeek
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,7 +33,7 @@ class HomeViewModel(
     private val currencyFormatsRepository: CurrencyFormatsRepository
 ) : BaseViewModel() {
 
-    private val _currentStartDate = mutableStateOf(getStartOfPreviousWeek())
+    private val _currentStartDate = mutableStateOf(getStartOfCurrentWeek())
     private val _currentEndDate = mutableStateOf(getEndOfCurrentWeek())
     val currentStartDate: State<String> get() = _currentStartDate
     val currentEndDate: State<String> get() = _currentEndDate
