@@ -1,12 +1,25 @@
 package com.seyone22.expensetracker.ui.screen.budget.panes
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -21,12 +34,14 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +62,7 @@ import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.navigation.NavigationDestination
 import com.seyone22.expensetracker.ui.screen.budget.composables.BudgetItemCard
 import com.seyone22.expensetracker.ui.screen.budget.composables.UnsetBudgetItemCard
+import com.seyone22.expensetracker.utils.formatCurrency
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -117,6 +133,7 @@ fun BudgetDetailPane(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BudgetDetailContent(
     modifier: Modifier,
@@ -130,26 +147,97 @@ private fun BudgetDetailContent(
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
     val baseCurrency by sharedViewModel.baseCurrencyFlow.collectAsState(initial = CurrencyFormat())
 
+    val expandedState = remember { mutableStateMapOf<Int, Boolean>() }
+
     val parentCategories = budgetDetailUiState.categories.filter { it.parentId == -1 }
     val childCategoriesMap =
         budgetDetailUiState.categories.filter { it.parentId != -1 }.groupBy { it.parentId }
 
+    val selectedBudgetYear =
+        viewModel.budgetDetailUiState.collectAsState(BudgetDetailUiState()).value.selectedBudgetYear
+
+    var categoryStatistics by remember { mutableStateOf(Pair(0.0, 0.0)) }
+
     LazyColumn(
         modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+
         item { IncomeExpenseSummary(baseCurrency, viewModel) }
 
         parentCategories.forEach { parent ->
-            item {
-                ParentCategoryItem(
-                    parent,
-                    childCategoriesMap,
-                    currencyFormat,
-                    viewModel,
-                    backStackEntry,
-                    showOnlyActive
+            val isExpanded = expandedState[parent.categId] ?: true
+
+            stickyHeader {
+                LaunchedEffect(parent.categId, selectedBudgetYear) {
+                    categoryStatistics =
+                        viewModel.fetchCategoryStatisticsFor(parent.categId, selectedBudgetYear)
+                }
+                val rotationAngle by animateFloatAsState(
+                    targetValue = if (isExpanded) 0f else -90f, // Rotate when expanded
+                    animationSpec = tween(durationMillis = 300) // Smooth transition
+                )
+
+                ListItem(
+                    modifier = Modifier.clickable {
+                        expandedState[parent.categId] = !isExpanded
+                    }, headlineContent = {
+                        Text(
+                            text = parent.categName, style = MaterialTheme.typography.titleLarge
+                        )
+                    }, supportingContent = {
+                        Text(
+                            "${
+                                formatCurrency(
+                                    categoryStatistics.first, baseCurrency ?: CurrencyFormat()
+                                )
+                            } (${
+                                formatCurrency(
+                                    categoryStatistics.second, baseCurrency ?: CurrencyFormat()
+                                )
+                            })"
+                        )
+                    },
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = if (isExpanded) "Collapse" else "Expand",
+                            modifier = Modifier.rotate(rotationAngle) // Apply rotation
+                        )
+                    }
                 )
             }
+
+            item {
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
+                    exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top) // ⬆ Moves up into header
+                ) {
+                    Column(modifier = Modifier.animateContentSize()) {
+                        if (isExpanded) {
+                            BudgetCategoryItem(
+                                parent,
+                                currencyFormat,
+                                viewModel,
+                                backStackEntry,
+                                showOnlyActive = showOnlyActive
+                            )
+
+                            childCategoriesMap[parent.categId]?.forEach { child ->
+                                BudgetCategoryItem(
+                                    child,
+                                    currencyFormat,
+                                    viewModel,
+                                    backStackEntry,
+                                    showOnlyActive = showOnlyActive
+                                )
+                            }
+
+                        }
+                    }
+                }
+            }
+
         }
     }
 }
@@ -264,47 +352,6 @@ private fun SummaryCard(
 }
 
 @Composable
-private fun ParentCategoryItem(
-    parent: Category,
-    childCategoriesMap: Map<Int, List<Category>>,
-    currencyFormat: CurrencyFormat,
-    viewModel: BudgetDetailViewModel,
-    backStackEntry: Int,
-    showOnlyActive: MutableState<Boolean>
-) {
-    val selectedBudgetYear =
-        viewModel.budgetDetailUiState.collectAsState(BudgetDetailUiState()).value.selectedBudgetYear
-
-    var categoryStatistics by remember { mutableStateOf(Pair(0.0, 0.0)) }
-
-    LaunchedEffect(parent.categId, selectedBudgetYear) {
-        categoryStatistics =
-            viewModel.fetchCategoryStatisticsFor(parent.categId, selectedBudgetYear)
-    }
-
-    ListItem(headlineContent = {
-        Text(
-            text = parent.categName, style = MaterialTheme.typography.titleLarge
-        )
-    }, trailingContent = {
-        Column(horizontalAlignment = Alignment.End) {
-            Text("Estimated: ${categoryStatistics.first}")
-            Text("Actual: ${categoryStatistics.second}")
-        }
-    })
-
-    BudgetCategoryItem(
-        parent, currencyFormat, viewModel, backStackEntry, showOnlyActive = showOnlyActive
-    )
-
-    childCategoriesMap[parent.categId]?.forEach { child ->
-        BudgetCategoryItem(
-            child, currencyFormat, viewModel, backStackEntry, showOnlyActive = showOnlyActive
-        )
-    }
-}
-
-@Composable
 private fun BudgetCategoryItem(
     category: Category,
     currencyFormat: CurrencyFormat,
@@ -326,7 +373,8 @@ private fun BudgetCategoryItem(
     }
 
     if (budgetItem != null || expenseForCategory != 0.0) {
-        BudgetItemCard(modifier = Modifier.padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
+        BudgetItemCard(
+            modifier = Modifier.padding(bottom = 8.dp, start = 16.dp, end = 16.dp),
             category = category,
             budgetItem = budgetItem,
             expenseForCategory = expenseForCategory,
@@ -349,20 +397,21 @@ private fun BudgetCategoryItem(
             })
     } else {
         if (!showOnlyActive.value) {
-            UnsetBudgetItemCard(modifier = Modifier.padding(
-                bottom = 8.dp, start = 16.dp, end = 16.dp
-            ), category = category, cardClickAction = {
-                viewModel.showDialog(
-                    AddEditBudgetEntryDialogAction(
-                        onAdd = { budgetEntry ->
-                            coroutineScope.launch {
-                                viewModel.addBudgetEntry(budgetEntry)
-                                viewModel.fetchBudgetEntriesFor(backStackEntry)
-                            }
-                        }, categId = category.categId, budgetYearId = backStackEntry
+            UnsetBudgetItemCard(
+                modifier = Modifier.padding(
+                    bottom = 8.dp, start = 16.dp, end = 16.dp
+                ), category = category, cardClickAction = {
+                    viewModel.showDialog(
+                        AddEditBudgetEntryDialogAction(
+                            onAdd = { budgetEntry ->
+                                coroutineScope.launch {
+                                    viewModel.addBudgetEntry(budgetEntry)
+                                    viewModel.fetchBudgetEntriesFor(backStackEntry)
+                                }
+                            }, categId = category.categId, budgetYearId = backStackEntry
+                        )
                     )
-                )
-            })
+                })
         }
     }
 }
