@@ -10,7 +10,9 @@ import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.BillsDepositWithDetails
 import com.seyone22.expensetracker.data.model.BillsDeposits
 import com.seyone22.expensetracker.data.model.Transaction
+import com.seyone22.expensetracker.data.model.TransactionStatus
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
+import com.seyone22.expensetracker.data.model.toTransaction
 import com.seyone22.expensetracker.data.repository.account.AccountsRepository
 import com.seyone22.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
@@ -50,6 +52,10 @@ class TransactionsViewModel(
     // Filter and sort options
     private val _filters = MutableStateFlow(TransactionFilters())
     val filters: StateFlow<TransactionFilters> = _filters
+
+    // Selected transaction
+    private val _selectedTransaction = MutableStateFlow<TransactionWithDetails?>(null)
+    val selectedTransaction: StateFlow<TransactionWithDetails?> = _selectedTransaction
 
     private val _sortOption = MutableStateFlow(SortOption.default)
     val sortOption: StateFlow<SortOption> = _sortOption
@@ -111,13 +117,34 @@ class TransactionsViewModel(
         }
     }
 
+    fun setSelectedTransaction(transaction: TransactionWithDetails) {
+        _selectedTransaction.value = transaction
+    }
+
+    fun updateSelectedTransaction() {
+        viewModelScope.launch {
+            val updatedTransaction = _selectedTransaction.value?.transId?.let {
+                transactionsRepository.getTransactionStream(it)
+                    .firstOrNull()
+            } // Safely collect the first emitted value
+
+            updatedTransaction?.let { transaction ->
+                _selectedTransaction.value =
+                    _selectedTransaction.value?.copy(status = transaction.status)
+            }
+        }
+    }
+
+
     suspend fun getAccountFromId(accountId: Int): Account? {
         return accountsRepository.getAccountStream(accountId).firstOrNull()
     }
 
-    suspend fun deleteTransaction(transaction: Transaction): Boolean {
+    fun deleteTransaction(transaction: Transaction): Boolean {
         return try {
-            transactionsRepository.deleteTransaction(transaction)
+            viewModelScope.launch {
+                transactionsRepository.deleteTransaction(transaction)
+            }
             true
         } catch (e: Exception) {
             Log.e("TransactionsViewModel", "Error deleting transaction", e)
@@ -125,9 +152,49 @@ class TransactionsViewModel(
         }
     }
 
-    suspend fun editTransaction(transactionDetails: TransactionDetails): Boolean {
+    fun editTransaction(transactionDetails: TransactionDetails): Boolean {
         return try {
-            transactionsRepository.updateTransaction(transactionDetails.toTransaction())
+            viewModelScope.launch {
+                transactionsRepository.updateTransaction(transactionDetails.toTransaction())
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("TransactionsViewModel", "Error updating transaction", e)
+            false
+        }
+    }
+
+    fun setTransactionStatus(transaction: Transaction, status: TransactionStatus): Boolean {
+        return try {
+            viewModelScope.launch {
+                transactionsRepository.updateTransaction(transaction.copy(status = status.displayName))
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("TransactionsViewModel", "Error updating transaction", e)
+            false
+        }
+    }
+
+    fun duplicateTransaction(transaction: Transaction): Boolean {
+        return try {
+            viewModelScope.launch {
+                transactionsRepository.insertTransaction(transaction.copy(transId = 0))
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("TransactionsViewModel", "Error updating transaction", e)
+            false
+        }
+    }
+
+    fun moveTransaction(transaction: TransactionWithDetails, newAccountId: Int): Boolean {
+        return try {
+            viewModelScope.launch {
+                transactionsRepository.updateTransaction(
+                    transaction.toTransaction().copy(accountId = newAccountId)
+                )
+            }
             true
         } catch (e: Exception) {
             Log.e("TransactionsViewModel", "Error updating transaction", e)
@@ -160,7 +227,7 @@ class TransactionsViewModel(
         return category.parentId.takeIf { it != -1 }
             ?.let { parentId ->
                 categoriesRepository.getCategoryByIdStream(parentId).firstOrNull()?.categName
-            }?.let { parentName -> "$parentName > ${category.categName}" } ?: category.categName
+            }?.let { parentName -> "$parentName(${category.categName})" } ?: category.categName
     }
 
     private fun validateInput(uiState: TransactionDetails = transactionUiState.transactionDetails): Boolean {

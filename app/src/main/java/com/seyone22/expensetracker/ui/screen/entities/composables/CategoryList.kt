@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.ui.common.removeTrPrefix
 import com.seyone22.expensetracker.ui.screen.entities.EntityViewModel
+import com.seyone22.expensetracker.utils.TransactionCategoryIcons
 import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -67,19 +68,20 @@ fun CategoryList(
                             ListItem(headlineContent = { Text(removeTrPrefix(it.categName)) },
                                 leadingContent = {
                                     Icon(
-                                        Icons.Filled.Bookmark,
+                                        TransactionCategoryIcons.getIconForCategory(it.categName),
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                 },
                                 modifier = Modifier
-                                    .combinedClickable(onClick = {
-                                        viewModel.setSelectedEntity(it)
-                                        onClicked(it.categId)
-                                    }, onLongClick = {
-                                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        longClicked(it)
-                                    }, onLongClickLabel = "  "
+                                    .combinedClickable(
+                                        onClick = {
+                                            viewModel.setSelectedEntity(it)
+                                            onClicked(it.categId)
+                                        }, onLongClick = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            longClicked(it)
+                                        }, onLongClickLabel = "  "
                                     )
                                     .padding(24.dp, 0.dp, 0.dp, 0.dp),
                                 tonalElevation = if (selectedEntity == it && isSelected) 200.dp else 0.dp
