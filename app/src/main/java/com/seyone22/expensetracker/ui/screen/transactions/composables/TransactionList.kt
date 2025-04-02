@@ -1,27 +1,19 @@
 package com.seyone22.expensetracker.ui.screen.transactions.composables
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.seyone22.expensetracker.data.model.Account
@@ -42,27 +35,22 @@ import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.Tag
-import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionStatus
+import com.seyone22.expensetracker.data.model.TransactionWithDetails
 import com.seyone22.expensetracker.ui.AppViewModelProvider
 import com.seyone22.expensetracker.ui.common.SortBar
 import com.seyone22.expensetracker.ui.common.TimeRangeFilter
-import com.seyone22.expensetracker.ui.common.dialogs.DeleteItemDialogAction
-import com.seyone22.expensetracker.ui.common.dialogs.EditTransactionDialogAction
 import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
-import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
-import com.seyone22.expensetracker.ui.screen.operations.transaction.toTransactionDetails
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TransactionList(
     modifier: Modifier = Modifier,
     viewModel: TransactionsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    entryViewModel: TransactionEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
     showFilter: Boolean = true,
     useLazyColumn: Boolean = false, // Determines whether to use LazyColumn or Column
     count: Int? = null,
@@ -74,11 +62,7 @@ fun TransactionList(
     val filteredTransactions by viewModel.filteredTransactions.collectAsState()
 
     // Bottom sheet state management
-    var selectedTransaction by remember { mutableStateOf<Transaction?>(null) }
     var isBottomSheetVisible by remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    val transactionUiState by entryViewModel.transactionUiState.collectAsState()
 
     val currentDialog by viewModel.currentDialog
     currentDialog?.let {
@@ -86,9 +70,9 @@ fun TransactionList(
     }
 
     // Handle bottom sheet actions
-    fun openBottomSheet(transaction: Transaction) {
+    fun openBottomSheet(transaction: TransactionWithDetails) {
         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-        selectedTransaction = transaction
+        viewModel.setSelectedTransaction(transaction)
         isBottomSheetVisible = true
     }
 
@@ -96,67 +80,70 @@ fun TransactionList(
         isBottomSheetVisible = false
     }
 
-    fun editTransaction() {
-        selectedTransaction?.let { transaction ->
-            viewModel.showDialog(
-                EditTransactionDialogAction(
-                    onEdit = { transactionDetails ->
-                        coroutineScope.launch {
-                            viewModel.editTransaction(transactionDetails)
-                        }
-                    },
-                    initialTransaction = transaction.toTransactionDetails(),
-                    viewModel = entryViewModel,
-                    coroutineScope = coroutineScope,
-                    transactionUiState = transactionUiState
-                )
-            )
-        }
-        closeBottomSheet()
-    }
-
-    fun deleteTransaction() {
-        selectedTransaction?.let { transaction ->
-            coroutineScope.launch {
-                viewModel.showDialog(
-                    DeleteItemDialogAction(
-                        onAdd = {
-                            coroutineScope.launch {
-                                viewModel.deleteTransaction(transaction)
-                            }
-                        }, itemName = "this transaction"
-                    )
-                )
-            }
-        }
-        closeBottomSheet()
-    }
-
     if (useLazyColumn) {
-        LazyColumn(modifier = modifier) {
+
+        LazyColumn(
+            modifier = modifier,
+            state = rememberLazyListState(),
+            verticalArrangement = Arrangement.spacedBy(8.dp) // Adds spacing between items
+        ) {
             if (showFilter) {
-                item {
-                    SortBar()
+                item { SortBar() }
+            }
+
+            val groupedTransactions = filteredTransactions.groupBy { it.transDate }
+
+            groupedTransactions.forEach { (date, transactions) ->
+                // Sticky Date Header
+                stickyHeader {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(vertical = 8.dp, horizontal = 16.dp)
+                    ) {
+                        date?.let {
+                            Text(
+                                text = date.format(DateTimeFormatter.ofPattern("MMMM d")), // Example: "March 1"
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // Transactions under the date
+                items(transactions.size) { idx ->
+                    TransactionItem(
+                        transaction = transactions[idx],
+                        haptics = haptics,
+                        longClicked = { openBottomSheet(transactions[idx]) },
+                        viewModel = viewModel,
+                        style = TransactionStyle.Status
+                    )
+
+                    // Add divider between transactions, but not after the last one
+                    if (transactions[idx] != transactions.last()) {
+                        HorizontalDivider()
+                    }
                 }
             }
-            if (filteredTransactions.isNotEmpty()) {
-                items(filteredTransactions.size) { index ->
-                    TransactionItem(
-                        transaction = filteredTransactions[index],
-                        haptics = haptics,
-                        longClicked = { openBottomSheet(it) },
-                        viewModel = viewModel,
-                    )
-                    HorizontalDivider()
-                }
-            } else {
+
+            // Empty state
+            if (filteredTransactions.isEmpty()) {
                 item {
-                    Text(
-                        text = "Nothing to show here!",
-                        fontStyle = FontStyle.Italic,
-                        color = Color.Gray,
+                    Box(
                         modifier = Modifier
-                    )
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Nothing to show here!",
+                            fontStyle = FontStyle.Italic,
+                            color = Color.Gray
+                        )
+                    }
                 }
             }
         }
@@ -173,8 +160,12 @@ fun TransactionList(
                             haptics = haptics,
                             longClicked = { openBottomSheet(it) },
                             viewModel = viewModel,
+                            style = TransactionStyle.Date
                         )
-                        HorizontalDivider()
+                        // Add divider between transactions, but not after the last one
+                        if (transaction != filteredTransactions[(count ?: 1) - 1]) {
+                            HorizontalDivider()
+                        }
                     }
             } else {
                 Text(
@@ -188,73 +179,11 @@ fun TransactionList(
     }
 
     if (isBottomSheetVisible) {
-        ModalBottomSheet(
-            onDismissRequest = { closeBottomSheet() }, sheetState = bottomSheetState
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-
-                HorizontalDivider()
-
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { editTransaction() }
-                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text("Edit", style = MaterialTheme.typography.bodyLarge)
-                }
-
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { editTransaction() }
-                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Check, contentDescription = "Edit")
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text("Reconcile transaction", style = MaterialTheme.typography.bodyLarge)
-                }
-
-
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { editTransaction() }
-                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Edit")
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text("Duplicate", style = MaterialTheme.typography.bodyLarge)
-                }
-
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { editTransaction() }
-                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Edit")
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text("Move to...", style = MaterialTheme.typography.bodyLarge)
-                }
-
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { editTransaction() }
-                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Share, contentDescription = "Edit")
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text("Share", style = MaterialTheme.typography.bodyLarge)
-                }
-
-                Row(modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { deleteTransaction() }
-                    .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text("Delete", style = MaterialTheme.typography.bodyLarge, color = Color.Red)
-                }
-            }
-        }
+        ExpandableTransactionBottomSheet(
+            isVisible = isBottomSheetVisible,
+            closeBottomSheet = { closeBottomSheet() },
+            viewModel = viewModel,
+        )
     }
 }
 

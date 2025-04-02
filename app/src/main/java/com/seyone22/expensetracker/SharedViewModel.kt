@@ -29,6 +29,7 @@ import com.seyone22.expensetracker.managers.SecurityManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -105,6 +106,15 @@ class SharedViewModel(
 
     suspend fun getCurrencyById(id: Int): CurrencyFormat? {
         return currencyManager.getCurrencyById(id)
+    }
+
+    suspend fun getCurrencyForAccount(id: Int): CurrencyFormat? {
+        val account = accountsRepository.getAccountStream(id).firstOrNull()
+        return if (account != null) {
+            currencyManager.getCurrencyById(account.currencyId)
+        } else {
+            null
+        }
     }
 
 

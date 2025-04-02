@@ -52,12 +52,11 @@ import com.seyone22.expensetracker.data.model.TransactionCode
 import com.seyone22.expensetracker.data.model.TransactionStatus
 import com.seyone22.expensetracker.data.model.toBillsDeposit
 import com.seyone22.expensetracker.ui.AppViewModelProvider
-import com.seyone22.expensetracker.ui.common.TimeRangeFilter
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
 import com.seyone22.expensetracker.ui.common.SortBar
 import com.seyone22.expensetracker.ui.common.SortOption
+import com.seyone22.expensetracker.ui.common.TimeRangeFilter
 import com.seyone22.expensetracker.ui.common.TransactionType
-import com.seyone22.expensetracker.ui.common.dialogs.DeleteItemDialogAction
 import com.seyone22.expensetracker.ui.common.dialogs.EditTransactionDialogAction
 import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.common.getAbbreviatedMonthName
@@ -145,26 +144,8 @@ fun ScheduledTransactionList(
                     initialTransaction = TransactionDetails(),
                     viewModel = entryViewModel,
                     coroutineScope = coroutineScope,
-                    transactionUiState = transactionUiState
                 )
             )
-        }
-        closeBottomSheet()
-    }
-
-    fun deleteTransaction() {
-        selectedTransaction?.let { transaction ->
-            coroutineScope.launch {
-                viewModel.showDialog(
-                    DeleteItemDialogAction(
-                        onAdd = {
-                            coroutineScope.launch {
-                                viewModel.deleteBillDeposit(transaction)
-                            }
-                        }, itemName = "this transaction"
-                    )
-                )
-            }
         }
         closeBottomSheet()
     }
@@ -306,7 +287,7 @@ fun ScheduledTransactionList(
 
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { deleteTransaction() }
+                    .clickable { }
                     .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
                     Spacer(modifier = Modifier.width(16.dp))

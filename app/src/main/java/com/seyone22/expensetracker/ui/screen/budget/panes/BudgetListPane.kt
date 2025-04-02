@@ -1,5 +1,6 @@
 package com.seyone22.expensetracker.ui.screen.budget.panes
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -19,7 +20,7 @@ import com.seyone22.expensetracker.ui.screen.budget.BudgetsDestination
 import com.seyone22.expensetracker.ui.screen.budget.composables.BudgetCard
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun BudgetListPane(
     navigateToScreen: (screen: Int) -> Unit,
@@ -69,7 +70,7 @@ fun BudgetListPane(
         }
 
         yearBudgets.forEach { yearBudget ->
-            item {
+            stickyHeader {
                 BudgetCard(budgetYear = yearBudget,
                     isYearBudget = true,
                     isSelected = if (windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
