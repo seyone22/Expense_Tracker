@@ -227,7 +227,7 @@ class TransactionsViewModel(
         return category.parentId.takeIf { it != -1 }
             ?.let { parentId ->
                 categoriesRepository.getCategoryByIdStream(parentId).firstOrNull()?.categName
-            }?.let { parentName -> "$parentName > ${category.categName}" } ?: category.categName
+            }?.let { parentName -> "$parentName(${category.categName})" } ?: category.categName
     }
 
     private fun validateInput(uiState: TransactionDetails = transactionUiState.transactionDetails): Boolean {

@@ -1,11 +1,8 @@
 package com.seyone22.expensetracker.ui.screen.entities.panes
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,9 +62,8 @@ fun EntityListPane(
     }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.statusBars)
     ) {
         ExpenseTopBar(
             selectedActivity = EntitiesDestination.route,

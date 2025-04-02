@@ -52,6 +52,7 @@ import com.seyone22.expensetracker.ui.common.dialogs.MoveTransactionDialogAction
 import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionEntryViewModel
 import com.seyone22.expensetracker.ui.screen.operations.transaction.toTransactionDetails
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsViewModel
+import com.seyone22.expensetracker.utils.TransactionCategoryIcons
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -100,7 +101,7 @@ fun ExpandableTransactionBottomSheet(
                     .padding(16.dp),
             ) {
                 Row(
-                    verticalAlignment = Alignment.Top,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val letter: String = transaction.value!!.payeeName?.get(0).toString()
                     letter.uppercase(
@@ -121,11 +122,16 @@ fun ExpandableTransactionBottomSheet(
                         )
                         transaction.value?.let {
                             var accountName by remember { mutableStateOf("") }
+                            var toAccountName by remember { mutableStateOf("") }
                             coroutineScope.launch {
                                 accountName =
                                     viewModel.getAccountFromId(it.accountId)?.accountName ?: ""
+                                toAccountName =
+                                    viewModel.getAccountFromId(it.toAccountId ?: 0)?.accountName
+                                        ?: ""
                             }
                             Text("${accountName} | ${it.status}")
+                            Text(text = it.payeeName ?: "Transfer -> ${toAccountName}")
                         }
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -135,18 +141,26 @@ fun ExpandableTransactionBottomSheet(
                                     SuggestionChip(
                                         enabled = true,
                                         onClick = {},
-                                        label = { Text(text = "${it.transactionNumber}") })
-                                }
-                                item {
-                                    SuggestionChip(
-                                        enabled = true,
-                                        onClick = {},
+                                        icon = {
+                                            Icon(
+                                                TransactionCategoryIcons.getIconForCategory(
+                                                    it.categName ?: ""
+                                                ), ""
+                                            )
+                                        },
                                         label = { Text(text = "${it.categName}") })
                                 }
                                 item {
                                     SuggestionChip(
                                         enabled = true,
                                         onClick = {},
+                                        icon = {
+                                            Icon(
+                                                TransactionCategoryIcons.getIconForCategory(
+                                                    it.transCode
+                                                ), ""
+                                            )
+                                        },
                                         label = { Text(text = it.transCode) })
                                 }
                             }
