@@ -1,9 +1,18 @@
 package com.seyone22.expensetracker.ui.screen.transactions.composables
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -18,6 +27,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.model.Category
@@ -33,8 +44,9 @@ import com.seyone22.expensetracker.ui.common.TimeRangeFilter
 import com.seyone22.expensetracker.ui.common.dialogs.GenericDialog
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsViewModel
 import kotlinx.coroutines.CoroutineScope
+import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TransactionList(
     modifier: Modifier = Modifier,
@@ -69,30 +81,69 @@ fun TransactionList(
     }
 
     if (useLazyColumn) {
-        LazyColumn(modifier = modifier) {
+
+        LazyColumn(
+            modifier = modifier,
+            state = rememberLazyListState(),
+            verticalArrangement = Arrangement.spacedBy(8.dp) // Adds spacing between items
+        ) {
             if (showFilter) {
-                item {
-                    SortBar()
+                item { SortBar() }
+            }
+
+            val groupedTransactions = filteredTransactions.groupBy { it.transDate }
+
+            groupedTransactions.forEach { (date, transactions) ->
+                // Sticky Date Header
+                stickyHeader {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(vertical = 8.dp, horizontal = 16.dp)
+                    ) {
+                        date?.let {
+                            Text(
+                                text = date.format(DateTimeFormatter.ofPattern("MMMM d")), // Example: "March 1"
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // Transactions under the date
+                items(transactions.size) { idx ->
+                    TransactionItem(
+                        transaction = transactions[idx],
+                        haptics = haptics,
+                        longClicked = { openBottomSheet(transactions[idx]) },
+                        viewModel = viewModel,
+                        style = TransactionStyle.Status
+                    )
+
+                    // Add divider between transactions, but not after the last one
+                    if (transactions[idx] != transactions.last()) {
+                        HorizontalDivider()
+                    }
                 }
             }
-            if (filteredTransactions.isNotEmpty()) {
-                items(filteredTransactions.size) { index ->
-                    TransactionItem(
-                        transaction = filteredTransactions[index],
-                        haptics = haptics,
-                        longClicked = { openBottomSheet(it) },
-                        viewModel = viewModel,
-                    )
-                    HorizontalDivider()
-                }
-            } else {
+
+            // Empty state
+            if (filteredTransactions.isEmpty()) {
                 item {
-                    Text(
-                        text = "Nothing to show here!",
-                        fontStyle = FontStyle.Italic,
-                        color = Color.Gray,
+                    Box(
                         modifier = Modifier
-                    )
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Nothing to show here!",
+                            fontStyle = FontStyle.Italic,
+                            color = Color.Gray
+                        )
+                    }
                 }
             }
         }
@@ -109,8 +160,12 @@ fun TransactionList(
                             haptics = haptics,
                             longClicked = { openBottomSheet(it) },
                             viewModel = viewModel,
+                            style = TransactionStyle.Date
                         )
-                        HorizontalDivider()
+                        // Add divider between transactions, but not after the last one
+                        if (transaction != filteredTransactions[(count ?: 1) - 1]) {
+                            HorizontalDivider()
+                        }
                     }
             } else {
                 Text(
