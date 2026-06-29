@@ -36,10 +36,19 @@ fun FormattedCurrency(
     type: TransactionType = TransactionType.NEUTRAL,
     defaultColor: Color = MaterialTheme.colorScheme.onSurface,
     decorativeText: String = "",
-    invert: Boolean = false
+    invert: Boolean = false,
+    hideValue: Boolean = false
 ) {
-    // Use the extracted function to get the formatted currency string
-    val formattedValue = formatCurrency(value, currency)
+    // Use the extracted function to get the formatted currency string or hide it
+    val formattedValue = if (hideValue) {
+        if (currency.pfx_symbol.isNotEmpty()) {
+            "${currency.pfx_symbol} ***"
+        } else {
+            "***${currency.sfx_symbol}"
+        }
+    } else {
+        formatCurrency(value, currency)
+    }
 
     var textColor = if ((type == TransactionType.DEBIT) or (value < 0)) {
         MaterialTheme.colorScheme.error

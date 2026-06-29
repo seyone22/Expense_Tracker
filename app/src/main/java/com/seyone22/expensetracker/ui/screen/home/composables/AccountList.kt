@@ -13,6 +13,7 @@ fun AccountList(
     modifier: Modifier = Modifier,
     accountList: List<Pair<Account, Double>>,
     navigateToScreen: (screen: String) -> Unit,
+    hideBalances: Boolean = false
 ) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -23,6 +24,7 @@ fun AccountList(
             AccountCard(
                 accountWithBalance = accountPair,
                 navigateToScreen = navigateToScreen,
+                hideBalances = hideBalances
             )
         }
         item { Spacer(modifier = Modifier) }

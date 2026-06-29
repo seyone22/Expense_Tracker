@@ -545,6 +545,13 @@ fun SecuritySettingsList(
     val isBiometricAvailable = remember { BiometricHelper.isBiometricAvailable(activity) }
     val requireUnlock = remember { mutableStateOf(screenLockManager.isScreenLockEnabled()) }
 
+    var hideBalancesByDefault by remember {
+        mutableStateOf(
+            context!!.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                .getBoolean("hide_balances_by_default", false)
+        )
+    }
+
     BiometricHelper.checkBiometricStatus(context = context)
 
     // Register biometric authentication launcher
@@ -582,6 +589,19 @@ fun SecuritySettingsList(
             onToggleChange = { newValue ->
                 sharedViewModel.saveSecureScreenSetting(context, newValue)
             })
+
+        SettingsToggleListItem(
+            settingName = "Hide balances by default",
+            settingSubtext = "Obfuscate account and net worth values on home screen by default",
+            toggle = hideBalancesByDefault,
+            onToggleChange = { newValue ->
+                hideBalancesByDefault = newValue
+                context!!.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                    .edit()
+                    .putBoolean("hide_balances_by_default", newValue)
+                    .apply()
+            }
+        )
     }
 }
 

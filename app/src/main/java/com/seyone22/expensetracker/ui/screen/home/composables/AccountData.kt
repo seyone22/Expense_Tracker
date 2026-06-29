@@ -20,6 +20,7 @@ fun AccountData(
     modifier: Modifier,
     accountsUiState: HomeUiState,
     navigateToScreen: (screen: String) -> Unit,
+    hideBalances: Boolean = false
 ) {
     Column(
         modifier = modifier.padding(0.dp),
@@ -50,6 +51,7 @@ fun AccountData(
             modifier = modifier,
             accountList = accountsUiState.accountList,
             navigateToScreen = navigateToScreen,
+            hideBalances = hideBalances
         )
     }
 }

@@ -38,4 +38,34 @@ object RepeatsFieldHelper {
 
         return Triple(autoExecute, autoSilent, recurrenceType)
     }
+
+    /**
+     * Computes the next occurrence date based on the current next occurrence date and recurrence rules.
+     */
+    fun calculateNextOccurrenceDate(currentDateStr: String?, repeats: Int?): String {
+        if (currentDateStr.isNullOrBlank()) return java.time.LocalDate.now().toString()
+        val date = try {
+            java.time.LocalDate.parse(currentDateStr)
+        } catch (e: Exception) {
+            java.time.LocalDate.now()
+        }
+        val repeatsVal = repeats ?: 0
+        val (_, _, recurrenceType) = decode(repeatsVal)
+
+        val nextDate = when (recurrenceType) {
+            RecurrenceType.ONCE -> date
+            RecurrenceType.WEEKLY -> date.plusWeeks(1)
+            RecurrenceType.EVERY_2_WEEKS -> date.plusWeeks(2)
+            RecurrenceType.MONTHLY -> date.plusMonths(1)
+            RecurrenceType.EVERY_2_MONTHS -> date.plusMonths(2)
+            RecurrenceType.QUARTERLY -> date.plusMonths(3)
+            RecurrenceType.HALF_YEARLY -> date.plusMonths(6)
+            RecurrenceType.YEARLY -> date.plusYears(1)
+            RecurrenceType.FOUR_MONTHS -> date.plusMonths(4)
+            RecurrenceType.FOUR_WEEKS -> date.plusWeeks(4)
+            RecurrenceType.DAILY -> date.plusDays(1)
+            else -> date.plusMonths(1)
+        }
+        return nextDate.toString()
+    }
 }

@@ -251,43 +251,70 @@ fun ScheduledTransactionList(
 
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { editTransaction() }
+                    .clickable {
+                        selectedTransaction?.let {
+                            viewModel.skipNextOccurrence(it)
+                        }
+                        closeBottomSheet()
+                    }
                     .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.SkipNext, contentDescription = "Edit")
+                    Icon(Icons.Default.SkipNext, contentDescription = "Skip")
                     Spacer(modifier = Modifier.width(16.dp))
                     Text("Skip next transaction", style = MaterialTheme.typography.bodyLarge)
                 }
 
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { editTransaction() }
+                    .clickable {
+                        selectedTransaction?.let {
+                            viewModel.executeScheduledTransactionNow(it)
+                        }
+                        closeBottomSheet()
+                    }
                     .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.KeyboardDoubleArrowDown, contentDescription = "Edit")
+                    Icon(Icons.Default.KeyboardDoubleArrowDown, contentDescription = "Enter Now")
                     Spacer(modifier = Modifier.width(16.dp))
                     Text("Enter next transaction now", style = MaterialTheme.typography.bodyLarge)
                 }
 
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { editTransaction() }
+                    .clickable {
+                        selectedTransaction?.let {
+                            coroutineScope.launch {
+                                sharedViewModel.insertBillsDeposit(it.copy(BDID = 0))
+                            }
+                        }
+                        closeBottomSheet()
+                    }
                     .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.ContentCopy, contentDescription = "Edit")
+                    Icon(Icons.Default.ContentCopy, contentDescription = "Duplicate")
                     Spacer(modifier = Modifier.width(16.dp))
                     Text("Duplicate", style = MaterialTheme.typography.bodyLarge)
                 }
 
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { editTransaction() }
+                    .clickable {
+                        // Keep share or similar empty action for now
+                        closeBottomSheet()
+                    }
                     .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Share, contentDescription = "Edit")
+                    Icon(Icons.Default.Share, contentDescription = "Share")
                     Spacer(modifier = Modifier.width(16.dp))
                     Text("Share", style = MaterialTheme.typography.bodyLarge)
                 }
 
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { }
+                    .clickable {
+                        selectedTransaction?.let {
+                            coroutineScope.launch {
+                                viewModel.deleteBillDeposit(it)
+                            }
+                        }
+                        closeBottomSheet()
+                    }
                     .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red)
                     Spacer(modifier = Modifier.width(16.dp))

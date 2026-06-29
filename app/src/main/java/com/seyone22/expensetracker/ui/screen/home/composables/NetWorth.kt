@@ -10,11 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.NorthEast
 import androidx.compose.material.icons.outlined.SouthWest
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -30,18 +34,39 @@ import com.seyone22.expensetracker.ui.screen.home.Totals
 
 @Composable
 fun NetWorth(
-    totals: Totals, baseCurrencyInfo: CurrencyFormat, modifier: Modifier = Modifier
+    totals: Totals,
+    baseCurrencyInfo: CurrencyFormat,
+    modifier: Modifier = Modifier,
+    hideBalances: Boolean = false,
+    onToggleHideBalances: () -> Unit = {}
 ) {
     Column(
         modifier = modifier.fillMaxWidth()
     ) {
         Spacer(modifier = Modifier.height(24.dp))
-        FormattedCurrency(
+        Row(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            style = MaterialTheme.typography.displayMedium,
-            value = totals.total,
-            currency = baseCurrencyInfo,
-        )
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FormattedCurrency(
+                style = MaterialTheme.typography.displayMedium,
+                value = totals.total,
+                currency = baseCurrencyInfo,
+                hideValue = hideBalances
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(
+                onClick = onToggleHideBalances,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = if (hideBalances) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                    contentDescription = if (hideBalances) "Show Balance" else "Hide Balance",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
         Text(
             text = "Net Worth",
             modifier = Modifier
@@ -95,6 +120,7 @@ fun NetWorth(
                         style = MaterialTheme.typography.titleLarge,
                         value = totals.income,
                         currency = baseCurrencyInfo,
+                        hideValue = hideBalances
                     )
                 }
             }
@@ -134,6 +160,7 @@ fun NetWorth(
                         style = MaterialTheme.typography.titleLarge,
                         value = totals.expenses,
                         currency = baseCurrencyInfo,
+                        hideValue = hideBalances
                     )
                 }
             }

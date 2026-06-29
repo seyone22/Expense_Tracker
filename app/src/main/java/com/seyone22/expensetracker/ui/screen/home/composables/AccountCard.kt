@@ -33,6 +33,7 @@ fun AccountCard(
     accountWithBalance: Pair<Account, Double>,
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
+    hideBalances: Boolean = false
 ) {
     // Code block to get the current currency's detail.
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)
@@ -72,7 +73,8 @@ fun AccountCard(
                     value = accountWithBalance.second,
                     currency = currencyData,
                     style = MaterialTheme.typography.headlineLarge,
-                    defaultColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    defaultColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    hideValue = hideBalances
                 )
             }
 

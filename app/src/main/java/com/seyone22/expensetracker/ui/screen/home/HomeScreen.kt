@@ -13,6 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -50,10 +53,6 @@ fun HomeScreen(
 
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        sharedViewModel.nukeAllWorkManagers(context = context)
-    }
-
     val baseCurrency by sharedViewModel.baseCurrencyFlow.collectAsState(initial = CurrencyFormat())
     val isUsed by sharedViewModel.isUsedFlow.collectAsState(initial = true)
 
@@ -64,6 +63,13 @@ fun HomeScreen(
 
     if (!isUsed) {
         navigateToScreen(OnboardingDestination.route)
+    }
+
+    var hideBalances by remember {
+        mutableStateOf(
+            context.getSharedPreferences("user_prefs", android.content.Context.MODE_PRIVATE)
+                .getBoolean("hide_balances_by_default", false)
+        )
     }
 
     // Define item list and reorder based on windowSizeClass
@@ -84,13 +90,16 @@ fun HomeScreen(
                 modifier = Modifier.padding(16.dp, 0.dp),
                 totals = totals,
                 baseCurrencyInfo = baseCurrency ?: CurrencyFormat(),
+                hideBalances = hideBalances,
+                onToggleHideBalances = { hideBalances = !hideBalances }
             )
         },
         "MySpending" to {
             MySpending(
                 modifier = Modifier.padding(16.dp, 0.dp),
                 baseCurrencyInfo = baseCurrency ?: CurrencyFormat(),
-                viewModel = viewModel
+                viewModel = viewModel,
+                hideBalances = hideBalances
             )
         },
         "QuickActions" to {
@@ -105,6 +114,7 @@ fun HomeScreen(
                 modifier = modifier.padding(0.dp, 16.dp),
                 accountsUiState = accountsUiState,
                 navigateToScreen = navigateToScreen,
+                hideBalances = hideBalances
             )
         },
         "TransactionData" to {

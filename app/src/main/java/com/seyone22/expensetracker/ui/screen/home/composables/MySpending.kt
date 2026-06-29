@@ -61,7 +61,8 @@ import kotlin.math.absoluteValue
 fun MySpending(
     baseCurrencyInfo: CurrencyFormat,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    hideBalances: Boolean = false
 ) {
     val expensesByWeek by remember { viewModel.expensesByWeekFlow }.collectAsState(emptyList())
     Log.d("TAG", "MySpending: $expensesByWeek")
@@ -140,6 +141,7 @@ fun MySpending(
                     style = MaterialTheme.typography.headlineSmall,
                     value = currentWeekSum.value.times(-1),
                     currency = baseCurrencyInfo,
+                    hideValue = hideBalances
                 )
                 val changeColor =
                     if (percentageChange <= 0) Color(0xff50b381) else Color(0xffd9534f)

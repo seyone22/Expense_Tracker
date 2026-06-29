@@ -221,6 +221,57 @@ class TransactionsViewModel(
         }
     }
 
+    fun skipNextOccurrence(billsDeposit: BillsDeposits) {
+        viewModelScope.launch {
+            val nextDate = com.seyone22.expensetracker.utils.RepeatsFieldHelper.calculateNextOccurrenceDate(
+                billsDeposit.NEXTOCCURRENCEDATE,
+                billsDeposit.REPEATS
+            )
+            val remainingOccurrences = ((billsDeposit.NUMOCCURRENCES ?: 1) - 1)
+            billsDepositsRepository.updateBillsDeposit(
+                billsDeposit.copy(
+                    NUMOCCURRENCES = remainingOccurrences,
+                    NEXTOCCURRENCEDATE = nextDate
+                )
+            )
+        }
+    }
+
+    fun executeScheduledTransactionNow(billsDeposit: BillsDeposits) {
+        viewModelScope.launch {
+            val newTransaction = Transaction(
+                transId = 0,
+                accountId = billsDeposit.ACCOUNTID,
+                toAccountId = billsDeposit.TOACCOUNTID ?: -1,
+                payeeId = billsDeposit.PAYEEID,
+                transCode = billsDeposit.TRANSCODE,
+                transAmount = billsDeposit.TRANSAMOUNT,
+                status = "R", // Default to Reconciled
+                transactionNumber = billsDeposit.TRANSACTIONNUMBER ?: "",
+                notes = billsDeposit.NOTES ?: "",
+                categoryId = billsDeposit.CATEGID ?: -1,
+                transDate = billsDeposit.NEXTOCCURRENCEDATE ?: java.time.LocalDate.now().toString(),
+                followUpId = billsDeposit.FOLLOWUPID ?: 0,
+                toTransAmount = billsDeposit.TOTRANSAMOUNT ?: billsDeposit.TRANSAMOUNT,
+                color = billsDeposit.COLOR
+            )
+            transactionsRepository.insertTransaction(newTransaction)
+
+            // Update scheduled item to next date
+            val nextDate = com.seyone22.expensetracker.utils.RepeatsFieldHelper.calculateNextOccurrenceDate(
+                billsDeposit.NEXTOCCURRENCEDATE,
+                billsDeposit.REPEATS
+            )
+            val remainingOccurrences = ((billsDeposit.NUMOCCURRENCES ?: 1) - 1)
+            billsDepositsRepository.updateBillsDeposit(
+                billsDeposit.copy(
+                    NUMOCCURRENCES = remainingOccurrences,
+                    NEXTOCCURRENCEDATE = nextDate
+                )
+            )
+        }
+    }
+
     suspend fun getClarifiedName(categoryId: Int): String {
         val category =
             categoriesRepository.getCategoryByIdStream(categoryId).firstOrNull() ?: return ""
