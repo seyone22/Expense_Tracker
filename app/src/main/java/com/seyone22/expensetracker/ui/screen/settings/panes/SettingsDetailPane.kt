@@ -73,6 +73,11 @@ import com.seyone22.expensetracker.utils.BiometricHelper
 import com.seyone22.expensetracker.utils.BiometricPromptActivityResultContract
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.graphics.Color
+import com.seyone22.expensetracker.managers.BackupManager
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
@@ -607,7 +612,90 @@ fun SecuritySettingsList(
 
 @Composable
 fun ImportExportSettingsList(
-    viewModel: SettingsViewModel, scope: CoroutineScope = rememberCoroutineScope()
+    viewModel: SettingsViewModel,
+    scope: CoroutineScope = rememberCoroutineScope()
 ) {
-    Column {}
+    val context = LocalContext.current
+    val backupManager = remember { BackupManager(context) }
+
+    // Launcher to CREATE backup document
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val outputStream = context.contentResolver.openOutputStream(uri)
+                if (outputStream != null) {
+                    val success = backupManager.exportBackup(outputStream)
+                    if (success) {
+                        SnackbarManager.showMessage("Data exported successfully!")
+                    } else {
+                        SnackbarManager.showMessage("Export failed!")
+                    }
+                }
+            }
+        }
+    }
+
+    // Launcher to OPEN backup document
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                if (inputStream != null) {
+                    val success = backupManager.importBackup(inputStream)
+                    if (success) {
+                        SnackbarManager.showMessage("Data imported successfully! Please restart the app.")
+                    } else {
+                        SnackbarManager.showMessage("Import failed! Please ensure the file is valid.")
+                    }
+                }
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Backup & Restore",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = "Export your entire expense history, accounts, and categories to a secure JSON file, or restore from a previously exported backup.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Button(
+                onClick = {
+                    val dateStr = java.time.LocalDate.now().toString()
+                    exportLauncher.launch("expensetracker_backup_$dateStr.json")
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(text = "Backup Data")
+            }
+
+            Button(
+                onClick = {
+                    importLauncher.launch(arrayOf("application/json", "application/octet-stream"))
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary
+                )
+            ) {
+                Text(text = "Restore Data")
+            }
+        }
+    }
 }

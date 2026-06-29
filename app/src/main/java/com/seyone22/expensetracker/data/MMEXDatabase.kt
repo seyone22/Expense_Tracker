@@ -19,6 +19,10 @@ import com.seyone22.expensetracker.data.model.Report
 import com.seyone22.expensetracker.data.model.Tag
 import com.seyone22.expensetracker.data.model.TagLink
 import com.seyone22.expensetracker.data.model.Transaction
+import com.seyone22.expensetracker.data.model.SplitTransaction
+import com.seyone22.expensetracker.data.model.Attachment
+import com.seyone22.expensetracker.data.repository.splitTransaction.SplitTransactionDao
+import com.seyone22.expensetracker.data.repository.attachment.AttachmentDao
 import com.seyone22.expensetracker.data.repository.account.AccountDao
 import com.seyone22.expensetracker.data.repository.billsDeposit.BillsDepositsDao
 import com.seyone22.expensetracker.data.repository.budgetEntry.BudgetEntryDao
@@ -34,8 +38,8 @@ import com.seyone22.expensetracker.data.repository.tagLink.TagLinkDao
 import com.seyone22.expensetracker.data.repository.transaction.TransactionDao
 
 @Database(
-    entities = [Account::class, Transaction::class, Payee::class, Category::class, CurrencyFormat::class, Metadata::class, BillsDeposits::class, Report::class, CurrencyHistory::class, Tag::class, TagLink::class, BudgetEntry::class, BudgetYear::class],
-    version = 4,
+    entities = [Account::class, Transaction::class, Payee::class, Category::class, CurrencyFormat::class, Metadata::class, BillsDeposits::class, Report::class, CurrencyHistory::class, Tag::class, TagLink::class, BudgetEntry::class, BudgetYear::class, SplitTransaction::class, Attachment::class],
+    version = 6,
     exportSchema = true
 )
 abstract class MMEXDatabase : RoomDatabase() {
@@ -52,6 +56,8 @@ abstract class MMEXDatabase : RoomDatabase() {
     abstract fun tagLinkDao(): TagLinkDao
     abstract fun budgetEntryDao(): BudgetEntryDao
     abstract fun budgetYearDao(): BudgetYearDao
+    abstract fun splitTransactionDao(): SplitTransactionDao
+    abstract fun attachmentDao(): AttachmentDao
 
     companion object {
         @Volatile
@@ -61,7 +67,7 @@ abstract class MMEXDatabase : RoomDatabase() {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, MMEXDatabase::class.java, "mmex_database")
                     //.createFromAsset("database/prepopulate_v1_1.db")
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build()
                     .also { Instance = it }
             }
@@ -145,6 +151,46 @@ abstract class MMEXDatabase : RoomDatabase() {
             }
         }
 
-        // Migrate to Version 5 (add assets, attachments, customfielddata, stocks & shares, and split transactions
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS SPLITTRANSACTIONS_V1 (
+                        SPLITTRANSID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        TRANSID INTEGER NOT NULL,
+                        CATEGID INTEGER,
+                        SPLITTRANSAMOUNT REAL,
+                        NOTES TEXT
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE INDEX IF NOT EXISTS IDX_SPLITTRANSACTIONS_TRANSID ON SPLITTRANSACTIONS_V1(TRANSID)
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS ATTACHMENT_V1 (
+                        ATTACHMENTID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        REFTYPE TEXT NOT NULL,
+                        REFID INTEGER NOT NULL,
+                        DESCRIPTION TEXT,
+                        FILENAME TEXT NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE INDEX IF NOT EXISTS IDX_ATTACHMENT_REF ON ATTACHMENT_V1 (REFTYPE, REFID)
+                    """.trimIndent()
+                )
+            }
+        }
     }
 }

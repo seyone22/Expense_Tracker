@@ -125,7 +125,10 @@ class OfflineTransactionsRepository(private val transactionDao: TransactionDao) 
     }
 
 
-    override suspend fun insertTransaction(transaction: Transaction) =
+    override fun getAllRawTransactionsStream(): Flow<List<Transaction>> =
+        transactionDao.getAllRawTransactions()
+
+    override suspend fun insertTransaction(transaction: Transaction): Long =
         transactionDao.insert(transaction)
 
     override suspend fun deleteTransaction(transaction: Transaction) =

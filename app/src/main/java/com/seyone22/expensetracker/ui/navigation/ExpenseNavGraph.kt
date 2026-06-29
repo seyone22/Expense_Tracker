@@ -59,6 +59,8 @@ import com.seyone22.expensetracker.ui.screen.settings.SettingsDestination
 import com.seyone22.expensetracker.ui.screen.settings.SettingsScreen
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsDestination
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsScreen
+import com.seyone22.expensetracker.ui.screen.reconcile.ReconcileDestination
+import com.seyone22.expensetracker.ui.screen.reconcile.ReconcileScreen
 
 /**
  * Provides Navigation graph for the application.
@@ -210,6 +212,15 @@ fun ExpenseNavHost(
             AccountDetailScreen(
                 navController = navController,
                 backStackEntry = it.arguments?.getString("accountId") ?: "-1"
+            )
+        }
+        composable(
+            route = ReconcileDestination.route + "/{accountId}",
+            arguments = listOf(navArgument("accountId") { type = NavType.StringType })
+        ) {
+            ReconcileScreen(
+                accountId = it.arguments?.getString("accountId") ?: "-1",
+                navController = navController
             )
         }
         composable(route = TransactionEntryDestination.route + "/{transactionType}") { backStackEntry ->

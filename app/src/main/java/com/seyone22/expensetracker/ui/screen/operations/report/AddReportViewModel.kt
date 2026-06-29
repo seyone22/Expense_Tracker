@@ -86,6 +86,7 @@ data class ReportDetails(
 
 // Extension functions to convert between [Report], [ReportUiState], and [ReportDetails]
 fun ReportDetails.toReport(): Report = Report(
+    REPORTID = reportId,
     REPORTNAME = reportName,
     GROUPNAME = groupName,
     ACTIVE = if (active) 1 else 0,
@@ -107,5 +108,6 @@ fun Report.toReportDetails(): ReportDetails = ReportDetails(
     active = ACTIVE == 1,
     sqlContent = SQLCONTENT ?: "",
     luaContent = LUACONTENT ?: "",
+    templateContent = TEMPLATECONTENT ?: "",
     description = DESCRIPTION ?: "",
 )

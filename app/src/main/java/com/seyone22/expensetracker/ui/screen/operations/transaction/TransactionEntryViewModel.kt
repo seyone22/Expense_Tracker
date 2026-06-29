@@ -20,6 +20,10 @@ import com.seyone22.expensetracker.data.repository.billsDeposit.BillsDepositsRep
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.payee.PayeesRepository
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
+import com.seyone22.expensetracker.data.repository.splitTransaction.SplitTransactionsRepository
+import com.seyone22.expensetracker.data.repository.attachment.AttachmentsRepository
+import com.seyone22.expensetracker.data.model.SplitTransaction
+import com.seyone22.expensetracker.data.model.Attachment
 import com.seyone22.expensetracker.ui.screen.operations.entity.payee.PayeeDetails
 import com.seyone22.expensetracker.ui.screen.operations.entity.payee.PayeeUiState
 import com.seyone22.expensetracker.ui.screen.operations.entity.payee.toPayee
@@ -36,7 +40,9 @@ class TransactionEntryViewModel(
     private val accountsRepository: AccountsRepository,
     private val payeesRepository: PayeesRepository,
     private val categoriesRepository: CategoriesRepository,
-    private val billsDepositsRepository: BillsDepositsRepository
+    private val billsDepositsRepository: BillsDepositsRepository,
+    private val splitTransactionsRepository: SplitTransactionsRepository,
+    private val attachmentsRepository: AttachmentsRepository
 ) : BaseViewModel() {
     private val _transactionUiState = MutableStateFlow(TransactionUiState())
     val transactionUiState: StateFlow<TransactionUiState> get() = _transactionUiState
@@ -82,35 +88,110 @@ class TransactionEntryViewModel(
     fun updateUiState(
         transactionDetails: TransactionDetails? = null,
         billsDepositsDetails: BillsDepositsDetails? = null,
-        advancedAmount: Double? = null
+        advancedAmount: Double? = null,
+        isSplit: Boolean? = null,
+        splits: List<SplitDetails>? = null
     ) {
+        val newDetails = transactionDetails ?: _transactionUiState.value.transactionDetails
+        val newIsSplit = isSplit ?: _transactionUiState.value.isSplit
+        val newSplits = splits ?: _transactionUiState.value.splits
+
         _transactionUiState.value = _transactionUiState.value.copy(
-            transactionDetails = transactionDetails ?: _transactionUiState.value.transactionDetails,
-            billsDepositsDetails = billsDepositsDetails
-                ?: _transactionUiState.value.billsDepositsDetails,
-            advancedAmount = advancedAmount
-                ?: _transactionUiState.value.advancedAmount, // ✅ Include advancedAmount in one update
-            isEntryValid = transactionDetails?.let { validateInput(it) }
-                ?: _transactionUiState.value.isEntryValid,
+            transactionDetails = newDetails,
+            billsDepositsDetails = billsDepositsDetails ?: _transactionUiState.value.billsDepositsDetails,
+            advancedAmount = advancedAmount ?: _transactionUiState.value.advancedAmount,
+            isSplit = newIsSplit,
+            splits = newSplits,
+            isEntryValid = validateInput(newDetails, newIsSplit, newSplits),
             isRecurringEntryValid = billsDepositsDetails?.let { validateRecurringInput(it) }
                 ?: _transactionUiState.value.isRecurringEntryValid
         )
     }
 
+    fun addSplitRow() {
+        val currentSplits = _transactionUiState.value.splits.toMutableList()
+        currentSplits.add(SplitDetails())
+        updateUiState(splits = currentSplits)
+    }
+
+    fun removeSplitRow(index: Int) {
+        val currentSplits = _transactionUiState.value.splits.toMutableList()
+        if (index in currentSplits.indices) {
+            currentSplits.removeAt(index)
+        }
+        updateUiState(splits = currentSplits)
+    }
+
+    fun updateSplit(index: Int, details: SplitDetails) {
+        val currentSplits = _transactionUiState.value.splits.toMutableList()
+        if (index in currentSplits.indices) {
+            currentSplits[index] = details
+        }
+        updateUiState(splits = currentSplits)
+    }
+
+    fun toggleSplit(enabled: Boolean) {
+        val currentSplits = if (enabled && _transactionUiState.value.splits.isEmpty()) {
+            listOf(SplitDetails(), SplitDetails())
+        } else {
+            _transactionUiState.value.splits
+        }
+        updateUiState(isSplit = enabled, splits = currentSplits)
+    }
+
     suspend fun saveTransaction() {
         if (validateInput()) {
-            if (transactionUiState.value.transactionDetails.transCode == TransactionCode.TRANSFER.displayName) {
-                transactionsRepository.insertTransaction(
-                    transactionUiState.value.transactionDetails.toTransaction()
-                        .copy(toTransAmount = transactionUiState.value.advancedAmount)
-                )
-            } else {
-                transactionsRepository.insertTransaction(
-                    transactionUiState.value.transactionDetails.toTransaction()
-                        .copy(toTransAmount = transactionUiState.value.transactionDetails.transAmount.toDouble())
+            val transAmount = transactionUiState.value.transactionDetails.transAmount.toDoubleOrNull() ?: 0.0
+            val categoryId = if (transactionUiState.value.isSplit) -1 else transactionUiState.value.transactionDetails.categoryId.toInt()
+
+            val transaction = transactionUiState.value.transactionDetails.toTransaction().copy(
+                categoryId = categoryId,
+                toTransAmount = if (transactionUiState.value.transactionDetails.transCode == TransactionCode.TRANSFER.displayName) {
+                    transactionUiState.value.advancedAmount
+                } else {
+                    transAmount
+                }
+            )
+
+            val insertedId = transactionsRepository.insertTransaction(transaction).toInt()
+
+            // Save split items
+            if (transactionUiState.value.isSplit) {
+                val splitsList = transactionUiState.value.splits.map { splitDetail ->
+                    SplitTransaction(
+                        TRANSID = insertedId,
+                        CATEGID = splitDetail.categId.toInt(),
+                        SPLITTRANSAMOUNT = splitDetail.splitAmount.toDoubleOrNull() ?: 0.0,
+                        NOTES = splitDetail.notes
+                    )
+                }
+                splitTransactionsRepository.insertAllSplits(splitsList)
+            }
+
+            // Save attachments
+            transactionUiState.value.attachments.forEach { path ->
+                attachmentsRepository.insertAttachment(
+                    Attachment(
+                        REFTYPE = "Transaction",
+                        REFID = insertedId,
+                        FILENAME = path,
+                        DESCRIPTION = "Receipt image"
+                    )
                 )
             }
         }
+    }
+
+    fun addAttachment(path: String) {
+        val updatedList = _transactionUiState.value.attachments.toMutableList()
+        updatedList.add(path)
+        _transactionUiState.value = _transactionUiState.value.copy(attachments = updatedList)
+    }
+
+    fun removeAttachment(path: String) {
+        val updatedList = _transactionUiState.value.attachments.toMutableList()
+        updatedList.remove(path)
+        _transactionUiState.value = _transactionUiState.value.copy(attachments = updatedList)
     }
 
     suspend fun saveRecurringTransaction() {
@@ -120,14 +201,28 @@ class TransactionEntryViewModel(
             )
             x.REPEATS = numericOf(x.REPEATS).toString()
             billsDepositsRepository.insertBillsDeposit(x.toBillsDeposits())
-
-
         }
     }
 
-    private fun validateInput(uiState: TransactionDetails = transactionUiState.value.transactionDetails): Boolean {
-        return with(uiState) {
-            transAmount.isNotBlank() && transDate.isNotBlank() && accountId.isNotBlank() && categoryId.isNotBlank()
+    private fun validateInput(
+        uiState: TransactionDetails = transactionUiState.value.transactionDetails,
+        isSplit: Boolean = transactionUiState.value.isSplit,
+        splits: List<SplitDetails> = transactionUiState.value.splits
+    ): Boolean {
+        val totalAmount = uiState.transAmount.toDoubleOrNull()
+        if (totalAmount == null || totalAmount <= 0.0 || uiState.transDate.isBlank() || uiState.accountId.isBlank()) return false
+
+        if (!isSplit) {
+            return uiState.categoryId.isNotBlank()
+        } else {
+            if (splits.isEmpty()) return false
+            var splitSum = 0.0
+            for (split in splits) {
+                val amount = split.splitAmount.toDoubleOrNull() ?: 0.0
+                if (amount <= 0.0 || split.categId.isBlank()) return false
+                splitSum += amount
+            }
+            return Math.abs(totalAmount - splitSum) < 0.01
         }
     }
 
@@ -172,15 +267,23 @@ class TransactionEntryViewModel(
     }
 }
 
+data class SplitDetails(
+    val categId: String = "",
+    val splitAmount: String = "",
+    val notes: String = ""
+)
+
 //Data class for AccountUiState
 data class TransactionUiState(
     val transactionDetails: TransactionDetails = TransactionDetails(),
     val billsDepositsDetails: BillsDepositsDetails = BillsDepositsDetails(),
     val advancedAmount: Double = 0.0,
-
     val isEntryValid: Boolean = false,
     val isRecurringEntryValid: Boolean = false,
-    val tagLinkList: List<TagLink> = emptyList()
+    val tagLinkList: List<TagLink> = emptyList(),
+    val isSplit: Boolean = false,
+    val splits: List<SplitDetails> = emptyList(),
+    val attachments: List<String> = emptyList()
 )
 
 data class EntityList(

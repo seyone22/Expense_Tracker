@@ -9,6 +9,10 @@ import androidx.room.Update
 import com.seyone22.expensetracker.data.model.Report
 import kotlinx.coroutines.flow.Flow
 
+import androidx.room.RawQuery
+import androidx.sqlite.db.SupportSQLiteQuery
+import android.database.Cursor
+
 @Dao
 interface ReportDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
@@ -26,4 +30,7 @@ interface ReportDao {
 
     @Query("SELECT * FROM REPORT_V1 WHERE REPORTID = :reportId")
     fun getReportById(reportId: Int): Flow<Report?>
+
+    @RawQuery
+    fun executeRawQuery(query: SupportSQLiteQuery): Cursor
 }

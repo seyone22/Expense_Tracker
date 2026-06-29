@@ -11,11 +11,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import java.io.File
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -170,6 +186,101 @@ fun ExpandableTransactionBottomSheet(
                                 text = transaction.value!!.notes ?: "",
                                 style = MaterialTheme.typography.bodyLarge,
                             )
+                        }
+
+                        // Load and display attachments
+                        val contextApp = LocalContext.current.applicationContext as com.seyone22.expensetracker.ExpenseApplication
+                        val attachmentsRepository = contextApp.container.attachmentsRepository
+                        val attachmentsList by remember(transaction.value?.transId) {
+                            attachmentsRepository.getAttachmentsForRefStream("Transaction", transaction.value?.transId ?: -1)
+                        }.collectAsState(initial = emptyList())
+
+                        if (attachmentsList.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "Attachments (${attachmentsList.size})",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(attachmentsList) { attachment ->
+                                    val file = File(attachment.FILENAME)
+                                    var openPreview by remember { mutableStateOf(false) }
+                                    
+                                    Card(
+                                        modifier = Modifier
+                                            .size(80.dp)
+                                            .clickable { openPreview = true },
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier.fillMaxSize()
+                                        ) {
+                                            if (file.exists() && (file.extension.lowercase() == "jpg" || file.extension.lowercase() == "jpeg" || file.extension.lowercase() == "png")) {
+                                                AsyncImage(
+                                                    model = file,
+                                                    contentDescription = "Attachment preview",
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentScale = ContentScale.Crop
+                                                )
+                                            } else {
+                                                Icon(
+                                                    imageVector = Icons.Default.Info,
+                                                    contentDescription = "File attachment",
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    if (openPreview) {
+                                        AlertDialog(
+                                            onDismissRequest = { openPreview = false },
+                                            confirmButton = {
+                                                TextButton(onClick = { openPreview = false }) {
+                                                    Text("Close")
+                                                }
+                                            },
+                                            title = { Text(file.name) },
+                                            text = {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(300.dp),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    if (file.exists() && (file.extension.lowercase() == "jpg" || file.extension.lowercase() == "jpeg" || file.extension.lowercase() == "png")) {
+                                                        AsyncImage(
+                                                            model = file,
+                                                            contentDescription = null,
+                                                            modifier = Modifier.fillMaxSize()
+                                                        )
+                                                    } else {
+                                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                            Icon(
+                                                                imageVector = Icons.Default.Info,
+                                                                contentDescription = null,
+                                                                modifier = Modifier.size(64.dp)
+                                                            )
+                                                            Spacer(modifier = Modifier.height(8.dp))
+                                                            Text(
+                                                                text = "Cannot preview this file type locally.",
+                                                                style = MaterialTheme.typography.bodyMedium
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }

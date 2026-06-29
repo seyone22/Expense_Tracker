@@ -13,6 +13,9 @@ import com.seyone22.expensetracker.data.repository.report.ReportsRepository
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import androidx.sqlite.db.SimpleSQLiteQuery
 import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.absoluteValue
@@ -24,9 +27,21 @@ class ReportViewModel(
     private val transactionsRepository: TransactionsRepository,
     private val categoriesRepository: CategoriesRepository,
     private val payeesRepository: PayeesRepository,
-    private val reportsRepository: ReportsRepository
-
+    private val reportsRepository: ReportsRepository,
+    private val billsDepositsRepository: com.seyone22.expensetracker.data.repository.billsDeposit.BillsDepositsRepository
 ) : ViewModel() {
+
+    val activeSubscriptionsFlow: Flow<List<com.seyone22.expensetracker.data.model.BillsDepositWithDetails>> =
+        billsDepositsRepository.getAllTransactionsStream()
+
+    init {
+        viewModelScope.launch {
+            val currentReports = reportsRepository.getAllReportsStream().first()
+            if (currentReports.isEmpty()) {
+                insertDefaultReports()
+            }
+        }
+    }
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
 
@@ -117,5 +132,114 @@ class ReportViewModel(
         } else {
             return null
         }
+    }
+
+    private suspend fun insertDefaultReports() {
+        val defaultList = listOf(
+            Report(
+                REPORTNAME = "Income vs. Expenses",
+                GROUPNAME = "Income & Expenses",
+                ACTIVE = 1,
+                SQLCONTENT = """
+                    SELECT 
+                        strftime('%Y-%m', transDate) AS month,
+                        SUM(CASE WHEN transCode = 'Deposit' THEN transAmount ELSE 0 END) AS Income,
+                        SUM(CASE WHEN transCode = 'Withdrawal' THEN transAmount ELSE 0 END) AS Expenses
+                    FROM CHECKINGACCOUNT_V1
+                    WHERE status != 'Void'
+                    GROUP BY month
+                    ORDER BY month ASC
+                    LIMIT 12
+                """.trimIndent(),
+                LUACONTENT = "",
+                TEMPLATECONTENT = "chart_type=bar",
+                DESCRIPTION = "Shows your monthly income against expenses for the last 12 months."
+            ),
+            Report(
+                REPORTNAME = "Expenses by Category (This Month)",
+                GROUPNAME = "Categories",
+                ACTIVE = 1,
+                SQLCONTENT = """
+                    SELECT 
+                        c.categName AS category,
+                        SUM(t.transAmount) AS amount
+                    FROM CHECKINGACCOUNT_V1 t
+                    INNER JOIN CATEGORY_V1 c ON t.categoryId = c.categId
+                    WHERE t.transCode = 'Withdrawal' 
+                      AND t.status != 'Void'
+                      AND strftime('%Y-%m', t.transDate) = strftime('%Y-%m', 'now')
+                    GROUP BY category
+                    ORDER BY amount DESC
+                """.trimIndent(),
+                LUACONTENT = "",
+                TEMPLATECONTENT = "chart_type=pie",
+                DESCRIPTION = "Pie chart breakdown of expenses by category for the current month."
+            ),
+            Report(
+                REPORTNAME = "Current Account Balances",
+                GROUPNAME = "Accounts",
+                ACTIVE = 1,
+                SQLCONTENT = """
+                    SELECT 
+                        a.accountName AS account,
+                        (a.initialBalance + COALESCE(SUM(
+                            CASE 
+                                WHEN t.transCode = 'Deposit' THEN t.transAmount
+                                WHEN t.transCode = 'Withdrawal' THEN -t.transAmount
+                                WHEN t.transCode = 'Transfer' AND t.accountId = a.accountId THEN -t.transAmount
+                                WHEN t.transCode = 'Transfer' AND t.toAccountId = a.accountId THEN t.transAmount
+                                ELSE 0 
+                            END
+                        ), 0)) AS balance
+                    FROM ACCOUNTLIST_V1 a
+                    LEFT JOIN CHECKINGACCOUNT_V1 t ON t.accountId = a.accountId OR t.toAccountId = a.accountId
+                    WHERE a.status = 'Open'
+                    GROUP BY a.accountId
+                    ORDER BY balance DESC
+                """.trimIndent(),
+                LUACONTENT = "",
+                TEMPLATECONTENT = "chart_type=bar",
+                DESCRIPTION = "Current real-time balances for all open accounts."
+            )
+        )
+        for (report in defaultList) {
+            reportsRepository.insertReport(report)
+        }
+    }
+
+    suspend fun runReportQuery(sql: String): List<Map<String, Any>> = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        val results = mutableListOf<Map<String, Any>>()
+        try {
+            val query = SimpleSQLiteQuery(sql)
+            val cursor = reportsRepository.executeRawQuery(query)
+            cursor.use { c ->
+                val columnNames = c.columnNames
+                while (c.moveToNext()) {
+                    val row = mutableMapOf<String, Any>()
+                    for (i in 0 until c.columnCount) {
+                        val name = columnNames[i]
+                        when (c.getType(i)) {
+                            android.database.Cursor.FIELD_TYPE_NULL -> row[name] = ""
+                            android.database.Cursor.FIELD_TYPE_INTEGER -> row[name] = c.getLong(i)
+                            android.database.Cursor.FIELD_TYPE_FLOAT -> row[name] = c.getDouble(i)
+                            android.database.Cursor.FIELD_TYPE_STRING -> row[name] = c.getString(i)
+                            android.database.Cursor.FIELD_TYPE_BLOB -> row[name] = c.getBlob(i)
+                        }
+                    }
+                    results.add(row)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("ReportViewModel", "Error running custom report query", e)
+        }
+        results
+    }
+
+    suspend fun deleteReport(report: Report) {
+        reportsRepository.deleteReport(report)
+    }
+
+    suspend fun updateReport(report: Report) {
+        reportsRepository.updateReport(report)
     }
 }

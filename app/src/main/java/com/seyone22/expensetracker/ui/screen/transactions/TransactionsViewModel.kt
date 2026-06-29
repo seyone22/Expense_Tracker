@@ -82,7 +82,7 @@ class TransactionsViewModel(
     val filteredTransactions: StateFlow<List<TransactionWithDetails>> = combine(
         _transactionsFlow, _filters, _sortOption
     ) { transactions, filters, sortOption ->
-        filterTransactions(
+        val basicFiltered = filterTransactions(
             transactions,
             filters.timeFilter,
             filters.typeFilter,
@@ -91,6 +91,18 @@ class TransactionsViewModel(
             filters.categoryFilter,
             filters.accountFilter,
         )
+        if (filters.searchQuery.isNotBlank()) {
+            val q = filters.searchQuery.lowercase().trim()
+            basicFiltered.filter {
+                (it.notes?.lowercase()?.contains(q) == true) ||
+                (it.payeeName?.lowercase()?.contains(q) == true) ||
+                (it.categName?.lowercase()?.contains(q) == true) ||
+                (it.transAmount.toString().contains(q)) ||
+                (it.transCode.lowercase().contains(q))
+            }
+        } else {
+            basicFiltered
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     // Function to apply filters

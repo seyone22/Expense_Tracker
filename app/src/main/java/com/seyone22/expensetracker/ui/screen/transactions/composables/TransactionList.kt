@@ -21,6 +21,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -88,7 +98,49 @@ fun TransactionList(
             verticalArrangement = Arrangement.spacedBy(8.dp) // Adds spacing between items
         ) {
             if (showFilter) {
-                item { SortBar() }
+                item {
+                    val currentFilters by viewModel.filters.collectAsState()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = currentFilters.searchQuery,
+                            onValueChange = { query ->
+                                viewModel.setFilters(currentFilters.copy(searchQuery = query))
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("Search transactions...") },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search"
+                                )
+                            },
+                            trailingIcon = {
+                                if (currentFilters.searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = {
+                                        viewModel.setFilters(currentFilters.copy(searchQuery = ""))
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Clear"
+                                        )
+                                    }
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(24.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SortBar(viewModel = viewModel)
+                    }
+                }
             }
 
             val groupedTransactions = filteredTransactions.groupBy { it.transDate }
@@ -195,5 +247,6 @@ data class TransactionFilters(
     val categoryFilter: Category? = null,
     val payeeFilter: Payee? = null,
     val currencyFilter: CurrencyFormat? = null,
-    val tagFilter: Tag? = null
+    val tagFilter: Tag? = null,
+    val searchQuery: String = ""
 )

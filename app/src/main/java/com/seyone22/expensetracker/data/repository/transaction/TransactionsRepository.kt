@@ -49,8 +49,9 @@ interface TransactionsRepository {
 
     fun getExpensesForDateRange(startDate: String, endDate: String): Flow<List<BalanceResult>>
 
+    fun getAllRawTransactionsStream(): Flow<List<Transaction>>
 
-    suspend fun insertTransaction(transaction: Transaction)
+    suspend fun insertTransaction(transaction: Transaction): Long
     suspend fun deleteTransaction(transaction: Transaction)
     suspend fun updateTransaction(transaction: Transaction)
 }

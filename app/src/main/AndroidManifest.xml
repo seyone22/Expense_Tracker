@@ -33,6 +33,15 @@
             android:name=".utils.BiometricAuthActivity"
             android:exported="false"
             android:theme="@style/Theme.ExpenseTracker" />
+
+        <receiver
+            android:name=".receivers.NotificationActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.seyone22.expensetracker.ACTION_PAY_NOW" />
+                <action android:name="com.seyone22.expensetracker.ACTION_SKIP" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

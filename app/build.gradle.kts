@@ -2,7 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
-
+    id("jacoco")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
 }
 
@@ -14,8 +14,8 @@ android {
         applicationId = "com.seyone22.expenses"
         minSdk = 28
         targetSdk = 35
-        versionCode = 15
-        versionName = "0.4.12"
+        versionCode = 16
+        versionName = "0.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -75,6 +75,7 @@ dependencies {
 
     // JUnit
     testImplementation(libs.junit)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 
     // AndroidX Test
     androidTestImplementation(libs.androidx.junit)
@@ -147,4 +148,32 @@ dependencies {
     implementation("androidx.compose.material3:material3-window-size-class-android:1.3.1")
 
     implementation(libs.androidx.activity.ktx) // Latest version
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+    classDirectories.setFrom(
+        fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/debug")) {
+            exclude(
+                "**/R.class",
+                "**/R\$*.class",
+                "**/BuildConfig.*",
+                "**/Manifest*.*",
+                "**/*_MembersInjector.class",
+                "**/Dagger*.*",
+                "**/*_Factory*.*",
+                "**/*_Provide*Factory*.*",
+                "**/*\$Holder.class",
+                "**/*_MembersInjector\$*.*"
+            )
+        }
+    )
+    sourceDirectories.setFrom(files("src/main/java"))
+    executionData.setFrom(fileTree(layout.buildDirectory) {
+        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+    })
 }

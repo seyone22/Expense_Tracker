@@ -20,6 +20,7 @@ import com.seyone22.expensetracker.ui.screen.operations.transaction.TransactionE
 import com.seyone22.expensetracker.ui.screen.report.ReportViewModel
 import com.seyone22.expensetracker.ui.screen.settings.SettingsViewModel
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsViewModel
+import com.seyone22.expensetracker.ui.screen.reconcile.ReconcileViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -71,7 +72,8 @@ object AppViewModelProvider {
                 expenseApplication().container.transactionsRepository,
                 expenseApplication().container.categoriesRepository,
                 expenseApplication().container.payeesRepository,
-                expenseApplication().container.reportsRepository
+                expenseApplication().container.reportsRepository,
+                expenseApplication().container.billsDepositsRepository
             )
         }
         //Initializer for AccountEntryViewModel
@@ -88,7 +90,9 @@ object AppViewModelProvider {
                 expenseApplication().container.accountsRepository,
                 expenseApplication().container.payeesRepository,
                 expenseApplication().container.categoriesRepository,
-                expenseApplication().container.billsDepositsRepository
+                expenseApplication().container.billsDepositsRepository,
+                expenseApplication().container.splitTransactionsRepository,
+                expenseApplication().container.attachmentsRepository
             )
         }
         initializer {
@@ -96,6 +100,12 @@ object AppViewModelProvider {
             AccountDetailViewModel(
                 expenseApplication().container.accountsRepository,
                 expenseApplication().container.transactionsRepository,
+            )
+        }
+        initializer {
+            ReconcileViewModel(
+                expenseApplication().container.accountsRepository,
+                expenseApplication().container.transactionsRepository
             )
         }
         // Initializers for Entity type Viewmodels

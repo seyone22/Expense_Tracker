@@ -58,6 +58,9 @@ fun AccountDetailScreen(
         viewModel.setAccountId(backStackEntry.toInt())
         transactionsViewModel.setFilters(TransactionFilters(accountFilter = accountDetailUiState.account))
     }
+    val isFavorite = accountDetailUiState.account.favoriteAccount == "TRUE"
+    val favoriteLabel = if (isFavorite) "Remove Favourite" else "Make Favourite"
+
     Scaffold(topBar = {
         ExpenseTopBar(
             selectedActivity = AccountDetailDestination.route,
@@ -65,6 +68,7 @@ fun AccountDetailScreen(
             hasNavigation = true,
             dropdownOptions = listOf(
                 "Edit" to { navController.navigate(AccountEntryDestination.route + "/$backStackEntry") },
+                "Reconcile" to { navController.navigate("Reconcile/$backStackEntry") },
                 "Delete" to {
                     viewModel.showDialog(
                         DeleteItemDialogAction(
@@ -77,7 +81,11 @@ fun AccountDetailScreen(
                         )
                     )
                 },
-                "Make Favourite" to { })
+                favoriteLabel to {
+                    coroutineScope.launch {
+                        viewModel.toggleFavoriteAccount(accountDetailUiState.account)
+                    }
+                })
         )
     }) {
         LazyColumn(

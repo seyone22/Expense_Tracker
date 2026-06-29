@@ -113,6 +113,12 @@ class AccountDetailViewModel(
             false
         }
     }
+
+    suspend fun toggleFavoriteAccount(account: Account) {
+        val newFavorite = if (account.favoriteAccount == "TRUE") "" else "TRUE"
+        accountsRepository.updateAccount(account.copy(favoriteAccount = newFavorite))
+        refreshAccount()
+    }
 }
 
 data class AccountDetailUiState(

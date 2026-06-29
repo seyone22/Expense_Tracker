@@ -25,6 +25,10 @@ import com.seyone22.expensetracker.data.repository.tag.OfflineTagsRepository
 import com.seyone22.expensetracker.data.repository.tag.TagsRepository
 import com.seyone22.expensetracker.data.repository.transaction.OfflineTransactionsRepository
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
+import com.seyone22.expensetracker.data.repository.splitTransaction.SplitTransactionsRepository
+import com.seyone22.expensetracker.data.repository.splitTransaction.OfflineSplitTransactionsRepository
+import com.seyone22.expensetracker.data.repository.attachment.AttachmentsRepository
+import com.seyone22.expensetracker.data.repository.attachment.OfflineAttachmentsRepository
 
 interface AppContainer {
     val accountsRepository: AccountsRepository
@@ -39,6 +43,8 @@ interface AppContainer {
     val budgetEntryRepository: BudgetEntryRepository
     val budgetYearRepository: BudgetYearRepository
     val tagsRepository: TagsRepository
+    val splitTransactionsRepository: SplitTransactionsRepository
+    val attachmentsRepository: AttachmentsRepository
 }
 /**
  * [AppContainer] implementation that provides instance of OfflineItemsRepository
@@ -82,5 +88,11 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
     override val tagsRepository: TagsRepository by lazy {
         OfflineTagsRepository(MMEXDatabase.getDatabase(context).tagDao())
+    }
+    override val splitTransactionsRepository: SplitTransactionsRepository by lazy {
+        OfflineSplitTransactionsRepository(MMEXDatabase.getDatabase(context).splitTransactionDao())
+    }
+    override val attachmentsRepository: AttachmentsRepository by lazy {
+        OfflineAttachmentsRepository(MMEXDatabase.getDatabase(context).attachmentDao())
     }
 }

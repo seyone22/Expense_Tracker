@@ -21,6 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.Account
@@ -61,6 +63,14 @@ fun AccountCard(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
+            if (accountWithBalance.first.favoriteAccount == "TRUE") {
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = "Favorite Account",
+                    tint = androidx.compose.ui.graphics.Color(0xFFFBC02D),
+                    modifier = Modifier.align(Alignment.TopEnd)
+                )
+            }
             Column(
                 modifier = Modifier.align(Alignment.TopStart)
             ) {

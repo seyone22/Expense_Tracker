@@ -110,7 +110,7 @@ class HomeViewModel(
             val balance = transactionsRepository.getBalanceByAccountId().firstOrNull()
                 ?.find { it.accountId == account.accountId }?.balance ?: 0.0
             account to balance
-        }
+        }.sortedByDescending { it.first.favoriteAccount == "TRUE" }
 
         HomeUiState(
             accountList = transformedList,

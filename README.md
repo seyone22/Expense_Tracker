@@ -6,95 +6,68 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/seyone22/Expense_Tracker/build_and_release_signed_apk.yml?label=Release)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/eb10603b1a9b4a9483c099a5767da56d)](https://app.codacy.com/gh/seyone22/Expense_Tracker/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
-Expense Tracker is a personal finance application for Android, designed to help users manage their
-expenses efficiently. It draws inspiration from the popular Money Manager EX project but offers a
-modernized approach to expense tracking on the Android platform. Leveraging modern Android
-development practices, Expense Tracker utilizes Jetpack Compose for UI development and Room for
-database management. Our aim is to provide feature parity with Money Manager EX while delivering a
-more intuitive and user-friendly experience.
+Expense Tracker is a personal finance application for Android, designed to help users manage their expenses efficiently. It draws inspiration from the popular Money Manager EX (MMEX) project but offers a modernized approach to expense tracking on the Android platform. Leveraging modern Android development practices, Expense Tracker utilizes Jetpack Compose for UI development and Room for database management. Our aim is to provide feature parity with Money Manager EX while delivering a more intuitive and user-friendly experience.
 
-## Features
+---
 
-Expense Tracker currently offers the following features:
+## Key Features
 
-- **Account Management:** Users can create and manage multiple accounts to organize their finances.
-- **Transaction Tracking:** Record and categorize transactions to monitor income and expenses.
-- **Reporting:** Generate basic reports to analyze spending patterns over time.
-- **Entity Management:** Manage categories, payees, and currencies to customize the app according to
-  individual needs.
-- **Automatic Currency Updates:** Expense Tracker fetches currency exchange rates from the European
-  Union InfoEuro system for monthly updates.
+Expense Tracker offers the following features:
 
-<div style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <img src="assets/Screenshot_settings.png" alt="Settings" width="200" style="margin: 10px;">
-    <img src="assets/Screenshot_entities.png" alt="Categories" width="200" style="margin: 10px;">
-    <img src="assets/Screenshot_accounts.png" alt="Settings" width="200" style="margin: 10px;"> 
-</div>
-<div style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <img src="assets/Screenshot_transactions.png" alt="Settings" width="200" style="margin: 10px;">
-    <img src="assets/Screenshot_home.png" alt="Settings" width="200" style="margin: 10px;">
-    <img src="assets/Screenshot_transactions.png" alt="Settings" width="200" style="margin: 10px;">
-</div>
-<div style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <img src="assets/Screenshot_reports.png" alt="Settings" width="200" style="margin: 10px;">
-    <img src="assets/Screenshot_20240212_120830.png" alt="Payees" width="200" style="margin: 10px;">
-</div>
-<div style="display: flex; flex-wrap: wrap; justify-content: center;">
-    <img src="assets/tablet_ui.png" alt="Tablet UI" width="400" style="margin: 10px;">
-</div>
+- **🔀 Split Transactions**: Categorize a single transaction into multiple categories and amounts. Compliant with the MMEX `SPLITTRANSACTIONS_V1` table schema, complete with dynamic forms that validate that split item amounts sum up to the transaction total in real-time.
+- **📊 Interactive Reports Builder**: Custom animated SVG-like canvas Pie and Donut charts, combined with Cartesian bar/line charts using Vico. Build, run, and save custom SQL reports via an inline SQLite raw query editor. Includes default reports auto-populated on first startup (e.g. Subscriptions, Summary of Accounts, Category Breakdown).
+- **🔍 Transaction Search & Multi-Field Filters**: Easily search transactions by payee, notes, category name, or transaction code using a search bar at the top of the transaction list.
+- **💱 Multi-Currency Transfers & Conversion Rates**: Cross-currency transfers auto-detect mismatched account currencies and prompt for conversion rates or target deposit amounts.
+- **⚖️ Account Reconciliation Wizard**: Reconcile your transactions against monthly bank statements. Prompt for Ending Balance, select cleared items, and trace the variance down to exactly zero before saving.
+- **📸 Receipt Attachment & Photo Capture**: Attach photos of invoices or documents to any transaction. Files are copied securely into local internal app storage and indexed polymorphically using the MMEX `ATTACHMENT_V1` table structure.
+- **🏦 Account Management**: Create and manage multiple accounts to organize your cash, checkings, savings, assets, and liabilities.
+- **Automatic Currency Updates**: Fetches currency exchange rates from the European Union InfoEuro system for monthly updates.
 
-## Installation
+---
 
-### APK Installation
+## Technical Architecture
 
-1. Download the APK file from
-   the [latest release](https://github.com/seyone22/Expense_Tracker/releases/tag/v0.1.2-alpha).
-2. Transfer the APK file to your Android device.
-3. Open the APK file on your device and follow the installation prompts.
+*   **UI Layer**: Jetpack Compose (Material 3) with M3 Adaptive Navigation Suite supporting both tablet layouts and mobile layouts.
+*   **Database**: Room Database with migration versioning supporting Money Manager EX (MMEX) desktop schema layouts.
+*   **Background Tasks**: AndroidX WorkManager running background exchange rate syncs.
 
-### Building from Source
+---
 
-1. Clone the repository to your local machine:
-   ```git clone https://github.com/yourusername/expense-tracker.git```
-2. Open the project in Android Studio.
-3. Build and run the project on an Android device or emulator.
+## Testing & Code Coverage
 
-## Testing
+Expense Tracker contains a comprehensive unit testing suite verifying ViewModels, repositories, formatting utilities, and data layers:
 
-Expense Tracker currently lacks automated test coverage. Contributions to add testing support are
-highly encouraged and appreciated. Please refer to the CONTRIBUTING.md file for guidelines on
-contributing to the project.
+### Running Tests
+To execute unit tests:
+```bash
+./gradlew test
+```
 
-## Built With
+### Running Test Coverage (Jacoco)
+To run tests and compile an HTML/XML code coverage report:
+```bash
+./gradlew test jacocoTestReport
+```
+The resulting code coverage reports will be compiled at:
+`app/build/reports/jacoco/jacocoTestReport/html/index.html`
 
-Expense Tracker is built using the following technologies and libraries:
+---
 
-- [Jetpack Compose](https://developer.android.com/jetpack/compose)
-- [Room](https://developer.android.com/jetpack/androidx/releases/room)
-- [Material UI](https://material.io/components)
-- [Retrofit](https://square.github.io/retrofit/)
+## Versioning & Releases
 
-## Versioning
+Expense Tracker follows semantic versioning. 
+*   **Tag releases**: Auto-generated by our GitHub actions CI/CD pipeline whenever version changes are committed and pushed to the `master` branch.
+*   **Rebuilds from source**: To manually compile a release APK locally, execute:
+    ```bash
+    ./gradlew assembleRelease
+    ```
 
-Expense Tracker follows semantic versioning for version management. For the available versions, see
-the [tags on this repository](https://github.com/seyone22/expense_tracker/tags).
-
-## Author
-
-Expense Tracker is developed by S.G. Seyone.
+---
 
 ## Contributing
 
-Contributions to Expense Tracker are welcome! Please review the guidelines outlined in
-the [CONTRIBUTING.md](CONTRIBUTING.md) file before contributing.
+Contributions are welcome! Please review the guidelines outlined in the [CONTRIBUTING.md](CONTRIBUTING.md) file before contributing.
 
 ## License
 
-Expense Tracker is licensed under the [MIT License](LICENSE.md). See the LICENSE.md file for
-details.
-
-## Acknowledgments
-
-We extend our gratitude to the developers of Money Manager EX for their pioneering work in personal
-finance management. Special thanks to the European Union InfoEuro system for providing currency
-exchange rate data.
+Expense Tracker is licensed under the [MIT License](LICENSE.md). See the LICENSE.md file for details.

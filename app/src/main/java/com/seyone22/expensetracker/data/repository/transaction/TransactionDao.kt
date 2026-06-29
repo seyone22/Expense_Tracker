@@ -16,7 +16,7 @@ import java.time.LocalDate
 @Dao
 interface TransactionDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insert(transaction: Transaction)
+    suspend fun insert(transaction: Transaction): Long
 
     @Update
     suspend fun update(transaction: Transaction)
@@ -26,6 +26,9 @@ interface TransactionDao {
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE transId = :transId")
     fun getTransaction(transId: Int): Flow<Transaction>
+
+    @Query("SELECT * FROM CHECKINGACCOUNT_V1")
+    fun getAllRawTransactions(): Flow<List<Transaction>>
 
     @RawQuery(observedEntities = [Transaction::class])
     fun getAllTransactions(query: SupportSQLiteQuery): Flow<List<TransactionWithDetails>>
