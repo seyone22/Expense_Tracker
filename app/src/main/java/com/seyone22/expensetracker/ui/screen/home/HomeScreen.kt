@@ -61,8 +61,10 @@ fun HomeScreen(
         GenericDialog(dialogAction = it, onDismiss = { viewModel.dismissDialog() })
     }
 
-    if (!isUsed) {
-        navigateToScreen(OnboardingDestination.route)
+    LaunchedEffect(isUsed) {
+        if (!isUsed) {
+            navigateToScreen(OnboardingDestination.route)
+        }
     }
 
     var hideBalances by remember {
