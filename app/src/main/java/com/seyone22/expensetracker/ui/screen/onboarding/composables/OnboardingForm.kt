@@ -76,7 +76,7 @@ fun OnboardingForm(
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(0.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color.Transparent
             )
@@ -100,7 +100,7 @@ fun OnboardingForm(
                         )
                     },
                     label = { Text("Your Username") },
-                    placeholder = { Text("Enter name for transaction labels") },
+                    placeholder = { Text("Name for attribution") },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Person,
