@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -77,12 +78,12 @@ fun OnboardingForm(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                containerColor = Color.Transparent
             )
         ) {
             Column(
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(0.dp)
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
