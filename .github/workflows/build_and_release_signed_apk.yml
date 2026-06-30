@@ -21,51 +21,44 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Get Version Name
+        id: version
+        run: echo "VERSION_NAME=$(grep VERSION_NAME gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
+
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d -w 0 > keystore.jks
 
       - name: Grant execute permission for Gradlew
         run: chmod +x ./gradlew
 
-              # Building and signing App
+      # Building App
       - name: Build Android APK
         run: ./gradlew assembleRelease 
-  
+
+      # Native APK Signing using apksigner
       - name: Sign APK
-        uses: r0adkll/sign-android-release@v1
-        # ID used to access action output
-        id: sign_app
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.KEYSTORE_BASE64 }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-        env:
-          # override default build-tools version (35.0.0) -- optional
-          BUILD_TOOLS_VERSION: "35.0.0"
-
-      - name: Get Version Name
-        id: version
-        run: echo "VERSION_NAME=$(grep VERSION_NAME gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
-
-      - name: Debug - List all APK files
-        run: find app/build/outputs/ -name "*.apk"
-
-      - name: Rename APK file
         run: |
-          VERSION_STRING="${{ env.VERSION_NAME }}"
-          APK_FILE="${{ steps.sign_app.outputs.signedReleaseFile }}"
-    
-          if [ ! -f "$APK_FILE" ]; then
-            echo "Error: APK not found at $APK_FILE"
+          # Find apksigner
+          APKSIGNER=$(find $ANDROID_SDK_ROOT/build-tools -name apksigner | sort -r | head -n 1)
+          echo "Using apksigner at: $APKSIGNER"
+          
+          # Find unsigned APK
+          UNSIGNED_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          if [ -z "$UNSIGNED_APK" ]; then
+            echo "Error: Unsigned APK not found!"
             exit 1
           fi
-      
-          NEW_APK_NAME="${{ github.workspace }}/Expense Tracker v${VERSION_STRING}.apk"
-          mv "$APK_FILE" "$NEW_APK_NAME"
-          echo "APK renamed to $NEW_APK_NAME"
-
+          echo "Found unsigned APK at: $UNSIGNED_APK"
+          
+          # Sign the APK directly to the workspace output destination
+          $APKSIGNER sign --ks keystore.jks \
+            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
+            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
+            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
+            --out "${{ github.workspace }}/Expense Tracker v${{ env.VERSION_NAME }}.apk" \
+            $UNSIGNED_APK
+          
+          echo "APK successfully signed and output to ${{ github.workspace }}/Expense Tracker v${{ env.VERSION_NAME }}.apk"
 
       - name: Check if APK exists
         run: |
@@ -82,7 +75,7 @@ jobs:
           retention-days: 4
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION_NAME }}
           name: Release v${{ env.VERSION_NAME }}
