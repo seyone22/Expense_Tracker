@@ -24,6 +24,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.dimensions
@@ -46,17 +47,19 @@ fun AccountHistoryGraph(
     modifier: Modifier,
     accountDetailUiState: AccountDetailUiState,
 ) {
-    // Initialize seriesState with a default value (e.g., list of 0.0)
-    var seriesState by remember { mutableStateOf(List(2) { 10.0 }) }
+    val initialBalance = accountDetailUiState.account.initialBalance ?: 0.0
+    // Initialize seriesState with a default line at the initial balance
+    var seriesState by remember { mutableStateOf(List(7) { initialBalance }) }
 
     val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(accountDetailUiState.balanceHistory) {
-        Log.d("TAG", "AccountDetailCard: ${accountDetailUiState.balanceHistory}")
-        // Extract balance values into seriesState once data is available
+    LaunchedEffect(accountDetailUiState.balanceHistory, initialBalance) {
+        // Extract balance values + initialBalance once data is available
         if (accountDetailUiState.balanceHistory.isNotEmpty()) {
             seriesState = accountDetailUiState.balanceHistory.map { (_, balance, _) ->
-                balance
+                balance + initialBalance
             }
+        } else {
+            seriesState = List(7) { initialBalance }
         }
 
         // Update the model producer with the new series data
@@ -67,15 +70,16 @@ fun AccountHistoryGraph(
         }
     }
 
-    val primary = MaterialTheme.colorScheme.primary.toArgb()
-
+    val primaryColor = MaterialTheme.colorScheme.primary
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(200.dp),
-        colors = CardDefaults.cardColors()
-            .copy(containerColor = MaterialTheme.colorScheme.background)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        shape = MaterialTheme.shapes.large
     ) {
         CartesianChartHost(
             modifier = Modifier
@@ -85,19 +89,38 @@ fun AccountHistoryGraph(
                 rememberLineCartesianLayer(
                     LineCartesianLayer.LineProvider.series(
                         LineCartesianLayer.rememberLine(
-                            fill = remember { LineCartesianLayer.LineFill.single(fill(Color(primary))) },
+                            fill = remember { LineCartesianLayer.LineFill.single(fill(primaryColor)) },
+                            areaFill = remember {
+                                LineCartesianLayer.AreaFill.single(fill(primaryColor.copy(alpha = 0.12f)))
+                            },
                             pointConnector = remember {
                                 LineCartesianLayer.PointConnector.cubic(
-                                    curvature = 0f
+                                    curvature = 0.35f
                                 )
                             },
                         )
                     )
                 ),
-                startAxis = VerticalAxis.rememberStart(),
+                startAxis = VerticalAxis.rememberStart(
+                    label = rememberTextComponent(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    line = null,
+                    tick = null,
+                    guideline = rememberLineComponent(
+                        fill = fill(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+                        thickness = 1.dp
+                    )
+                ),
                 bottomAxis = HorizontalAxis.rememberBottom(
+                    label = rememberTextComponent(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    line = null,
+                    tick = null,
                     valueFormatter = bottomAxisValueFormatter
-                ), marker = rememberDefaultCartesianMarker(
+                ), 
+                marker = rememberDefaultCartesianMarker(
                     label = rememberTextComponent(
                         color = MaterialTheme.colorScheme.onSurface,
                         textAlignment = Layout.Alignment.ALIGN_CENTER,
@@ -111,11 +134,9 @@ fun AccountHistoryGraph(
                 )
             ),
             modelProducer = modelProducer,
-
-            )
+        )
     }
 }
-
 
 private val bottomAxisValueFormatter = CartesianValueFormatter { _, x, _ ->
     try {
@@ -131,4 +152,3 @@ private val bottomAxisValueFormatter = CartesianValueFormatter { _, x, _ ->
         "" // Fallback in case of errors
     }
 }
-
