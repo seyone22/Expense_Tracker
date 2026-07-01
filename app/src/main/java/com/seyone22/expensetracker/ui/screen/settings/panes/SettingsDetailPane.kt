@@ -58,7 +58,7 @@ import androidx.window.core.layout.WindowWidthSizeClass
 import com.seyone22.expensetracker.R
 import com.seyone22.expensetracker.SharedViewModel
 import com.seyone22.expensetracker.data.model.CurrencyFormat
-import com.seyone22.expensetracker.data.model.Metadata
+import com.seyone22.expensetracker.data.model.AppMetadata
 import com.seyone22.expensetracker.managers.CryptoManager
 import com.seyone22.expensetracker.managers.ScreenLockManager
 import com.seyone22.expensetracker.managers.SnackbarManager
@@ -78,6 +78,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.graphics.Color
 import com.seyone22.expensetracker.managers.BackupManager
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
@@ -87,6 +91,7 @@ fun SettingsDetailPane(
     navController: NavController,
     windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
     currentDestinationKey: String,
+    onToggleDarkTheme: (Int) -> Unit = {},
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
     val metadataList by viewModel.metadataList.collectAsState(emptyList())
@@ -120,7 +125,7 @@ fun SettingsDetailPane(
                 "Appearance" -> {
                     AppearanceSettingsList(
                         metadata = metadataList,
-                        onToggleDarkTheme = { TODO() },
+                        onToggleDarkTheme = onToggleDarkTheme,
                         viewModel = viewModel
                     )
                 }
@@ -155,13 +160,17 @@ fun SettingsDetailPane(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeneralSettingsList(
-    metadata: List<Metadata?>, viewModel: SettingsViewModel
+    metadata: List<AppMetadata?>, viewModel: SettingsViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
     var baseCurrencyName by remember { mutableStateOf("") }
 
     var editCurrency by remember { mutableStateOf(false) }
     var editName by remember { mutableStateOf((false)) }
+    var editApiKey by remember { mutableStateOf(false) }
+
+    val finnhubApiKeyMeta by viewModel.finnhubApiKeyFlow.collectAsState(initial = null)
+    val finnhubApiKey = finnhubApiKeyMeta?.infoValue ?: ""
 
     Column {
         ListItem(headlineContent = { Text(text = "Username") }, supportingContent = {
@@ -177,9 +186,76 @@ fun GeneralSettingsList(
                 }
             }
             Text(text = removeTrPrefix(baseCurrencyName))
-        }, modifier = Modifier.clickable { editCurrency = !editCurrency }
+        }, modifier = Modifier.clickable { editCurrency = !editCurrency })
+        
+        ListItem(headlineContent = { Text(text = "Finnhub API Key") }, supportingContent = {
+            Text(text = if (finnhubApiKey.isBlank()) "Not set" else if (finnhubApiKey.length > 8) finnhubApiKey.take(4) + "..." + finnhubApiKey.takeLast(4) else finnhubApiKey)
+        }, modifier = Modifier.clickable { editApiKey = !editApiKey })
+    }
 
-        )
+    // Edit API Key Dialog
+    if (editApiKey) {
+        var newKey by remember { mutableStateOf(finnhubApiKey) }
+
+        Dialog(onDismissRequest = { editApiKey = !editApiKey }) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(275.dp)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = "Enter your Finnhub API Key",
+                        modifier = Modifier.padding(8.dp),
+                    )
+                    OutlinedTextField(
+                        value = newKey,
+                        onValueChange = { newKey = it },
+                        modifier = Modifier.padding(8.dp),
+                        label = { Text("API Key") },
+                        singleLine = true,
+                        trailingIcon = {
+                            if (newKey.isNotEmpty()) {
+                                IconButton(onClick = { newKey = "" }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Clear API Key"
+                                    )
+                                }
+                            }
+                        }
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        TextButton(
+                            onClick = { editApiKey = !editApiKey },
+                            modifier = Modifier.padding(8.dp),
+                        ) {
+                            Text("Dismiss")
+                        }
+                        TextButton(
+                            onClick = {
+                                editApiKey = !editApiKey
+                                coroutineScope.launch {
+                                    viewModel.changeFinnhubApiKey(newKey)
+                                }
+                            },
+                            modifier = Modifier.padding(8.dp),
+                        ) {
+                            Text("Confirm")
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Edit name Dialog
@@ -412,7 +488,7 @@ fun AboutList() {
 
 @Composable
 fun AppearanceSettingsList(
-    metadata: List<Metadata?>, onToggleDarkTheme: (Int) -> Unit, viewModel: SettingsViewModel
+    metadata: List<AppMetadata?>, onToggleDarkTheme: (Int) -> Unit, viewModel: SettingsViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -420,18 +496,31 @@ fun AppearanceSettingsList(
 
     var selectedTheme by remember { mutableIntStateOf(0) }
 
+    val currentTheme = LocalTheme.current
+
+    LaunchedEffect(currentTheme) {
+        selectedTheme = when {
+            currentTheme.systemTheme -> 2
+            currentTheme.isMidnight -> 3
+            currentTheme.isDark -> 1
+            else -> 0
+        }
+    }
+
     Column {
-        ListItem(headlineContent = { Text(text = "Theme") }, supportingContent = {
-            if (LocalTheme.current.isDark && !LocalTheme.current.isMidnight) {
-                Text(text = "Dark")
-                selectedTheme = 1
-            } else if (LocalTheme.current.isDark && LocalTheme.current.isMidnight) {
-                Text(text = "Midnight")
-            } else {
-                Text(text = "Light")
-                selectedTheme = 0
-            }
-        }, modifier = Modifier.clickable { editTheme = !editTheme })
+        ListItem(
+            headlineContent = { Text(text = "Theme") },
+            supportingContent = {
+                val themeText = when {
+                    currentTheme.systemTheme -> "System Default"
+                    currentTheme.isMidnight -> "Midnight"
+                    currentTheme.isDark -> "Dark"
+                    else -> "Light"
+                }
+                Text(text = themeText)
+            },
+            modifier = Modifier.clickable { editTheme = !editTheme }
+        )
 
         // Edit Theme Dialog
         if (editTheme) {
@@ -460,7 +549,8 @@ fun AppearanceSettingsList(
                         ) {
                             RadioButton(enabled = true, selected = (selectedTheme == 0), onClick = {
                                 selectedTheme = 0
-                                coroutineScope.launch { viewModel.setTheme(selectedTheme) }
+                                coroutineScope.launch { viewModel.setTheme(0) }
+                                onToggleDarkTheme(0)
                             })
                             Text(text = "Light")
                         }
@@ -470,7 +560,8 @@ fun AppearanceSettingsList(
                         ) {
                             RadioButton(enabled = true, selected = (selectedTheme == 1), onClick = {
                                 selectedTheme = 1
-                                coroutineScope.launch { viewModel.setTheme(selectedTheme) }
+                                coroutineScope.launch { viewModel.setTheme(1) }
+                                onToggleDarkTheme(1)
                             })
                             Text(text = "Dark")
                         }
@@ -480,7 +571,8 @@ fun AppearanceSettingsList(
                         ) {
                             RadioButton(enabled = true, selected = (selectedTheme == 2), onClick = {
                                 selectedTheme = 2
-                                coroutineScope.launch { viewModel.setTheme(selectedTheme) }
+                                coroutineScope.launch { viewModel.setTheme(2) }
+                                onToggleDarkTheme(2)
                             })
                             Text(text = "System Default")
                         }
@@ -491,7 +583,12 @@ fun AppearanceSettingsList(
                             RadioButton(
                                 enabled = true,
                                 selected = (selectedTheme == 3),
-                                onClick = { selectedTheme = 3 })
+                                onClick = {
+                                    selectedTheme = 3
+                                    coroutineScope.launch { viewModel.setTheme(3) }
+                                    onToggleDarkTheme(3)
+                                }
+                            )
                             Text(text = "Midnight")
                         }
                     }
@@ -503,7 +600,7 @@ fun AppearanceSettingsList(
 
 @Composable
 fun DataSettingsList(
-    metadata: List<Metadata?>,
+    metadata: List<AppMetadata?>,
     viewModel: SettingsViewModel,
 ) {
     val sharedViewModel: SharedViewModel = viewModel(factory = AppViewModelProvider.Factory)

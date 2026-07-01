@@ -3,17 +3,18 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("jacoco")
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.4.0"
+    alias(libs.plugins.kotlinCompose)
 }
 
 android {
     namespace = "com.seyone22.expensetracker"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.seyone22.expenses"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 16
         versionName = "0.5.0"
 
@@ -34,17 +35,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = "17"
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
+    kotlin {
+        jvmToolchain(21) // This forces both Java and Kotlin to use JDK 17
     }
     packaging {
         resources {
@@ -75,7 +73,7 @@ dependencies {
 
     // JUnit
     testImplementation(libs.junit)
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // AndroidX Test
     androidTestImplementation(libs.androidx.junit)
@@ -95,9 +93,9 @@ dependencies {
 
     // AndroidX Compose Material3 Adaptive Navigation Suite
     implementation(libs.androidx.material3.adaptive.navigation.suite)
-    implementation("androidx.compose.material3.adaptive:adaptive:1.2.0-alpha01")
-    implementation("androidx.compose.material3.adaptive:adaptive-layout:1.2.0-alpha01")
-    implementation("androidx.compose.material3.adaptive:adaptive-navigation:1.2.0-alpha01")
+    implementation(libs.androidx.compose.adaptive)
+    implementation(libs.androidx.compose.adaptive.layout)
+    implementation(libs.androidx.compose.adaptive.navigation)
 
     // AndroidX Room
     implementation(libs.androidx.room.runtime)
@@ -127,6 +125,7 @@ dependencies {
     implementation(libs.androidx.window)
 
     // Vico Charts - M3 Compose
+    implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)
 
     // Workers
@@ -145,7 +144,7 @@ dependencies {
     implementation(libs.charts)
 
     // AndroidX Compose Material3 Window Size Class Android
-    implementation("androidx.compose.material3:material3-window-size-class-android:1.3.1")
+    implementation(libs.androidx.compose.material3.window.size.class1.android)
 
     implementation(libs.androidx.activity.ktx) // Latest version
 }

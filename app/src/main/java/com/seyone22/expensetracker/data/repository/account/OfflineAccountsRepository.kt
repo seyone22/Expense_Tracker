@@ -3,6 +3,7 @@ package com.seyone22.expensetracker.data.repository.account
 import com.seyone22.expensetracker.data.model.Account
 import com.seyone22.expensetracker.data.repository.transaction.BalanceResult
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class OfflineAccountsRepository(private val accountDao: AccountDao) : AccountsRepository {
     override fun getAllAccountsStream(): Flow<List<Account>> = accountDao.getAllAccounts()
@@ -15,6 +16,7 @@ class OfflineAccountsRepository(private val accountDao: AccountDao) : AccountsRe
 
     override fun getAccountBalance(accountId: Int, date: String?): Flow<BalanceResult> =
         accountDao.getAccountBalance(accountId, date)
+            .map { it ?: BalanceResult(accountId, 0.0) }
 
     override suspend fun insertAccount(account: Account) = accountDao.insert(account)
     override suspend fun deleteAccount(account: Account) {

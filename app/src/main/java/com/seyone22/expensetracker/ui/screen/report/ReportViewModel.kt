@@ -2,9 +2,21 @@ package com.seyone22.expensetracker.ui.screen.report
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
-import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer.ColumnProvider.Companion.series
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.component.TextComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.seyone22.expensetracker.data.model.Report
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
@@ -16,6 +28,10 @@ import kotlinx.coroutines.flow.first
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import androidx.sqlite.db.SimpleSQLiteQuery
+import com.patrykandpatrick.vico.compose.cartesian.data.ColumnCartesianLayerModel
+import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
+import com.patrykandpatrick.vico.compose.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.absoluteValue
@@ -123,9 +139,7 @@ class ReportViewModel(
             val modelProducer = CartesianChartModelProducer()
 
             modelProducer.runTransaction {
-                columnSeries {
-                    series(xToDates.keys, transactionMap.values)
-                }
+                columnModel { series(xToDates.keys, transactionMap.values) }
             }
 
             return modelProducer

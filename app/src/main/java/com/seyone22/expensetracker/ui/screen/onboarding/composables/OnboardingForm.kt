@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.seyone22.expensetracker.data.model.CurrencyFormat
-import com.seyone22.expensetracker.data.model.Metadata
+import com.seyone22.expensetracker.data.model.AppMetadata
 import com.seyone22.expensetracker.ui.screen.onboarding.OnboardingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,7 +95,7 @@ fun OnboardingForm(
                         username = it
                         viewModel.updateUiState(
                             viewModel.metadataUiState.metadataDetails.copy(
-                                usernameMetadata = Metadata(6, "USERNAME", username)
+                                usernameMetadata = AppMetadata(6, "USERNAME", username)
                             )
                         )
                     },
@@ -174,7 +174,7 @@ fun OnboardingForm(
                                         currentCurrency = currency
                                         viewModel.updateUiState(
                                             viewModel.metadataUiState.metadataDetails.copy(
-                                                baseCurrencyMetadata = Metadata(
+                                                baseCurrencyMetadata = AppMetadata(
                                                     5, "BASECURRENCYID", currentCurrency.currencyId.toString()
                                                 )
                                             )

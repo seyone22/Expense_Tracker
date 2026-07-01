@@ -21,6 +21,7 @@ import com.seyone22.expensetracker.ui.screen.report.ReportViewModel
 import com.seyone22.expensetracker.ui.screen.settings.SettingsViewModel
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsViewModel
 import com.seyone22.expensetracker.ui.screen.reconcile.ReconcileViewModel
+import com.seyone22.expensetracker.ui.screen.investments.InvestmentsViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -149,6 +150,15 @@ object AppViewModelProvider {
                 expenseApplication().container.payeesRepository,
                 expenseApplication().container.tagsRepository,
                 expenseApplication().container.budgetEntryRepository
+            )
+        }
+        initializer {
+            InvestmentsViewModel(
+                expenseApplication().container.accountsRepository,
+                expenseApplication().container.stockRepository,
+                expenseApplication().container.stockHistoryRepository,
+                expenseApplication().container.metadataRepository,
+                expenseApplication().container.currenciesRepository
             )
         }
     }

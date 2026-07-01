@@ -8,6 +8,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -149,34 +150,14 @@ fun TransactionEntryScreen(
     }
 
     ) { padding ->
-        LazyColumn {
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(padding),
-                ) {
-                    TransactionEntryForm(
-                        modifier = Modifier
-                            .focusGroup()
-                            .padding(48.dp, 0.dp),
-                        viewModel = viewModel,
-                        coroutineScope = coroutineScope,
-                        edit = false
-                    )
-                    ScheduledTransactionEntryForm(
-                        modifier = Modifier
-                            .focusGroup()
-                            .padding(48.dp, 0.dp),
-                        editableTransactionDetails = transactionUiState.billsDepositsDetails,
-                        onValueChange = viewModel::updateUiState,
-                        viewModel = viewModel,
-                        setRecurring = { recurring = !recurring },
-                        coroutineScope = coroutineScope,
-                        edit = false
-                    )
-                }
-            }
-        }
+        TransactionEntryForm(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            viewModel = viewModel,
+            coroutineScope = coroutineScope,
+            edit = false,
+            onRecurringChanged = { recurring = it }
+        )
     }
 }

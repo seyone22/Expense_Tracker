@@ -5,6 +5,7 @@ import com.seyone22.expensetracker.ui.screen.budget.BudgetsDestination
 import com.seyone22.expensetracker.ui.screen.home.HomeDestination
 import com.seyone22.expensetracker.ui.screen.report.ReportsDestination
 import com.seyone22.expensetracker.ui.screen.settings.SettingsDestination
+import com.seyone22.expensetracker.ui.screen.investments.InvestmentsDestination
 
 /**
  * Interface to describe the navigation destinations for the app
@@ -31,5 +32,6 @@ enum class MainNavigationDestinations(
     HOME(HomeDestination),
     BUDGETS(BudgetsDestination),
     REPORTS(ReportsDestination),
+    INVESTMENTS(InvestmentsDestination),
     MORE(SettingsDestination)
 }

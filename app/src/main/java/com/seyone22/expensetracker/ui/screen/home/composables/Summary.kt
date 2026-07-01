@@ -24,7 +24,7 @@ import com.github.tehras.charts.piechart.PieChartData
 import com.github.tehras.charts.piechart.animation.simpleChartAnimation
 import com.github.tehras.charts.piechart.renderer.SimpleSliceDrawer
 import com.seyone22.expensetracker.data.model.CurrencyFormat
-import com.seyone22.expensetracker.ui.screen.home.Totals
+import com.seyone22.expensetracker.data.repository.transaction.Totals
 import kotlinx.coroutines.flow.Flow
 
 @Composable

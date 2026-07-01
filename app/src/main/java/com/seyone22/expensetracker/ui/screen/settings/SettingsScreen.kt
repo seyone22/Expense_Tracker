@@ -48,6 +48,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     navigateToScreen: (screen: String) -> Unit,
     navigateBack: () -> Unit,
+    onToggleDarkTheme: (Int) -> Unit = {},
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
 ) {
@@ -78,8 +79,9 @@ fun SettingsScreen(
                     }
                 },
                 currentDestinationKey = scaffoldNavigator.currentDestination?.contentKey ?: "",
-                navController = rememberNavController()
-                )
+                navController = rememberNavController(),
+                onToggleDarkTheme = onToggleDarkTheme
+            )
         }
     })
 }

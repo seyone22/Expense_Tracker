@@ -22,7 +22,7 @@ interface AccountDao {
     suspend fun delete(account: Account)
 
     @Query("SELECT * FROM ACCOUNTLIST_V1 WHERE accountId = :accountId")
-    fun getAccount(accountId: Int): Flow<Account>
+    fun getAccount(accountId: Int): Flow<Account?>
 
     @Query("SELECT * FROM ACCOUNTLIST_V1 ORDER BY accountName ASC")
     fun getAllAccounts(): Flow<List<Account>>
@@ -64,7 +64,7 @@ interface AccountDao {
     GROUP BY accountId
     """
     )
-    fun getAccountBalance(accountId: Int, date: String? = null): Flow<BalanceResult>
+    fun getAccountBalance(accountId: Int, date: String? = null): Flow<BalanceResult?>
 
     @Query("DELETE FROM CHECKINGACCOUNT_V1 WHERE accountId = :accountId")
     suspend fun deleteTransactionsForAccount(accountId: Int)

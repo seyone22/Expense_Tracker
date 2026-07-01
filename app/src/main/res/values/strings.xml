@@ -18,5 +18,7 @@
     <string name="biometric_prompt_subtitle_text">Use your fingerprint or face recognition</string>
     <string name="biometric_prompt_description_text">To proceed, authenticate using your registered biometric credentials.</string>
     <string name="biometric_prompt_use_password_instead_text">Use Password Instead</string>
+    <string name="investments_title">Invest</string>
+    <string name="stock_detail_title">Stock Details</string>
 </resources>
 

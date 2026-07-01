@@ -68,8 +68,17 @@ class OfflineTransactionsRepository(private val transactionDao: TransactionDao) 
     ): Flow<List<Transaction>> =
         transactionDao.getAllTransactionsByPayee(payeeId, startDate, endDate)
 
-    override fun getBalanceByAccountId(): Flow<List<BalanceResult>> =
-        transactionDao.getAllAccountBalances()
+    override fun getBalanceByAccountId(): Flow<List<BalanceResult>> {
+        return combine(
+            transactionDao.getAllAccountsDirect(),
+            getAllTransactionsStream("DESC", "TransDate")
+        ) { accounts, transactions ->
+            val balances = com.seyone22.expensetracker.utils.FinancialStatsCalculator.calculateAccountBalances(accounts, transactions)
+            balances.map { (accountId, balance) ->
+                BalanceResult(accountId, balance)
+            }
+        }
+    }
 
     override fun getTotalBalanceByCode(transactionCode: String, status: String): Flow<Double> =
         transactionDao.getTotalBalanceByCode(transactionCode, status)
@@ -121,7 +130,40 @@ class OfflineTransactionsRepository(private val transactionDao: TransactionDao) 
         startDate: String,
         endDate: String
     ): Flow<List<BalanceResult>> {
-        return transactionDao.getExpensesForDateRange(startDate, endDate)
+        return combine(
+            getAllTransactionsStream("DESC", "TransDate"),
+            transactionDao.getAllAccountsDirect(),
+            transactionDao.getAllCurrenciesDirect(),
+            transactionDao.getBaseCurrencyId()
+        ) { transactions, accounts, currencies, baseCurrencyIdStr ->
+            val baseCurrencyId = baseCurrencyIdStr?.toIntOrNull()
+            com.seyone22.expensetracker.utils.FinancialStatsCalculator.calculateExpensesForDateRange(
+                transactions = transactions,
+                accounts = accounts,
+                currencies = currencies,
+                baseCurrencyId = baseCurrencyId,
+                startDate = startDate,
+                endDate = endDate
+            )
+        }
+    }
+
+    override fun getTotalsStream(filter: String): Flow<Totals> {
+        return combine(
+            transactionDao.getAllAccountsDirect(),
+            getAllTransactionsStream("DESC", "TransDate"),
+            transactionDao.getAllCurrenciesDirect(),
+            transactionDao.getBaseCurrencyId()
+        ) { accounts, transactions, currencies, baseCurrencyIdStr ->
+            val baseCurrencyId = baseCurrencyIdStr?.toIntOrNull()
+            com.seyone22.expensetracker.utils.FinancialStatsCalculator.calculateTotals(
+                accounts = accounts,
+                transactions = transactions,
+                currencies = currencies,
+                baseCurrencyId = baseCurrencyId,
+                filter = filter
+            )
+        }
     }
 
 

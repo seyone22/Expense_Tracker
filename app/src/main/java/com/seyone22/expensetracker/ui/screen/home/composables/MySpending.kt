@@ -31,24 +31,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
-import com.patrykandpatrick.vico.compose.common.dimensions
-import com.patrykandpatrick.vico.compose.common.fill
-import com.patrykandpatrick.vico.compose.common.shape.markerCorneredShape
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
-import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
-import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
-import com.patrykandpatrick.vico.core.common.component.TextComponent
-import com.patrykandpatrick.vico.core.common.shape.Corner
-import com.patrykandpatrick.vico.core.common.shape.CorneredShape
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.ColumnCartesianLayerModel
+import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
+import com.patrykandpatrick.vico.compose.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer.ColumnProvider.Companion.series
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.component.TextComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
 import com.seyone22.expensetracker.ui.screen.home.HomeViewModel
@@ -119,9 +124,7 @@ fun MySpending(
         }
 
         modelProducer.runTransaction {
-            columnSeries {
-                series(y = seriesState.value)
-            }
+            columnModel { series(y = seriesState.value) }
         }
     }
 
@@ -194,9 +197,7 @@ fun MySpending(
                         columnCollectionSpacing = 2.dp,
                         columnProvider = ColumnCartesianLayer.ColumnProvider.series(
                             rememberLineComponent(
-                                fill = fill(Color(MaterialTheme.colorScheme.primary.toArgb())),
                                 thickness = 8.dp,
-                                shape = CorneredShape.rounded(allPercent = 16),
                             )
                         )
                     ), bottomAxis = HorizontalAxis.rememberBottom(
@@ -204,18 +205,13 @@ fun MySpending(
                         line = null,
                         valueFormatter = bottomAxisValueFormatter,
                         label = rememberTextComponent(
-                            color = MaterialTheme.colorScheme.onSurface,
                         )
                     ), marker = rememberDefaultCartesianMarker(
                         label = rememberTextComponent(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            textAlignment = Layout.Alignment.ALIGN_CENTER,
-                            padding = dimensions(8.dp, 4.dp),
                             background = rememberShapeComponent(
-                                fill = fill(MaterialTheme.colorScheme.surfaceBright),
-                                shape = markerCorneredShape(Corner.Sharp),
+
                             ),
-                            minWidth = TextComponent.MinWidth.fixed(40f),
+                            minWidth = TextComponent.MinWidth.fixed(40.dp),
                         ),
                     )
                 ),

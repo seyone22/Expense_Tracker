@@ -24,19 +24,17 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val MidnightColorScheme = darkColorScheme(
-    primary = Color.Black,
-    secondary = Color.Black,
-    tertiary = Color.Black,
-
+    primary = Purple80,
+    secondary = PurpleGrey80,
+    tertiary = Pink80,
     background = Color.Black,
-    surface = Color.Black,
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
+    surface = Color(0xFF121212),
+    onPrimary = Color.Black,
+    onSecondary = Color.Black,
+    onTertiary = Color.Black,
     onBackground = Color.White,
-    onSurface = Color.White,
-
-    )
+    onSurface = Color.White
+)
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
@@ -57,7 +55,7 @@ private val LightColorScheme = lightColorScheme(
 data class DarkTheme(
     var isDark: Boolean = false,
     var isMidnight: Boolean = false,
-    val systemTheme: Boolean = false
+    val systemTheme: Boolean = true
 )
 
 var LocalTheme = compositionLocalOf { DarkTheme() }
@@ -72,9 +70,9 @@ fun ExpenseTrackerTheme(
 ) {
     val isSystemInDarkTheme = darkTheme
     val colorScheme = when {
+        midnight -> MidnightColorScheme
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (midnight) MidnightColorScheme
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 

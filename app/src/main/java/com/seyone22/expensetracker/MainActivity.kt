@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -122,7 +123,8 @@ class MainActivity : ComponentActivity() {
 
             CompositionLocalProvider(LocalTheme provides darkTheme) {
                 ExpenseTrackerTheme(
-                    darkTheme = darkTheme.isDark, midnight = darkTheme.isMidnight
+                    darkTheme = if (darkTheme.systemTheme) isSystemInDarkTheme() else darkTheme.isDark,
+                    midnight = if (darkTheme.systemTheme) false else darkTheme.isMidnight
                 ) {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         val isAppLocked by screenLockManager.isAppLocked.collectAsState()
@@ -136,9 +138,11 @@ class MainActivity : ComponentActivity() {
                             ExpenseApp(windowSizeClass = windowSize.widthSizeClass,
                                 onToggleDarkTheme = { option ->
                                     darkTheme = when (option) {
-                                        1 -> DarkTheme(isDark = true)
-                                        0 -> DarkTheme(isDark = false)
-                                        else -> DarkTheme(isDark = isSystemInDarkTheme())
+                                        0 -> DarkTheme(isDark = false, isMidnight = false, systemTheme = false)
+                                        1 -> DarkTheme(isDark = true, isMidnight = false, systemTheme = false)
+                                        2 -> DarkTheme(isDark = false, isMidnight = false, systemTheme = true)
+                                        3 -> DarkTheme(isDark = true, isMidnight = true, systemTheme = false)
+                                        else -> DarkTheme(systemTheme = true)
                                     }
                                 })
                         }

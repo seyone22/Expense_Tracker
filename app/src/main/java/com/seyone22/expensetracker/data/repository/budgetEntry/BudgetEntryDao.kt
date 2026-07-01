@@ -31,7 +31,7 @@ interface BudgetEntryDao {
     fun getActiveBudgetEntriesForBudgetYearId(budgetYearId: Int): Flow<List<BudgetEntry>>
 
     @Query("SELECT * FROM BUDGETTABLE_V1 WHERE active = 1 AND budgetEntryId = :budgetEntryId")
-    fun getBudgetEntryById(budgetEntryId: Int): Flow<BudgetEntry>
+    fun getBudgetEntryById(budgetEntryId: Int): Flow<BudgetEntry?>
 
 }
 

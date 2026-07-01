@@ -29,6 +29,14 @@ import com.seyone22.expensetracker.data.repository.splitTransaction.SplitTransac
 import com.seyone22.expensetracker.data.repository.splitTransaction.OfflineSplitTransactionsRepository
 import com.seyone22.expensetracker.data.repository.attachment.AttachmentsRepository
 import com.seyone22.expensetracker.data.repository.attachment.OfflineAttachmentsRepository
+import com.seyone22.expensetracker.data.repository.stock.StockRepository
+import com.seyone22.expensetracker.data.repository.stock.OfflineStockRepository
+import com.seyone22.expensetracker.data.repository.stockHistory.StockHistoryRepository
+import com.seyone22.expensetracker.data.repository.stockHistory.OfflineStockHistoryRepository
+import com.seyone22.expensetracker.data.repository.transLink.TransLinkRepository
+import com.seyone22.expensetracker.data.repository.transLink.OfflineTransLinkRepository
+import com.seyone22.expensetracker.data.repository.shareInfo.ShareInfoRepository
+import com.seyone22.expensetracker.data.repository.shareInfo.OfflineShareInfoRepository
 
 interface AppContainer {
     val accountsRepository: AccountsRepository
@@ -45,6 +53,10 @@ interface AppContainer {
     val tagsRepository: TagsRepository
     val splitTransactionsRepository: SplitTransactionsRepository
     val attachmentsRepository: AttachmentsRepository
+    val stockRepository: StockRepository
+    val stockHistoryRepository: StockHistoryRepository
+    val transLinkRepository: TransLinkRepository
+    val shareInfoRepository: ShareInfoRepository
 }
 /**
  * [AppContainer] implementation that provides instance of OfflineItemsRepository
@@ -94,5 +106,17 @@ class AppDataContainer(private val context: Context) : AppContainer {
     }
     override val attachmentsRepository: AttachmentsRepository by lazy {
         OfflineAttachmentsRepository(MMEXDatabase.getDatabase(context).attachmentDao())
+    }
+    override val stockRepository: StockRepository by lazy {
+        OfflineStockRepository(MMEXDatabase.getDatabase(context).stockDao())
+    }
+    override val stockHistoryRepository: StockHistoryRepository by lazy {
+        OfflineStockHistoryRepository(MMEXDatabase.getDatabase(context).stockHistoryDao())
+    }
+    override val transLinkRepository: TransLinkRepository by lazy {
+        OfflineTransLinkRepository(MMEXDatabase.getDatabase(context).transLinkDao())
+    }
+    override val shareInfoRepository: ShareInfoRepository by lazy {
+        OfflineShareInfoRepository(MMEXDatabase.getDatabase(context).shareInfoDao())
     }
 }

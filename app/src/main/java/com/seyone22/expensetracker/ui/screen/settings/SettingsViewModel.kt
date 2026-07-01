@@ -3,7 +3,7 @@ package com.seyone22.expensetracker.ui.screen.settings
 import androidx.lifecycle.viewModelScope
 import com.seyone22.expensetracker.BaseViewModel
 import com.seyone22.expensetracker.data.model.CurrencyFormat
-import com.seyone22.expensetracker.data.model.Metadata
+import com.seyone22.expensetracker.data.model.AppMetadata
 import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
 import com.seyone22.expensetracker.data.repository.currencyHistory.CurrencyHistoryRepository
 import com.seyone22.expensetracker.data.repository.metadata.MetadataRepository
@@ -31,15 +31,15 @@ class SettingsViewModel(
     }
 
     // Flow for username
-    private val usernameFlow: Flow<Metadata?> =
+    private val usernameFlow: Flow<AppMetadata?> =
         metadataRepository.getMetadataByNameStream("USERNAME")
 
     // Flow for baseCurrency
-    private val baseCurrencyIdFlow: Flow<Metadata?> =
+    private val baseCurrencyIdFlow: Flow<AppMetadata?> =
         metadataRepository.getMetadataByNameStream("BASECURRENCYID")
 
     // Combine the flows and calculate the totals
-    val metadataList: Flow<List<Metadata?>> =
+    val metadataList: Flow<List<AppMetadata?>> =
         combine(usernameFlow, baseCurrencyIdFlow) { username, basecurrencyid ->
             listOf(username, basecurrencyid)
         }
@@ -63,52 +63,54 @@ class SettingsViewModel(
 
     suspend fun getCurrentTheme(): DarkTheme {
         val x =
-            metadataRepository.getMetadataByNameStream("THEME").firstOrNull() ?: return DarkTheme()
-        when (x.infoValue) {
-            "LIGHT" -> {
-                return DarkTheme(false, false)
-            }
-
-            "DARK" -> {
-                return DarkTheme(true, false)
-            }
-
-            "MIDNIGHHT" -> {
-                return DarkTheme(true, true)
-            }
+            metadataRepository.getMetadataByNameStream("THEME").firstOrNull() ?: return DarkTheme(systemTheme = true)
+        return when (x.infoValue) {
+            "LIGHT" -> DarkTheme(isDark = false, isMidnight = false, systemTheme = false)
+            "DARK" -> DarkTheme(isDark = true, isMidnight = false, systemTheme = false)
+            "MIDNIGHT", "MIDNIGHHT" -> DarkTheme(isDark = true, isMidnight = true, systemTheme = false)
+            "SYSTEM" -> DarkTheme(isDark = false, isMidnight = false, systemTheme = true)
+            else -> DarkTheme(systemTheme = true)
         }
-        return DarkTheme()
     }
 
     suspend fun setTheme(theme: Int) {
         when (theme) {
             0 -> {
-                metadataRepository.insertMetadata(Metadata(99, "THEME", "LIGHT"))
+                metadataRepository.insertMetadata(AppMetadata(99, "THEME", "LIGHT"))
             }
 
             1 -> {
-                metadataRepository.insertMetadata(Metadata(99, "THEME", "DARK"))
+                metadataRepository.insertMetadata(AppMetadata(99, "THEME", "DARK"))
             }
 
             2 -> {
-                metadataRepository.insertMetadata(Metadata(99, "THEME", "SYSTEM"))
+                metadataRepository.insertMetadata(AppMetadata(99, "THEME", "SYSTEM"))
             }
 
             3 -> {
-                metadataRepository.insertMetadata(Metadata(99, "THEME", "MIDNIGHT"))
+                metadataRepository.insertMetadata(AppMetadata(99, "THEME", "MIDNIGHT"))
             }
         }
     }
 
     suspend fun changeUsername(newName: String) {
         metadataRepository.updateMetadata(
-            Metadata(6, "USERNAME", newName)
+            AppMetadata(6, "USERNAME", newName)
         )
     }
 
     suspend fun changeCurrency(newCurrency: Int) {
         metadataRepository.updateMetadata(
-            Metadata(5, "BASECURRENCYID", newCurrency.toString())
+            AppMetadata(5, "BASECURRENCYID", newCurrency.toString())
+        )
+    }
+
+    val finnhubApiKeyFlow: Flow<AppMetadata?> =
+        metadataRepository.getMetadataByNameStream("FINNHUB_API_KEY")
+
+    suspend fun changeFinnhubApiKey(newKey: String) {
+        metadataRepository.insertMetadata(
+            AppMetadata(100, "FINNHUB_API_KEY", newKey)
         )
     }
 }

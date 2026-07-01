@@ -21,7 +21,7 @@ interface CurrencyFormatDao {
     suspend fun delete(account: CurrencyFormat)
 
     @Query("SELECT * FROM CURRENCYFORMATS_V1 WHERE currencyId = :currencyId")
-    fun getCurrencyFormat(currencyId: Int): Flow<CurrencyFormat>
+    fun getCurrencyFormat(currencyId: Int): Flow<CurrencyFormat?>
 
     @Query("SELECT * FROM CURRENCYFORMATS_V1 ORDER BY currencyName ASC")
     fun getAllCurrencyFormats(): Flow<List<CurrencyFormat>>

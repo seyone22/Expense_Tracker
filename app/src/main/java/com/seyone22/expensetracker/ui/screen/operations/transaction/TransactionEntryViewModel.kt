@@ -141,10 +141,19 @@ class TransactionEntryViewModel(
 
     suspend fun saveTransaction() {
         if (validateInput()) {
-            val transAmount = transactionUiState.value.transactionDetails.transAmount.toDoubleOrNull() ?: 0.0
-            val categoryId = if (transactionUiState.value.isSplit) -1 else transactionUiState.value.transactionDetails.categoryId.toInt()
+            val evaluatedStr = com.seyone22.expensetracker.utils.FinancialStatsCalculator.evaluateExpression(transactionUiState.value.transactionDetails.transAmount)
+            val transAmount = evaluatedStr.toDoubleOrNull() ?: 0.0
+            
+            var categoryId = if (transactionUiState.value.isSplit) -1 else (transactionUiState.value.transactionDetails.categoryId.toIntOrNull() ?: 0)
+            if (transactionUiState.value.transactionDetails.transCode == TransactionCode.TRANSFER.displayName) {
+                val transferCategory = _entityList.value.categoriesList.find { 
+                    it.categName.equals("Transfer", ignoreCase = true) || it.categName.contains("Transfer", ignoreCase = true) 
+                }
+                categoryId = transferCategory?.categId ?: categoryId
+            }
 
             val transaction = transactionUiState.value.transactionDetails.toTransaction().copy(
+                transAmount = transAmount,
                 categoryId = categoryId,
                 toTransAmount = if (transactionUiState.value.transactionDetails.transCode == TransactionCode.TRANSFER.displayName) {
                     transactionUiState.value.advancedAmount
@@ -209,11 +218,16 @@ class TransactionEntryViewModel(
         isSplit: Boolean = transactionUiState.value.isSplit,
         splits: List<SplitDetails> = transactionUiState.value.splits
     ): Boolean {
-        val totalAmount = uiState.transAmount.toDoubleOrNull()
+        val cleanAmountStr = com.seyone22.expensetracker.utils.FinancialStatsCalculator.evaluateExpression(uiState.transAmount)
+        val totalAmount = cleanAmountStr.toDoubleOrNull()
         if (totalAmount == null || totalAmount <= 0.0 || uiState.transDate.isBlank() || uiState.accountId.isBlank()) return false
 
+        if (uiState.transCode == TransactionCode.TRANSFER.displayName) {
+            if (uiState.toAccountId.isBlank() || uiState.toAccountId == "-1" || uiState.toAccountId == uiState.accountId) return false
+        }
+
         if (!isSplit) {
-            return uiState.categoryId.isNotBlank()
+            return uiState.transCode == TransactionCode.TRANSFER.displayName || uiState.categoryId.isNotBlank()
         } else {
             if (splits.isEmpty()) return false
             var splitSum = 0.0

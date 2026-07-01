@@ -49,9 +49,19 @@ interface TransactionsRepository {
 
     fun getExpensesForDateRange(startDate: String, endDate: String): Flow<List<BalanceResult>>
 
+    fun getTotalsStream(filter: String = "All"): Flow<Totals>
+
     fun getAllRawTransactionsStream(): Flow<List<Transaction>>
 
     suspend fun insertTransaction(transaction: Transaction): Long
     suspend fun deleteTransaction(transaction: Transaction)
     suspend fun updateTransaction(transaction: Transaction)
 }
+
+data class Totals(
+    val expenses: Double = 0.0,
+    val income: Double = 0.0,
+    val total: Double = 0.0,
+    val hasMissingRates: Boolean = false,
+    val missingRateCurrencies: List<String> = emptyList()
+)

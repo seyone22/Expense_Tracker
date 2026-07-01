@@ -12,6 +12,7 @@ import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormat
 import com.seyone22.expensetracker.data.repository.metadata.MetadataRepository
 import com.seyone22.expensetracker.data.repository.transaction.BalanceResult
 import com.seyone22.expensetracker.data.repository.transaction.TransactionsRepository
+import com.seyone22.expensetracker.data.repository.transaction.Totals
 import com.seyone22.expensetracker.utils.getEndOfCurrentWeek
 import com.seyone22.expensetracker.utils.getStartOfCurrentWeek
 import kotlinx.coroutines.flow.Flow
@@ -38,9 +39,7 @@ class HomeViewModel(
     val currentStartDate: State<String> get() = _currentStartDate
     val currentEndDate: State<String> get() = _currentEndDate
 
-    private val expensesFlow = transactionsRepository.getTotalBalanceByCode("Withdrawal")
-    private val incomeFlow = transactionsRepository.getTotalBalanceByCode("Deposit")
-    private val totalFlow = transactionsRepository.getTotalBalance()
+
 
     private val _expensesByWeekFlow = MutableStateFlow<List<BalanceResult>>(emptyList())
     val expensesByWeekFlow: StateFlow<List<BalanceResult>> = _expensesByWeekFlow
@@ -59,10 +58,7 @@ class HomeViewModel(
             if (previous != 0.0) ((current - previous) / previous) * 100 else if (current == 0.0) 0.0 else 100.0
         }.stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
 
-    private val totalsFlow =
-        combine(expensesFlow, incomeFlow, totalFlow) { expenses, income, total ->
-            Totals(expenses * -1, income, total)
-        }
+
 
     init {
         viewModelScope.launch {
@@ -124,25 +120,7 @@ class HomeViewModel(
     }
 
     fun getFilteredTotal(filter: String): Flow<Totals> {
-        return when (filter) {
-            "Current Month" -> {
-                val currentYear = LocalDate.now().year.toString()
-                val monthString = LocalDate.now().monthValue.toString().padStart(2, '0')
-                val newExpensesFlow = transactionsRepository.getTotalBalanceByCodeAndDate(
-                    "Withdrawal", month = monthString, year = currentYear
-                )
-                val newIncomeFlow = transactionsRepository.getTotalBalanceByCodeAndDate(
-                    "Deposit", month = monthString, year = currentYear
-                )
-                val newTotalFlow =
-                    transactionsRepository.getTotalBalanceByDate("Total", monthString, currentYear)
-                combine(newExpensesFlow, newIncomeFlow, newTotalFlow) { expenses, income, total ->
-                    Totals(expenses, income, total)
-                }
-            }
-
-            else -> totalsFlow
-        }
+        return transactionsRepository.getTotalsStream(filter)
     }
 }
 
@@ -152,8 +130,4 @@ data class HomeUiState(
     val expensesByWeek: List<BalanceResult> = emptyList()
 )
 
-data class Totals(
-    val expenses: Double = 0.0,
-    val income: Double = 0.0,
-    val total: Double = 0.0
-)
+

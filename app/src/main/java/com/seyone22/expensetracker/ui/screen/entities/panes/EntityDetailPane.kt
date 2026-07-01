@@ -24,34 +24,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer.ColumnProvider.Companion.series
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.component.TextComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
-import com.patrykandpatrick.vico.compose.common.dimensions
-import com.patrykandpatrick.vico.compose.common.fill
-import com.patrykandpatrick.vico.compose.common.shape.markerCorneredShape
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
-import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
-import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
-import com.patrykandpatrick.vico.core.common.component.TextComponent
-import com.patrykandpatrick.vico.core.common.shape.Corner
-import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.Payee
@@ -67,7 +59,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun EntityDetailPane(
@@ -80,8 +71,8 @@ fun EntityDetailPane(
 ) {
     val entity by viewModel.selectedEntity.collectAsState()
     val transactions by transactionViewModel.filteredTransactions.collectAsState()
-    val modelProducer = remember { CartesianChartModelProducer() }
 
+    val modelProducer = remember { CartesianChartModelProducer() }
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     // Apply filters based on the selected entity
@@ -102,9 +93,7 @@ fun EntityDetailPane(
         val transactionsByDate =
             transactions.groupBy { it.transDate } // Assuming `transDate` is a string or LocalDate
                 .mapKeys {
-                    LocalDate.parse(
-                        it.key, dateFormatter
-                    )
+                    LocalDate.parse(it.key, dateFormatter)
                 } // Convert String to LocalDate for proper sorting
                 .mapValues { (_, list) ->
                     // Conditionally sum based on transCode
@@ -129,7 +118,6 @@ fun EntityDetailPane(
                 }.map { it.toEpochDay().toFloat() }.toList()
 
             Log.d("TAG", "EntityDetailPane: $paddedDates")
-
             paddedDates
         } else {
             // For more than 3 transactions, no padding needed
@@ -140,8 +128,9 @@ fun EntityDetailPane(
 
         val yValues = transactionsByDate.values.map { it.toFloat() } // Convert amounts to Float
 
+        // Vico 3: columnSeries is deprecated and renamed to columnModel
         modelProducer.runTransaction {
-            columnSeries {
+            columnModel {
                 series(x = xValues, y = yValues)
             }
         }
@@ -173,41 +162,33 @@ fun EntityDetailPane(
                             modifier = Modifier.fillMaxWidth(),
                             chart = rememberCartesianChart(
                                 rememberColumnCartesianLayer(
-                                    columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                                    columnProvider = series(
                                         rememberLineComponent(
-                                            fill = fill(Color(MaterialTheme.colorScheme.primary.toArgb())),
+                                            // Vico 3 accepts Compose Color instances directly natively
                                             thickness = 8.dp,
-                                            shape = CorneredShape.rounded(allPercent = 16),
                                         )
                                     )
-                                ), startAxis = VerticalAxis.rememberStart(
+                                ),
+                                startAxis = VerticalAxis.rememberStart(
                                     label = rememberTextComponent(
-                                        color = MaterialTheme.colorScheme.onSurface,
                                     ),
-
-
-                                    ), bottomAxis = HorizontalAxis.rememberBottom(
+                                ),
+                                bottomAxis = HorizontalAxis.rememberBottom(
                                     guideline = null,
                                     valueFormatter = bottomAxisValueFormatter,
                                     label = rememberTextComponent(
-                                        color = MaterialTheme.colorScheme.onSurface,
                                     )
-                                ), marker = rememberDefaultCartesianMarker(
+                                ),
+                                marker = rememberDefaultCartesianMarker(
                                     label = rememberTextComponent(
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        textAlignment = Layout.Alignment.ALIGN_CENTER,
-                                        padding = dimensions(8.dp, 4.dp),
                                         background = rememberShapeComponent(
-                                            fill = fill(MaterialTheme.colorScheme.surfaceBright),
-                                            shape = markerCorneredShape(Corner.Sharp),
                                         ),
-                                        minWidth = TextComponent.MinWidth.fixed(40f),
+                                        minWidth = TextComponent.MinWidth.fixed(40.dp),
                                     )
                                 )
                             ),
                             modelProducer = modelProducer,
-
-                            )
+                        )
                     }
                 }
 
@@ -231,6 +212,7 @@ fun EntityDetailPane(
     }
 }
 
+// Vico 3: Requires the `context` argument to be the first lambda parameter
 private val bottomAxisValueFormatter = CartesianValueFormatter { _, x, _ ->
     try {
         val date = LocalDate.ofEpochDay(x.toLong()) // Convert x back to LocalDate

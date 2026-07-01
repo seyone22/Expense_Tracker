@@ -30,7 +30,8 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.ui.common.FormattedCurrency
-import com.seyone22.expensetracker.ui.screen.home.Totals
+import com.seyone22.expensetracker.data.repository.transaction.Totals
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun NetWorth(
@@ -44,6 +45,33 @@ fun NetWorth(
         modifier = modifier.fillMaxWidth()
     ) {
         Spacer(modifier = Modifier.height(24.dp))
+        if (totals.hasMissingRates) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .padding(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "Exchange Rates Missing",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Rates for some currencies (${totals.missingRateCurrencies.joinToString(", ")}) are set to 0.0. Net Worth and totals may be incomplete.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
         Row(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
@@ -54,6 +82,14 @@ fun NetWorth(
                 currency = baseCurrencyInfo,
                 hideValue = hideBalances
             )
+            if (totals.hasMissingRates) {
+                Text(
+                    text = " *",
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold
+                )
+            }
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(
                 onClick = onToggleHideBalances,
@@ -117,7 +153,7 @@ fun NetWorth(
 
                     FormattedCurrency(
                         modifier = Modifier.align(Alignment.CenterHorizontally),
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         value = totals.income,
                         currency = baseCurrencyInfo,
                         hideValue = hideBalances
@@ -157,7 +193,7 @@ fun NetWorth(
                     )
                     FormattedCurrency(
                         modifier = Modifier.align(Alignment.CenterHorizontally),
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         value = totals.expenses,
                         currency = baseCurrencyInfo,
                         hideValue = hideBalances

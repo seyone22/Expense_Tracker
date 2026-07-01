@@ -18,8 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
@@ -27,17 +25,25 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
-import com.patrykandpatrick.vico.compose.common.dimensions
-import com.patrykandpatrick.vico.compose.common.fill
-import com.patrykandpatrick.vico.compose.common.shape.markerCorneredShape
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
-import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
-import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.core.common.component.TextComponent
-import com.patrykandpatrick.vico.core.common.shape.Corner
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.LineCartesianLayerModel
+import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer.ColumnProvider.Companion.series
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.component.TextComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.seyone22.expensetracker.ui.screen.operations.account.AccountDetailUiState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -64,9 +70,7 @@ fun AccountHistoryGraph(
 
         // Update the model producer with the new series data
         modelProducer.runTransaction {
-            lineSeries {
-                series(y = seriesState)
-            }
+            lineModel { series(y = seriesState) }
         }
     }
 
@@ -89,10 +93,6 @@ fun AccountHistoryGraph(
                 rememberLineCartesianLayer(
                     LineCartesianLayer.LineProvider.series(
                         LineCartesianLayer.rememberLine(
-                            fill = remember { LineCartesianLayer.LineFill.single(fill(primaryColor)) },
-                            areaFill = remember {
-                                LineCartesianLayer.AreaFill.single(fill(primaryColor.copy(alpha = 0.12f)))
-                            },
                             pointConnector = remember {
                                 LineCartesianLayer.PointConnector.cubic(
                                     curvature = 0.35f
@@ -103,18 +103,15 @@ fun AccountHistoryGraph(
                 ),
                 startAxis = VerticalAxis.rememberStart(
                     label = rememberTextComponent(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
                     line = null,
                     tick = null,
                     guideline = rememberLineComponent(
-                        fill = fill(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
                         thickness = 1.dp
                     )
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     label = rememberTextComponent(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
                     line = null,
                     tick = null,
@@ -122,14 +119,7 @@ fun AccountHistoryGraph(
                 ), 
                 marker = rememberDefaultCartesianMarker(
                     label = rememberTextComponent(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlignment = Layout.Alignment.ALIGN_CENTER,
-                        padding = dimensions(8.dp, 4.dp),
-                        background = rememberShapeComponent(
-                            fill = fill(MaterialTheme.colorScheme.surfaceBright),
-                            shape = markerCorneredShape(Corner.Sharp),
-                        ),
-                        minWidth = TextComponent.MinWidth.fixed(40f),
+                        minWidth = TextComponent.MinWidth.fixed(40.dp),
                     )
                 )
             ),

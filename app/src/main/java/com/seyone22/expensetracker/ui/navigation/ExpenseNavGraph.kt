@@ -61,6 +61,10 @@ import com.seyone22.expensetracker.ui.screen.transactions.TransactionsDestinatio
 import com.seyone22.expensetracker.ui.screen.transactions.TransactionsScreen
 import com.seyone22.expensetracker.ui.screen.reconcile.ReconcileDestination
 import com.seyone22.expensetracker.ui.screen.reconcile.ReconcileScreen
+import com.seyone22.expensetracker.ui.screen.investments.InvestmentsDestination
+import com.seyone22.expensetracker.ui.screen.investments.InvestmentsScreen
+import com.seyone22.expensetracker.ui.screen.investments.StockDetailDestination
+import com.seyone22.expensetracker.ui.screen.investments.StockDetailScreen
 
 /**
  * Provides Navigation graph for the application.
@@ -150,6 +154,25 @@ fun ExpenseNavHost(
                 SettingsScreen(
                     navigateToScreen = { screen -> navController.navigate(screen) },
                     navigateBack = { navController.popBackStack() },
+                    onToggleDarkTheme = onToggleDarkTheme
+                )
+            }
+        }
+        composable(route = InvestmentsDestination.route) {
+            NavigationSuiteScaffoldWrapper(
+                currentDestination = currentDestination,
+                navigateToScreen = { screen ->
+                    navController.navigate(screen)
+                }
+            ) { modifier ->
+                InvestmentsScreen(
+                    onNavigateToStockDetail = { stockId ->
+                        navController.navigate("${StockDetailDestination.route}/$stockId")
+                    },
+                    onNavigateToCreateAccount = {
+                        navController.navigate(AccountEntryDestination.route)
+                    },
+                    modifier = modifier
                 )
             }
         }
@@ -221,6 +244,16 @@ fun ExpenseNavHost(
             ReconcileScreen(
                 accountId = it.arguments?.getString("accountId") ?: "-1",
                 navController = navController
+            )
+        }
+        composable(
+            route = StockDetailDestination.route + "/{stockId}",
+            arguments = listOf(navArgument("stockId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val stockId = backStackEntry.arguments?.getInt("stockId") ?: -1
+            StockDetailScreen(
+                stockId = stockId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
         composable(route = TransactionEntryDestination.route + "/{transactionType}") { backStackEntry ->

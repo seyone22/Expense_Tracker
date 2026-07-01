@@ -10,6 +10,8 @@ import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.TransactionWithDetails
+import com.seyone22.expensetracker.data.model.Account
+import com.seyone22.expensetracker.data.model.CurrencyFormat
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -25,7 +27,7 @@ interface TransactionDao {
     suspend fun delete(transaction: Transaction)
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1 WHERE transId = :transId")
-    fun getTransaction(transId: Int): Flow<Transaction>
+    fun getTransaction(transId: Int): Flow<Transaction?>
 
     @Query("SELECT * FROM CHECKINGACCOUNT_V1")
     fun getAllRawTransactions(): Flow<List<Transaction>>
@@ -283,6 +285,14 @@ FROM CHECKINGACCOUNT_V1 c
     )
     fun getExpensesForDateRange(startDate: String, endDate: String): Flow<List<BalanceResult>>
 
+    @Query("SELECT * FROM ACCOUNTLIST_V1")
+    fun getAllAccountsDirect(): Flow<List<Account>>
+
+    @Query("SELECT * FROM CURRENCYFORMATS_V1")
+    fun getAllCurrenciesDirect(): Flow<List<CurrencyFormat>>
+
+    @Query("SELECT infoValue FROM INFOTABLE_V1 WHERE infoName = 'BASECURRENCYID'")
+    fun getBaseCurrencyId(): Flow<String?>
 }
 
 data class BalanceResult(

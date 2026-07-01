@@ -123,7 +123,7 @@ fun AccountDetailScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     FormattedCurrency(
-                        style = MaterialTheme.typography.displayLarge.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
                         value = accountDetailUiState.balance,
                         currency = currencyData,
                         defaultColor = MaterialTheme.colorScheme.primary

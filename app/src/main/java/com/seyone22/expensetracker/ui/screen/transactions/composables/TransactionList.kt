@@ -205,20 +205,20 @@ fun TransactionList(
                 SortBar()
             }
             if (filteredTransactions.isNotEmpty()) {
-                filteredTransactions.take(count ?: filteredTransactions.size)
-                    .forEach { transaction ->
-                        TransactionItem(
-                            transaction = transaction,
-                            haptics = haptics,
-                            longClicked = { openBottomSheet(it) },
-                            viewModel = viewModel,
-                            style = TransactionStyle.Date
-                        )
-                        // Add divider between transactions, but not after the last one
-                        if (transaction != filteredTransactions[(count ?: 1) - 1]) {
-                            HorizontalDivider()
-                        }
+                val displayedTransactions = filteredTransactions.take(count ?: filteredTransactions.size)
+                displayedTransactions.forEachIndexed { index, transaction ->
+                    TransactionItem(
+                        transaction = transaction,
+                        haptics = haptics,
+                        longClicked = { openBottomSheet(it) },
+                        viewModel = viewModel,
+                        style = TransactionStyle.Date
+                    )
+                    // Add divider between transactions, but not after the last one
+                    if (index < displayedTransactions.lastIndex) {
+                        HorizontalDivider()
                     }
+                }
             } else {
                 Text(
                     text = "Nothing to show here!",

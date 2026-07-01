@@ -21,7 +21,7 @@ interface PayeeDao {
     suspend fun delete(payee: Payee)
 
     @Query("SELECT * FROM PAYEE_V1 WHERE payeeId = :payeeId")
-    fun getPayee(payeeId: Int): Flow<Payee>
+    fun getPayee(payeeId: Int): Flow<Payee?>
 
     @Query("SELECT * FROM PAYEE_V1 ORDER BY payeeName ASC")
     fun getAllPayees(): Flow<List<Payee>>

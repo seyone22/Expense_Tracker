@@ -13,7 +13,7 @@ import com.seyone22.expensetracker.data.model.BudgetYear
 import com.seyone22.expensetracker.data.model.Category
 import com.seyone22.expensetracker.data.model.CurrencyFormat
 import com.seyone22.expensetracker.data.model.CurrencyHistory
-import com.seyone22.expensetracker.data.model.Metadata
+import com.seyone22.expensetracker.data.model.AppMetadata
 import com.seyone22.expensetracker.data.model.Payee
 import com.seyone22.expensetracker.data.model.Report
 import com.seyone22.expensetracker.data.model.Tag
@@ -21,6 +21,10 @@ import com.seyone22.expensetracker.data.model.TagLink
 import com.seyone22.expensetracker.data.model.Transaction
 import com.seyone22.expensetracker.data.model.SplitTransaction
 import com.seyone22.expensetracker.data.model.Attachment
+import com.seyone22.expensetracker.data.model.Stock
+import com.seyone22.expensetracker.data.model.StockHistory
+import com.seyone22.expensetracker.data.model.TransLink
+import com.seyone22.expensetracker.data.model.ShareInfo
 import com.seyone22.expensetracker.data.repository.splitTransaction.SplitTransactionDao
 import com.seyone22.expensetracker.data.repository.attachment.AttachmentDao
 import com.seyone22.expensetracker.data.repository.account.AccountDao
@@ -36,10 +40,19 @@ import com.seyone22.expensetracker.data.repository.report.ReportDao
 import com.seyone22.expensetracker.data.repository.tag.TagDao
 import com.seyone22.expensetracker.data.repository.tagLink.TagLinkDao
 import com.seyone22.expensetracker.data.repository.transaction.TransactionDao
+import com.seyone22.expensetracker.data.repository.stock.StockDao
+import com.seyone22.expensetracker.data.repository.stockHistory.StockHistoryDao
+import com.seyone22.expensetracker.data.repository.transLink.TransLinkDao
+import com.seyone22.expensetracker.data.repository.shareInfo.ShareInfoDao
 
 @Database(
-    entities = [Account::class, Transaction::class, Payee::class, Category::class, CurrencyFormat::class, Metadata::class, BillsDeposits::class, Report::class, CurrencyHistory::class, Tag::class, TagLink::class, BudgetEntry::class, BudgetYear::class, SplitTransaction::class, Attachment::class],
-    version = 6,
+    entities = [
+        Account::class, Transaction::class, Payee::class, Category::class, CurrencyFormat::class,
+        AppMetadata::class, BillsDeposits::class, Report::class, CurrencyHistory::class, Tag::class,
+        TagLink::class, BudgetEntry::class, BudgetYear::class, SplitTransaction::class, Attachment::class,
+        Stock::class, StockHistory::class, TransLink::class, ShareInfo::class
+    ],
+    version = 7,
     exportSchema = true
 )
 abstract class MMEXDatabase : RoomDatabase() {
@@ -58,6 +71,10 @@ abstract class MMEXDatabase : RoomDatabase() {
     abstract fun budgetYearDao(): BudgetYearDao
     abstract fun splitTransactionDao(): SplitTransactionDao
     abstract fun attachmentDao(): AttachmentDao
+    abstract fun stockDao(): StockDao
+    abstract fun stockHistoryDao(): StockHistoryDao
+    abstract fun transLinkDao(): TransLinkDao
+    abstract fun shareInfoDao(): ShareInfoDao
 
     companion object {
         @Volatile
@@ -67,7 +84,7 @@ abstract class MMEXDatabase : RoomDatabase() {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, MMEXDatabase::class.java, "mmex_database")
                     //.createFromAsset("database/prepopulate_v1_1.db")
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                     .build()
                     .also { Instance = it }
             }
@@ -190,6 +207,80 @@ abstract class MMEXDatabase : RoomDatabase() {
                     CREATE INDEX IF NOT EXISTS IDX_ATTACHMENT_REF ON ATTACHMENT_V1 (REFTYPE, REFID)
                     """.trimIndent()
                 )
+            }
+        }
+
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Drop tables to clean up any partial/faulty schemas on dev devices
+                db.execSQL("DROP TABLE IF EXISTS STOCK_V1")
+                db.execSQL("DROP TABLE IF EXISTS STOCKHISTORY_V1")
+                db.execSQL("DROP TABLE IF EXISTS TRANSLINK_V1")
+                db.execSQL("DROP TABLE IF EXISTS SHAREINFO_V1")
+
+                // STOCK_V1 Table
+                db.execSQL(
+                    """
+                    CREATE TABLE STOCK_V1(
+                        STOCKID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        HELDAT INTEGER NOT NULL,
+                        PURCHASEDATE TEXT NOT NULL,
+                        STOCKNAME TEXT NOT NULL,
+                        SYMBOL TEXT,
+                        NUMSHARES REAL NOT NULL,
+                        PURCHASEPRICE REAL NOT NULL,
+                        NOTES TEXT,
+                        CURRENTPRICE REAL NOT NULL,
+                        VALUE REAL,
+                        COMMISSION REAL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS IDX_STOCK_HELDAT ON STOCK_V1(HELDAT)")
+
+                // STOCKHISTORY_V1 Table
+                db.execSQL(
+                    """
+                    CREATE TABLE STOCKHISTORY_V1(
+                        HISTID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        SYMBOL TEXT NOT NULL,
+                        DATE TEXT NOT NULL,
+                        VALUE REAL NOT NULL,
+                        UPDTYPE INTEGER
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS IDX_STOCKHISTORY_SYMBOL ON STOCKHISTORY_V1(SYMBOL)")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_STOCKHISTORY_V1_SYMBOL_DATE ON STOCKHISTORY_V1(SYMBOL, DATE)")
+
+                // TRANSLINK_V1 Table
+                db.execSQL(
+                    """
+                    CREATE TABLE TRANSLINK_V1(
+                        TRANSLINKID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        CHECKINGACCOUNTID INTEGER NOT NULL,
+                        LINKTYPE TEXT NOT NULL,
+                        LINKRECORDID INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS IDX_LINKRECORD ON TRANSLINK_V1(LINKTYPE, LINKRECORDID)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS IDX_CHECKINGACCOUNT ON TRANSLINK_V1(CHECKINGACCOUNTID)")
+
+                // SHAREINFO_V1 Table
+                db.execSQL(
+                    """
+                    CREATE TABLE SHAREINFO_V1(
+                        SHAREINFOID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        CHECKINGACCOUNTID INTEGER NOT NULL,
+                        SHARENUMBER REAL,
+                        SHAREPRICE REAL,
+                        SHARECOMMISSION REAL,
+                        SHARELOT TEXT
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS IDX_SHAREINFO ON SHAREINFO_V1(CHECKINGACCOUNTID)")
             }
         }
     }

@@ -8,7 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.seyone22.expensetracker.data.model.CurrencyFormat
-import com.seyone22.expensetracker.data.model.Metadata
+import com.seyone22.expensetracker.data.model.AppMetadata
 import com.seyone22.expensetracker.data.prepopulate
 import com.seyone22.expensetracker.data.repository.category.CategoriesRepository
 import com.seyone22.expensetracker.data.repository.currencyFormat.CurrencyFormatsRepository
@@ -90,14 +90,14 @@ class OnboardingViewModel(
         if (validateInput()) {
             Log.d("DEBUG", "saveItems: $metadataUiState")
             metadataRepository.insertMetadata(
-                Metadata(
+                AppMetadata(
                     3, "CREATEDATE", LocalDateTime.now().format(
                         DateTimeFormatter.ofPattern("yyyy-MM-dd")
                     )
                 )
             )
             metadataRepository.insertMetadata(
-                Metadata(
+                AppMetadata(
                     7,
                     "ISUSED",
                     "TRUE"
@@ -133,6 +133,6 @@ data class MetadataUiState(
 
 //Data class for AccountDetails
 data class MetadataDetails(
-    val usernameMetadata: Metadata = (Metadata(6, "USERNAME", "")),
-    val baseCurrencyMetadata: Metadata = (Metadata(5, "BASECURRENCYID", "")),
+    val usernameMetadata: AppMetadata = (AppMetadata(6, "USERNAME", "")),
+    val baseCurrencyMetadata: AppMetadata = (AppMetadata(5, "BASECURRENCYID", "")),
 )

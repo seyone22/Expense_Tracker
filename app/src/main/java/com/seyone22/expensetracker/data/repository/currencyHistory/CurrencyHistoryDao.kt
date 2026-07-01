@@ -21,7 +21,7 @@ interface CurrencyHistoryDao {
     suspend fun delete(account: CurrencyHistory)
 
     @Query("SELECT * FROM CURRENCYHISTORY_V1 WHERE currencyId = :currencyId")
-    fun getCurrencyHistory(currencyId: Int): Flow<CurrencyHistory>
+    fun getCurrencyHistory(currencyId: Int): Flow<CurrencyHistory?>
 
     @Query("SELECT * FROM CURRENCYHISTORY_V1 ORDER BY currDate DESC")
     fun getAllCurrencyHistory(): Flow<List<CurrencyHistory>>
